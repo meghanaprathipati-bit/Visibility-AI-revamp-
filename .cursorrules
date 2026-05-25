@@ -1,0 +1,405 @@
+# App Shell V2 — AI Setup Guide
+
+This is a React design scaffold. The shell layer (sidebar, topbar, drawers) is pre-built and frozen.
+
+---
+
+## CRITICAL — Read this first
+
+When someone says "set up my project" (or anything similar like "setup", "get started", "initialize"):
+
+**DO NOT explore files. DO NOT run npm install. DO NOT start a dev server. DO NOT do anything technical.**
+
+Your ONLY job is to have a short conversation — 4 questions — then make targeted file edits. Nothing else.
+
+Start immediately with Q1. No preamble, no explanation, just ask the question.
+
+---
+
+## The 4 questions — ask one at a time, wait for the answer before asking the next
+
+Run through these four questions **one at a time**. Do not ask them all at once.
+
+---
+
+### Q1 — Project name
+Ask: "What's your project name?"
+
+Store the answer as PROJECT_NAME.
+
+---
+
+### Q2 — What they're building
+Ask: "Describe what you're building in one line."
+
+Use keyword matching to determine CONTEXT and VARIANT:
+
+**Settings context** (sidebar: settings) — if the description contains any of:
+settings, config, configuration, integrations, billing, phone, payments, account, preferences, admin, system, manage, setup, permissions, compliance, security, profile, business
+
+→ Within settings, pick VARIANT:
+- Has keywords: tabs, sections, numbers, compliance, messaging, regulatory, voice → `settings-tabbed`
+- Has keywords: course, membership, detail, drill, sub-page, vertical → `settings-vertical-tabs`
+- Default settings → `settings-simple`
+
+**Main nav context** (sidebar: main-nav) — everything else (default fallback)
+
+→ Within main nav, pick VARIANT:
+- Has keywords: tabs, sections, overview + detail, analytics, campaigns, multiple views → `main-nav-tabbed`
+- Has keywords: detail, drill-down, contact, record, profile page → `main-nav-vertical-tabs`
+- Default → `main-nav-simple`
+
+---
+
+### Q3 — Optional PRD
+Ask: "Do you have a PRD or product description? Paste it here, or press Enter to skip."
+
+If provided, re-run the same keyword matching against the full PRD text to refine CONTEXT and VARIANT. A longer description gives more signal — trust it over Q2 if they conflict.
+
+---
+
+### Q4 — Confirm
+Ask: "Got it. I'll set up [PROJECT_NAME] as a [VARIANT description in plain English]. Ready to go? (Y/n)"
+
+On Y — make all the changes below. On N — stop and ask what they'd like to change.
+
+---
+
+## Changes to make after confirmation
+
+### 1. `package.json`
+Change `"name"` to kebab-case of PROJECT_NAME.
+Example: "Social Planner" → `"social-planner"`
+
+### 2. `index.html`
+Change `<title>My Project</title>` to `<title>PROJECT_NAME</title>`
+
+### 3. `src/pages/Page1.jsx`
+Rename the file to a short meaningful name based on PROJECT_NAME.
+Example: "Social Planner" → `Overview.jsx`
+
+Replace its content with the correct AppShell variant template from the section below.
+
+### 4. `src/App.jsx`
+Update the import and route:
+- Change `import Page1 from './pages/Page1'` to the new filename
+- Change `<Route path="/" element={<Page1 />} />` to match
+
+---
+
+## AppShell variant templates
+
+Use these exactly. Replace PROJECT_NAME with the actual name. Tell the teammate where to add their content (the Canvas block).
+
+---
+
+### main-nav-simple (default fallback)
+For: dashboards, single-screen products, simple overviews
+
+```jsx
+import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const NAV_SECTIONS = [
+  {
+    items: [
+      { icon: LayoutDashboard, label: 'Overview', active: true },
+      { icon: FileText, label: 'Page 2' },
+      { icon: Settings, label: 'Page 3' },
+    ],
+  },
+]
+
+export default function Overview() {
+  return (
+    <AppShell
+      sidebar="main-nav"
+      sidebarProps={{ navSections: NAV_SECTIONS }}
+      topbar="simple"
+      topbarProps={{ title: 'PROJECT_NAME' }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+### main-nav-tabbed
+For: products with multiple sections and sub-tabs (e.g. Social Listening, Marketing)
+
+```jsx
+import { useState } from 'react'
+import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const NAV_SECTIONS = [
+  {
+    items: [
+      { icon: LayoutDashboard, label: 'Overview', active: true },
+      { icon: FileText, label: 'Page 2' },
+      { icon: Settings, label: 'Page 3' },
+    ],
+  },
+]
+
+const SECTION_TABS = ['Section 1', 'Section 2', 'Section 3']
+const SUB_TABS = ['Tab 1', 'Tab 2', 'Tab 3']
+
+export default function Overview() {
+  const [activeSubTab, setActiveSubTab] = useState('Tab 1')
+
+  return (
+    <AppShell
+      sidebar="main-nav"
+      sidebarProps={{ navSections: NAV_SECTIONS }}
+      topbar="tabbed"
+      topbarProps={{
+        title: 'PROJECT_NAME',
+        sectionTabs: SECTION_TABS,
+        activeSection: 'Section 1',
+        subTabs: SUB_TABS,
+        activeSubTab,
+        onSubTabChange: setActiveSubTab,
+      }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+### main-nav-vertical-tabs
+For: detail/drill-down pages with side navigation (e.g. contact detail, record page)
+
+```jsx
+import { useState } from 'react'
+import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const NAV_SECTIONS = [
+  {
+    items: [
+      { icon: LayoutDashboard, label: 'Overview', active: true },
+      { icon: FileText, label: 'Page 2' },
+      { icon: Settings, label: 'Page 3' },
+    ],
+  },
+]
+
+const SIDE_TABS = ['Overview', 'Details', 'Activity', 'Notes']
+
+export default function Overview() {
+  const [activeTab, setActiveTab] = useState('Overview')
+
+  return (
+    <AppShell
+      sidebar="main-nav"
+      sidebarProps={{ navSections: NAV_SECTIONS }}
+      topbar="simple"
+      topbarProps={{ title: 'PROJECT_NAME' }}
+      backToolbar={{ onBack: () => {}, label: 'Back' }}
+      verticalTabs={{
+        tabs: SIDE_TABS,
+        activeTab,
+        onTabChange: setActiveTab,
+      }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+### settings-simple
+For: a single settings page with no sub-sections
+
+```jsx
+import { Building2, Users, CreditCard, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const SECTIONS = [
+  {
+    label: 'General',
+    items: [
+      { icon: Building2, label: 'Business profile', active: true },
+      { icon: Users, label: 'Team' },
+      { icon: CreditCard, label: 'Billing' },
+      { icon: Settings, label: 'Preferences' },
+    ],
+  },
+]
+
+export default function Overview() {
+  return (
+    <AppShell
+      sidebar="settings"
+      sidebarProps={{ sections: SECTIONS, onBack: () => {} }}
+      topbar="simple"
+      topbarProps={{ title: 'PROJECT_NAME' }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+### settings-tabbed
+For: settings with multiple sections and sub-tabs (e.g. Phone System, Messaging Limits)
+
+```jsx
+import { useState } from 'react'
+import { Building2, Users, CreditCard, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const SECTIONS = [
+  {
+    label: 'General',
+    items: [
+      { icon: Building2, label: 'Business profile' },
+      { icon: Users, label: 'Team' },
+      { icon: CreditCard, label: 'Billing', active: true },
+      { icon: Settings, label: 'Preferences' },
+    ],
+  },
+]
+
+const SECTION_TABS = ['Section 1', 'Section 2', 'Section 3']
+const SUB_TABS = ['Tab 1', 'Tab 2', 'Tab 3']
+
+export default function Overview() {
+  const [activeSubTab, setActiveSubTab] = useState('Tab 1')
+
+  return (
+    <AppShell
+      sidebar="settings"
+      sidebarProps={{ sections: SECTIONS, onBack: () => {} }}
+      topbar="tabbed"
+      topbarProps={{
+        title: 'PROJECT_NAME',
+        sectionTabs: SECTION_TABS,
+        activeSection: 'Section 1',
+        subTabs: SUB_TABS,
+        activeSubTab,
+        onSubTabChange: setActiveSubTab,
+      }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+### settings-vertical-tabs
+For: settings detail page with side navigation (e.g. Memberships, course builder)
+
+```jsx
+import { useState } from 'react'
+import { Building2, Users, CreditCard, Settings } from 'lucide-react'
+import AppShell from '../shell/AppShell'
+import Canvas from '../shell/Canvas'
+
+const SECTIONS = [
+  {
+    label: 'General',
+    items: [
+      { icon: Building2, label: 'Business profile', active: true },
+      { icon: Users, label: 'Team' },
+      { icon: CreditCard, label: 'Billing' },
+      { icon: Settings, label: 'Preferences' },
+    ],
+  },
+]
+
+const SIDE_TABS = ['Overview', 'Details', 'Settings', 'Activity']
+
+export default function Overview() {
+  const [activeTab, setActiveTab] = useState('Overview')
+
+  return (
+    <AppShell
+      sidebar="settings"
+      sidebarProps={{ sections: SECTIONS, onBack: () => {} }}
+      topbar="simple"
+      topbarProps={{ title: 'PROJECT_NAME' }}
+      backToolbar={{ onBack: () => {}, label: 'Back' }}
+      verticalTabs={{
+        tabs: SIDE_TABS,
+        activeTab,
+        onTabChange: setActiveTab,
+      }}
+    >
+      <Canvas level={1}>
+        {/* Your content goes here */}
+      </Canvas>
+    </AppShell>
+  )
+}
+```
+
+---
+
+## Frozen files — never modify
+
+These are the shell layer. Teammates never touch them:
+
+```
+src/shell/AppShell.jsx
+src/shell/Sidebar.jsx
+src/shell/TopBar.jsx
+src/shell/Canvas.jsx
+src/shell/BackToolbar.jsx
+src/shell/VerticalTabs.jsx
+src/shell/HelpDrawer.jsx
+src/shell/NotificationsDrawer.jsx
+src/shell/SubAccountSwitcher.jsx
+src/index.css
+```
+
+---
+
+## Where teammates work
+
+All design work lives in `src/pages/`. Each screen or feature is a new `.jsx` file. The teammate never needs to open any other folder.
+
+When they ask "how do I add a new page", create a new file in `src/pages/` using the same AppShell variant as their existing page, and add a route in `src/App.jsx`.
+
+---
+
+## Reference variants (for your own reference, not for teammates)
+
+All shell variants are accessible at `/ref/*` in the browser:
+- /ref/main-nav-simple
+- /ref/main-nav-tabbed
+- /ref/main-nav-tabbed-vertical-tabs
+- /ref/main-nav-vertical-tabs-back-toolbar
+- /ref/level2
+- /ref/fullscreen-builder
+- /ref/settings-tabbed
+- /ref/settings-vertical-tabs
+- /ref/settings-vertical-tabs-back-toolbar
+- /ref/fullscreen-vertical-tabs-back-toolbar
