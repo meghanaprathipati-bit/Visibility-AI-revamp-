@@ -1,53 +1,100 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary blue */
-  --color-hl-blue: #155EEF;
-  --color-hl-blue-dark: #1249C0;
-  --color-hl-blue-light: #EEF4FF;
+  /* ── Primary blue — maps to HighRise primary-600 ── */
+  --color-primary-50:  var(--primary-50);
+  --color-primary-200: var(--primary-200);
+  --color-primary-600: var(--primary-600);
+  --color-primary-700: var(--primary-700);
 
-  /* Gray scale (Untitled UI / HighRise tokens) */
-  --color-gray-900: #101828;
-  --color-gray-800: #1D2939;
-  --color-gray-700: #344054;
-  --color-gray-600: #475467;
-  --color-gray-500: #667085;
-  --color-gray-400: #98A2B3;
-  --color-gray-300: #D0D5DD;
-  --color-gray-200: #EAECF0;
-  --color-gray-100: #F2F4F7;
-  --color-gray-50:  #F9FAFB;
+  /* ── Neutral gray scale — exact HighRise gray tokens ── */
+  --color-gray-25:  #FAFAFA;
+  --color-gray-50:  var(--gray-50);
+  --color-gray-100: var(--gray-100);
+  --color-gray-200: var(--gray-200);
+  --color-gray-300: var(--gray-300);
+  --color-gray-400: var(--gray-400);
+  --color-gray-500: var(--gray-500);
+  --color-gray-600: var(--gray-600);
+  --color-gray-700: var(--gray-700);
+  --color-gray-800: var(--gray-800);
+  --color-gray-900: var(--gray-900);
 
-  /* Semantic */
-  --color-positive: #16A34A;
-  --color-negative: #DC2626;
-  --color-warning:  #D97706;
+  /* ── Semantic — maps to HighRise success / error / warning ── */
+  --color-success-50:  var(--success-50);
+  --color-success-600: var(--success-600);
+  --color-success-700: var(--success-700);
+  --color-success-800: var(--success-800);
+  --color-success-900: var(--success-900);
+  --color-error-50:    var(--error-50);
+  --color-error-600:   var(--error-600);
+  --color-warning-100: var(--warning-100);
+  --color-warning-600: var(--warning-600);
 
-  /* Brand */
-  --color-hl-yellow: #F9C400;
-  --color-hl-teal: #00C4C4;
+  /* ── Purple (AI / Reputation) — maps to HighRise purple ── */
+  --color-purple-50:  var(--purple-50);
+  --color-purple-200: var(--purple-200);
+  --color-purple-600: var(--purple-600);
+  --color-purple-700: var(--purple-700);
 
-  /* Accent */
-  --color-accent-green: #73E2A3;
-  --color-accent-purple: #6938EF;
-  --color-accent-purple-light: #F4F3FF;
-  --color-accent-purple-border: #E9D7FE;
+  /* ── Fuchsia (AI gradient end) ── */
+  --color-fuchsia-500: var(--fuchsia-500);
 
-  /* Semantic light backgrounds */
-  --color-warning-light: #FEF3C7;
-  --color-negative-light: #FFF1F3;
-  --color-positive-light: #F0FDF4;
+  /* ── Teal (AI user avatar) ── */
+  --color-teal-50:  var(--teal-50);
+  --color-teal-200: var(--teal-200);
+  --color-teal-600: var(--teal-600);
+
+  /* ── Custom extensions (no HighRise equivalent) ── */
+  --color-accent-green:      #73E2A3;
+  --color-accent-green-dark: #5DD08C;
+  --color-brand-deep:        #0F1419;
+  --color-va-accent-green:   #34D399;
+  --color-va-accent-orange:  #F97316;
+  --color-positive-deepest:  #14532d;
+
+  /* ── Shadows ── */
+  --shadow-xs:              0px 1px 1px rgba(16,24,40,0.05);
+  --shadow-card:            0px 12px 16px -4px rgba(16,24,40,0.08),0px 4px 6px -2px rgba(16,24,40,0.03);
+  --shadow-switcher:        0px 20px 24px -4px rgba(16,24,40,0.08),0px 8px 8px -4px rgba(16,24,40,0.03);
+  --shadow-purple-glow:     0 0 18px -3px rgba(105,56,239,0.45);
+  --shadow-focus-primary-sm: 0 0 0 3px rgba(21,94,239,0.08);
+  --shadow-focus-purple-xs: 0 0 0 3px rgba(105,56,239,0.06);
+  --shadow-focus-purple-sm: 0 0 0 3px rgba(105,56,239,0.08);
+  --shadow-focus-purple-md: 0 0 0 3px rgba(105,56,239,0.10);
+  --shadow-message:         0 1px 3px rgba(16,24,40,0.05);
+  --shadow-progress-card:   0 1px 4px rgba(16,24,40,0.06);
+  --shadow-dropdown:        0px 4px 6px -2px rgba(16,24,40,0.03),0px 12px 16px -4px rgba(16,24,40,0.08);
+  --shadow-focus-primary-sm: 0 0 0 3px rgba(21,94,239,0.08);
 }
 
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-* { box-sizing: border-box; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 4px;
+  transition: background 150ms ease;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+
+.hover-shows-scrollbar:hover ::-webkit-scrollbar-thumb { background: var(--gray-300); }
+.hover-shows-scrollbar:hover ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+.hover-shows-scrollbar { scrollbar-color: transparent transparent; }
+.hover-shows-scrollbar:hover { scrollbar-color: var(--gray-300) transparent; }
+
+.scrollbar-gray-300 ::-webkit-scrollbar-thumb { background: var(--gray-300); border-radius: 4px; }
+.scrollbar-gray-300 ::-webkit-scrollbar-thumb:hover { background: var(--gray-400); }
+.scrollbar-gray-300 { scrollbar-color: var(--gray-300) transparent; }
+
+* { box-sizing: border-box; scrollbar-color: var(--gray-300) transparent; scrollbar-width: thin; }
 
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #F9FAFB;
-  color: #101828;
+  background: var(--gray-50);
+  color: var(--gray-900);
   -webkit-font-smoothing: antialiased;
 }

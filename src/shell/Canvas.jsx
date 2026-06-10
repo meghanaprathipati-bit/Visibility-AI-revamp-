@@ -1,6 +1,4 @@
-import { ArrowLeft } from 'lucide-react'
-
-const CANVAS_SHADOW = 'shadow-[0px_12px_16px_-4px_rgba(16,24,40,0.08),0px_4px_6px_-2px_rgba(16,24,40,0.03)]'
+import { ArrowLeft } from '../icons/index.js'
 
 /**
  * Canvas — two levels:
@@ -31,22 +29,22 @@ export default function Canvas({
 }) {
   if (level === 2) {
     return (
-      <div className="flex-1 flex flex-col min-h-0 bg-[#F9FAFB] p-4">
-        <div className={`bg-white rounded-xl ${CANVAS_SHADOW} flex flex-col flex-1 overflow-hidden`}>
+      <div className="flex-1 flex flex-col min-h-0 bg-gray-50 p-4">
+        <div className="bg-white rounded-xl shadow-card flex flex-col flex-1 overflow-hidden">
 
           {/* Back toolbar */}
-          <div className="border-b border-[#EAECF0] px-8 py-2.5 flex items-center gap-3 shrink-0">
+          <div className="border-b border-gray-200 px-8 py-2.5 flex items-center gap-3 shrink-0">
             <button
               onClick={onBack}
-              className="flex items-center gap-1.5 text-[13px] text-[#667085] hover:text-[#101828] transition-colors shrink-0"
+              className="flex items-center gap-1.5 text-[13px] text-gray-500 hover:text-gray-900 transition-colors shrink-0"
             >
               <ArrowLeft size={14} />
               {backLabel}
             </button>
             {title && (
               <>
-                <div className="w-px h-5 bg-[#EAECF0] shrink-0" />
-                <p className="text-[14px] font-semibold text-[#101828] shrink-0 truncate">{title}</p>
+                <div className="w-px h-5 bg-gray-200 shrink-0" />
+                <p className="text-[14px] font-semibold text-gray-900 shrink-0 truncate">{title}</p>
               </>
             )}
             {toolbar && (
@@ -67,8 +65,8 @@ export default function Canvas({
   }
 
   return (
-    <div className="flex-1 overflow-auto bg-[#F9FAFB] p-4 flex flex-col">
-      <div className={`bg-white rounded-xl ${CANVAS_SHADOW} px-8 py-6 flex-1`}>
+    <div className="flex-1 overflow-auto bg-gray-50 p-4 flex flex-col">
+      <div className="bg-white rounded-xl shadow-card px-8 py-6 flex-1">
         {children}
       </div>
     </div>

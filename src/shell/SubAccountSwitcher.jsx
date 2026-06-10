@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Search, ArrowLeft, Pin } from 'lucide-react'
+import { Search, ArrowLeft, Pin } from '../icons/index.js'
 
 const ENTER_MS = 200
 const EXIT_MS = 150
@@ -22,7 +22,7 @@ function AccountCard({ account, active, showPin }) {
   const initial = account.name.replace(/[^a-zA-Z]/g, '')[0]?.toUpperCase() ?? '?'
   return (
     <div className={`flex items-center gap-3 px-3 py-3 rounded-lg border cursor-pointer transition-colors ${
-      active ? 'border-hl-blue bg-hl-blue-light' : 'border-gray-200 hover:bg-gray-50'
+      active ? 'border-primary-600 bg-primary-50' : 'border-gray-200 hover:bg-gray-50'
     }`}>
       <div className="size-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
         <span className="text-[13px] font-semibold text-gray-700">{initial}</span>
@@ -32,7 +32,7 @@ function AccountCard({ account, active, showPin }) {
         <span className="text-[13px] text-gray-500 truncate">{account.address}</span>
       </div>
       {showPin && (
-        <Pin size={15} className={account.pinned ? 'text-hl-blue fill-hl-blue' : 'text-gray-300'} />
+        <Pin size={15} className={account.pinned ? 'text-primary-600 fill-primary-600' : 'text-gray-300'} />
       )}
     </div>
   )
@@ -83,7 +83,7 @@ export default function SubAccountSwitcher({ onClose, sidebarWidth = 280 }) {
       >
         {/* Search */}
         <div className="p-3 border-b border-gray-200">
-          <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 focus-within:border-hl-blue transition-colors">
+          <div className="flex items-center gap-2 border border-gray-300 rounded-lg px-3 py-2 focus-within:border-primary-600 transition-colors">
             <Search size={15} className="text-gray-400 shrink-0" />
             <input
               autoFocus
@@ -96,9 +96,9 @@ export default function SubAccountSwitcher({ onClose, sidebarWidth = 280 }) {
         </div>
 
         {/* Switch to Agency View */}
-        <button className="flex items-center gap-3 px-4 py-3 text-hl-blue hover:bg-hl-blue-light transition-colors border-b border-gray-200">
-          <div className="size-7 rounded-full bg-hl-blue-light flex items-center justify-center">
-            <ArrowLeft size={14} className="text-hl-blue" />
+        <button className="flex items-center gap-3 px-4 py-3 text-primary-600 hover:bg-primary-50 transition-colors border-b border-gray-200">
+          <div className="size-7 rounded-full bg-primary-50 flex items-center justify-center">
+            <ArrowLeft size={14} className="text-primary-600" />
           </div>
           <span className="text-[14px] font-medium">Switch to Agency View</span>
         </button>
