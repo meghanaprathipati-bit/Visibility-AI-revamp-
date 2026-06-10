@@ -1,5 +1,5 @@
 import { useRef, useState, useLayoutEffect, useEffect } from 'react'
-import { Sparkles, Megaphone, Bell, HelpCircle, ChevronDown } from 'lucide-react'
+import { Sparkles, Megaphone, Bell, HelpCircle, ChevronDown } from '../icons/index.js'
 
 function GlobalIcons({ onOpenNotifications, onOpenHelp }) {
   return (
@@ -7,40 +7,40 @@ function GlobalIcons({ onOpenNotifications, onOpenHelp }) {
       <svg width="0" height="0" className="absolute" aria-hidden="true">
         <defs>
           <linearGradient id="ai-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor="#6938EF" />
-            <stop offset="100%" stopColor="#D444F1" />
+            <stop offset="0%" stopColor="var(--purple-600)" />
+            <stop offset="100%" stopColor="var(--fuchsia-500)" />
           </linearGradient>
         </defs>
       </svg>
-      <button className="group relative h-8 pl-3 pr-1.5 mr-1 flex items-center gap-1.5 rounded-full border border-[#E9D7FE] hover:border-[#6938EF] hover:shadow-[0_0_18px_-3px_rgba(105,56,239,0.45)] hover:scale-[1.02] transition-all overflow-hidden">
-        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-[#6938EF]/15 to-transparent pointer-events-none" />
+      <button className="group relative h-8 pl-3 pr-1.5 mr-1 flex items-center gap-1.5 rounded-full border border-purple-200 hover:border-purple-600 hover:shadow-purple-glow hover:scale-[1.02] transition-all overflow-hidden">
+        <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-purple-600/15 to-transparent pointer-events-none" />
         <Sparkles size={14} fill="url(#ai-gradient)" stroke="url(#ai-gradient)" className="relative z-10 group-hover:rotate-12 transition-transform duration-300" />
-        <span className="relative z-10 text-[13px] font-medium bg-gradient-to-r from-[#6938EF] to-[#D444F1] bg-clip-text text-transparent">
+        <span className="relative z-10 text-[13px] font-medium bg-gradient-to-r from-purple-600 to-fuchsia-500 bg-clip-text text-transparent">
           Ask AI
         </span>
-        <span className="relative z-10 px-1.5 py-0.5 rounded bg-[#F2F4F7] text-[#667085] text-[12px] font-medium leading-none">
+        <span className="relative z-10 px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 text-[12px] font-medium leading-none">
           ⌘K
         </span>
       </button>
       <div className="relative">
-        <button className="size-8 flex items-center justify-center rounded-full text-[#98A2B3] hover:text-[#667085] hover:bg-[#F9FAFB] transition-colors">
+        <button className="size-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-50 transition-colors">
           <Megaphone size={16} />
         </button>
-        <span className="absolute top-0.5 right-0.5 size-2 rounded-full bg-red-500 ring-[1.5px] ring-white pointer-events-none" />
+        <span className="absolute top-0.5 right-0.5 size-2 rounded-full bg-error-600 ring-[1.5px] ring-white pointer-events-none" />
       </div>
       <button
         onClick={onOpenNotifications}
-        className="size-8 flex items-center justify-center rounded-full text-[#98A2B3] hover:text-[#667085] hover:bg-[#F9FAFB] transition-colors"
+        className="size-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-50 transition-colors"
       >
         <Bell size={16} />
       </button>
       <button
         onClick={onOpenHelp}
-        className="size-8 flex items-center justify-center rounded-full text-[#98A2B3] hover:text-[#667085] hover:bg-[#F9FAFB] transition-colors"
+        className="size-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-50 transition-colors"
       >
         <HelpCircle size={16} />
       </button>
-      <button className="size-8 rounded-full bg-[#344054] flex items-center justify-center hover:bg-[#1D2939] transition-colors ml-1">
+      <button className="size-8 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-800 transition-colors ml-1">
         <span className="text-white text-[12px] font-semibold leading-none">SS</span>
       </button>
     </div>
@@ -124,13 +124,13 @@ function OverflowTabRow({ tabs, activeTab, onTabChange, textSize, indicatorBotto
             onClick={() => onTabChange?.(tab)}
             className={`relative flex items-center justify-center self-stretch px-2 whitespace-nowrap transition-colors shrink-0 ${
               isActive
-                ? 'font-semibold text-[#155EEF]'
-                : 'font-medium text-[#667085] hover:text-[#344054]'
+                ? 'font-semibold text-primary-600'
+                : 'font-medium text-gray-500 hover:text-gray-700'
             }`}
           >
             <span className={`${textSize} translate-y-px`}>{tab}</span>
             {isActive && indicatorBottom && (
-              <span className={`absolute ${indicatorBottom} left-0 right-0 h-[2px] bg-[#155EEF] rounded-full`} />
+              <span className={`absolute ${indicatorBottom} left-0 right-0 h-[2px] bg-primary-600 rounded-full`} />
             )}
           </button>
         )
@@ -143,8 +143,8 @@ function OverflowTabRow({ tabs, activeTab, onTabChange, textSize, indicatorBotto
             onClick={() => setOpen(o => !o)}
             className={`relative flex items-center gap-1 self-stretch px-2 whitespace-nowrap transition-colors ${
               activeInOverflow
-                ? 'font-semibold text-[#155EEF]'
-                : 'font-medium text-[#667085] hover:text-[#344054]'
+                ? 'font-semibold text-primary-600'
+                : 'font-medium text-gray-500 hover:text-gray-700'
             }`}
           >
             <span className={`${textSize} translate-y-px`}>
@@ -152,19 +152,19 @@ function OverflowTabRow({ tabs, activeTab, onTabChange, textSize, indicatorBotto
             </span>
             <ChevronDown size={11} strokeWidth={2.5} className="translate-y-px" />
             {activeInOverflow && indicatorBottom && (
-              <span className={`absolute ${indicatorBottom} left-0 right-0 h-[2px] bg-[#155EEF] rounded-full`} />
+              <span className={`absolute ${indicatorBottom} left-0 right-0 h-[2px] bg-primary-600 rounded-full`} />
             )}
           </button>
           {open && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-[#EAECF0] rounded-lg shadow-lg py-1 z-50 min-w-[160px]">
+            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-50 min-w-[160px]">
               {overflow.map(tab => (
                 <button
                   key={tab}
                   onClick={() => { onTabChange?.(tab); setOpen(false) }}
                   className={`w-full text-left px-3 py-2 text-[14px] transition-colors ${
                     tab === activeTab
-                      ? 'text-[#155EEF] font-semibold bg-[#EEF4FF]'
-                      : 'text-[#344054] font-medium hover:bg-[#F9FAFB]'
+                      ? 'text-primary-600 font-semibold bg-primary-50'
+                      : 'text-gray-700 font-medium hover:bg-gray-50'
                   }`}
                 >
                   {tab}
@@ -205,10 +205,10 @@ export default function TopBar({
   if (variant === 'simple') {
     return (
       <header className="bg-white w-full flex flex-col shrink-0">
-        <div className="flex items-center gap-12 px-4 py-2 border-b border-[#EAECF0] shadow-[0px_1px_1px_rgba(16,24,40,0.05)]">
+        <div className="flex items-center gap-12 px-4 py-2 border-b border-gray-200 shadow-xs">
           <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-            {TitleIcon && <TitleIcon size={15} className="text-[#667085]" />}
-            <span className="text-[16px] font-semibold text-[#101828]">{title}</span>
+            {TitleIcon && <TitleIcon size={15} className="text-gray-500" />}
+            <span className="text-[16px] font-semibold text-gray-900">{title}</span>
           </div>
           <div className="flex-1" />
           <GlobalIcons onOpenNotifications={onOpenNotifications} onOpenHelp={onOpenHelp} />
@@ -224,8 +224,8 @@ export default function TopBar({
       <div className="flex items-center gap-4 px-4 pt-2 pb-1">
         <div className="flex flex-1 self-stretch items-center gap-3 min-w-0">
           <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-            {TitleIcon && <TitleIcon size={15} className="text-[#667085]" />}
-            <span className="text-[16px] font-semibold text-[#101828]">{title}</span>
+            {TitleIcon && <TitleIcon size={15} className="text-gray-500" />}
+            <span className="text-[16px] font-semibold text-gray-900">{title}</span>
           </div>
           <OverflowTabRow
             tabs={sectionTabs}
@@ -238,7 +238,7 @@ export default function TopBar({
       </div>
 
       {/* Row 2: subLabel + sub-tabs + optional actions */}
-      <div className="flex items-center gap-4 px-4 min-h-[44px] border-b border-[#D0D5DD] shadow-[0px_1px_1px_rgba(16,24,40,0.05)]">
+      <div className="flex items-center gap-4 px-4 min-h-[44px] border-b border-gray-300 shadow-xs">
         <div className="flex flex-1 self-stretch items-center gap-2 min-w-0">
           <OverflowTabRow
             tabs={subTabs}

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
-import { X, Bell, Paperclip, Settings, AlertTriangle } from 'lucide-react'
+import { X, Bell, Paperclip, Settings, AlertTriangle } from '../icons/index.js'
 
 const ENTER_MS = 280
 const EXIT_MS = 220
 const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'
 
 const AVATAR_COLORS = [
-  'bg-hl-blue-light text-hl-blue',
-  'bg-accent-purple-light text-accent-purple',
-  'bg-positive-light text-positive',
-  'bg-warning-light text-warning',
+  'bg-primary-50 text-primary-600',
+  'bg-purple-50 text-purple-600',
+  'bg-success-50 text-success-600',
+  'bg-warning-100 text-warning-600',
 ]
 
 const TABS = ['All', 'Alerts', 'Archive']
@@ -133,7 +133,7 @@ function Avatar({ initials, colorIdx, online }) {
         {initials}
       </div>
       {online && (
-        <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-positive border-2 border-white" />
+        <div className="absolute bottom-0 right-0 size-2.5 rounded-full bg-success-600 border-2 border-white" />
       )}
     </div>
   )
@@ -142,7 +142,7 @@ function Avatar({ initials, colorIdx, online }) {
 function AlertIcon({ severity }) {
   return (
     <div className={`size-10 rounded-full flex items-center justify-center shrink-0 ${
-      severity === 'error' ? 'bg-negative-light text-negative' : 'bg-warning-light text-warning'
+      severity === 'error' ? 'bg-error-50 text-error-600' : 'bg-warning-100 text-warning-600'
     }`}>
       <AlertTriangle size={16} />
     </div>
@@ -236,13 +236,13 @@ export default function NotificationsDrawer({ onClose }) {
                   onClick={() => setActiveTab(tab)}
                   className={`flex items-center gap-1.5 py-3 mr-5 text-[14px] font-medium border-b-2 transition-colors ${
                     activeTab === tab
-                      ? 'border-hl-blue text-hl-blue'
+                      ? 'border-primary-600 text-primary-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   {tab}
                   {count > 0 && (
-                    <span className="min-w-[20px] h-5 rounded-full bg-hl-blue text-white text-[12px] font-semibold flex items-center justify-center px-1.5">
+                    <span className="min-w-[20px] h-5 rounded-full bg-primary-600 text-white text-[12px] font-semibold flex items-center justify-center px-1.5">
                       {count}
                     </span>
                   )}
@@ -291,7 +291,7 @@ export default function NotificationsDrawer({ onClose }) {
                       <div className="flex gap-2 mt-0.5">
                         <button
                           onClick={e => { e.stopPropagation(); handleAction(n.id, true) }}
-                          className="px-3 py-1.5 rounded-lg border border-hl-blue text-hl-blue text-[13px] font-medium hover:bg-hl-blue-light transition-colors"
+                          className="px-3 py-1.5 rounded-lg border border-primary-600 text-primary-600 text-[13px] font-medium hover:bg-primary-50 transition-colors"
                         >
                           Accept
                         </button>
@@ -304,12 +304,12 @@ export default function NotificationsDrawer({ onClose }) {
                       </div>
                     )}
                     {n.actionResult && (
-                      <span className={`text-[12px] font-medium ${n.actionResult === 'Accepted' ? 'text-positive' : 'text-gray-400'}`}>
+                      <span className={`text-[12px] font-medium ${n.actionResult === 'Accepted' ? 'text-success-600' : 'text-gray-400'}`}>
                         {n.actionResult}
                       </span>
                     )}
                   </div>
-                  {!n.read && <div className="size-2 rounded-full bg-hl-blue shrink-0 mt-2" />}
+                  {!n.read && <div className="size-2 rounded-full bg-primary-600 shrink-0 mt-2" />}
                 </div>
               ))}
 
@@ -328,13 +328,13 @@ export default function NotificationsDrawer({ onClose }) {
                     <div className="mt-0.5">
                       <button
                         onClick={e => e.stopPropagation()}
-                        className="px-3 py-1.5 rounded-lg border border-hl-blue text-hl-blue text-[13px] font-medium hover:bg-hl-blue-light transition-colors"
+                        className="px-3 py-1.5 rounded-lg border border-primary-600 text-primary-600 text-[13px] font-medium hover:bg-primary-50 transition-colors"
                       >
                         {a.cta}
                       </button>
                     </div>
                   </div>
-                  {!a.read && <div className="size-2 rounded-full bg-hl-blue shrink-0 mt-2" />}
+                  {!a.read && <div className="size-2 rounded-full bg-primary-600 shrink-0 mt-2" />}
                 </div>
               ))}
             </div>

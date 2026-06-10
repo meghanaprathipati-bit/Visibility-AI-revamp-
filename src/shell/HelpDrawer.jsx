@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Copy, HelpCircle, BookOpen, Users, Megaphone, Calendar, Phone, ChevronRight, ExternalLink } from 'lucide-react'
+import { X, Sparkles, Copy, HelpCircle, BookOpen, Users, Megaphone, Calendar, Phone, ChevronRight, ExternalLink } from '../icons/index.js'
 
 const ENTER_MS = 280
 const EXIT_MS = 220
@@ -9,48 +9,48 @@ const HELP_LINKS = [
   {
     id: 'help-center',
     icon: HelpCircle,
-    iconBg: 'bg-warning-light',
-    iconColor: 'text-warning',
+    iconBg: 'bg-warning-100',
+    iconColor: 'text-warning-600',
     title: 'Visit our Help Center',
     description: 'View your support tickets, our support articles and helpful FAQs!',
   },
   {
     id: 'courses',
     icon: BookOpen,
-    iconBg: 'bg-hl-blue-light',
-    iconColor: 'text-hl-blue',
+    iconBg: 'bg-primary-50',
+    iconColor: 'text-primary-600',
     title: 'Courses',
     description: 'Browse a library of courses in our University.',
   },
   {
     id: 'facebook',
     icon: Users,
-    iconBg: 'bg-hl-blue-light',
-    iconColor: 'text-hl-blue',
+    iconBg: 'bg-primary-50',
+    iconColor: 'text-primary-600',
     title: 'Join our Facebook Group',
     description: 'Be part of the fastest growing community.',
   },
   {
     id: 'announcements',
     icon: Megaphone,
-    iconBg: 'bg-negative-light',
-    iconColor: 'text-negative',
+    iconBg: 'bg-error-50',
+    iconColor: 'text-error-600',
     title: 'Announcements',
     description: 'Keep up to date with all the latest news & releases!',
   },
   {
     id: 'events',
     icon: Calendar,
-    iconBg: 'bg-positive-light',
-    iconColor: 'text-positive',
+    iconBg: 'bg-success-50',
+    iconColor: 'text-success-600',
     title: 'Events',
     description: 'Daily brainstorming sessions with our team.',
   },
   {
     id: 'contact',
     icon: Phone,
-    iconBg: 'bg-hl-blue-light',
-    iconColor: 'text-hl-blue',
+    iconBg: 'bg-primary-50',
+    iconColor: 'text-primary-600',
     title: 'Contact Us',
     description: 'Call us at +1(888)732-4197',
   },
@@ -122,24 +122,24 @@ export default function HelpDrawer({ onClose }) {
           <button onClick={copyRelNumber} className="text-gray-400 hover:text-gray-600 transition-colors">
             <Copy size={13} />
           </button>
-          {copied && <span className="text-[12px] text-positive">Copied!</span>}
+          {copied && <span className="text-[12px] text-success-600">Copied!</span>}
         </div>
 
         {/* AI Support Assistant */}
-        <div className="mx-5 mb-4 flex items-center justify-between px-4 py-3 rounded-lg bg-accent-purple-light border border-accent-purple-border cursor-pointer hover:bg-accent-purple-border transition-colors">
+        <div className="mx-5 mb-4 flex items-center justify-between px-4 py-3 rounded-lg bg-purple-50 border border-purple-200 cursor-pointer hover:bg-purple-200 transition-colors">
           <div className="flex items-center gap-2">
-            <Sparkles size={16} className="text-accent-purple" />
+            <Sparkles size={16} className="text-purple-600" />
             <span className="text-[14px] font-medium text-gray-700">AI Support Assistant</span>
-            <span className="px-2 py-0.5 rounded-full bg-white border border-accent-purple-border text-[11px] font-medium text-accent-purple">Beta</span>
+            <span className="px-2 py-0.5 rounded-full bg-white border border-purple-200 text-[11px] font-medium text-purple-600">Beta</span>
           </div>
-          <ChevronRight size={15} className="text-accent-purple" />
+          <ChevronRight size={15} className="text-purple-600" />
         </div>
 
         <div className="h-px bg-gray-200 mx-5" />
 
         {/* Highly mascot */}
         <div className="flex flex-col items-center gap-3 px-5 py-5">
-          <div className="size-16 rounded-full bg-gradient-to-br from-hl-yellow via-hl-teal to-accent-purple flex items-center justify-center shadow-md">
+          <div className="size-16 rounded-full bg-gradient-to-br from-[#F9C400] via-[#00C4C4] to-purple-600 flex items-center justify-center shadow-md">
             <span className="text-[24px] font-bold text-white">H</span>
           </div>
           <div className="flex flex-col items-center gap-0.5">
@@ -150,13 +150,13 @@ export default function HelpDrawer({ onClose }) {
             Use any of the buttons below to get help!
           </p>
           <div className="flex gap-2 w-full">
-            <button className="flex-1 py-2 rounded-lg bg-hl-blue text-white text-[14px] font-semibold hover:bg-hl-blue-dark transition-colors">
+            <button className="flex-1 py-2 rounded-lg bg-primary-600 text-white text-[14px] font-semibold hover:bg-primary-700 transition-colors">
               Start Zoom
             </button>
-            <button className="flex-1 py-2 rounded-lg bg-hl-blue text-white text-[14px] font-semibold hover:bg-hl-blue-dark transition-colors flex items-center justify-center gap-1">
+            <button className="flex-1 py-2 rounded-lg bg-primary-600 text-white text-[14px] font-semibold hover:bg-primary-700 transition-colors flex items-center justify-center gap-1">
               Start Chat <ChevronRight size={12} />
             </button>
-            <button className="flex-1 py-2 rounded-lg bg-hl-blue text-white text-[14px] font-semibold hover:bg-hl-blue-dark transition-colors">
+            <button className="flex-1 py-2 rounded-lg bg-primary-600 text-white text-[14px] font-semibold hover:bg-primary-700 transition-colors">
               Raise Ticket
             </button>
           </div>

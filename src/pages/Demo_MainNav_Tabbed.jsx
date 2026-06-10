@@ -3,7 +3,7 @@ import {
   ArrowUpCircle, LayoutDashboard, MessageCircle, Calendar,
   User, CreditCard, Send, RefreshCw, Globe, Star,
   TrendingUp, Grid3x3, Tablet, Settings, Plus,
-} from 'lucide-react'
+} from '../icons/index.js'
 import AppShell from '../shell/AppShell'
 import Canvas from '../shell/Canvas'
 
@@ -40,17 +40,17 @@ export default function Demo_MainNav_Tabbed() {
 
   const actions = (
     <div className="flex items-center gap-1.5">
-      <button className="size-8 flex items-center justify-center rounded-md border border-[#EAECF0] text-[#667085] hover:bg-[#F9FAFB] transition-colors">
+      <button className="size-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors">
         <RefreshCw size={13} />
       </button>
-      <button className="size-8 flex items-center justify-center rounded-md border border-[#EAECF0] text-[#667085] hover:bg-[#F9FAFB] transition-colors">
+      <button className="size-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors">
         <Settings size={13} />
       </button>
-      <button className="h-8 px-3 flex items-center gap-1 text-[13px] font-medium text-[#344054] border border-[#D0D5DD] rounded-lg hover:bg-[#F9FAFB] transition-colors">
+      <button className="h-8 px-3 flex items-center gap-1 text-[13px] font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
         <Plus size={12} />
         Socials
       </button>
-      <button className="h-8 px-3 flex items-center gap-1 text-[13px] font-semibold text-white bg-[#155EEF] rounded-lg hover:bg-[#1249C0] transition-colors">
+      <button className="h-8 px-3 flex items-center gap-1 text-[13px] font-semibold text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-colors">
         <Plus size={12} />
         New post
       </button>
@@ -74,8 +74,8 @@ export default function Demo_MainNav_Tabbed() {
     >
       <Canvas level={1}>
         <div className="mb-5">
-          <h1 className="text-[16px] font-semibold text-[#101828]">Social listening</h1>
-          <p className="text-[13px] text-[#667085] mt-0.5">
+          <h1 className="text-[16px] font-semibold text-gray-900">Social listening</h1>
+          <p className="text-[13px] text-gray-500 mt-0.5">
             Monitor brand mentions and trends across social platforms in real time.
           </p>
         </div>
@@ -90,19 +90,19 @@ function PlaceholderContent() {
     <div className="flex flex-col gap-4">
       <div className="grid grid-cols-3 gap-4">
         {[['Total mentions', '182'], ['Avg sentiment', '68%'], ['Active topics', '4']].map(([label, val]) => (
-          <div key={label} className="border border-[#EAECF0] rounded-lg p-4">
-            <p className="text-[12px] font-medium text-[#667085] mb-1">{label}</p>
-            <p className="text-[24px] font-semibold text-[#101828]">{val}</p>
+          <div key={label} className="border border-gray-200 rounded-lg p-4">
+            <p className="text-[12px] font-medium text-gray-500 mb-1">{label}</p>
+            <p className="text-[24px] font-semibold text-gray-900">{val}</p>
           </div>
         ))}
       </div>
-      <div className="border border-[#EAECF0] rounded-lg p-4 h-48 flex items-center justify-center">
-        <span className="text-[13px] text-[#98A2B3]">Chart placeholder</span>
+      <div className="border border-gray-200 rounded-lg p-4 h-48 flex items-center justify-center">
+        <span className="text-[13px] text-gray-400">Chart placeholder</span>
       </div>
       <div className="grid grid-cols-2 gap-4">
         {['Trending topics', 'Recent mentions'].map(label => (
-          <div key={label} className="border border-[#EAECF0] rounded-lg p-4 h-36 flex items-center justify-center">
-            <span className="text-[13px] text-[#98A2B3]">{label}</span>
+          <div key={label} className="border border-gray-200 rounded-lg p-4 h-36 flex items-center justify-center">
+            <span className="text-[13px] text-gray-400">{label}</span>
           </div>
         ))}
       </div>

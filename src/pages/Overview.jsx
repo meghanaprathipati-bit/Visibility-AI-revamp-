@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { LayoutDashboard, FileText, Settings } from 'lucide-react'
+import { LayoutDashboard, FileText, Settings } from '../icons/index.js'
 import AppShell from '../shell/AppShell'
 import Canvas from '../shell/Canvas'
 

@@ -1,0 +1,88 @@
+---
+description: Enforces HighRise design system compliance for Vue 3 only — no React, no custom CSS. Search before coding, reuse HighRise components, stop if no Design System solution exists.
+alwaysApply: true
+---
+
+# Design System Enforcement
+
+You are a Design System-first UI implementation agent.
+
+Before writing any code, always search the codebase for existing Design System components, patterns, Storybook stories, and previous implementations. Reuse existing components whenever possible.
+
+## Vue only — no exceptions
+
+- **Vue 3 only.** All UI must be Vue 3 SFCs (`.vue`).
+- **Never use React.** Do not create or edit `.jsx`, `.tsx`, or React components. Do not import `react` or `react-dom`.
+- **Never write custom CSS.** No custom CSS files, no `<style>` blocks with custom rules, no inline `style` attributes, no scoped overrides outside approved HighRise tokens.
+- **Only approved sources:** `@platform-ui/highrise`, `ghl-ui`, `@gohighlevel/ghl-icons`, and HLTailwindConfig token classes.
+
+If a task cannot be done in Vue with HighRise/ghl-ui components, stop and explain — do not fall back to React or custom CSS.
+
+## Before any UI code
+
+Search in this order:
+
+1. `@platform-ui/highrise` components and https://highrise.gohighlevel.com/
+2. Storybook (`*.stories.ts`, `*.stories.js`, `*.stories.vue`)
+3. Existing `.vue` views for similar compositions
+4. `@gohighlevel/ghl-icons` usage
+5. HLTailwindConfig token classes in the repo
+6. HighRise Figma library if a design is provided
+
+**Component priority:** `@platform-ui/highrise` → `ghl-ui` → HLTailwindConfig token classes.
+
+If no HighRise or ghl-ui match exists, stop and explain the limitation — do not build custom UI, React, or custom CSS.
+
+## Rules
+
+* Use only approved Design System components, variants, tokens, and layouts.
+* Do not create custom UI components if an existing Design System component can be used.
+* Do not introduce custom colors, spacing, typography, shadows, border radii, or animations.
+* Follow existing product patterns and component compositions.
+* Match Figma designs using Design System components only.
+* Consistency is more important than creativity.
+* If a design cannot be implemented using existing Design System components, stop and explain the limitation instead of creating a custom solution.
+* Before completing any task, verify that no custom styling or duplicate components were introduced.
+
+## Success criteria
+
+1. Maximum reuse of existing Design System components.
+2. Zero unnecessary custom UI.
+3. Consistent with existing product patterns.
+4. Design System compliance takes priority over speed and convenience.
+
+## Strict rule
+
+Always implement UI using existing Design System components, variants, tokens, and patterns found in the codebase. Before writing code, search for existing implementations and reuse them. Never create custom components, styles, colors, spacing, typography, shadows, radii, or layouts when a Design System solution exists. Prioritize consistency with the Design System and existing product patterns over creativity or speed. If a requirement cannot be achieved using approved components, stop and explain the limitation instead of introducing custom UI.
+
+## Vue 3 implementation
+
+- Stack: Vue 3 SFCs (`.vue`), `@platform-ui/highrise`, `@gohighlevel/ghl-icons`
+- Import: `import { HrButton } from '@platform-ui/highrise'` and `import '@platform-ui/highrise/style.css'` in app entry
+- Tokens: use HLTailwindConfig palette classes (`bg-purple-600`, `text-gray-700`, `border-gray-200`) — never arbitrary hex (`bg-[#6938EF]`)
+- Icons: import from `@gohighlevel/ghl-icons` — never ad-hoc inline SVGs
+
+```vue
+<!-- Good -->
+<HrButton variant="primary" size="md">Save changes</HrButton>
+
+<!-- Bad — custom CSS -->
+<button style="background: #6938EF">Save changes</button>
+
+<!-- Bad — React -->
+import { useState } from 'react'
+```
+
+## References
+
+- Design system: https://highrise.gohighlevel.com/
+- Icons: https://ghl-icons.msgsndr.net/?path=/docs/ghl-icons--docs
+- Figma: https://www.figma.com/design/emjjdhZIMlqbszmzP9PdS6/HighRise-1.1?node-id=34982-40752
+
+## Before completing UI work
+
+- [ ] Implemented in Vue 3 `.vue` only — no React
+- [ ] Reused HighRise/ghl-ui component where possible
+- [ ] No custom CSS, arbitrary hex, inline styles, or duplicate wrappers
+- [ ] Icons from `@gohighlevel/ghl-icons`
+- [ ] If blocked, limitation explained instead of React or custom workaround
