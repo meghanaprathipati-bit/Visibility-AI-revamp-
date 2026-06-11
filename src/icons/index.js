@@ -73,3 +73,5 @@ export { Grid01Icon } from './Grid01Icon.jsx';
 export { PanelLeftIcon } from './PanelLeftIcon.jsx';
 export { PanelRightIcon } from './PanelRightIcon.jsx';
 export { ArrowUp } from './ArrowUp.jsx';
+export { ThumbsUp } from './ThumbsUp.jsx';
+export { ThumbsDown } from './ThumbsDown.jsx';

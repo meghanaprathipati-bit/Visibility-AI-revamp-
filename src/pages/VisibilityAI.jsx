@@ -6,12 +6,14 @@ import {
   ChevronDown, ChevronRight, Search, Plus, Settings,
   MessageChatSquareIcon, Grid01Icon, PanelLeftIcon, PanelRightIcon,
   BookOpen, Zap, Workflow, CheckSquare,
-  Pencil, Trash2, Check, X, Copy,
+  Pencil, Trash2, Check, X, Copy, ThumbsUp, ThumbsDown,
   FolderPlus, MapPin,
   Circle, CircleCheck, LoadingCircle, Wand2,
   ArrowUp,
 } from '../icons/index.js'
 import AppShell from '../shell/AppShell'
+import { ActionItemsPanel } from '../components/action-items/index.js'
+import { getActionItemsForPrompt } from '../data/actionItems.js'
 
 const NAV_SECTIONS = [
   {
@@ -102,6 +104,34 @@ const TOOLS = [
   { icon: CheckSquare, label: 'To do' },
 ]
 
+// Derives a short, context-aware chat title from the first user message — same approach as ChatGPT
+function generateChatTitle(input) {
+  const trimmed = input.trim()
+
+  // URL present → use domain + intent prefix
+  const urlMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)/i)
+  if (urlMatch) {
+    const domain = urlMatch[1].toLowerCase()
+    const lower = trimmed.toLowerCase()
+    if (/\baudit\b|\bgbp\b/.test(lower)) return `GBP audit — ${domain}`
+    if (/\bseo\b|\bcrawl\b/.test(lower)) return `SEO crawl — ${domain}`
+    if (/\bai\b|\bvisibility\b/.test(lower)) return `AI visibility — ${domain}`
+    if (/\bcompetitor\b|\banalysis\b/.test(lower)) return `Competitor analysis — ${domain}`
+    if (/\bperformance\b|\btrack\b/.test(lower)) return `Performance — ${domain}`
+    return `Visibility scan — ${domain}`
+  }
+
+  // No URL → first 5 meaningful words (strip stopwords)
+  const stopwords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','how','can','i','my','me','us','our','do','does','what','show'])
+  const words = trimmed
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !stopwords.has(w.toLowerCase()))
+  const title = words.slice(0, 5).join(' ')
+  if (!title) return trimmed.slice(0, 42) + (trimmed.length > 42 ? '…' : '')
+  return title.charAt(0).toUpperCase() + title.slice(1)
+}
+
 // Dummy scan context — replace with API response in production
 const SCAN_CONTEXT = {
   websiteUrl: 'https://www.newmodernhotel.com',
@@ -121,111 +151,41 @@ const SCAN_PROGRESS_STEPS = [
   'Preparing your scan summary',
 ]
 
-// Dummy action items — replace with API hierarchy response in production
-const SEVERITY_META = {
-  error: {
-    groupLabel: 'ERRORS',
-    dotClass: 'bg-error-600',
-    pillBg: 'bg-error-50',
-    pillText: 'text-error-600',
-    tagSingular: 'error',
-    tagPlural: 'errors',
-  },
-  warning: {
-    groupLabel: 'WARNINGS',
-    dotClass: 'bg-warning-600',
-    pillBg: 'bg-warning-100',
-    pillText: 'text-warning-600',
-    tagSingular: 'warning',
-    tagPlural: 'warnings',
-  },
-  notice: {
-    groupLabel: 'NOTICES',
-    dotClass: 'bg-success-600',
-    pillBg: 'bg-success-50',
-    pillText: 'text-success-600',
-    tagSingular: 'notice',
-    tagPlural: 'notices',
-  },
-}
-
-const ACTION_ITEMS_DATA = {
-  total: 7,
-  categories: [
+// Dummy visibility report — replace with API response in production
+const VISIBILITY_REPORT = {
+  fetchedAt: 'Jun 10, 2026, 05:14 PM',
+  title: 'Visibility AI finds key SEO gaps in your website',
+  channelsAnalyzed: 'Website, Local Directories',
+  opportunityScope: 'There are several low-hanging, easy-to-achieve fixes that can significantly improve overall results.',
+  channelSnapshot: [
     {
-      id: 'gbp',
-      label: 'Google Business Profile',
-      icon: MapPin,
-      tags: { error: 2, warning: 1, notice: 1 },
-      groups: [
-        {
-          id: 'gbp-errors',
-          severity: 'error',
-          items: [
-            {
-              id: 'gbp-e1',
-              title: 'Complete 3 missing profile fields: Appointment URL, Menu/Services list, Business description (detailed)',
-              defaultExpanded: true,
-              fields: [
-                { id: 'gbp-e1-f1', field: 'Appointment URL', current: '(missing)', recommended: 'Add the recommended value for Appointment URL.' },
-                { id: 'gbp-e1-f2', field: 'Business description (detailed)', current: '(missing)', recommended: 'Add a complete business description for test p.' },
-                { id: 'gbp-e1-f3', field: 'Menu/Services list', current: '(missing)', recommended: 'Add the recommended value for Menu/Services list.' },
-              ],
-              cta: 'GBP not connected. Click here to connect',
-            },
-            {
-              id: 'gbp-e2',
-              title: 'Improve review response rate (currently 40%)',
-            },
-          ],
-        },
-        {
-          id: 'gbp-warnings',
-          severity: 'warning',
-          items: [
-            {
-              id: 'gbp-w1',
-              title: 'Add primary category for your business type',
-              subtitle: 'Affects local pack ranking',
-            },
-          ],
-        },
-        {
-          id: 'gbp-notices',
-          severity: 'notice',
-          items: [
-            {
-              id: 'gbp-n1',
-              title: 'Upload at least 10 photos',
-              subtitle: 'Profiles with 10+ photos get 42% more direction requests',
-            },
-          ],
-        },
+      channel: 'Website',
+      status: 'Needs attention',
+      detail: 'Critical meta tag error on homepage; medium warnings present.',
+      subItems: [
+        'SEO site audit — Technical SEO issue counts are summarized for prioritization.',
+        'AI visibility — AI search visibility signals were checked without listing issue details here.',
       ],
     },
     {
-      id: 'reviews',
-      label: 'Reviews Platforms',
-      icon: MapPin,
-      tags: { warning: 2, notice: 1 },
-      groups: [
-        {
-          id: 'reviews-warnings',
-          severity: 'warning',
-          items: [
-            { id: 'rev-w1', title: 'Improve review response rate (currently 40%)' },
-            { id: 'rev-w2', title: 'Set up review request automation' },
-          ],
-        },
-        {
-          id: 'reviews-notices',
-          severity: 'notice',
-          items: [
-            { id: 'rev-n1', title: 'Monitor and respond to new reviews weekly' },
-          ],
-        },
-      ],
+      channel: 'Local Directories',
+      status: 'Needs attention',
+      detail: 'Multiple security issues detected affecting site trust.',
+      subItems: ['Listings scan — Directory coverage and NAP consistency were checked.'],
     },
+  ],
+  topGaps: [
+    { channel: 'Website', category: 'SEO site audit', issueCategory: 'Website SEO', topFix: 'Missing homepage title tag' },
+    { channel: 'Website', category: 'SEO site audit', issueCategory: 'Website SEO', topFix: 'No XML sitemap' },
+    { channel: 'Local Directories', category: 'Listings scan', issueCategory: 'Website SEO', topFix: 'Missing HTTPS encryption' },
+    { channel: 'Website', category: 'SEO site audit', issueCategory: 'Website SEO', topFix: 'Oversized images' },
+    { channel: 'Local Directories', category: 'Listings scan', issueCategory: 'Website SEO', topFix: 'Outdated security protocol version' },
+  ],
+  nextActionPlan: [
+    { when: 'Now', channel: 'Website', category: 'SEO site audit', action: 'Add a descriptive homepage title' },
+    { when: 'Next', channel: 'Website', category: 'AI visibility', action: 'Generate and submit an XML sitemap' },
+    { when: 'With access', channel: 'Website', category: 'SEO site audit', action: 'Compress large images' },
+    { when: 'Follow-up', channel: 'Local Directories', category: 'Listings scan', action: 'Implement HTTPS encryption' },
   ],
 }
 
@@ -238,6 +198,8 @@ export default function VisibilityAI() {
   const [composerHasInput, setComposerHasInput] = useState(false)
   // true once the current "New chat" has had at least one message sent
   const [activeChatUsed, setActiveChatUsed] = useState(false)
+  // auto-generated title for the active chat, consumed by ChatPanel then cleared
+  const [pendingChatTitle, setPendingChatTitle] = useState(null)
 
   return (
     <AppShell
@@ -262,11 +224,14 @@ export default function VisibilityAI() {
           onNewChat={() => { setComposerFocusKey(k => k + 1); setComposerHasInput(false); setActiveChatUsed(false) }}
           composerHasInput={composerHasInput}
           activeChatUsed={activeChatUsed}
+          pendingChatTitle={pendingChatTitle}
+          onChatTitleConsumed={() => setPendingChatTitle(null)}
         />
         <MainContent
           composerFocusKey={composerFocusKey}
           onInputChange={setComposerHasInput}
           onMessageSent={() => setActiveChatUsed(true)}
+          onFirstMessage={text => setPendingChatTitle(generateChatTitle(text))}
         />
         <ToolsPanel
           collapsed={toolsPanelCollapsed}
@@ -396,7 +361,7 @@ function TypingText() {
   )
 }
 
-function ChatPanel({ activePanel, onPanelChange, collapsed, onToggleCollapse, onNewChat, composerHasInput, activeChatUsed }) {
+function ChatPanel({ activePanel, onPanelChange, collapsed, onToggleCollapse, onNewChat, composerHasInput, activeChatUsed, pendingChatTitle, onChatTitleConsumed }) {
   const [chats, setChats] = useState(INITIAL_CHATS)
   const [activeChatId, setActiveChatId] = useState(1)
   const [editingId, setEditingId] = useState(null)
@@ -426,6 +391,17 @@ function ChatPanel({ activePanel, onPanelChange, collapsed, onToggleCollapse, on
     if (projectDropdownOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [projectDropdownOpen])
+
+  // Auto-rename the active "New chat" when the first message is sent (ChatGPT-style)
+  useEffect(() => {
+    if (!pendingChatTitle) return
+    setChats(prev => prev.map(c =>
+      c.id === activeChatId && c.label === 'New chat'
+        ? { ...c, label: pendingChatTitle }
+        : c
+    ))
+    onChatTitleConsumed?.()
+  }, [pendingChatTitle]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleNewChat() {
     // Only redirect to existing empty chat if it hasn't been used yet
@@ -931,7 +907,60 @@ function PromptComposer({
   )
 }
 
-function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
+function AiFeedbackRow({ ts }) {
+  const [copied, setCopied] = useState(false)
+  const [vote, setVote] = useState(null) // 'up' | 'down' | null
+
+  function handleCopy() {
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
+  }
+
+  return (
+    <div className="flex flex-col gap-1 mt-2">
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => setVote(v => (v === 'up' ? null : 'up'))}
+          className={`p-1.5 rounded-md transition-colors ${
+            vote === 'up'
+              ? 'text-primary-600 bg-primary-50'
+              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+          }`}
+          aria-label="Helpful"
+        >
+          <ThumbsUp size={15} strokeWidth={1.75} />
+        </button>
+        <button
+          onClick={() => setVote(v => (v === 'down' ? null : 'down'))}
+          className={`p-1.5 rounded-md transition-colors ${
+            vote === 'down'
+              ? 'text-error-600 bg-error-50'
+              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+          }`}
+          aria-label="Not helpful"
+        >
+          <ThumbsDown size={15} strokeWidth={1.75} />
+        </button>
+        <button
+          onClick={handleCopy}
+          className={`p-1.5 rounded-md transition-colors ${
+            copied
+              ? 'text-success-600 bg-success-50'
+              : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+          }`}
+          aria-label="Copy response"
+        >
+          <Copy size={15} />
+        </button>
+      </div>
+      {ts && (
+        <span className="text-[11px] text-gray-400 pl-0.5">{ts}</span>
+      )}
+    </div>
+  )
+}
+
+function MainContent({ composerFocusKey, onInputChange, onMessageSent, onFirstMessage }) {
   const [inputValue, setInputValueRaw] = useState('')
   function setInputValue(val) {
     setInputValueRaw(val)
@@ -940,7 +969,6 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
   const [chatMode, setChatMode] = useState(false)
   const [isScanning, setIsScanning] = useState(false)
   const [messages, setMessages] = useState([])
-  const [showActionItems, setShowActionItems] = useState(false)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
 
@@ -949,12 +977,11 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
     setIsScanning(false)
     setMessages([])
     setInputValue('')
-    setShowActionItems(false)
   }, [composerFocusKey])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isScanning, showActionItems])
+  }, [messages, isScanning])
 
   function getTimestamp() {
     const now = new Date()
@@ -963,7 +990,18 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
 
   const onScanComplete = useCallback(() => {
     setIsScanning(false)
-    setShowActionItems(true)
+    setMessages(prev => {
+      if (prev.some(m => m.content === 'report')) return prev
+      const lastUser = [...prev].reverse().find(m => m.type === 'user')
+      const actionItems = getActionItemsForPrompt(lastUser?.content)
+      const base = Date.now()
+      const ts = getTimestamp()
+      return [
+        ...prev,
+        { id: base + 1, type: 'ai', content: 'report', ts },
+        { id: base + 2, type: 'ai', content: 'action-items', actionItems, ts },
+      ]
+    })
   }, [])
 
   function handleStopScan() {
@@ -980,6 +1018,7 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
     const userMsg = { id: Date.now(), type: 'user', content: trimmed, ts }
 
     if (!chatMode) {
+      onFirstMessage?.(trimmed)
       setChatMode(true)
       setIsScanning(true)
       setMessages([userMsg])
@@ -1009,29 +1048,64 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
   }
 
   const chatFooter = (
-    <div className="shrink-0 border-t border-gray-200 bg-white">
-      <div className="max-w-[768px] mx-auto px-8 pb-2">
-        {showActionItems && (
-          <div className="pt-4 pb-3">
-            <ActionItemsPanel />
+    /* Floats over the scroll area. Gradient lives INSIDE the composer box only —
+       transparent at the top edge of the box, fully white by the midpoint (vanishing point).
+       Nothing above the composer has any gradient. */
+    <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
+
+      {/* ── Composer zone ─────────────────────────────────────────────────────────
+          The gradient overlay sits over this zone (z-10, pointer-events-none).
+          The actual composer content sits above it (z-20, pointer-events-auto).
+          Messages scroll from below, enter the top of this zone (transparent),
+          and are fully invisible by the midpoint (white). */}
+      <div className="relative pointer-events-auto">
+        {/* Solid white backdrop covers the full width so no message leaks into the side margins */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-white pointer-events-none"
+          style={{ zIndex: 8 }}
+        />
+        {/* Gradient layer — constrained to the same max-w/px-8 column as the composer box so the
+            transparent-to-white fade starts exactly at the left/right borders of the text box */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{ zIndex: 9 }}
+        >
+          <div className="max-w-[768px] mx-auto px-8 h-full">
+            <div
+              className="h-full"
+              style={{ background: 'linear-gradient(to bottom, transparent 0%, white 50%)' }}
+            />
           </div>
-        )}
-        <div className={showActionItems ? '' : 'pt-2'}>
-          <PromptComposer
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onSend={handleSend}
-            inputRef={inputRef}
-            focusKey={composerFocusKey}
-            scanning={isScanning}
-            onStop={handleStopScan}
-            placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
-          />
-          <p className="text-center text-[11px] text-gray-400 mt-2 mb-2">
+        </div>
+        {/* Composer content — sits above gradient so it is always fully readable */}
+        <div style={{ position: 'relative', zIndex: 20 }}>
+          <div className="max-w-[768px] mx-auto px-8 pb-3">
+            <PromptComposer
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onSend={handleSend}
+              inputRef={inputRef}
+              focusKey={composerFocusKey}
+              scanning={isScanning}
+              onStop={handleStopScan}
+              placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* ── Hint text ─────────────────────────────────────────────────────────────
+          Solid white, sits below the composer zone, fully blocks messages. */}
+      <div className="pointer-events-auto bg-white">
+        <div className="max-w-[768px] mx-auto px-8 pb-3">
+          <p className="text-center text-[11px] leading-none text-gray-400 mb-1">
             Review important AI-assisted changes before publishing.
           </p>
         </div>
       </div>
+
     </div>
   )
 
@@ -1039,7 +1113,7 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
     return (
       <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center px-8 py-10 overflow-y-auto">
-          <div className="w-full max-w-[860px] flex flex-col items-center gap-6">
+          <div className="w-full max-w-[768px] flex flex-col items-center gap-6">
 
             {/* Headline */}
             <div className="text-center">
@@ -1094,15 +1168,17 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
   }
 
   return (
-    <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
-      {/* Scrollable conversational thread */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-8 py-8">
-        <div className="max-w-[768px] mx-auto flex flex-col gap-8">
+    <main className="flex-1 min-w-0 bg-white relative overflow-hidden">
+      {/* Scrollable conversational thread — fills the full height, flows behind the floating composer */}
+      <div className="absolute inset-0 overflow-y-auto pt-8">
+        <div className="max-w-[768px] mx-auto px-8 flex flex-col gap-6 pb-[140px]">
           {messages.map(msg => {
             if (msg.type === 'user') {
               return (
+                /* User bubble — GHL AI bubble spec: rounded-2xl rounded-br-sm, no border,
+                   bg-gray-100 fill, px-4 py-3, max-w-[80%] right-aligned */
                 <div key={msg.id} className="flex justify-end">
-                  <div className="max-w-[520px] px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl rounded-br-md">
+                  <div className="max-w-[80%] min-w-0 px-4 py-3 bg-gray-100 rounded-2xl rounded-br-sm">
                     <p className="text-[14px] text-gray-900 leading-relaxed">{msg.content}</p>
                   </div>
                 </div>
@@ -1111,11 +1187,28 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
 
             if (msg.content === 'scan') {
               return (
-                <ScanConversationBlock
-                  key={msg.id}
-                  ts={msg.ts}
-                  onComplete={onScanComplete}
-                />
+                <div key={msg.id} className="flex flex-col">
+                  <ScanConversationBlock ts={msg.ts} onComplete={onScanComplete} />
+                  <AiFeedbackRow ts={msg.ts} />
+                </div>
+              )
+            }
+
+            if (msg.content === 'report') {
+              return (
+                <div key={msg.id} className="flex flex-col">
+                  <VisibilityReportCard />
+                  <AiFeedbackRow ts={msg.ts} />
+                </div>
+              )
+            }
+
+            if (msg.content === 'action-items') {
+              return (
+                <div key={msg.id} className="flex flex-col">
+                  <ActionItemsPanel items={msg.actionItems} />
+                  <AiFeedbackRow ts={msg.ts} />
+                </div>
               )
             }
 
@@ -1125,262 +1218,126 @@ function MainContent({ composerFocusKey, onInputChange, onMessageSent }) {
         </div>
       </div>
 
-      {/* Fixed footer — separator line, action items, then editor */}
+      {/* Floating composer with gradient fade — no border, no separator */}
       {chatFooter}
     </main>
   )
 }
 
-function SeveritySummaryTags({ tags }) {
+/**
+ * VisibilityReportCard — renders the post-scan summary with two data tables.
+ * Table styling mirrors the HighRise HrDataTable visual spec
+ * (https://highrise.gohighlevel.com/components/data-display/data-table):
+ *   - bordered container, rounded-lg overflow-hidden
+ *   - header: bg-gray-50, 11px medium uppercase text, border-b
+ *   - rows: border-b border-gray-100, 13px text-gray-700, px-4 py-3
+ */
+function HRTable({ columns, rows }) {
   return (
-    <div className="flex items-center gap-1.5 shrink-0 flex-wrap justify-end">
-      {Object.entries(tags).map(([severity, count]) => {
-        if (!count) return null
-        const meta = SEVERITY_META[severity]
-        return (
-          <span
-            key={severity}
-            className={`inline-flex items-center gap-1 text-[11px] font-medium rounded-full px-2 py-0.5 ${meta.pillBg} ${meta.pillText}`}
-          >
-            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${meta.dotClass}`} />
-            {count} {count === 1 ? meta.tagSingular : meta.tagPlural}
-          </span>
-        )
-      })}
+    <div className="w-full rounded-lg border border-gray-200 overflow-hidden">
+      <table className="w-full border-collapse text-left">
+        <thead>
+          <tr className="bg-gray-50 border-b border-gray-200">
+            {columns.map(col => (
+              <th
+                key={col}
+                className="px-4 py-2.5 text-[11px] font-medium text-gray-500 uppercase tracking-wide whitespace-nowrap"
+              >
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row, ri) => (
+            <tr
+              key={ri}
+              className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors"
+            >
+              {row.map((cell, ci) => (
+                <td key={ci} className="px-4 py-3 text-[13px] text-gray-700 align-top">
+                  {cell}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   )
 }
 
-function ActionItemCheckbox({ checked, onToggle }) {
+function VisibilityReportCard() {
+  const r = VISIBILITY_REPORT
   return (
-    <button
-      type="button"
-      onClick={e => {
-        e.stopPropagation()
-        onToggle()
-      }}
-      className={`w-[15px] h-[15px] rounded-[3px] flex items-center justify-center shrink-0 border-2 transition-colors ${
-        checked
-          ? 'bg-primary-600 border-primary-600'
-          : 'bg-white border-gray-300 hover:border-primary-600'
-      }`}
-      aria-label={checked ? 'Deselect item' : 'Select item'}
-    >
-      {checked && <Check size={9} className="text-white" strokeWidth={3.5} />}
-    </button>
-  )
-}
-
-function ActionItemDetailTable({ item, checkedIds, onToggleCheck }) {
-  if (!item.fields?.length) return null
-
-  return (
-    <div className="mx-4 mb-3 ml-10 border border-gray-200 rounded-lg overflow-hidden bg-white">
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] gap-3 px-3 py-2 bg-gray-50 border-b border-gray-200 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">
-        <span>Field</span>
-        <span>Current Value</span>
-        <span>Recommended Value</span>
+    <div className="w-full rounded-xl border border-gray-200 bg-white overflow-hidden shadow-xs">
+      {/* Timestamp */}
+      <div className="px-5 pt-4 pb-1 text-[11px] text-gray-400">
+        Data fetched on {r.fetchedAt}
       </div>
-      {item.fields.map(field => (
-        <div
-          key={field.id}
-          className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.4fr)] gap-3 px-3 py-2.5 border-b border-gray-100 last:border-b-0 items-start"
-        >
-          <div className="flex items-start gap-2 min-w-0">
-            <ActionItemCheckbox
-              checked={checkedIds.has(field.id)}
-              onToggle={() => onToggleCheck(field.id)}
-            />
-            <span className="text-[12px] font-medium text-gray-900 leading-snug">{field.field}</span>
-          </div>
-          <span className="text-[12px] text-gray-500">{field.current}</span>
-          <div className="flex items-start gap-1.5 min-w-0">
-            <span className="text-[12px] text-gray-700 leading-snug flex-1">{field.recommended}</span>
-            <Pencil size={13} className="text-gray-400 shrink-0 mt-0.5" />
-          </div>
+
+      {/* Divider */}
+      <div className="mx-5 border-b border-gray-100 mt-2" />
+
+      {/* Body */}
+      <div className="px-5 py-4 flex flex-col gap-5">
+        {/* Title */}
+        <h3 className="text-[16px] font-bold text-gray-900 leading-snug">{r.title}</h3>
+
+        {/* Key-value meta */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[13px] text-gray-700">
+            <span className="font-semibold">Channels analyzed:</span>{' '}
+            {r.channelsAnalyzed}
+          </p>
+          <p className="text-[13px] text-gray-700">
+            <span className="font-semibold">Opportunity scope:</span>{' '}
+            {r.opportunityScope}
+          </p>
         </div>
-      ))}
-      {item.cta && (
-        <div className="flex justify-end px-3 py-2 border-t border-gray-100 bg-gray-25">
-          <button type="button" className="text-[12px] font-semibold text-primary-600 hover:text-primary-700 transition-colors">
-            {item.cta}
-          </button>
+
+        {/* Channel snapshot */}
+        <div>
+          <p className="text-[13px] font-semibold text-gray-900 mb-2">Channel snapshot</p>
+          <ul className="flex flex-col gap-1.5 list-none pl-0">
+            {r.channelSnapshot.map(ch => (
+              <li key={ch.channel}>
+                <p className="text-[13px] text-gray-700">
+                  <span className="font-semibold">{ch.channel}:</span>{' '}
+                  {ch.status} — {ch.detail}
+                </p>
+                {ch.subItems.length > 0 && (
+                  <ul className="mt-1 pl-4 flex flex-col gap-1">
+                    {ch.subItems.map(s => (
+                      <li key={s} className="text-[12px] text-gray-500 list-disc list-inside">
+                        {s}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
-      )}
-    </div>
-  )
-}
 
-function ActionItemsPanel() {
-  const [panelOpen, setPanelOpen] = useState(true)
-  const [expandedCategories, setExpandedCategories] = useState({ gbp: true })
-  const [expandedGroups, setExpandedGroups] = useState({ 'gbp-errors': true, 'gbp-warnings': true })
-  const [expandedItems, setExpandedItems] = useState({ 'gbp-e1': true })
-  const [checkedItems, setCheckedItems] = useState(new Set())
-
-  function toggleCategory(catId) {
-    const opening = !expandedCategories[catId]
-    if (opening) {
-      const cat = ACTION_ITEMS_DATA.categories.find(c => c.id === catId)
-      const firstExpandable = cat?.groups.flatMap(g => g.items).find(i => i.fields?.length)
-      if (firstExpandable) {
-        setExpandedItems(e => ({ ...e, [firstExpandable.id]: true }))
-      }
-      if (cat?.groups.length) {
-        setExpandedGroups(gx => ({
-          ...gx,
-          ...Object.fromEntries(cat.groups.map(grp => [grp.id, true])),
-        }))
-      }
-    }
-    setExpandedCategories(prev => ({ ...prev, [catId]: !prev[catId] }))
-  }
-
-  function toggleGroup(groupId) {
-    setExpandedGroups(prev => ({ ...prev, [groupId]: !prev[groupId] }))
-  }
-
-  function toggleItem(itemId, category) {
-    setExpandedItems(prev => {
-      if (!prev[itemId]) {
-        return { ...prev, [itemId]: true }
-      }
-      const expandableIds = category.groups.flatMap(g =>
-        g.items.filter(i => i.fields?.length).map(i => i.id)
-      )
-      const otherOpen = expandableIds.some(id => id !== itemId && prev[id])
-      if (!otherOpen && expandableIds.includes(itemId)) {
-        return prev
-      }
-      return { ...prev, [itemId]: false }
-    })
-  }
-
-  function toggleCheck(itemId) {
-    setCheckedItems(prev => {
-      const next = new Set(prev)
-      if (next.has(itemId)) next.delete(itemId)
-      else next.add(itemId)
-      return next
-    })
-  }
-
-  return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-xs">
-      <button
-        type="button"
-        className="w-full flex items-center gap-2 px-4 py-3 bg-primary-50 cursor-pointer select-none text-left"
-        onClick={() => setPanelOpen(o => !o)}
-      >
-        <div className="w-5 h-5 rounded-full bg-primary-600 flex items-center justify-center shrink-0">
-          <Check size={11} className="text-white" strokeWidth={3} />
+        {/* Top gaps table */}
+        <div>
+          <p className="text-[13px] font-semibold text-gray-900 mb-2">Top gaps to fix</p>
+          <HRTable
+            columns={['Channel', 'Category', 'Issue category', 'Top fix examples']}
+            rows={r.topGaps.map(g => [g.channel, g.category, g.issueCategory, g.topFix])}
+          />
         </div>
-        <span className="text-[14px] font-semibold text-gray-900">Action Items</span>
-        <span className="text-[14px] font-normal text-gray-500">({ACTION_ITEMS_DATA.total} tasks)</span>
-        <div className="flex-1" />
-        <ChevronDown
-          size={16}
-          className={`text-gray-500 shrink-0 transition-transform duration-200 ${panelOpen ? '' : '-rotate-90'}`}
-        />
-      </button>
 
-      {panelOpen && (
-        <div className="bg-white max-h-[320px] overflow-y-auto scrollbar-gray-300">
-          {ACTION_ITEMS_DATA.categories.map((cat, catIdx) => {
-            const CatIcon = cat.icon
-            const catExpanded = !!expandedCategories[cat.id]
-            const isLastCat = catIdx === ACTION_ITEMS_DATA.categories.length - 1
-
-            return (
-              <div key={cat.id} className={!isLastCat ? 'border-b border-gray-200' : ''}>
-                <button
-                  type="button"
-                  className="w-full flex items-center gap-2.5 px-4 py-3 hover:bg-gray-50 transition-colors text-left"
-                  onClick={() => toggleCategory(cat.id)}
-                >
-                  <ChevronRight
-                    size={14}
-                    className={`text-gray-400 shrink-0 transition-transform duration-200 ${catExpanded ? 'rotate-90' : ''}`}
-                  />
-                  <CatIcon size={16} className="text-primary-600 shrink-0" />
-                  <span className="text-[14px] font-medium text-gray-900 flex-1 min-w-0 text-left">
-                    {cat.label}
-                  </span>
-                  {!catExpanded && <SeveritySummaryTags tags={cat.tags} />}
-                </button>
-
-                {catExpanded && cat.groups.map(group => {
-                  const meta = SEVERITY_META[group.severity]
-                  const groupExpanded = !!expandedGroups[group.id]
-
-                  return (
-                    <div key={group.id}>
-                      <button
-                        type="button"
-                        className="w-full flex items-center gap-2.5 pl-8 pr-4 py-2 hover:bg-gray-50 transition-colors text-left border-t border-gray-100"
-                        onClick={() => toggleGroup(group.id)}
-                      >
-                        <ChevronDown
-                          size={12}
-                          className={`text-gray-400 shrink-0 transition-transform duration-200 ${groupExpanded ? '' : '-rotate-90'}`}
-                        />
-                        <span className={`w-2 h-2 rounded-full shrink-0 ${meta.dotClass}`} />
-                        <span className={`text-[11px] font-bold tracking-wide ${meta.pillText}`}>
-                          {meta.groupLabel}
-                        </span>
-                        <span className={`text-[11px] font-bold px-1.5 py-0.5 rounded-full leading-none ${meta.pillBg} ${meta.pillText}`}>
-                          {group.items.length}
-                        </span>
-                      </button>
-
-                      {groupExpanded && group.items.map(item => {
-                        const itemExpanded = !!expandedItems[item.id]
-                        const hasDetail = !!item.fields?.length
-
-                        return (
-                          <div key={item.id} className="border-t border-gray-100">
-                            <div className="flex items-start gap-2 pl-10 pr-4 py-2.5 hover:bg-gray-25 transition-colors">
-                              <ActionItemCheckbox
-                                checked={checkedItems.has(item.id)}
-                                onToggle={() => toggleCheck(item.id)}
-                              />
-                              <button
-                                type="button"
-                                className="flex items-start gap-1.5 flex-1 min-w-0 text-left"
-                                onClick={() => hasDetail && toggleItem(item.id, cat)}
-                              >
-                                {hasDetail && (
-                                  <ChevronDown
-                                    size={13}
-                                    className={`text-gray-400 shrink-0 mt-0.5 transition-transform duration-200 ${itemExpanded ? '' : '-rotate-90'}`}
-                                  />
-                                )}
-                                <span className="text-[13px] text-gray-800 leading-snug">{item.title}</span>
-                              </button>
-                            </div>
-
-                            {itemExpanded && hasDetail && (
-                              <ActionItemDetailTable
-                                item={item}
-                                checkedIds={checkedItems}
-                                onToggleCheck={toggleCheck}
-                              />
-                            )}
-
-                            {itemExpanded && !hasDetail && item.subtitle && (
-                              <p className="pl-[4.25rem] pr-4 pb-2.5 text-[12px] text-gray-500">{item.subtitle}</p>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )
-                })}
-              </div>
-            )
-          })}
+        {/* Next action plan table */}
+        <div>
+          <p className="text-[13px] font-semibold text-gray-900 mb-2">Next action plan</p>
+          <HRTable
+            columns={['When', 'Channel', 'Category', 'Actions']}
+            rows={r.nextActionPlan.map(a => [a.when, a.channel, a.category, a.action])}
+          />
         </div>
-      )}
+      </div>
     </div>
   )
 }

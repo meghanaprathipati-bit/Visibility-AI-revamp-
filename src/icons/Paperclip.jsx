@@ -12,11 +12,11 @@ export function Paperclip({ size = 24, className = '', color = 'currentColor', .
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M21.152 10.9l-9.015 9.015a5.25 5.25 0 01-7.425-7.425l9.016-9.015a3.5 3.5 0 114.95 4.95l-8.662 8.662a1.75 1.75 0 11-2.475-2.475l7.601-7.602" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21.152 10.9l-9.015 9.015a5.25 5.25 0 01-7.425-7.425l9.016-9.015a3.5 3.5 0 114.95 4.95l-8.662 8.662a1.75 1.75 0 11-2.475-2.475l7.601-7.602" />
     </svg>
   );
 }
