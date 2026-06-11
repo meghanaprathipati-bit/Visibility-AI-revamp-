@@ -12,11 +12,11 @@ export function Check({ size = 24, className = '', color = 'currentColor', ...pr
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M20 6L9 17l-5-5" />
     </svg>
   );
 }

@@ -12,11 +12,11 @@ export function Code2({ size = 24, className = '', color = 'currentColor', ...pr
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
     </svg>
   );
 }

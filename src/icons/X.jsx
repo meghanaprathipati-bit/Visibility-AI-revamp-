@@ -12,11 +12,11 @@ export function X({ size = 24, className = '', color = 'currentColor', ...props 
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M17 7L7 17M7 7l10 10" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 6L6 18M6 6l12 12" />
     </svg>
   );
 }

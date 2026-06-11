@@ -12,11 +12,11 @@ export function TrendingUp({ size = 24, className = '', color = 'currentColor', 
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M22 7l-7.869 7.869c-.396.396-.594.594-.822.668a1 1 0 01-.618 0c-.228-.074-.426-.272-.822-.668L9.13 12.13c-.396-.396-.594-.594-.822-.668a1 1 0 00-.618 0c-.228.074-.426.272-.822.668L2 17M22 7h-7m7 0v7" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M22 7l-7.869 7.869c-.396.396-.594.594-.822.668a1 1 0 01-.618 0c-.228-.074-.426-.272-.822-.668L9.13 12.13c-.396-.396-.594-.594-.822-.668a1 1 0 00-.618 0c-.228.074-.426.272-.822.668L2 17M22 7h-7m7 0v7" />
     </svg>
   );
 }

@@ -12,11 +12,11 @@ export function RefreshCw({ size = 24, className = '', color = 'currentColor', .
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M22 10s-2.005-2.732-3.634-4.362a9 9 0 102.282 8.862M22 10V4m0 6h-6" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M22 10s-2.005-2.732-3.634-4.362a9 9 0 102.282 8.862M22 10V4m0 6h-6" />
     </svg>
   );
 }
