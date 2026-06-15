@@ -12,11 +12,11 @@ export function BarChart3({ size = 24, className = '', color = 'currentColor', .
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M18 20V10m-6 10V4M6 20v-6" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M18 20V10m-6 10V4M6 20v-6" />
     </svg>
   );
 }

@@ -12,11 +12,11 @@ export function Loader2({ size = 24, className = '', color = 'currentColor', ...
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25v2.5M12 18v4M5.75 12h-3.5m19 0h-1.5m-1.293 6.457l-.707-.707m.914-12.334L17.25 6.83M4.922 19.078L7.75 16.25M5.129 5.209L7.25 7.33" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25v2.5M12 18v4M5.75 12h-3.5m19 0h-1.5m-1.293 6.457l-.707-.707m.914-12.334L17.25 6.83M4.922 19.078L7.75 16.25M5.129 5.209L7.25 7.33" />
     </svg>
   );
 }

@@ -6,7 +6,7 @@ import {
   ChevronDown, ChevronRight, Search, Plus, Settings,
   MessageChatSquareIcon, Grid01Icon, PanelLeftIcon, PanelRightIcon,
   BookOpen, Zap, Workflow, CheckSquare,
-  Pencil, Trash2, Check, X, Copy,
+  Pencil, Trash2, Check, X, Copy, ThumbsUp, ThumbsDown,
   FolderPlus, MapPin,
   Circle, CircleCheck, LoadingCircle, Wand2,
   ArrowUp, Loader2,
@@ -97,6 +97,34 @@ const TOOLS = [
   { icon: Workflow, label: 'Automations' },
   { icon: CheckSquare, label: 'To do' },
 ]
+
+// Derives a short, context-aware chat title from the first user message — same approach as ChatGPT
+function generateChatTitle(input) {
+  const trimmed = input.trim()
+
+  // URL present → use domain + intent prefix
+  const urlMatch = trimmed.match(/(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})?)/i)
+  if (urlMatch) {
+    const domain = urlMatch[1].toLowerCase()
+    const lower = trimmed.toLowerCase()
+    if (/\baudit\b|\bgbp\b/.test(lower)) return `GBP audit — ${domain}`
+    if (/\bseo\b|\bcrawl\b/.test(lower)) return `SEO crawl — ${domain}`
+    if (/\bai\b|\bvisibility\b/.test(lower)) return `AI visibility — ${domain}`
+    if (/\bcompetitor\b|\banalysis\b/.test(lower)) return `Competitor analysis — ${domain}`
+    if (/\bperformance\b|\btrack\b/.test(lower)) return `Performance — ${domain}`
+    return `Visibility scan — ${domain}`
+  }
+
+  // No URL → first 5 meaningful words (strip stopwords)
+  const stopwords = new Set(['a','an','the','and','or','but','in','on','at','to','for','of','with','by','from','is','are','how','can','i','my','me','us','our','do','does','what','show'])
+  const words = trimmed
+    .replace(/[^\w\s]/g, ' ')
+    .split(/\s+/)
+    .filter(w => w.length > 1 && !stopwords.has(w.toLowerCase()))
+  const title = words.slice(0, 5).join(' ')
+  if (!title) return trimmed.slice(0, 42) + (trimmed.length > 42 ? '…' : '')
+  return title.charAt(0).toUpperCase() + title.slice(1)
+}
 
 // Dummy scan context — replace with API response in production
 const SCAN_CONTEXT = {
@@ -357,6 +385,8 @@ export default function VisibilityAI() {
           }}
           composerHasInput={composerHasInput}
           activeChatUsed={activeChatUsed}
+          pendingChatTitle={pendingChatTitle}
+          onChatTitleConsumed={() => setPendingChatTitle(null)}
         />
         <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
           {activePanel === 'Dashboards' ? (
@@ -1532,6 +1562,7 @@ function MainContent({
     }
 
     if (!chatMode) {
+      onFirstMessage?.(trimmed)
       setChatMode(true)
       startScan(userMsg, true, scanKind)
     } else {
@@ -1597,6 +1628,7 @@ function MainContent({
           Review important AI-assisted changes before publishing.
         </p>
       </div>
+
     </div>
   )
 
@@ -2029,7 +2061,7 @@ function MainContent({
         </div>
       </div>
 
-      {/* Fixed footer — separator line, action items, then editor */}
+      {/* Floating composer with gradient fade — no border, no separator */}
       {chatFooter}
     </main>
   )

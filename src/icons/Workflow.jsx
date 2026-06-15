@@ -12,11 +12,13 @@ export function Workflow({ size = 24, className = '', color = 'currentColor', ..
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h-.2c-1.68 0-2.52 0-3.162-.327a3 3 0 01-1.311-1.311C12 17.72 12 16.88 12 15.2V8.8c0-1.68 0-2.52.327-3.162a3 3 0 011.311-1.311C14.28 4 15.12 4 16.8 4h.2m0 16a2 2 0 104 0 2 2 0 00-4 0zm0-16a2 2 0 104 0 2 2 0 00-4 0zM7 12h10M7 12a2 2 0 11-4 0 2 2 0 014 0zm10 0a2 2 0 104 0 2 2 0 00-4 0z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 18v-.2c0-1.68 0-2.52.327-3.162a3 3 0 011.311-1.311C6.28 13 7.12 13 8.8 13h6.4c1.68 0 2.52 0 3.162.327a3 3 0 011.311 1.311C20 15.28 20 16.12 20 17.8v.2" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 18a2 2 0 100 4 2 2 0 000-4zm16 0a2 2 0 100 4 2 2 0 000-4zm-8 0a2 2 0 100 4 2 2 0 000-4z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18V8M6 8h12c.932 0 1.398 0 1.765-.152a2 2 0 001.083-1.083C21 6.398 21 5.932 21 5c0-.932 0-1.398-.152-1.765a2 2 0 00-1.083-1.083C19.398 2 18.932 2 18 2H6c-.932 0-1.398 0-1.765.152a2 2 0 00-1.083 1.083C3 3.602 3 4.068 3 5c0 .932 0 1.398.152 1.765a2 2 0 001.083 1.083C4.602 8 5.068 8 6 8z" />
     </svg>
   );
 }

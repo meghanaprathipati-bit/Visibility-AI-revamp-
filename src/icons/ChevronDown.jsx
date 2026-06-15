@@ -12,11 +12,11 @@ export function ChevronDown({ size = 24, className = '', color = 'currentColor',
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 9l6 6 6-6" />
     </svg>
   );
 }

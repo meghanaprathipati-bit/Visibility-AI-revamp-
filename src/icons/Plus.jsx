@@ -12,11 +12,11 @@ export function Plus({ size = 24, className = '', color = 'currentColor', ...pro
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className}
       aria-hidden="true"
+      className={className}
       {...props}
     >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 5v14m-7-7h14" />
     </svg>
   );
 }
