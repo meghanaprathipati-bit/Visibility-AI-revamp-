@@ -3,7 +3,9 @@
 @theme {
   /* ── Primary blue — maps to HighRise primary-600 ── */
   --color-primary-50:  var(--primary-50);
+  --color-primary-100: var(--primary-100);
   --color-primary-200: var(--primary-200);
+  --color-primary-300: var(--primary-300);
   --color-primary-600: var(--primary-600);
   --color-primary-700: var(--primary-700);
 
@@ -28,8 +30,11 @@
   --color-success-900: var(--success-900);
   --color-error-50:    var(--error-50);
   --color-error-600:   var(--error-600);
+  --color-warning-25:  var(--warning-25);
   --color-warning-100: var(--warning-100);
+  --color-warning-300: var(--warning-300);
   --color-warning-600: var(--warning-600);
+  --color-warning-700: var(--warning-700);
 
   /* ── Purple (AI / Reputation) — maps to HighRise purple ── */
   --color-purple-50:  var(--purple-50);
@@ -60,7 +65,7 @@
   --shadow-purple-glow:     0 0 18px -3px rgba(105,56,239,0.45);
   --shadow-focus-primary-sm: 0 0 0 3px rgba(21,94,239,0.08);
   --shadow-focus-purple-xs: 0 0 0 3px rgba(105,56,239,0.06);
-  --shadow-focus-purple-sm: 0 0 0 3px rgba(105,56,239,0.08);
+  --shadow-focus-purple-sm: 0 0 0 2px rgba(105,56,239,0.08);
   --shadow-focus-purple-md: 0 0 0 3px rgba(105,56,239,0.10);
   --shadow-message:         0 1px 3px rgba(16,24,40,0.05);
   --shadow-progress-card:   0 1px 4px rgba(16,24,40,0.06);
@@ -97,4 +102,175 @@ body {
   background: var(--gray-50);
   color: var(--gray-900);
   -webkit-font-smoothing: antialiased;
+}
+
+/* HLCheckbox — mirrors @platform-ui/highrise naive checkbox styles (highrise852.mjs) */
+.hr-v-4-7-2 .hr-checkbox {
+  font-size: var(--n-font-size, 14px);
+  outline: none;
+  cursor: pointer;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  word-break: break-word;
+  line-height: var(--n-size);
+}
+
+.hr-v-4-7-2 .hr-checkbox.hr-checkbox--show-label {
+  line-height: var(--n-label-line-height);
+}
+
+.hr-v-4-7-2 .hr-checkbox__container {
+  display: flex;
+  align-items: center;
+  gap: var(--n-label-gap);
+}
+
+.hr-v-4-7-2 .hr-checkbox__container:not(.hr-checkbox--disabled):not(.hr-checkbox--checked) .hr-checkbox-box:hover {
+  background-color: var(--n-color-hover);
+}
+
+.hr-v-4-7-2 .hr-checkbox__container.hr-checkbox--disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.hr-v-4-7-2 .hr-checkbox:hover .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox:focus-within:not(:active) .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-focus);
+  box-shadow: var(--n-box-shadow-focus);
+}
+
+.hr-v-4-7-2 .hr-checkbox--checked .hr-checkbox-box,
+.hr-v-4-7-2 .hr-checkbox--indeterminate .hr-checkbox-box {
+  background-color: var(--n-color-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox--checked .hr-checkbox-icon .check-icon,
+.hr-v-4-7-2 .hr-checkbox--indeterminate .hr-checkbox-icon .line-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hr-v-4-7-2 .hr-checkbox--indeterminate .hr-checkbox-icon .check-icon {
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+.hr-v-4-7-2 .hr-checkbox--checked:focus-within:not(:active) .hr-checkbox-box .hr-checkbox-box__border,
+.hr-v-4-7-2 .hr-checkbox--indeterminate:focus-within:not(:active) .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-checked);
+  box-shadow: var(--n-box-shadow-focus);
+}
+
+.hr-v-4-7-2 .hr-checkbox--checked .hr-checkbox-box .hr-checkbox-box__border,
+.hr-v-4-7-2 .hr-checkbox--indeterminate .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--checked .hr-checkbox-box,
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--indeterminate .hr-checkbox-box {
+  background-color: var(--n-color-disabled-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--checked .hr-checkbox-box .hr-checkbox-box__border,
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--indeterminate .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-disabled-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--checked .hr-checkbox-icon .check-icon,
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--indeterminate .hr-checkbox-icon .check-icon,
+.hr-v-4-7-2 .hr-checkbox--disabled.hr-checkbox--indeterminate .hr-checkbox-icon .line-icon {
+  fill: var(--n-check-mark-color-disabled-checked);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox-box {
+  background-color: var(--n-color-disabled);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox-box .hr-checkbox-box__border {
+  border: var(--n-border-disabled);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox-icon .check-icon,
+.hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox-icon .line-icon {
+  fill: var(--n-check-mark-color-disabled);
+}
+
+.hr-v-4-7-2 .hr-checkbox-box-wrapper {
+  position: relative;
+  width: var(--n-size);
+  flex-shrink: 0;
+  flex-grow: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.hr-v-4-7-2 .hr-checkbox-box {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--n-size);
+  width: var(--n-size);
+  display: inline-block;
+  box-sizing: border-box;
+  border-radius: var(--n-border-radius);
+  background-color: var(--n-color);
+  transition: background-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-checkbox-box__border {
+  transition:
+    border-color 0.3s var(--n-bezier),
+    box-shadow 0.3s var(--n-bezier);
+  border-radius: inherit;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  border: var(--n-border);
+  pointer-events: none;
+}
+
+.hr-v-4-7-2 .hr-checkbox-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 1px;
+  right: 1px;
+  top: 1px;
+  bottom: 1px;
+}
+
+.hr-v-4-7-2 .hr-checkbox-icon .check-icon,
+.hr-v-4-7-2 .hr-checkbox-icon .line-icon {
+  width: 100%;
+  fill: var(--n-check-mark-color);
+  opacity: 0;
+  transform: scale(0.5);
+  transform-origin: center;
+  transition:
+    fill 0.3s var(--n-bezier),
+    transform 0.3s var(--n-bezier),
+    opacity 0.3s var(--n-bezier),
+    border-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-checkbox__label {
+  color: var(--n-text-color);
+  transition: color 0.3s var(--n-bezier);
+  user-select: none;
+  -webkit-user-select: none;
+  padding: var(--n-label-padding);
+  font-weight: var(--n-label-font-weight);
+}
+
+.hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox__label {
+  color: var(--n-text-color-disabled);
 }

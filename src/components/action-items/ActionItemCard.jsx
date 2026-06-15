@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import {
-  Check, ChevronDown, Globe, MapPin, Sparkles,
-} from '../../icons/index.js'
+import { useState, useEffect } from 'react'
+import { ChevronDown, Globe, MapPin, Sparkles, Bot, Zap, Lock01Icon } from '../../icons/index.js'
+import HLCheckbox from '../HLCheckbox.jsx'
 import ActionItemDetailTable from './ActionItemDetailTable.jsx'
 import ActionItemDetailSingle from './ActionItemDetailSingle.jsx'
 
@@ -11,7 +10,6 @@ const PRIORITY_DOT = {
   notice: 'bg-primary-600',
 }
 
-/** HighRise-style tag pill */
 function HrTag({ variant = 'default', children }) {
   const styles = {
     default: 'bg-gray-50 text-gray-600 border-gray-200',
@@ -19,68 +17,124 @@ function HrTag({ variant = 'default', children }) {
     manual: 'bg-purple-50 text-purple-700 border-purple-200',
   }
   return (
-    <span
-      className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full border whitespace-nowrap ${styles[variant]}`}
-    >
+    <span className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full border whitespace-nowrap ${styles[variant]}`}>
       {children}
     </span>
   )
 }
 
-/**
- * ActionItemCard — collapsible row with inline detail panel (spec ActionItemCard.vue).
- */
-export default function ActionItemCard({ item, selected, onToggleSelect, onUpdateRec }) {
-  const [open, setOpen] = useState(false)
-  const canSelect = item.autofix
+function LockedSelectionControl() {
+  return (
+    <span
+      aria-hidden="true"
+      style={{ width: 16, height: 16, borderRadius: 4 }}
+      className="box-border border border-gray-300 bg-gray-100 inline-flex items-center justify-center shrink-0"
+    >
+      <Lock01Icon size={10} className="text-gray-400" strokeWidth={2} />
+    </span>
+  )
+}
 
-  const SourceIcon = item.source === 'gbp' ? MapPin : Globe
-  const sourceLabel = item.source === 'gbp' ? 'GBP' : 'Website SEO'
+// 3-state subscribe flow for AI visibility items: subscribe → configure → implement
+function SubscribeFlow() {
+  const [stage, setStage] = useState('subscribe')
+  return (
+    <div className="px-3.5 py-3 border-t border-gray-100 flex items-center gap-3">
+      {stage === 'subscribe' && (
+        <>
+          <p className="flex-1 text-[12px] text-gray-500">Unlock this fix with an AI Visibility subscription</p>
+          <button
+            type="button"
+            onClick={() => setStage('configure')}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-warning-600 hover:bg-warning-700 text-white text-[12px] font-semibold transition-colors"
+          >
+            Subscribe to fix
+          </button>
+        </>
+      )}
+      {stage === 'configure' && (
+        <>
+          <p className="flex-1 text-[12px] text-gray-500">Configure the integration to apply this fix automatically</p>
+          <button
+            type="button"
+            onClick={() => setStage('implement')}
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-semibold transition-colors"
+          >
+            Configure
+          </button>
+        </>
+      )}
+      {stage === 'implement' && (
+        <>
+          <p className="flex-1 text-[12px] text-success-700 font-medium">Ready to deploy — review the changes below</p>
+          <button
+            type="button"
+            className="shrink-0 px-3 py-1.5 rounded-lg bg-success-700 hover:bg-success-800 text-white text-[12px] font-semibold transition-colors"
+          >
+            Implement changes
+          </button>
+        </>
+      )}
+    </div>
+  )
+}
+
+export default function ActionItemCard({ item, selected, onToggleSelect, onUpdateRec, selectionLocked = false }) {
+  const [open, setOpen] = useState(false)
+  const [selectedRows, setSelectedRows] = useState(() => new Set())
+  const isLocked = item.locked === true
+  const isSubscription = item.fixFlow === 'subscription'
+  const isSelectionLocked = selectionLocked && !selected && !isLocked
+  const showLockedControl = isLocked || isSelectionLocked
+  const canSelect = item.autofix && !isLocked && !isSelectionLocked
+  const sourceMap = { gbp: { icon: MapPin, label: 'GBP' }, seo: { icon: Globe, label: 'Website SEO' }, ai: { icon: Bot, label: 'AI Search' } }
+  const { icon: SourceIcon, label: sourceLabel } = sourceMap[item.source] ?? { icon: Globe, label: 'Website SEO' }
+
+  useEffect(() => {
+    if (!item.tableRows?.length) return
+    if (selected) {
+      setSelectedRows(new Set(item.tableRows.map((_, idx) => idx)))
+    } else {
+      setSelectedRows(new Set())
+    }
+  }, [selected, item.tableRows])
+
+  function toggleRowSelect(rowIndex) {
+    if (!canSelect) return
+    setSelectedRows(prev => {
+      const next = new Set(prev)
+      if (next.has(rowIndex)) next.delete(rowIndex)
+      else next.add(rowIndex)
+      return next
+    })
+  }
 
   return (
     <div
       role="listitem"
-      className={`bg-white border border-gray-200 rounded-xl mb-2 overflow-hidden transition-[border-color,opacity] hover:border-gray-300 ${
-        selected ? 'opacity-60' : 'opacity-100'
+      className={`bg-white border rounded-xl mb-2 overflow-hidden transition-[border-color] ${
+        isLocked ? 'border-gray-100' : selected ? 'border-gray-200' : 'border-gray-200 hover:border-gray-300'
       }`}
     >
-      <div
-        className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer select-none"
-        onClick={() => setOpen(v => !v)}
-      >
-        {/* Checkbox — selection for bulk implement/remove */}
-        <button
-          type="button"
-          role="checkbox"
-          aria-checked={selected}
-          aria-disabled={!canSelect}
-          aria-label={canSelect ? 'Select item' : 'Manual fix only'}
-          disabled={!canSelect}
-          onClick={e => {
-            e.stopPropagation()
-            if (canSelect) onToggleSelect()
-          }}
-          className={`w-[18px] h-[18px] rounded shrink-0 flex items-center justify-center border-[1.5px] transition-colors ${
-            !canSelect
-              ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
-              : selected
-                ? 'bg-success-700 border-success-700'
-                : 'border-gray-300 bg-white hover:border-gray-400'
-          }`}
-        >
-          {selected && canSelect && <Check size={12} className="text-white" strokeWidth={3} />}
-        </button>
-
-        {/* Priority dot */}
+      <div className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer select-none" onClick={() => !isLocked && setOpen(v => !v)}>
+        {showLockedControl ? (
+          <LockedSelectionControl />
+        ) : (
+          <HLCheckbox
+            id={`action-item-${item.id}`}
+            size="sm"
+            checked={selected}
+            disabled={!canSelect}
+            aria-label={canSelect ? 'Select item' : 'Manual fix only'}
+            className="shrink-0"
+            onChange={() => {
+              if (canSelect) onToggleSelect()
+            }}
+          />
+        )}
         <span className={`w-[7px] h-[7px] rounded-full shrink-0 ${PRIORITY_DOT[item.priority]}`} aria-hidden="true" />
-
-        {/* Body */}
         <div className="flex-1 min-w-0">
-          <p
-            className={`text-[13px] text-gray-900 leading-snug m-0 mb-1 ${
-              selected ? 'line-through text-gray-400' : ''
-            }`}
-          >
+          <p className={`text-[13px] leading-snug m-0 mb-1 ${isLocked ? 'text-gray-500' : selected ? 'line-through text-gray-400' : 'text-gray-900'}`}>
             {item.title}
           </p>
           <div className="flex items-center gap-1.5 flex-wrap">
@@ -88,39 +142,55 @@ export default function ActionItemCard({ item, selected, onToggleSelect, onUpdat
               <SourceIcon size={12} />
               {sourceLabel}
             </span>
-            {item.tags.map(tag => (
+            {(item.tags ?? []).map(tag => (
               <HrTag key={tag}>{tag}</HrTag>
             ))}
-            {item.autofix && (
+            {item.autofix && !isLocked && (
               <HrTag variant="autofix">
                 <Sparkles size={11} />
                 Auto-fix
               </HrTag>
             )}
             {item.manualFix && <HrTag variant="manual">Manual fix</HrTag>}
+            {isLocked && (
+              <span className="inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full border bg-warning-100 text-warning-600 border-warning-200 whitespace-nowrap">
+                <Lock01Icon size={10} strokeWidth={2} />
+                Upgrade to unlock
+              </span>
+            )}
+            {isSubscription && !isLocked && (
+              <HrTag variant="manual">
+                <Zap size={10} />
+                Subscription fix
+              </HrTag>
+            )}
           </div>
         </div>
-
-        {/* Affected pages */}
         {item.affectedPages != null && (
           <span className="text-[11px] text-gray-400 shrink-0">
             {item.affectedPages === 'site-wide' ? 'Site-wide' : `${item.affectedPages} pages`}
           </span>
         )}
-
-        <ChevronDown
-          size={14}
-          className={`text-gray-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`}
-        />
+        {!isLocked && (
+          <ChevronDown size={14} className={`text-gray-400 shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} />
+        )}
       </div>
 
-      {open && (
+      {/* Subscription CTA — shown expanded by default for subscription items */}
+      {isSubscription && <SubscribeFlow />}
+
+      {open && !isLocked && (
         <div className="border-t border-gray-200">
           {item.detailType === 'table' && item.tableRows ? (
             <ActionItemDetailTable
+              itemId={item.id}
               columns={item.tableColumns}
               rows={item.tableRows}
               editable={item.autofix}
+              selectable={canSelect}
+              selectionLocked={selectionLocked}
+              selectedRows={selectedRows}
+              onToggleRow={toggleRowSelect}
               onUpdateRec={(idx, text) => onUpdateRec(idx, text)}
             />
           ) : (

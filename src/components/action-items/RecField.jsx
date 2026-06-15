@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Pencil } from '../../icons/index.js'
 
-/** HighRise-style secondary/primary button adapters for RecField edit actions */
 function HrButton({ variant = 'primary', size = 'sm', onClick, children, type = 'button' }) {
   const sizeClass = size === 'sm' ? 'text-[12px] px-3 py-1 rounded-md' : 'text-[13px] px-5 py-2 rounded-lg'
   const variantClass =
@@ -15,10 +14,6 @@ function HrButton({ variant = 'primary', size = 'sm', onClick, children, type = 
   )
 }
 
-/**
- * RecField — recommendation display with inline edit (spec RecField.vue).
- * Uses HighRise tokens + ghl-icons Pencil.
- */
 export default function RecField({ value, display = 'inline', editable = false, onSave }) {
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -66,12 +61,8 @@ export default function RecField({ value, display = 'inline', editable = false, 
           }}
         />
         <div className="flex gap-1.5 justify-end">
-          <HrButton variant="secondary" onClick={cancel}>
-            Cancel
-          </HrButton>
-          <HrButton variant="primary" onClick={save}>
-            Save
-          </HrButton>
+          <HrButton variant="secondary" onClick={cancel}>Cancel</HrButton>
+          <HrButton variant="primary" onClick={save}>Save</HrButton>
         </div>
       </div>
     )
@@ -79,9 +70,7 @@ export default function RecField({ value, display = 'inline', editable = false, 
 
   return (
     <div className={displayClass}>
-      <span className="flex-1 text-[13px] leading-snug text-gray-600">
-        {value}
-      </span>
+      <span className="flex-1 text-[13px] leading-snug text-gray-600">{value}</span>
       <button
         type="button"
         aria-label="Edit recommendation"

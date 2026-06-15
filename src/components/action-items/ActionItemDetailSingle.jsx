@@ -1,6 +1,5 @@
 import RecField from './RecField.jsx'
 
-/** ActionItemDetailSingle — single-field GBP-style detail layout (spec). */
 export default function ActionItemDetailSingle({
   fieldName,
   currentValue,
@@ -21,21 +20,14 @@ export default function ActionItemDetailSingle({
         {currentValue && (
           <div className="flex-1 min-w-0">
             <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">Current value</div>
-            <div
-              className={`text-[13px] ${currentValue === '(missing)' ? 'text-gray-400 italic' : 'text-gray-900'}`}
-            >
+            <div className={`text-[13px] ${currentValue === '(missing)' ? 'text-gray-400 italic' : 'text-gray-900'}`}>
               {currentValue}
             </div>
           </div>
         )}
       </div>
       <div className="text-[11px] font-medium text-gray-400 uppercase tracking-wide mb-1">{recommendationLabel}</div>
-      <RecField
-        value={recommendation}
-        display="block"
-        editable={editable}
-        onSave={onUpdateRec}
-      />
+      <RecField value={recommendation} display="block" editable={editable} onSave={onUpdateRec} />
     </div>
   )
 }

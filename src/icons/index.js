@@ -43,6 +43,8 @@ export { Plus } from './Plus.jsx';
 export { MessageSquare } from './MessageSquare.jsx';
 export { Workflow } from './Workflow.jsx';
 export { CheckSquare } from './CheckSquare.jsx';
+export { Lock01Icon } from './Lock01Icon.jsx';
+export { CheckIcon } from './CheckIcon.jsx';
 export { BarChart3 } from './BarChart3.jsx';
 export { LayoutGrid } from './LayoutGrid.jsx';
 export { ArrowUpCircle } from './ArrowUpCircle.jsx';
