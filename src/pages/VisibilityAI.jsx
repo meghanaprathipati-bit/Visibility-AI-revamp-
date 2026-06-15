@@ -385,8 +385,6 @@ export default function VisibilityAI() {
           }}
           composerHasInput={composerHasInput}
           activeChatUsed={activeChatUsed}
-          pendingChatTitle={pendingChatTitle}
-          onChatTitleConsumed={() => setPendingChatTitle(null)}
         />
         <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
           {activePanel === 'Dashboards' ? (
