@@ -1,5 +1,51 @@
 @import "tailwindcss";
 
+/* HighRise design token CSS variables (replaces @platform-ui/highrise/style.css) */
+:root {
+  /* Primary blue */
+  --primary-50:  #EEF4FF;
+  --primary-200: #B2CCFF;
+  --primary-600: #155EEF;
+  --primary-700: #1249C0;
+
+  /* Gray scale */
+  --gray-50:  #F9FAFB;
+  --gray-100: #F2F4F7;
+  --gray-200: #EAECF0;
+  --gray-300: #D0D5DD;
+  --gray-400: #98A2B3;
+  --gray-500: #667085;
+  --gray-600: #475467;
+  --gray-700: #344054;
+  --gray-800: #1D2939;
+  --gray-900: #101828;
+
+  /* Semantic */
+  --success-50:  #F0FDF4;
+  --success-600: #16A34A;
+  --success-700: #15803D;
+  --success-800: #166534;
+  --success-900: #14532D;
+  --error-50:    #FEF2F2;
+  --error-600:   #DC2626;
+  --warning-100: #FEF3C7;
+  --warning-600: #D97706;
+
+  /* Purple (AI / Reputation) */
+  --purple-50:  #F4F3FF;
+  --purple-200: #E9D7FE;
+  --purple-600: #6938EF;
+  --purple-700: #5B2FD0;
+
+  /* Fuchsia */
+  --fuchsia-500: #D444F1;
+
+  /* Teal */
+  --teal-50:  #F0FDFA;
+  --teal-200: #99F6E4;
+  --teal-600: #0D9488;
+}
+
 @theme {
   /* ── Primary blue — maps to HighRise primary-600 ── */
   --color-primary-50:  var(--primary-50);
