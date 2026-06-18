@@ -81,7 +81,13 @@ export function hydrateScanResultsMessages(messages, fallbackPrompt = '') {
 
   return messages.map((msg, index) => {
     if (msg.content !== 'scan-results') return msg
-    if (msg.report?.actionItemsTable?.length) return msg
+    if (
+      msg.report?.topGaps?.length ||
+      msg.report?.scoreOverview?.length ||
+      msg.report?.executiveReport
+    ) {
+      return msg
+    }
 
     const priorUser = messages.slice(0, index).reverse().find(m => m.type === 'user')
     const promptText = priorUser?.content || fallbackPrompt

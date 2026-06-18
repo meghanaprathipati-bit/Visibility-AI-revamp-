@@ -11,27 +11,48 @@ function HLLogo({ compact }) {
   )
 }
 
-function NavItemMainNav({ icon: Icon, label, active, collapsed }) {
+function NavSubItemMainNav({ label, active, collapsed }) {
+  if (collapsed) return null
+  return (
+    <div className={`flex gap-2 items-center pl-9 pr-2 py-1.5 rounded-lg w-full cursor-pointer ${
+      active ? 'bg-gray-800' : 'hover:bg-gray-800/50'
+    }`}>
+      <span className={`text-[14px] font-medium leading-5 ${active ? 'text-white' : 'text-gray-400'}`}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function NavItemMainNav({ icon: Icon, label, active, collapsed, subItems = [] }) {
+  const hasActiveChild = subItems.some(item => item.active)
+  const isHighlighted = active || hasActiveChild
+
   if (collapsed) {
     return (
       <div
         title={label}
         className={`size-9 mx-auto flex items-center justify-center rounded-lg cursor-pointer ${
-          active ? 'bg-gray-800' : 'hover:bg-gray-800/50'
+          isHighlighted ? 'bg-gray-800' : 'hover:bg-gray-800/50'
         }`}
       >
-        <Icon size={20} strokeWidth={1.8} className={active ? 'text-white' : 'text-gray-400'} />
+        <Icon size={20} strokeWidth={1.8} className={isHighlighted ? 'text-white' : 'text-gray-400'} />
       </div>
     )
   }
   return (
-    <div className={`flex gap-2 items-center px-2 py-2 rounded-lg w-full cursor-pointer ${
-      active ? 'bg-gray-800' : 'hover:bg-gray-800/50'
-    }`}>
-      <Icon size={20} strokeWidth={1.8} className={active ? 'text-white' : 'text-gray-400'} />
-      <span className={`text-[16px] font-medium leading-5 ${active ? 'text-white' : 'text-gray-300'}`}>
-        {label}
-      </span>
+    <div className="flex flex-col gap-0.5">
+      <div className={`flex gap-2 items-center px-2 py-2 rounded-lg w-full cursor-pointer ${
+        isHighlighted ? 'bg-gray-800' : 'hover:bg-gray-800/50'
+      }`}>
+        <Icon size={20} strokeWidth={1.8} className={isHighlighted ? 'text-white' : 'text-gray-400'} />
+        <span className={`text-[16px] font-medium leading-5 ${isHighlighted ? 'text-white' : 'text-gray-300'}`}>
+          {label}
+        </span>
+      </div>
+      {subItems.map(item => (
+        <NavSubItemMainNav key={item.label} {...item} collapsed={collapsed} />
+      ))}
     </div>
   )
 }
@@ -82,8 +103,9 @@ export default function Sidebar({
   onBack,
   onOpenSwitcher,
   onCollapsedChange,
+  defaultCollapsed = false,
 }) {
-  const [collapsed, setCollapsed] = useState(false)
+  const [collapsed, setCollapsed] = useState(defaultCollapsed)
 
   function toggleCollapsed() {
     const next = !collapsed

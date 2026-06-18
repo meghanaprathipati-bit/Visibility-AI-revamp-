@@ -1,6 +1,6 @@
-import VisibilityScanReport from '../reports/VisibilityScanReport.jsx'
+import DetailedScanReport from '../reports/DetailedScanReport.jsx'
 
-/** Detailed report body for the split pane — matches product report panel layout */
-export default function DetailedReportPanel({ report }) {
-  return <VisibilityScanReport report={report} />
+/** Detailed report body for the split pane */
+export default function DetailedReportPanel({ report, onPromptAction }) {
+  return <DetailedScanReport report={report} onPromptAction={onPromptAction} />
 }
