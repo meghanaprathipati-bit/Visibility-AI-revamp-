@@ -18,13 +18,6 @@ export function createSeoScanMessages() {
       content: SEO_SCAN_PROMPT,
       ts: '14:32',
     },
-    // scan-done renders nothing — progress was already complete when this session was loaded
-    {
-      id: 'seo-scan-1',
-      type: 'ai',
-      content: 'scan-done',
-      ts: '14:35',
-    },
     {
       id: 'seo-results-1',
       type: 'ai',

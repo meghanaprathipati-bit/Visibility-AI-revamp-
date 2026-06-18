@@ -206,10 +206,12 @@ export default function TopBar({
     return (
       <header className="bg-white w-full flex flex-col shrink-0">
         <div className="flex items-center gap-12 px-4 py-2 border-b border-gray-200 shadow-xs">
-          <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
-            {TitleIcon && <TitleIcon size={15} className="text-gray-500" />}
-            <span className="text-[16px] font-semibold text-gray-900">{title}</span>
-          </div>
+          {title ? (
+            <div className="flex items-center gap-1.5 whitespace-nowrap shrink-0">
+              {TitleIcon && <TitleIcon size={15} className="text-gray-500" />}
+              <span className="text-[16px] font-semibold text-gray-900">{title}</span>
+            </div>
+          ) : null}
           <div className="flex-1" />
           <GlobalIcons onOpenNotifications={onOpenNotifications} onOpenHelp={onOpenHelp} />
         </div>

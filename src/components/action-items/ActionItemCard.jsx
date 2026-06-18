@@ -1,20 +1,37 @@
 import { useState, useEffect } from 'react'
 import { ChevronDown, Globe, MapPin, Sparkles, Bot, Zap, Lock01Icon } from '../../icons/index.js'
 import HLCheckbox from '../HLCheckbox.jsx'
+import HLTooltip from '../HLTooltip.jsx'
 import ActionItemDetailTable from './ActionItemDetailTable.jsx'
 import ActionItemDetailSingle from './ActionItemDetailSingle.jsx'
 
+/** Prototype free-fix cap — replace with billing entitlements in production */
+const FREE_FIX_LIMIT_TOOLTIP = (
+  <>
+    You have reached the 3 free fix limit.
+    <br />
+    Subscribe to unlock all fixes.
+  </>
+)
+
+const MANUAL_FIX_TOOLTIP = 'Auto-fix not available'
+
 const PRIORITY_DOT = {
   error: 'bg-error-600',
-  warning: 'bg-warning-600',
+  warning: 'bg-warning-250',
   notice: 'bg-primary-600',
+}
+
+function getCardBorderClass({ isLocked, selected }) {
+  if (isLocked) return 'border-gray-100'
+  return selected ? 'border-gray-200' : 'border-gray-200 hover:border-gray-300'
 }
 
 function HrTag({ variant = 'default', children }) {
   const styles = {
     default: 'bg-gray-50 text-gray-600 border-gray-200',
-    autofix: 'bg-success-50 text-success-700 border-success-200',
-    manual: 'bg-purple-50 text-purple-700 border-purple-200',
+    autofix: 'bg-purple-50 text-purple-700 border-purple-200',
+    manual: 'bg-success-50 text-success-700 border-success-200',
   }
   return (
     <span className={`inline-flex items-center gap-1 text-[11px] px-1.5 py-0.5 rounded-full border whitespace-nowrap ${styles[variant]}`}>
@@ -23,8 +40,8 @@ function HrTag({ variant = 'default', children }) {
   )
 }
 
-function LockedSelectionControl() {
-  return (
+function LockedSelectionControl({ itemId, showFreeLimitTooltip = false }) {
+  const control = (
     <span
       aria-hidden="true"
       style={{ width: 16, height: 16, borderRadius: 4 }}
@@ -32,6 +49,20 @@ function LockedSelectionControl() {
     >
       <Lock01Icon size={10} className="text-gray-400" strokeWidth={2} />
     </span>
+  )
+
+  if (!showFreeLimitTooltip) return control
+
+  return (
+    <HLTooltip
+      id={`action-item-free-limit-lock-${itemId}`}
+      variant="dark"
+      placement="top"
+      content={FREE_FIX_LIMIT_TOOLTIP}
+      wrap
+    >
+      {control}
+    </HLTooltip>
   )
 }
 
@@ -84,9 +115,9 @@ export default function ActionItemCard({ item, selected, onToggleSelect, onUpdat
   const [selectedRows, setSelectedRows] = useState(() => new Set())
   const isLocked = item.locked === true
   const isSubscription = item.fixFlow === 'subscription'
-  const isSelectionLocked = selectionLocked && !selected && !isLocked
-  const showLockedControl = isLocked || isSelectionLocked
-  const canSelect = item.autofix && !isLocked && !isSelectionLocked
+  const isFreeLimitLocked = selectionLocked && !selected && !isLocked && item.autofix
+  const showLockedControl = isLocked || isFreeLimitLocked
+  const canSelect = item.autofix && !isLocked && !isFreeLimitLocked
   const sourceMap = { gbp: { icon: MapPin, label: 'GBP' }, seo: { icon: Globe, label: 'Website SEO' }, ai: { icon: Bot, label: 'AI Search' } }
   const { icon: SourceIcon, label: sourceLabel } = sourceMap[item.source] ?? { icon: Globe, label: 'Website SEO' }
 
@@ -112,23 +143,37 @@ export default function ActionItemCard({ item, selected, onToggleSelect, onUpdat
   return (
     <div
       role="listitem"
-      className={`bg-white border rounded-xl mb-2 overflow-hidden transition-[border-color] ${
-        isLocked ? 'border-gray-100' : selected ? 'border-gray-200' : 'border-gray-200 hover:border-gray-300'
-      }`}
+      className={`bg-white border rounded-xl mb-2 overflow-hidden transition-[border-color] ${getCardBorderClass({ isLocked, selected })}`}
     >
       <div className="flex items-center gap-2.5 px-3.5 py-2.5 cursor-pointer select-none" onClick={() => !isLocked && setOpen(v => !v)}>
         {showLockedControl ? (
-          <LockedSelectionControl />
+          <LockedSelectionControl itemId={item.id} showFreeLimitTooltip={isFreeLimitLocked} />
+        ) : !canSelect ? (
+          <HLTooltip
+            id={`action-item-manual-fix-${item.id}`}
+            variant="dark"
+            placement="top"
+            content={MANUAL_FIX_TOOLTIP}
+          >
+            <HLCheckbox
+              id={`action-item-${item.id}`}
+              size="sm"
+              checked={selected}
+              disabled
+              aria-label="Manual fix only"
+              className="shrink-0"
+              onChange={() => {}}
+            />
+          </HLTooltip>
         ) : (
           <HLCheckbox
             id={`action-item-${item.id}`}
             size="sm"
             checked={selected}
-            disabled={!canSelect}
-            aria-label={canSelect ? 'Select item' : 'Manual fix only'}
+            aria-label="Select item"
             className="shrink-0"
             onChange={() => {
-              if (canSelect) onToggleSelect()
+              onToggleSelect()
             }}
           />
         )}
