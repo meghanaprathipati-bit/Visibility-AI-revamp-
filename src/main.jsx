@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import '@platform-ui/highrise/style.css'
+import './vendor/highrise-style.css'
 import './index.css'
 import App from './App.jsx'
 
