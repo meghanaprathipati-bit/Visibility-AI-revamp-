@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   FileText, Package, GraduationCap, CreditCard,
   Sparkles, Bot, Send, RefreshCw, Globe, Crown, Image as ImageIcon,
@@ -7,7 +7,7 @@ import {
   MessageChatSquareIcon, Grid01Icon, PanelLeftIcon, PanelRightIcon,
   BookOpen, Zap, Workflow, CheckSquare,
   Pencil, Trash2, Check, X, Copy, ThumbsUp, ThumbsDown,
-  FolderPlus, MapPin,
+  FolderPlus, MapPin, Calendar,
   Circle, CircleCheck, LoadingCircle, Wand2,
   ArrowUp, Loader2,
 } from '../icons/index.js'
@@ -30,17 +30,12 @@ import HLButton from '../components/HLButton.jsx'
 import { DASHBOARD_ITEMS } from '../data/aiRankDashboard.js'
 import ClarifyingQuestionsCard from '../components/ClarifyingQuestionsCard.jsx'
 import CloudflareTokenCard from '../components/implement/CloudflareTokenCard.jsx'
-import ImplementPreviewCard from '../components/implement/ImplementPreviewCard.jsx'
 import ImplementProgressBlock from '../components/implement/ImplementProgressBlock.jsx'
-import { CLOUDFLARE_CONNECT_QUESTIONS } from '../data/implementFlow.js'
-import SubscriptionModal from '../components/subscription/SubscriptionModal.jsx'
+import ImplementSummaryCard from '../components/implement/ImplementSummaryCard.jsx'
+import { CLOUDFLARE_CONNECT_QUESTIONS, CLOUDFLARE_CONNECT_TITLE } from '../data/implementFlow.js'
+import { buildImplementSummary, buildRescanSummary } from '../data/implementSummary.js'
 import DesktopAccessModal from '../components/DesktopAccessModal.jsx'
 import HLTooltip from '../components/HLTooltip.jsx'
-import VoiceWaveform from '../components/VoiceWaveform.jsx'
-import {
-  pickDummyDictation,
-  DICTATE_TRANSCRIBE_MS,
-} from '../data/dictation.js'
 import {
   SEO_SCAN_CHAT_ID,
   createSeoScanSession,
@@ -65,7 +60,7 @@ const NAV_SECTIONS = [
     items: [
       { icon: Sparkles, label: 'AI Studio' },
       { icon: Bot, label: 'AI Agents' },
-      { icon: Sparkles, label: 'Visibility AI', active: true },
+      { icon: Sparkles, label: 'Visibility', active: true },
       { icon: Send, label: 'Marketing' },
       { icon: RefreshCw, label: 'Automation' },
       { icon: Globe, label: 'Sites' },
@@ -81,13 +76,14 @@ const NAV_SECTIONS = [
   },
 ]
 
+// Prototype dummy project list — metadata fields mirror New project modal (website, GBP, created date)
 const INITIAL_PROJECTS = [
-  { id: 1, label: 'Untitled Project 31' },
-  { id: 2, label: 'Untitled Project 30' },
-  { id: 3, label: 'Untitled Project 29' },
-  { id: 4, label: 'website. Show profile health' },
-  { id: 5, label: 'Untitled Project 17' },
-  { id: 6, label: 'Untitled Project 28' },
+  { id: 1, label: 'Untitled Project 31', createdAt: '2026-06-12' },
+  { id: 2, label: 'Untitled Project 30', websiteUrl: 'https://acmecorp.com' },
+  { id: 3, label: 'Untitled Project 29', gbpUrl: 'https://maps.google.com/?cid=123456789' },
+  { id: 4, label: 'website. Show profile health', websiteUrl: 'https://retailco.com', gbpUrl: 'https://maps.google.com/?cid=987654321' },
+  { id: 5, label: 'Untitled Project 17', createdAt: '2026-05-03' },
+  { id: 6, label: 'Untitled Project 28', websiteUrl: 'https://textileco.com' },
 ]
 
 const INITIAL_CHATS = [
@@ -249,12 +245,19 @@ const SCAN_STEPS = {
     'Compiling findings',
     'Preparing your report',
   ],
+  rescan: [
+    'Re-crawling updated pages',
+    'Verifying manual GBP changes',
+    'Checking structured data updates',
+    'Updating visibility score',
+    'Preparing rescan summary',
+  ],
 }
 // GBP partial-failure: steps at these indices show as errors but the scan continues to completion
 const GBP_PARTIAL_FAIL_STEPS = new Set([2, 3])
 
 // Initial "already done" steps per kind (for visual progress effect)
-const SCAN_INITIAL_DONE = { seo: -1, gbp: 0, 'ai-visibility': 2, 'ai-visibility-prep': 0, 'ai-action-plan': 1, generic: 1 }
+const SCAN_INITIAL_DONE = { seo: -1, gbp: 0, 'ai-visibility': 2, 'ai-visibility-prep': 0, 'ai-action-plan': 1, generic: 1, rescan: 0 }
 
 // Intro message shown above the progress steps (non-SEO scan kinds)
 const SCAN_INTRO = {
@@ -262,6 +265,7 @@ const SCAN_INTRO = {
   'ai-visibility-prep': `Got it — let me set up your AI visibility scan. I'll need one quick detail to get started.`,
   'ai-visibility': `Got your URL. Now checking how your brand appears across AI search engines — ChatGPT, Perplexity, Gemini, and Google AI Overviews.`,
   'ai-action-plan': `Analyzing your business data to build a custom action plan...`,
+  rescan: `Rescanning your site to verify manual fixes and update your visibility score.`,
   generic: `Running your visibility scan. I'll keep you updated as each step completes.`,
 }
 
@@ -285,7 +289,6 @@ export default function VisibilityAI() {
   const [detailPanel, setDetailPanel] = useState(null)
   /** Prototype implement flow state — replace with API job state in production */
   const [implementFlow, setImplementFlow] = useState(null)
-  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false)
   const [activeChatId, setActiveChatId] = useState(1)
   const [chatSessions, setChatSessions] = useState({
     [SEO_SCAN_CHAT_ID]: createSeoScanSession(),
@@ -306,39 +309,40 @@ export default function VisibilityAI() {
   }
 
   function handleStartImplement(selectedItems) {
-    const skipCloudflare = Boolean(implementFlow?.subscribed && implementFlow?.cloudflareConnected)
+    const skipCloudflare = Boolean(implementFlow?.cloudflareConnected)
     setImplementFlow(prev => ({
       ...(prev || {}),
-      step: skipCloudflare ? 'preview' : 'cloudflare-token',
-      round: skipCloudflare ? 'subscribed' : 'free',
+      step: skipCloudflare ? 'implementing' : 'cloudflare-token',
       selectedItems,
-      subscribed: prev?.subscribed ?? false,
+      panelItems: detailPanel?.type === 'action-items' ? (detailPanel.items ?? []) : [],
       cloudflareConnected: prev?.cloudflareConnected ?? false,
       freeImplementDone: prev?.freeImplementDone ?? false,
       allAutoFixesDone: prev?.allAutoFixesDone ?? false,
+      resolvedItemIds: prev?.resolvedItemIds ?? [],
       skipCloudflare,
       initKey: Date.now(),
     }))
   }
 
-  function handleSubscriptionComplete() {
-    setSubscriptionModalOpen(false)
+  function handleRescanSite() {
+    // Prototype — replace with rescan job + panel refresh from API in production
     setImplementFlow(prev => ({
       ...(prev || {}),
-      subscribed: true,
-      round: 'subscribed',
-      subscriptionCompleteAt: Date.now(),
+      rescanKey: Date.now(),
+      rescanPending: true,
     }))
   }
 
-  function handleImplementPanelAction(action) {
-    if (action === 'confirm') {
-      setImplementFlow(prev => (prev?.step === 'preview' ? { ...prev, confirmAt: Date.now() } : prev))
-    }
-    if (action === 'subscribe') {
-      setSubscriptionModalOpen(true)
-    }
+  function handleRescanComplete(summary) {
+    const verifiedIds = (summary?.applied ?? []).map(item => item.id)
+    setImplementFlow(prev => (prev ? {
+      ...prev,
+      rescanPending: false,
+      resolvedItemIds: [...new Set([...(prev.resolvedItemIds ?? []), ...verifiedIds])],
+    } : prev))
   }
+
+  // Resolved items stay in the panel — ActionItemsPanel renders them under "Resolved items"
 
   function syncChatTitleFromSession(chatId, session) {
     if (!session?.messages?.length) return
@@ -491,6 +495,7 @@ export default function VisibilityAI() {
                 onOpenDetailPanel={setDetailPanel}
                 implementFlow={implementFlow}
                 onImplementFlowChange={setImplementFlow}
+                onRescanComplete={handleRescanComplete}
               />
               {detailPanel && (
                 <DetailSidePanel
@@ -503,12 +508,10 @@ export default function VisibilityAI() {
                     <ActionItemsPanel
                       items={detailPanel.items}
                       embedded
-                      freeFixLimit={
-                        implementFlow?.subscribed || implementFlow?.freeImplementDone ? null : 3
-                      }
                       implementFlow={implementFlow}
                       onStartImplement={handleStartImplement}
-                      onImplementPanelAction={handleImplementPanelAction}
+                      onCancel={() => setDetailPanel(null)}
+                      onRescan={handleRescanSite}
                     />
                   )}
                   {detailPanel.type === 'report' && (
@@ -524,11 +527,6 @@ export default function VisibilityAI() {
           onToggleCollapse={() => setToolsPanelCollapsed(c => !c)}
         />
       </div>
-      <SubscriptionModal
-        open={subscriptionModalOpen}
-        onClose={() => setSubscriptionModalOpen(false)}
-        onComplete={handleSubscriptionComplete}
-      />
     </AppShell>
   )
 }
@@ -541,48 +539,6 @@ function VaLogo() {
         <path d="M11.5 5.5L7.5 16.5L8.5 16.5L9.6 13.6L13.4 13.6L14.5 16.5L15.5 16.5L11.5 5.5ZM10 12.2L11.5 8.4L13 12.2L10 12.2Z" fill="#F97316"/>
       </svg>
     </div>
-  )
-}
-
-function MicIcon({ size = 16, className = '' }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <rect x="9" y="2" width="6" height="13" rx="3" />
-      <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
-      <line x1="12" y1="19" x2="12" y2="22" />
-    </svg>
-  )
-}
-
-function WaveformIcon({ size = 16, className = '' }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M3 10v4" />
-      <path d="M7 6v12" />
-      <path d="M11 3v18" />
-      <path d="M15 7v10" />
-      <path d="M19 10v4" />
-    </svg>
   )
 }
 
@@ -652,6 +608,86 @@ function TypingText() {
   )
 }
 
+function formatProjectWebsiteDisplay(url) {
+  if (!url?.trim()) return ''
+  try {
+    const normalized = url.includes('://') ? url : `https://${url}`
+    return new URL(normalized).hostname.replace(/^www\./, '')
+  } catch {
+    return url.replace(/^https?:\/\/(www\.)?/, '').split('/')[0]
+  }
+}
+
+function formatProjectCreatedDate(isoDate) {
+  const date = new Date(`${isoDate}T00:00:00`)
+  return `Created ${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+}
+
+function ProjectMetadataLine({ project }) {
+  const website = project.websiteUrl?.trim()
+  const gbp = project.gbpUrl?.trim()
+  const metaClass = 'flex items-center gap-1 mt-0.5 min-w-0 text-[13px] text-gray-500'
+
+  if (website && gbp) {
+    return (
+      <div className={metaClass}>
+        <Globe size={12} className="text-gray-400 shrink-0" />
+        <span className="truncate">{formatProjectWebsiteDisplay(website)}</span>
+        <span className="text-gray-400 shrink-0">·</span>
+        <MapPin size={12} className="text-gray-400 shrink-0" />
+        <span className="truncate">Google Business</span>
+      </div>
+    )
+  }
+
+  if (website) {
+    return (
+      <div className={metaClass}>
+        <Globe size={12} className="text-gray-400 shrink-0" />
+        <span className="truncate">{formatProjectWebsiteDisplay(website)}</span>
+      </div>
+    )
+  }
+
+  if (gbp) {
+    return (
+      <div className={metaClass}>
+        <MapPin size={12} className="text-gray-400 shrink-0" />
+        <span className="truncate">Google Business Profile</span>
+      </div>
+    )
+  }
+
+  if (project.createdAt) {
+    return (
+      <div className={metaClass}>
+        <Calendar size={12} className="text-gray-400 shrink-0" />
+        <span className="truncate">{formatProjectCreatedDate(project.createdAt)}</span>
+      </div>
+    )
+  }
+
+  return null
+}
+
+function ProjectDropdownItem({ project, isActive, onSelect }) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      className={`flex items-start w-full px-4 py-2.5 text-left transition-colors ${
+        isActive ? 'bg-primary-50' : 'hover:bg-gray-50'
+      }`}
+    >
+      <div className="flex-1 min-w-0">
+        <div className="text-[14px] font-normal text-gray-700 truncate">{project.label}</div>
+        <ProjectMetadataLine project={project} />
+      </div>
+      {isActive && <Check size={14} className="text-primary-600 shrink-0 ml-2 mt-0.5" />}
+    </button>
+  )
+}
+
 function ChatPanel({
   activePanel,
   activeChatId,
@@ -684,7 +720,18 @@ function ChatPanel({
 
   function handleCreateProject(data) {
     const id = nextProjectId
-    setProjects(prev => [{ id, label: data.name }, ...prev])
+    const websiteUrl = data.websiteUrl?.trim() || undefined
+    const gbpUrl = data.gbpUrl?.trim() || undefined
+    setProjects(prev => [
+      {
+        id,
+        label: data.name,
+        ...(websiteUrl ? { websiteUrl } : {}),
+        ...(gbpUrl ? { gbpUrl } : {}),
+        ...(!websiteUrl && !gbpUrl ? { createdAt: new Date().toISOString().slice(0, 10) } : {}),
+      },
+      ...prev,
+    ])
     setActiveProjectId(id)
     setNextProjectId(n => n + 1)
   }
@@ -783,26 +830,17 @@ function ChatPanel({
       </button>
       <div className="border-t border-gray-200" />
       <div className="max-h-[240px] overflow-y-auto scrollbar-gray-300">
-        {projects.map(project => {
-          const isActive = project.id === activeProjectId
-          return (
-            <button
-              key={project.id}
-              onClick={() => {
-                setActiveProjectId(project.id)
-                setProjectDropdownOpen(false)
-              }}
-              className={`flex items-center w-full px-4 py-2.5 text-left transition-colors ${
-                isActive ? 'bg-primary-50' : 'hover:bg-gray-50'
-              }`}
-            >
-              <span className="flex-1 text-[14px] font-normal text-gray-700 truncate">
-                {project.label}
-              </span>
-              {isActive && <Check size={14} className="text-primary-600 shrink-0 ml-2" />}
-            </button>
-          )
-        })}
+        {projects.map(project => (
+          <ProjectDropdownItem
+            key={project.id}
+            project={project}
+            isActive={project.id === activeProjectId}
+            onSelect={() => {
+              setActiveProjectId(project.id)
+              setProjectDropdownOpen(false)
+            }}
+          />
+        ))}
       </div>
     </div>
   )
@@ -967,11 +1005,11 @@ function ChatPanel({
   return (
     <aside className="w-full min-w-0 shrink-0 border-r border-gray-200 bg-white flex flex-col hover-shows-scrollbar">
 
-      {/* Visibility AI — product title */}
+      {/* Visibility — product title */}
       <div className="flex items-center gap-2.5 px-3 pt-3 pb-3 border-b border-gray-200">
         <VaLogo />
         <div className="flex-1 min-w-0">
-          <div className="text-[14px] font-semibold text-gray-900 leading-tight truncate">Visibility AI</div>
+          <div className="text-[14px] font-semibold text-gray-900 leading-tight truncate">Visibility</div>
           <div className="text-[12px] text-gray-500 leading-tight truncate">Search, AI, and local</div>
         </div>
         <button
@@ -1017,26 +1055,17 @@ function ChatPanel({
               </button>
               <div className="border-t border-gray-200" />
               <div className="max-h-[240px] overflow-y-auto scrollbar-gray-300">
-                {projects.map(project => {
-                  const isActive = project.id === activeProjectId
-                  return (
-                    <button
-                      key={project.id}
-                      onClick={() => {
-                        setActiveProjectId(project.id)
-                        setProjectDropdownOpen(false)
-                      }}
-                      className={`flex items-center w-full px-4 py-2.5 text-left transition-colors ${
-                        isActive ? 'bg-primary-50' : 'hover:bg-gray-50'
-                      }`}
-                    >
-                      <span className="flex-1 text-[14px] font-normal text-gray-700 truncate">
-                        {project.label}
-                      </span>
-                      {isActive && <Check size={14} className="text-primary-600 shrink-0 ml-2" />}
-                    </button>
-                  )
-                })}
+                {projects.map(project => (
+                  <ProjectDropdownItem
+                    key={project.id}
+                    project={project}
+                    isActive={project.id === activeProjectId}
+                    onSelect={() => {
+                      setActiveProjectId(project.id)
+                      setProjectDropdownOpen(false)
+                    }}
+                  />
+                ))}
               </div>
             </div>
           )}
@@ -1332,7 +1361,8 @@ function ScanConversationBlock({ scanKind = 'seo', onComplete }) {
 }
 
 function appendScanMessages(prev, scanKind, ts) {
-  return [...prev, { id: Date.now(), type: 'ai', content: 'scan', scanKind, ts }]
+  const withoutScan = prev.filter(m => m.content !== 'scan')
+  return [...withoutScan, { id: Date.now(), type: 'ai', content: 'scan', scanKind, ts }]
 }
 
 const MAX_COMPOSER_HEIGHT = 160 // px — ~5 lines before scroll
@@ -1351,59 +1381,15 @@ function PromptComposer({
   const internalRef = useRef(null)
   const [isFocused, setIsFocused] = useState(!scanning)
   const [filePickerOpen, setFilePickerOpen] = useState(false)
-  const [dictatePhase, setDictatePhase] = useState(null) // null | 'recording' | 'transcribing'
-  const transcribeTimerRef = useRef(null)
   const hasText = value.trim().length > 0
-  const isDictating = dictatePhase === 'recording'
-  const isTranscribing = dictatePhase === 'transcribing'
 
-  function clearTranscribeTimer() {
-    if (transcribeTimerRef.current) {
-      clearTimeout(transcribeTimerRef.current)
-      transcribeTimerRef.current = null
-    }
-  }
-
-  function applyDictatedText(text) {
-    const trimmed = value.trim()
-    const next = trimmed ? `${trimmed} ${text}` : text
-    onChange?.({ target: { value: next } })
-  }
-
-  const confirmDictate = useCallback(() => {
-    clearTranscribeTimer()
-    setDictatePhase('transcribing')
-    transcribeTimerRef.current = setTimeout(() => {
-      applyDictatedText(pickDummyDictation())
-      setDictatePhase(null)
-      transcribeTimerRef.current = null
-      setTimeout(() => internalRef.current?.focus(), 0)
-    }, DICTATE_TRANSCRIBE_MS)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, onChange])
-
-  function cancelDictate() {
-    clearTranscribeTimer()
-    setDictatePhase(null)
-  }
-
-  function startDictate() {
-    if (scanning) return
-    clearTranscribeTimer()
-    setDictatePhase('recording')
-    setIsFocused(true)
-  }
-
-  useEffect(() => () => clearTranscribeTimer(), [])
-
-  // Auto-grow textarea (skip during recording to keep composer height stable)
+  // Auto-grow textarea
   useEffect(() => {
-    if (isDictating) return
     const el = internalRef.current
     if (!el) return
     el.style.height = 'auto'
     el.style.height = Math.min(el.scrollHeight, MAX_COMPOSER_HEIGHT) + 'px'
-  }, [value, isDictating])
+  }, [value])
 
   useEffect(() => {
     if (scanning) return
@@ -1442,41 +1428,28 @@ function PromptComposer({
           : '#6938EF0A 0px 0px 0px 2px, #6938EF1A 0px 4px 16px -4px',
       }}
     >
-      {/* Row 1: text input with voice meter overlay — fixed height, no layout shift */}
       <div className="relative w-full min-h-[44px]">
         <textarea
           ref={setRefs}
           id="vai-prompt-composer"
           rows={1}
           value={scanning ? '' : value}
-          onChange={scanning || isDictating || isTranscribing ? undefined : onChange}
+          onChange={scanning ? undefined : onChange}
           onKeyDown={handleKeyDown}
           onFocus={() => !scanning && setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
-          placeholder={isDictating ? '' : scanning ? scanPlaceholder : placeholder}
-          disabled={scanning || isTranscribing}
-          readOnly={isDictating}
+          placeholder={scanning ? scanPlaceholder : placeholder}
+          disabled={scanning}
           aria-label="Prompt input"
           style={{ maxHeight: MAX_COMPOSER_HEIGHT, overflowY: 'auto' }}
           className={`w-full resize-none text-[14px] text-gray-900 placeholder:text-gray-400 bg-transparent outline-none border-0 leading-[1.5] px-4 pt-3 pb-1 ${
-            scanning || isTranscribing
-              ? 'cursor-not-allowed'
-              : isDictating
-                ? 'text-transparent caret-transparent'
-                : ''
+            scanning ? 'cursor-not-allowed' : ''
           }`}
         />
-        {isDictating && (
-          <div className="absolute inset-0 flex items-center justify-center px-4 pt-3 pb-1 pointer-events-none">
-            <VoiceWaveform active={isDictating} />
-          </div>
-        )}
       </div>
 
-      {/* Row 2: icons stuck to bottom */}
       <div className="flex items-center px-2 pb-2 pt-1 gap-1 overflow-visible">
-        {/* + — hidden only while voice meter is recording */}
-        {!scanning && !isDictating && (
+        {!scanning && (
           <button
             type="button"
             onClick={() => setFilePickerOpen(true)}
@@ -1498,79 +1471,21 @@ function PromptComposer({
           >
             <StopSquareIcon size={10} />
           </button>
-        ) : isDictating ? (
-          <>
-            <button
-              type="button"
-              onClick={cancelDictate}
-              className="size-8 rounded-full flex items-center justify-center shrink-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-              aria-label="Cancel dictation"
-            >
-              <X size={18} strokeWidth={2} />
-            </button>
-            <button
-              type="button"
-              onClick={confirmDictate}
-              className="size-9 rounded-full flex items-center justify-center shrink-0 border-2 border-primary-600 bg-white text-primary-600 hover:bg-primary-50 transition-colors"
-              aria-label="Done dictating"
-            >
-              <Check size={18} strokeWidth={2.5} />
-            </button>
-          </>
-        ) : isTranscribing ? (
-          <div
-            className="size-9 rounded-full flex items-center justify-center shrink-0 border-2 border-primary-600 bg-white text-primary-600"
-            aria-label="Transcribing"
-            role="status"
-          >
-            <Loader2 size={18} strokeWidth={2.5} className="animate-spin" />
-          </div>
-        ) : hasText ? (
-          <>
-            <HLTooltip id="composer-mic-tooltip" content="Dictate" variant="dark" placement="top">
-              <button
-                type="button"
-                onClick={startDictate}
-                className="size-8 rounded-full flex items-center justify-center shrink-0 text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-                aria-label="Dictate"
-                aria-describedby="composer-mic-tooltip"
-              >
-                <MicIcon size={16} />
-              </button>
-            </HLTooltip>
-            <button
-              type="button"
-              onClick={onSend}
-              className="size-9 rounded-full flex items-center justify-center shrink-0 bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-xs"
-              aria-label="Send message"
-            >
-              <ArrowUp size={18} strokeWidth={2.5} />
-            </button>
-          </>
         ) : (
-          <>
-            <HLTooltip id="composer-mic-tooltip" content="Dictate" variant="dark" placement="top">
-              <button
-                type="button"
-                onClick={startDictate}
-                className="size-8 rounded-full flex items-center justify-center shrink-0 text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors"
-                aria-label="Dictate"
-                aria-describedby="composer-mic-tooltip"
-              >
-                <MicIcon size={16} />
-              </button>
-            </HLTooltip>
-            <HLTooltip id="composer-voice-mode-tooltip" content="Voice mode" variant="dark" placement="top">
-              <button
-                type="button"
-                className="size-9 rounded-full flex items-center justify-center shrink-0 bg-purple-600 hover:bg-purple-700 text-white transition-colors shadow-xs"
-                aria-label="Voice mode"
-                aria-describedby="composer-voice-mode-tooltip"
-              >
-                <WaveformIcon size={16} />
-              </button>
-            </HLTooltip>
-          </>
+          <button
+            type="button"
+            onClick={onSend}
+            disabled={!hasText}
+            className={`size-9 rounded-full flex items-center justify-center shrink-0 transition-colors shadow-xs ${
+              hasText
+                ? 'bg-purple-600 hover:bg-purple-700 text-white cursor-pointer'
+                : 'bg-purple-200 text-white cursor-not-allowed'
+            }`}
+            aria-label="Send message"
+            aria-disabled={!hasText}
+          >
+            <ArrowUp size={18} strokeWidth={2.5} />
+          </button>
         )}
       </div>
     </div>
@@ -1635,6 +1550,7 @@ function MainContent({
   onOpenDetailPanel,
   implementFlow,
   onImplementFlowChange,
+  onRescanComplete,
 }) {
   const [inputValue, setInputValueRaw] = useState('')
   function setInputValue(val) {
@@ -1656,8 +1572,7 @@ function MainContent({
   const prevActiveChatIdRef = useRef(activeChatId)
   const scanCompleteSyncedRef = useRef(false)
   const implementInitKeyRef = useRef(null)
-  const implementConfirmRef = useRef(null)
-  const subscriptionCompleteRef = useRef(null)
+  const rescanKeyRef = useRef(null)
 
   function resolveSession() {
     if (loadedSession) return loadedSession
@@ -1751,11 +1666,11 @@ function MainContent({
       nextMessages.push({
         id: implementFlow.initKey + 1,
         type: 'ai',
-        content: 'implement-preview',
+        content: 'implement-progress',
         items: implementFlow.selectedItems ?? [],
         ts,
       })
-      onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'preview' } : prev))
+      onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'implementing' } : prev))
     } else {
       nextMessages.push({
         id: implementFlow.initKey + 1,
@@ -1769,55 +1684,22 @@ function MainContent({
   }, [implementFlow?.initKey, implementFlow?.skipCloudflare, implementFlow?.selectedItems, onImplementFlowChange])
 
   useEffect(() => {
-    if (!implementFlow?.subscriptionCompleteAt || subscriptionCompleteRef.current === implementFlow.subscriptionCompleteAt) return
-    subscriptionCompleteRef.current = implementFlow.subscriptionCompleteAt
+    if (!implementFlow?.rescanKey || rescanKeyRef.current === implementFlow.rescanKey) return
+    rescanKeyRef.current = implementFlow.rescanKey
     const ts = getTimestamp()
+    setChatMode(true)
     setMessages(prev => [
       ...prev,
-      {
-        id: implementFlow.subscriptionCompleteAt,
-        type: 'ai',
-        content: 'subscription-success',
-        ts,
-      },
-      {
-        id: implementFlow.subscriptionCompleteAt + 1,
-        type: 'ai',
-        content: 'subscription-action-items-guide',
-        ts,
-      },
+      { id: implementFlow.rescanKey, type: 'user', content: 'Rescan site', ts },
     ])
-  }, [implementFlow?.subscriptionCompleteAt])
-
-  useEffect(() => {
-    if (!implementFlow?.confirmAt || implementConfirmRef.current === implementFlow.confirmAt) return
-    implementConfirmRef.current = implementFlow.confirmAt
-    const ts = getTimestamp()
-    const confirmLabel = implementFlow.round === 'subscribed' ? 'Proceed with fixes' : 'Confirm and implement fixes'
-    setMessages(prev => [
-      ...prev,
-      {
-        id: implementFlow.confirmAt,
-        type: 'user',
-        content: confirmLabel,
-        ts,
-      },
-      {
-        id: implementFlow.confirmAt + 1,
-        type: 'ai',
-        content: 'implement-progress',
-        ts,
-      },
-    ])
-    onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'implementing' } : prev))
-  }, [implementFlow?.confirmAt, onImplementFlowChange])
+    setIsScanning(true)
+    setTimeout(() => {
+      setMessages(prev => appendScanMessages(prev, 'rescan', getTimestamp()))
+    }, 450)
+  }, [implementFlow?.rescanKey])
 
   function handleCloudflareTokenContinue() {
     onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'cloudflare-credentials' } : prev))
-  }
-
-  function handleImplementPreviewProceed() {
-    onImplementFlowChange?.(prev => (prev?.step === 'preview' ? { ...prev, confirmAt: Date.now() } : prev))
   }
 
   function handleCloudflareCredentialsSubmit(answers) {
@@ -1843,12 +1725,12 @@ function MainContent({
       {
         id: Date.now() + 2,
         type: 'ai',
-        content: 'implement-preview',
+        content: 'implement-progress',
         items: selectedItems,
         ts,
       },
     ])
-    onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'preview', cloudflareConnected: true } : prev))
+    onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'implementing', cloudflareConnected: true } : prev))
   }
 
   function handleCloudflareCredentialsSkip() {
@@ -1856,40 +1738,44 @@ function MainContent({
   }
 
   const handleImplementComplete = useCallback(() => {
-    const count = implementFlow?.selectedItems?.length ?? 0
-    const round = implementFlow?.round ?? 'free'
+    const selectedItems = implementFlow?.selectedItems ?? []
+    const panelItems = implementFlow?.panelItems ?? []
+    const selectedIds = new Set(selectedItems.map(item => item.id))
+    const manualItems = panelItems.filter(item => item.manualFix && !selectedIds.has(item.id))
+    const remainingAutofix = panelItems.filter(item => item.autofix && !selectedIds.has(item.id))
+    const summary = buildImplementSummary(selectedItems, manualItems)
+    const appliedIds = summary.applied.map(item => item.id)
     setMessages(prev => [
       ...prev.filter(m => m.content !== 'implement-progress'),
       {
         id: Date.now(),
         type: 'ai',
-        content: 'implement-complete',
-        count,
+        content: 'implement-summary',
+        summary,
         ts: getTimestamp(),
       },
     ])
 
-    if (round === 'free') {
-      onImplementFlowChange?.(prev => (prev ? {
-        ...prev,
-        step: null,
-        freeImplementDone: true,
-        cloudflareConnected: true,
-      } : prev))
-      return
-    }
-
-    if (round === 'subscribed') {
-      onImplementFlowChange?.(prev => (prev ? {
-        ...prev,
-        step: null,
-        allAutoFixesDone: true,
-      } : prev))
-      return
-    }
-
-    onImplementFlowChange?.(prev => (prev ? { ...prev, step: 'complete' } : prev))
+    onImplementFlowChange?.(prev => (prev ? {
+      ...prev,
+      step: null,
+      freeImplementDone: true,
+      allAutoFixesDone: remainingAutofix.length === 0 && summary.failedCount === 0,
+      cloudflareConnected: true,
+      resolvedItemIds: [...new Set([
+        ...(prev.resolvedItemIds ?? []),
+        ...appliedIds,
+      ])],
+    } : prev))
   }, [implementFlow, onImplementFlowChange])
+
+  function handleSummaryItemResolved(itemId) {
+    onImplementFlowChange?.(prev => (prev ? {
+      ...prev,
+      resolvedItemIds: [...new Set([...(prev.resolvedItemIds ?? []), itemId])],
+      allAutoFixesDone: false,
+    } : prev))
+  }
 
   const implementCredentialsPending = implementFlow?.step === 'cloudflare-credentials'
 
@@ -1901,8 +1787,23 @@ function MainContent({
   const onScanComplete = useCallback(() => {
     setIsScanning(false)
     setMessages(prev => {
-      const scanMsg = prev.find(m => m.content === 'scan')
+      const scanMsg = [...prev].reverse().find(m => m.content === 'scan')
       const scanKind = scanMsg?.scanKind || 'generic'
+
+      if (scanKind === 'rescan') {
+        const manualItems = (implementFlow?.panelItems ?? []).filter(item => item.manualFix)
+        const summary = buildRescanSummary(manualItems)
+        onRescanComplete?.(summary)
+        return prev
+          .filter(m => m.content !== 'scan')
+          .concat([{
+            id: Date.now(),
+            type: 'ai',
+            content: 'implement-summary',
+            summary,
+            ts: getTimestamp(),
+          }])
+      }
 
       // ai-visibility-prep: remove loader, then show URL card above composer
       if (scanKind === 'ai-visibility-prep') {
@@ -1918,8 +1819,7 @@ function MainContent({
         .filter(m => m.content !== 'scan')
         .concat([{ id: Date.now(), type: 'ai', content: 'scan-results', scanKind, ts, ...payload }])
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [implementFlow, onRescanComplete])
 
   const onScanFail = useCallback((failMessage) => {
     setIsScanning(false)
@@ -1980,10 +1880,7 @@ function MainContent({
     // Start the actual AI visibility scan after a short delay
     setIsScanning(true)
     setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now() + 1, type: 'ai', content: 'scan', scanKind: 'ai-visibility', ts: getTimestamp() },
-      ])
+      setMessages(prev => appendScanMessages(prev, 'ai-visibility', getTimestamp()))
     }, 400)
   }
 
@@ -1991,10 +1888,7 @@ function MainContent({
     setAiVisibilityPending(false)
     setIsScanning(true)
     setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        { id: Date.now() + 1, type: 'ai', content: 'scan', scanKind: 'ai-visibility', ts: getTimestamp() },
-      ])
+      setMessages(prev => appendScanMessages(prev, 'ai-visibility', getTimestamp()))
     }, 400)
   }
 
@@ -2012,7 +1906,7 @@ function MainContent({
     const scanKind = awaitingAnswer
     setIsScanning(true)
     setTimeout(() => {
-      setMessages(prev => [...prev, { id: Date.now() + 1, type: 'ai', content: 'scan', scanKind, ts: getTimestamp() }])
+      setMessages(prev => appendScanMessages(prev, scanKind, getTimestamp()))
     }, 400)
   }
 
@@ -2099,10 +1993,7 @@ function MainContent({
         chatTitleAsIs,
       })
       setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          { id: Date.now() + 1, type: 'ai', content: 'scan', scanKind: 'ai-visibility-prep', ts: getTimestamp() },
-        ])
+        setMessages(prev => appendScanMessages(prev, 'ai-visibility-prep', getTimestamp()))
       }, 450)
       return
     }
@@ -2128,6 +2019,11 @@ function MainContent({
     submitPrompt(trimmed, chipLabel ? { chatTitle: chipLabel, chatTitleAsIs: true } : {})
   }
 
+  const activeScanMessageId = useMemo(() => {
+    const scanMessages = messages.filter(m => m.content === 'scan')
+    return scanMessages[scanMessages.length - 1]?.id ?? null
+  }, [messages])
+
 
   const chatFooter = (
     <div className="shrink-0 border-t border-gray-200 bg-white">
@@ -2145,11 +2041,13 @@ function MainContent({
           <div className="w-full relative">
             <div className="mx-2.5 relative z-0">
               <ClarifyingQuestionsCard
+                title={CLOUDFLARE_CONNECT_TITLE}
                 questions={CLOUDFLARE_CONNECT_QUESTIONS}
                 onSubmit={handleCloudflareCredentialsSubmit}
                 onSkip={handleCloudflareCredentialsSkip}
                 attachedToEditor
                 singleStep
+                showQuestionNumbers={false}
               />
             </div>
             <div className="relative z-10 -mt-2">
@@ -2211,11 +2109,15 @@ function MainContent({
   if (!chatMode) {
     return (
       <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
-        <div className="flex-1 flex flex-col items-center justify-center py-10 overflow-y-auto">
-          <div className="w-[85vw] max-w-[1540px] mx-auto flex flex-col items-center gap-6">
+        <div className="flex-1 flex flex-col items-center justify-center py-10 overflow-y-auto overflow-x-hidden w-full">
+          <div
+            className={`mx-auto flex flex-col items-center gap-6 px-6 ${
+              detailPanelOpen ? 'w-full max-w-[720px]' : 'w-full max-w-[800px]'
+            }`}
+          >
 
             {/* Headline */}
-            <div className="text-center">
+            <div className="text-center w-full">
               <h1 className="text-[32px] font-bold text-gray-900 leading-[1.15] tracking-tight">
                 How can we improve your visibility today?
               </h1>
@@ -2225,7 +2127,7 @@ function MainContent({
             <TypingText />
 
             {/* Prompt composer — HighRise AI textarea pattern */}
-            <div className="w-[60%] mx-auto">
+            <div className="w-full">
               <PromptComposer
                 value={inputValue}
                 onChange={e => setInputValue(e.target.value)}
@@ -2236,13 +2138,13 @@ function MainContent({
             </div>
 
             {/* Quick action chips — click pastes full prompt into composer; Send starts the conversation */}
-            <div className="flex flex-nowrap items-center justify-center gap-2 w-full">
+            <div className="flex flex-nowrap items-center justify-center gap-1 w-full">
               {QUICK_ACTIONS.map(({ label, prompt }) => (
                 <button
                   key={label}
                   type="button"
                   onClick={() => handleQuickActionSelect({ prompt })}
-                  className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg bg-gray-100 text-[13px] font-normal text-gray-600 hover:bg-gray-200 transition-colors"
+                  className="shrink-0 whitespace-nowrap px-2 py-1 rounded-lg bg-gray-100 text-[12px] font-normal text-gray-600 hover:bg-gray-200 transition-colors"
                 >
                   {label}
                 </button>
@@ -2309,8 +2211,9 @@ function MainContent({
             // scan-done: legacy placeholder — render nothing
             if (msg.content === 'scan-done') return null
 
-            // scan: actively running — show loader block
+            // scan: actively running — show loader block (latest only)
             if (msg.content === 'scan') {
+              if (msg.id !== activeScanMessageId) return null
               return (
                 <div key={msg.id} className={`flex flex-col ${agentTopSpacing}`}>
                   <ScanConversationBlock
@@ -2390,23 +2293,32 @@ function MainContent({
               )
             }
 
-            if (msg.content === 'implement-preview') {
+            if (msg.content === 'implement-progress') {
               return (
                 <div key={msg.id} className={`flex flex-col gap-3 ${agentTopSpacing}`}>
-                  <ImplementPreviewCard
-                    items={msg.items ?? []}
-                    onProceed={handleImplementPreviewProceed}
-                    proceedDisabled={implementFlow?.step !== 'preview'}
+                  <ImplementProgressBlock
+                    items={msg.items ?? implementFlow?.selectedItems ?? []}
+                    onComplete={handleImplementComplete}
                   />
-                  <AiFeedbackRow ts={msg.ts} />
                 </div>
               )
             }
 
-            if (msg.content === 'implement-progress') {
+            if (msg.content === 'implement-summary') {
               return (
                 <div key={msg.id} className={`flex flex-col gap-3 ${agentTopSpacing}`}>
-                  <ImplementProgressBlock onComplete={handleImplementComplete} />
+                  <p className="text-[14px] text-gray-700 leading-relaxed m-0">
+                    {msg.summary?.variant === 'rescan'
+                      ? 'Rescan complete. Here is your updated visibility summary:'
+                      : msg.summary?.hasIssues
+                        ? 'Implementation complete with some issues. Review the summary:'
+                        : 'Implementation complete. Review the summary:'}
+                  </p>
+                  <ImplementSummaryCard
+                    summary={msg.summary}
+                    onItemResolved={handleSummaryItemResolved}
+                  />
+                  <AiFeedbackRow ts={msg.ts} />
                 </div>
               )
             }
@@ -2420,31 +2332,6 @@ function MainContent({
                       All {msg.count} fix{msg.count === 1 ? '' : 'es'} implemented successfully.
                     </p>
                   </div>
-                  <AiFeedbackRow ts={msg.ts} />
-                </div>
-              )
-            }
-
-            if (msg.content === 'subscription-success') {
-              return (
-                <div key={msg.id} className={`flex flex-col gap-2 ${agentTopSpacing}`}>
-                  <p className="text-[14px] font-semibold text-gray-900 leading-relaxed m-0">
-                    🎉 You&apos;re now subscribed to All-in-One!
-                  </p>
-                  <p className="text-[14px] text-gray-700 leading-relaxed m-0">
-                    Here&apos;s what&apos;s now unlocked for you — Local SEO, Website SEO, AEO, GEO, and all advanced features. Feel free to ask me anything!
-                  </p>
-                  <AiFeedbackRow ts={msg.ts} />
-                </div>
-              )
-            }
-
-            if (msg.content === 'subscription-action-items-guide') {
-              return (
-                <div key={msg.id} className={`flex flex-col gap-2 ${agentTopSpacing}`}>
-                  <p className="text-[14px] text-gray-700 leading-relaxed m-0">
-                    Go to action items, select more fixes, and click Proceed to implement the rest.
-                  </p>
                   <AiFeedbackRow ts={msg.ts} />
                 </div>
               )
@@ -2570,7 +2457,7 @@ function MainContent({
                         <FileText size={16} className="text-gray-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-[13px] font-semibold text-gray-900">Review detailed report</p>
+                        <p className="text-[13px] font-semibold text-gray-900">Detailed report</p>
                         <p className="text-[12px] text-gray-500 mt-0.5">Open full AI visibility analysis in the side panel</p>
                       </div>
                       <ChevronRight size={16} className="text-gray-400 shrink-0" />
@@ -2693,7 +2580,6 @@ function MainContent({
                             {ack.aiEnginesDetail}
                           </li>
                         </ul>
-                        <p>{ack.timeline}</p>
                       </div>
                       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs">
                         <ScanQuickSummary report={report} />
@@ -2729,14 +2615,14 @@ function MainContent({
                   )}
                   <button
                     type="button"
-                    onClick={() => onOpenDetailPanel({ type: 'report', title: 'SEO health report', subtitle: 'Detailed scan analysis', report })}
+                    onClick={() => onOpenDetailPanel({ type: 'report', title: 'Detailed report', subtitle: 'Comprehensive results from your SEO crawl.', report })}
                     className="w-full text-left rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-25 transition-colors shadow-xs px-4 py-3 flex items-center gap-3"
                   >
                     <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
                       <FileText size={16} className="text-gray-600" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold text-gray-900">Review detailed report</p>
+                      <p className="text-[13px] font-semibold text-gray-900">Detailed report</p>
                       <p className="text-[12px] text-gray-500 mt-0.5">Click to open the detailed report.</p>
                     </div>
                     <ChevronRight size={16} className="text-gray-400 shrink-0" />
@@ -2897,7 +2783,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
             <HLInput
               id="new-project-name"
               autoFocus
-              size="md"
+              size="sm"
               value={projectName}
               onChange={e => setProjectName(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleCreate()}
@@ -2911,7 +2797,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
             </label>
             <HLInput
               id="new-project-website"
-              size="md"
+              size="sm"
               type="url"
               prefixIcon={Globe}
               value={websiteUrl}
@@ -2926,7 +2812,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
             </label>
             <HLInput
               id="new-project-gbp"
-              size="md"
+              size="sm"
               type="url"
               prefixIcon={MapPin}
               value={gbpUrl}
@@ -2943,7 +2829,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
               <select
                 value={targetCountry}
                 onChange={e => setTargetCountry(e.target.value)}
-                className="w-full h-10 px-3 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 focus:shadow-focus-primary-sm transition-all"
+                className="w-full h-9 px-2 bg-white border border-gray-300 rounded-md text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 focus:shadow-focus-primary-sm transition-all"
               >
                 <option value="">Select a country...</option>
                 <option value="US">United States</option>

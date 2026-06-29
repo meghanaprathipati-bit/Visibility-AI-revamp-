@@ -24,11 +24,13 @@ export default function CloudflareTokenCard({ onContinue, actionsDisabled = fals
           variant="secondary"
           size="sm"
           disabled={actionsDisabled}
-          className="inline-flex items-center gap-2 w-fit"
+          className="w-fit"
           onClick={handleOpenCloudflare}
         >
-          <ExternalLink size={14} />
-          Open Cloudflare API token page
+          <span className="inline-flex items-center gap-1">
+            <ExternalLink size={14} className="shrink-0" />
+            Open Cloudflare API token page
+          </span>
         </HLButton>
         <HLButton
           variant="primary"

@@ -1,66 +1,53 @@
 import { Globe, Lock01Icon } from '../icons/index.js'
 
+/** Prototype Cloudflare credential form title — replace with API copy in production */
+export const CLOUDFLARE_CONNECT_TITLE = 'Connect your Cloudflare account'
+
 /** Prototype Cloudflare credential questions — replace with API-driven form in production */
 export const CLOUDFLARE_CONNECT_QUESTIONS = [
   {
     id: 'cloudflare-account-id',
-    label: 'Connect Cloudflare account — enter your account ID',
+    label: 'Account ID',
+    helperText: "Found in Cloudflare Dashboard → right sidebar under 'Account ID'",
     type: 'text',
-    placeholder: 'Enter your account ID',
+    placeholder: 'Paste your account ID (e.g. a1b2c3d4e5f6...)',
     required: true,
     icon: Globe,
   },
   {
     id: 'cloudflare-api-token',
-    label: 'Cloudflare API token',
+    label: 'API token',
+    helperText: 'Create a token in Cloudflare → My Profile → API Tokens → with Zone:Read & DNS:Edit permissions',
     type: 'password',
-    placeholder: 'Enter your API token',
+    placeholder: "Paste your API token – it won't be shown again after saving",
     required: true,
     icon: Lock01Icon,
   },
 ]
 
-/** Contextual label for the action items pane implement button — replace with billing state in production */
-export function getImplementButtonState({ implementFlow, selectedAutofixCount, packageCustomizerMode, freeFixLimit }) {
-  const defaultLabel = packageCustomizerMode
-    ? `Set to implement changes (${selectedAutofixCount}/${freeFixLimit} free)`
-    : `Implement changes${selectedAutofixCount > 0 ? ` (${selectedAutofixCount})` : ''}`
+const BUSY_STEPS = new Set(['cloudflare-token', 'cloudflare-credentials', 'implementing'])
 
-  if (implementFlow?.allAutoFixesDone) {
-    return { disabled: true, label: 'Only manual fixes left', action: null }
-  }
+/** Prototype panel footer — replace with billing + job state from API in production */
+export function getActionItemsFooterState({
+  implementFlow,
+  selectedAutofixCount,
+  selectableAutofixCount,
+}) {
+  const manualOnly = Boolean(implementFlow?.freeImplementDone || implementFlow?.allAutoFixesDone)
+  const isBusy = BUSY_STEPS.has(implementFlow?.step)
 
-  switch (implementFlow?.step) {
-    case 'cloudflare-token':
-    case 'cloudflare-credentials':
-      return { disabled: true, label: 'Connect site first', action: null }
-    case 'preview':
-      return {
-        disabled: true,
-        label: implementFlow.round === 'subscribed' ? 'Proceed in chat' : 'Confirm in chat',
-        action: null,
-      }
-    case 'implementing':
-      return { disabled: true, label: 'Implementing...', action: null }
-    default:
-      break
-  }
-
-  if (implementFlow?.freeImplementDone && !implementFlow?.subscribed) {
-    return { disabled: false, label: 'Subscribe to fix all', action: 'subscribe' }
-  }
-
-  if (packageCustomizerMode) {
+  if (manualOnly) {
     return {
-      disabled: selectedAutofixCount === 0,
-      label: `Set to implement changes (${selectedAutofixCount}/${freeFixLimit} free)`,
-      action: 'start',
+      mode: 'manual-only',
+      rescanDisabled: isBusy,
+      cancelDisabled: isBusy,
     }
   }
 
   return {
-    disabled: selectedAutofixCount === 0,
-    label: defaultLabel,
-    action: 'start',
+    mode: 'autofix',
+    rescanTertiaryDisabled: isBusy,
+    implementSelectedDisabled: isBusy || selectedAutofixCount === 0,
+    cancelDisabled: isBusy,
   }
 }

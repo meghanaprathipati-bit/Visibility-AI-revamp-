@@ -1,18 +1,6 @@
-import { ExternalLink, Lock01Icon } from '../../icons/index.js'
+import { ExternalLink } from '../../icons/index.js'
 import HLCheckbox from '../HLCheckbox.jsx'
 import RecField from './RecField.jsx'
-
-function LockedRowControl() {
-  return (
-    <span
-      aria-hidden="true"
-      style={{ width: 16, height: 16, borderRadius: 4 }}
-      className="box-border border border-gray-300 bg-gray-100 inline-flex items-center justify-center shrink-0"
-    >
-      <Lock01Icon size={10} className="text-gray-400" strokeWidth={2} />
-    </span>
-  )
-}
 
 export default function ActionItemDetailTable({
   itemId,
@@ -20,26 +8,24 @@ export default function ActionItemDetailTable({
   rows,
   editable = false,
   selectable = false,
-  selectionLocked = false,
   selectedRows,
   onToggleRow,
   onUpdateRec,
 }) {
   const showCurrent = Boolean(columns.current)
-  const showCheckboxColumn = selectable || selectionLocked
 
   return (
     <div className="overflow-x-auto">
       <table className="w-full border-collapse table-fixed">
         <colgroup>
-          {showCheckboxColumn && <col style={{ width: 40 }} />}
-          <col className={showCheckboxColumn ? 'w-[28%]' : 'w-[32%]'} />
-          {showCurrent && <col className={showCheckboxColumn ? 'w-[22%]' : 'w-[24%]'} />}
-          <col className={showCheckboxColumn ? (showCurrent ? 'w-[42%]' : 'w-[64%]') : showCurrent ? 'w-[44%]' : 'w-[68%]'} />
+          {selectable && <col style={{ width: 40 }} />}
+          <col className={selectable ? 'w-[28%]' : 'w-[32%]'} />
+          {showCurrent && <col className={selectable ? 'w-[22%]' : 'w-[24%]'} />}
+          <col className={selectable ? (showCurrent ? 'w-[42%]' : 'w-[64%]') : showCurrent ? 'w-[44%]' : 'w-[68%]'} />
         </colgroup>
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            {showCheckboxColumn && <th className="px-3.5 py-2" aria-hidden="true" />}
+          <tr className="bg-gray-50 border-b border-gray-100">
+            {selectable && <th className="px-3.5 py-2" aria-hidden="true" />}
             <th className="px-3.5 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wide">{columns.page}</th>
             {showCurrent && (
               <th className="px-3.5 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wide">{columns.current}</th>
@@ -50,24 +36,18 @@ export default function ActionItemDetailTable({
         <tbody>
           {rows.map((row, idx) => {
             const rowSelected = selectedRows?.has(idx) ?? false
-            const rowLocked = selectionLocked && !rowSelected
 
             return (
               <tr key={idx} className="border-b border-gray-100 last:border-0">
-                {showCheckboxColumn && (
+                {selectable && (
                   <td className="px-3.5 py-2.5 align-top">
-                    {rowLocked ? (
-                      <LockedRowControl />
-                    ) : (
-                      <HLCheckbox
-                        id={`${itemId}-row-${idx}`}
-                        size="sm"
-                        checked={rowSelected}
-                        disabled={!selectable}
-                        aria-label={`Select ${row.page}`}
-                        onChange={() => onToggleRow?.(idx)}
-                      />
-                    )}
+                    <HLCheckbox
+                      id={`${itemId}-row-${idx}`}
+                      size="xs"
+                      checked={rowSelected}
+                      aria-label={`Select ${row.page}`}
+                      onChange={() => onToggleRow?.(idx)}
+                    />
                   </td>
                 )}
                 <td className="px-3.5 py-2.5 align-top text-[12px] text-primary-600">

@@ -37,7 +37,7 @@ function ReportTable({ columns, rows }) {
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-gray-50 border-b border-gray-100">
             {columns.map(col => (
               <th key={col} className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide px-3 py-2.5 whitespace-nowrap">
                 {col}
