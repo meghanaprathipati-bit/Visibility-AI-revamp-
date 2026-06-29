@@ -23,8 +23,6 @@ export const SEO_SCAN_ACKNOWLEDGMENT = {
   searchEnginesDetail: 'Google, Bing, and other search result surfaces',
   aiEnginesLabel: 'AI LLM engines',
   aiEnginesDetail: 'Claude, Perplexity, Google AI Mode, Google AI Overview, and other answer engines',
-  timeline:
-    "This usually takes 2-5 minutes. I'll keep the progress updated here and post the scan report when everything finishes.",
 }
 
 export const SEO_SCAN_SUMMARY = {
@@ -36,47 +34,20 @@ export const SEO_SCAN_SUMMARY = {
     {
       name: 'Website',
       status: 'Needs attention',
-      description: 'Site mostly healthy but requires technical fixes for missed opportunities.',
-      checks: [
-        {
-          label: 'SEO site audit',
-          detail: 'Technical SEO issue counts are summarized for prioritization.',
-        },
-        {
-          label: 'AI visibility',
-          detail: 'AI search visibility signals were checked without listing issue details here.',
-        },
-      ],
+      description: 'Site is mostly healthy but requires technical fixes for missed opportunities.',
+      checks: [{ label: 'SEO site audit' }, { label: 'AI visibility' }],
     },
     {
-      name: 'Local Directories',
+      name: 'Local directories',
       status: 'Needs attention',
       description: 'Security checks indicate multiple HTTPS-related issues requiring resolution.',
-      checks: [
-        {
-          label: 'Listings scan',
-          detail: 'Directory coverage and NAP consistency were checked.',
-        },
-        {
-          label: 'NAP consistency',
-          detail: 'Directory coverage and NAP consistency were checked.',
-        },
-      ],
+      checks: [{ label: 'Listings scan' }, { label: 'NAP consistency' }],
     },
     {
-      name: 'Reviews Platforms',
+      name: 'Reviews platforms',
       status: 'Needs attention',
       description: 'Domain performance metrics indicate no authority or trust.',
-      checks: [
-        {
-          label: 'Reviews scan',
-          detail: 'Review coverage, sentiment, and response signals were checked.',
-        },
-        {
-          label: 'Sentiment',
-          detail: 'Review coverage, sentiment, and response signals were checked.',
-        },
-      ],
+      checks: [{ label: 'Reviews scan' }, { label: 'Sentiment' }],
     },
   ],
 }

@@ -5,6 +5,7 @@
 
 const COLOR_MAP = {
   blue: 'primary',
+  purple: 'purple',
   red: 'error',
   gray: 'gray',
   orange: 'warning',

@@ -25,11 +25,11 @@ const TONE_STYLES = {
     ring: 'stroke-error-600',
   },
   warning: {
-    dot: 'bg-warning-600',
-    badge: 'text-warning-600 bg-warning-100 border-warning-100',
-    bar: 'bg-warning-600',
-    text: 'text-warning-600',
-    ring: 'stroke-warning-600',
+    dot: 'bg-warning-250',
+    badge: 'text-warning-300 bg-warning-100 border-warning-100',
+    bar: 'bg-warning-250',
+    text: 'text-warning-250',
+    ring: 'stroke-warning-250',
   },
   notice: {
     dot: 'bg-primary-600',
@@ -68,7 +68,7 @@ function ReportTable({ columns, rows }) {
     <div className="overflow-x-auto rounded-lg border border-gray-200">
       <table className="w-full min-w-[480px] text-left border-collapse">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
+          <tr className="bg-gray-50 border-b border-gray-100">
             {columns.map(col => (
               <th
                 key={col}
@@ -186,7 +186,7 @@ function MobileCheckStatusIcon({ status }) {
     return <CircleCheck size={16} className="text-success-600 shrink-0" />
   }
   if (status === 'warning') {
-    return <AlertTriangle size={16} className="text-warning-600 shrink-0" />
+    return <AlertTriangle size={16} className="text-warning-250 shrink-0" />
   }
   return (
     <span className="w-4 h-4 rounded-full border-2 border-error-600 flex items-center justify-center shrink-0">

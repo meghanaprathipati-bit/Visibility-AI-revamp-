@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { InfoCircleIcon } from '@gohighlevel/ghl-icons/24/outline'
 import { ChevronDown } from '../icons/index.js'
+import HLTooltip from './HLTooltip.jsx'
 
 function ChevronUp({ size = 12, className = '' }) {
   return (
@@ -11,11 +13,12 @@ function ChevronUp({ size = 12, className = '' }) {
  * ClarifyingQuestionsCard
  *
  * Props:
- *   questions        — array of { id, label, required?, type, placeholder?, options?[], icon? }
+ *   questions        — array of { id, label, required?, type, placeholder?, helperText?, options?[], icon? }
  *   onSubmit(answers) — called with answer map when Continue/Submit is pressed on last question
  *   onSkip()         — skip the whole block
  *   embedded         — if true, no outer border/radius (sits inside PromptComposer)
  *   attachedToEditor — if true, light lavender top panel (no outer border — parent shell wraps composer)
+ *   title            — card header title (default: Questions)
  */
 export default function ClarifyingQuestionsCard({
   questions = [],
@@ -23,8 +26,11 @@ export default function ClarifyingQuestionsCard({
   onSkip,
   embedded = false,
   attachedToEditor = false,
+  title = 'Questions',
   /** When true, show every question at once with a single Submit action */
   singleStep = false,
+  /** When false, labels omit the "1." style prefix */
+  showQuestionNumbers = true,
 }) {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState({})
@@ -53,7 +59,7 @@ export default function ClarifyingQuestionsCard({
           <div className="w-6 h-6 rounded-md bg-gray-800 flex items-center justify-center shrink-0">
             <span className="text-white text-[11px] font-bold leading-none select-none">?</span>
           </div>
-          <span className="text-[14px] font-semibold text-gray-900">Questions</span>
+          <span className="text-[14px] font-semibold text-gray-900">{title}</span>
         </div>
         {!singleStep && (
           <div className="flex items-center">
@@ -95,14 +101,37 @@ export default function ClarifyingQuestionsCard({
               onClick={() => !singleStep && !isActive && setCurrentIdx(idx)}
             >
               <p
-                className={`text-[14px] leading-snug transition-colors ${
+                className={`flex items-center gap-1 text-[14px] leading-snug transition-colors ${
                   isActive
                     ? 'font-semibold text-gray-900'
                     : 'font-medium text-gray-400 cursor-pointer'
                 }`}
               >
-                {idx + 1}.&nbsp;{q.label}
+                {showQuestionNumbers ? `${idx + 1}.\u00A0` : ''}
+                {q.label}
                 {q.required && <span className="text-error-600 ml-1">*</span>}
+                {q.helperText && (singleStep || isActive) && (
+                  <HLTooltip
+                    id={`${q.id}-helper-tooltip`}
+                    content={q.helperText}
+                    variant="dark"
+                    placement="top"
+                    wrap
+                  >
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="inline-flex shrink-0 text-gray-400"
+                      aria-label={q.helperText}
+                      onClick={e => e.stopPropagation()}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') e.stopPropagation()
+                      }}
+                    >
+                      <InfoCircleIcon size={20} color="var(--gray-400)" />
+                    </span>
+                  </HLTooltip>
+                )}
               </p>
 
               {q.type === 'text' && (

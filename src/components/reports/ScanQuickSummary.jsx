@@ -3,18 +3,18 @@
  * Full executive report lives in DetailedScanReport (side panel).
  */
 
-function ReportTable({ title, columns, rows }) {
+function ReportTable({ title, columns, rows, className = '' }) {
   return (
-    <div>
+    <div className={className}>
       {title && <h4 className="text-[14px] font-semibold text-gray-900 mb-2">{title}</h4>}
       <div className="overflow-x-auto rounded-lg border border-gray-200">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
+            <tr className="bg-gray-50 border-b border-gray-100">
               {columns.map(col => (
                 <th
                   key={col}
-                  className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide px-3 py-2.5 whitespace-nowrap"
+                  className="text-[11px] font-semibold text-gray-500 px-3 py-2.5 whitespace-nowrap"
                 >
                   {col}
                 </th>
@@ -38,24 +38,22 @@ function ReportTable({ title, columns, rows }) {
   )
 }
 
-function CategoryBullet({ category }) {
+function CategorySnapshotItem({ category }) {
+  const checkLabels = (category.checks ?? []).map(check => check.label).join(' · ')
+
   return (
     <li className="flex flex-col gap-1.5">
-      <p className="text-[14px] text-gray-700 leading-snug">
-        <span className="font-semibold text-gray-900">{category.name}</span>
-        {' — '}
-        <span className="font-medium text-warning-600">{category.status}</span>
-        {' — '}
-        {category.description}
-      </p>
-      {category.checks?.length > 0 && (
-        <ul className="flex flex-col gap-1 pl-4">
-          {category.checks.map(check => (
-            <li key={check.label} className="text-[13px] text-gray-600 leading-snug">
-              {check.label} — {check.detail}
-            </li>
-          ))}
-        </ul>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[14px] font-semibold text-gray-900">{category.name}</span>
+        {category.status && (
+          <span className="inline-flex text-[11px] font-medium px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
+            {category.status}
+          </span>
+        )}
+      </div>
+      <p className="text-[13px] text-gray-700 leading-relaxed">{category.description}</p>
+      {checkLabels && (
+        <p className="text-[12px] text-gray-500 leading-snug">{checkLabels}</p>
       )}
     </li>
   )
@@ -77,29 +75,32 @@ export default function ScanQuickSummary({ report }) {
   ])
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col">
       {report.summaryTitle && (
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug">{report.summaryTitle}</p>
+        <p className="text-[15px] font-semibold text-gray-900 leading-snug mb-4">{report.summaryTitle}</p>
       )}
 
-      {report.channelsAnalyzed && (
-        <p className="text-[14px] text-gray-700 leading-relaxed">
-          <span className="font-semibold text-gray-900">Channels analyzed:</span> {report.channelsAnalyzed}
-        </p>
-      )}
-
-      {report.opportunityScope && (
-        <p className="text-[14px] text-gray-700 leading-relaxed">
-          <span className="font-semibold text-gray-900">Opportunity scope:</span> {report.opportunityScope}
-        </p>
+      {(report.channelsAnalyzed || report.opportunityScope) && (
+        <div className="flex flex-col gap-1.5 mb-6">
+          {report.channelsAnalyzed && (
+            <p className="text-[14px] text-gray-700 leading-relaxed">
+              <span className="font-semibold text-gray-900">Channels analyzed:</span> {report.channelsAnalyzed}
+            </p>
+          )}
+          {report.opportunityScope && (
+            <p className="text-[14px] text-gray-700 leading-relaxed">
+              <span className="font-semibold text-gray-900">Opportunity scope:</span> {report.opportunityScope}
+            </p>
+          )}
+        </div>
       )}
 
       {categories.length > 0 && (
-        <div>
-          <p className="text-[14px] font-semibold text-gray-900 mb-2">Channel snapshot</p>
-          <ul className="flex flex-col gap-3">
+        <div className="mb-10">
+          <p className="text-[12px] font-semibold text-gray-500 mb-3">Channel snapshot</p>
+          <ul className="flex flex-col gap-[18px]">
             {categories.map(category => (
-              <CategoryBullet key={category.name} category={category} />
+              <CategorySnapshotItem key={category.name} category={category} />
             ))}
           </ul>
         </div>
@@ -107,6 +108,7 @@ export default function ScanQuickSummary({ report }) {
 
       {topGapRows.length > 0 && (
         <ReportTable
+          className="mb-10"
           title="Top gaps to fix"
           columns={['Channel', 'Category', 'Issue category', 'Top fix examples']}
           rows={topGapRows}

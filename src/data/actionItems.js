@@ -62,7 +62,7 @@ export const actionItems = [
     autofix: true,
     manualFix: false,
     tags: ['Meta tags'],
-    affectedPages: 5,
+    affectedPages: 3,
     detailType: 'table',
     tableColumns: { page: 'Page', current: 'Current title', recommendation: 'Recommended title' },
     tableRows: [

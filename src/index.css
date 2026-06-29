@@ -3,6 +3,8 @@
 :root {
   --warning-250: #ffa35a;
   --hr-warning-250: #ffa35a;
+  --warning-300: #fa9209;
+  --hr-warning-300: #fa9209;
 }
 
 @theme {
