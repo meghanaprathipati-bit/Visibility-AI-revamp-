@@ -1025,9 +1025,6 @@ function ChatPanel({
                 }`}>
                   Overview
                 </span>
-                {selectedDashboardId === 'overview' && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
-                )}
               </button>
             )}
 
@@ -1092,9 +1089,6 @@ function ChatPanel({
                                     : 'hover:bg-gray-50'
                               }`}
                             >
-                              {isActive && (
-                                <span className="w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
-                              )}
                               <span className={`flex-1 min-w-0 text-[13px] truncate ${
                                 isActive
                                   ? 'font-semibold text-primary-600'

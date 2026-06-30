@@ -54,11 +54,11 @@ const CRAWL_KPIS = [
 ]
 
 const TOP_FINDINGS = [
-  { title: 'Missing meta descriptions',   severity: 'high',     pages: 124, impact: 'High impact',   effort: 'Easy fix'   },
-  { title: 'Missing LocalBusiness schema',severity: 'critical', pages: 31,  impact: 'High impact',   effort: 'Medium fix' },
-  { title: 'Broken internal links',       severity: 'medium',   pages: 34,  impact: 'Medium impact', effort: 'Easy fix'   },
-  { title: 'LCP above 4 s threshold',    severity: 'high',     pages: 12,  impact: 'High impact',   effort: 'Hard fix'   },
-  { title: 'Pages blocked by robots.txt', severity: 'high',     pages: 6,   impact: 'High impact',   effort: 'Easy fix'   },
+  { title: 'Missing meta descriptions',   severity: 'high',     pages: 124, impact: 'High impact',   effort: 'Easy fix',   catId: 'metatags',     findingId: 'm2'  },
+  { title: 'Missing LocalBusiness schema',severity: 'critical', pages: 31,  impact: 'High impact',   effort: 'Medium fix', catId: 'content',      findingId: 'cs2' },
+  { title: 'Broken internal links',       severity: 'medium',   pages: 34,  impact: 'Medium impact', effort: 'Easy fix',   catId: 'redirects',    findingId: 'r1'  },
+  { title: 'LCP above 4 s threshold',    severity: 'high',     pages: 12,  impact: 'High impact',   effort: 'Hard fix',   catId: 'speed',        findingId: 'sp1' },
+  { title: 'Pages blocked by robots.txt', severity: 'high',     pages: 6,   impact: 'High impact',   effort: 'Easy fix',   catId: 'crawlability', findingId: 'c9'  },
 ]
 
 const HTTP_CODES = [
@@ -196,7 +196,7 @@ function SemicircleGauge({ score, delta }) {
 
 // ─── Section 2: Health Summary ───────────────────────────────────────────────
 
-function HealthSummarySection({ compare }) {
+function HealthSummarySection({ compare, onTabSwitch }) {
   const total = RESULTS_BY_TYPE.reduce((s, r) => s + r.count, 0)
   return (
     <div className="grid grid-cols-3 gap-4 min-w-0">
@@ -211,10 +211,10 @@ function HealthSummarySection({ compare }) {
       <SectionCard className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-semibold text-gray-700">Results by type</p>
-          <button className="text-[12px] font-medium text-primary-600 hover:underline">View results</button>
+          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline">View results</button>
         </div>
         {/* Distribution bar */}
-        <div className="flex h-2 rounded-full overflow-hidden gap-px">
+        <div className="flex h-2.5 rounded-full overflow-hidden">
           {RESULTS_BY_TYPE.map(r => (
             <div key={r.label} style={{ flex: r.count, background: r.color }} />
           ))}
@@ -248,7 +248,7 @@ function HealthSummarySection({ compare }) {
       <SectionCard className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-semibold text-gray-700">Page health ratio</p>
-          <button className="text-[12px] font-medium text-primary-600 hover:underline">View by pages</button>
+          <button onClick={() => onTabSwitch?.('crawled')} className="text-[12px] font-medium text-primary-600 hover:underline">View by pages</button>
         </div>
         <div>
           <p className="text-[28px] font-bold text-gray-900 leading-none">{TOTAL_PAGES.toLocaleString()}</p>
@@ -256,8 +256,8 @@ function HealthSummarySection({ compare }) {
         </div>
         {/* Stacked bar */}
         <div className="flex h-2.5 rounded-full overflow-hidden">
-          <div className="bg-success-600" style={{ width: `${(HEALTHY_PAGES / TOTAL_PAGES) * 100}%` }} />
-          <div className="bg-error-500" style={{ width: `${(ISSUE_PAGES / TOTAL_PAGES) * 100}%` }} />
+          <div className="bg-success-600" style={{ flex: HEALTHY_PAGES }} />
+          <div className="bg-error-600" style={{ flex: ISSUE_PAGES }} />
         </div>
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
@@ -282,7 +282,7 @@ function HealthSummarySection({ compare }) {
 
 // ─── Section 3 & 4: Fix Coverage + Indexability ──────────────────────────────
 
-function FixAndIndexSection() {
+function FixAndIndexSection({ onTabSwitch }) {
   const autoFixed = FIX_COVERAGE.find(f => f.label === 'Fixed since last scan')?.value ?? 0
   const total = FIX_COVERAGE.filter(f => !f.label.startsWith('Fixed')).reduce((s, f) => s + f.value, 0)
   const [autoW, assistW, recW] = FIX_COVERAGE.slice(0, 3).map(f => ((f.value / (total || 1)) * 100).toFixed(1))
@@ -298,7 +298,7 @@ function FixAndIndexSection() {
             <p className="text-[14px] font-semibold text-gray-900">Fix coverage</p>
             <p className="text-[12px] text-gray-400 mt-0.5">A split of what can be auto-fixed, assisted, or manual-only</p>
           </div>
-          <button className="shrink-0 text-[12px] font-medium text-primary-600 border border-primary-200 bg-primary-50 px-3 py-1.5 rounded-lg hover:bg-primary-100 transition-colors">
+          <button onClick={() => onTabSwitch?.('scan')} className="shrink-0 text-[12px] font-medium text-primary-600 hover:underline">
             Review in scan results
           </button>
         </div>
@@ -333,14 +333,17 @@ function FixAndIndexSection() {
             <p className="text-[14px] font-semibold text-gray-900">Indexability snapshot</p>
             <p className="text-[12px] text-gray-400 mt-0.5">Discoverability across your crawled pages</p>
           </div>
+          <button className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">
+            View affected pages →
+          </button>
         </div>
 
         {/* Stacked bar */}
-        <div className="flex h-4 rounded-full overflow-hidden gap-[2px]">
-          <div className="rounded-l-full" style={{ background: '#16A34A', width: `${(INDEXABLE / TOTAL_PAGES) * 100}%` }} />
-          <div style={{ background: '#DC2626', width: `${((NOT_INDEXABLE - REDIRECTING - CANONICALIZED) / TOTAL_PAGES) * 100}%`, minWidth: NOT_INDEXABLE - REDIRECTING - CANONICALIZED > 0 ? '8px' : 0 }} />
-          <div style={{ background: '#D97706', width: `${(REDIRECTING / TOTAL_PAGES) * 100}%`, minWidth: REDIRECTING > 0 ? '8px' : 0 }} />
-          <div className="rounded-r-full" style={{ background: '#7C3AED', width: `${(CANONICALIZED / TOTAL_PAGES) * 100}%`, minWidth: CANONICALIZED > 0 ? '8px' : 0 }} />
+        <div className="flex h-2.5 rounded-full overflow-hidden">
+          <div style={{ background: '#16A34A', flex: INDEXABLE }} />
+          <div style={{ background: '#DC2626', flex: NOT_INDEXABLE - REDIRECTING - CANONICALIZED, minWidth: (NOT_INDEXABLE - REDIRECTING - CANONICALIZED) > 0 ? 8 : 0 }} />
+          <div style={{ background: '#D97706', flex: REDIRECTING, minWidth: REDIRECTING > 0 ? 8 : 0 }} />
+          <div style={{ background: '#7C3AED', flex: CANONICALIZED, minWidth: CANONICALIZED > 0 ? 8 : 0 }} />
         </div>
 
         {/* Stat cards grid */}
@@ -354,7 +357,7 @@ function FixAndIndexSection() {
           return (
             <div className="grid grid-cols-2 gap-2">
               {stats.map(s => (
-                <div key={s.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border" style={{ background: s.bg, borderColor: s.border }}>
+                <div key={s.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-gray-200 bg-white">
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
                   <div className="flex-1 min-w-0">
                     <p className="text-[11px] text-gray-500 leading-none mb-0.5">{s.label}</p>
@@ -367,9 +370,6 @@ function FixAndIndexSection() {
           )
         })()}
 
-        <button className="text-[12px] font-medium text-primary-600 hover:underline text-left">
-          View affected pages →
-        </button>
       </SectionCard>
     </div>
   )
@@ -397,7 +397,7 @@ function CrawlSnapshotStrip() {
 
 // ─── Section 6: Top Findings ─────────────────────────────────────────────────
 
-function TopFindingsSection() {
+function TopFindingsSection({ onFindingClick, onTabSwitch }) {
   return (
     <SectionCard>
       <div className="p-4 flex items-start justify-between gap-4">
@@ -405,27 +405,21 @@ function TopFindingsSection() {
           <p className="text-[14px] font-semibold text-gray-900">Top findings</p>
           <p className="text-[12px] text-gray-400 mt-0.5">Most impactful issues from this scan — prioritised by severity and page count</p>
         </div>
-        <button className="shrink-0 text-[12px] font-medium text-primary-600 hover:underline">Open findings</button>
+        <button onClick={() => onTabSwitch?.('scan')} className="shrink-0 text-[12px] font-medium text-primary-600 hover:underline">Open findings</button>
       </div>
 
       <div className="px-4 pb-4 flex flex-col gap-1.5">
-        {TOP_FINDINGS.map((finding, i) => {
-          const sev = SEVERITY_STYLE[finding.severity]
-          return (
-            <div
-              key={i}
-              className="flex items-center gap-3 border border-gray-100 rounded-lg px-3 py-2.5 hover:border-gray-200 hover:bg-gray-50/50 transition-all cursor-pointer min-w-0"
-            >
-              {/* Title */}
-              <p className="flex-1 min-w-0 text-[13px] font-medium text-gray-800 truncate">{finding.title}</p>
-
-              {/* Affected pages — single line, regular weight */}
-              <span className="shrink-0 text-[13px] text-gray-500 whitespace-nowrap">{finding.pages} pages</span>
-
-              <ChevronRight size={14} className="text-gray-300 shrink-0" />
-            </div>
-          )
-        })}
+        {TOP_FINDINGS.map((finding, i) => (
+          <button
+            key={i}
+            onClick={() => onFindingClick(finding.catId, finding.findingId)}
+            className="flex items-center gap-3 border border-gray-100 rounded-lg px-3 py-2.5 hover:border-primary-200 hover:bg-primary-50/30 transition-all cursor-pointer min-w-0 text-left w-full"
+          >
+            <p className="flex-1 min-w-0 text-[13px] font-medium text-gray-800 truncate">{finding.title}</p>
+            <span className="shrink-0 text-[13px] text-gray-500 whitespace-nowrap">{finding.pages} pages</span>
+            <ChevronRight size={14} className="text-gray-300 shrink-0" />
+          </button>
+        ))}
       </div>
     </SectionCard>
   )
@@ -683,7 +677,7 @@ function TechnicalDiagnostics() {
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
-function OverviewTab() {
+function OverviewTab({ onFindingClick, onTabSwitch }) {
   const [compare, setCompare] = useState(false)
   const [currentIdx, setCurrentIdx] = useState(0)
   const [compareIdx, setCompareIdx] = useState(1)
@@ -748,16 +742,16 @@ function OverviewTab() {
       </div>
 
       {/* Section 2: Health Summary */}
-      <HealthSummarySection compare={compare} />
+      <HealthSummarySection compare={compare} onTabSwitch={onTabSwitch} />
 
       {/* Section 3 + 4: Fix Coverage + Indexability */}
-      <FixAndIndexSection />
+      <FixAndIndexSection onTabSwitch={onTabSwitch} />
 
       {/* Section 5: Crawl Snapshot */}
       <CrawlSnapshotStrip />
 
       {/* Section 6: Top Findings */}
-      <TopFindingsSection />
+      <TopFindingsSection onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} />
 
       {/* Section 7: Technical Diagnostics */}
       <TechnicalDiagnostics />
@@ -1251,7 +1245,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
   const impactLabel      = IMPACT_META[finding.impact]?.label || null
 
   return (
-    <div className={`bg-white transition-colors ${isExpanded ? 'bg-gray-50/50' : 'hover:bg-gray-50/60'}`}>
+    <div id={`finding-${finding.id}`} className={`bg-white transition-colors ${isExpanded ? 'bg-gray-50/50' : 'hover:bg-gray-50/60'}`}>
 
       {/* ── Row: click to expand ── */}
       <div
@@ -1649,7 +1643,7 @@ function CategoryNavBar({ activeCategoryId, openCategoryId, activeSevs, onJump }
   )
 }
 
-function ScanResultsTab() {
+function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
   const [sevFilters,       setSevFilters]       = useState(new Set())
   const [openCategoryId,   setOpenCategoryId]   = useState(SCAN_DATA[0].id)
   const [expandedFindings, setExpandedFindings] = useState(new Set())
@@ -1666,6 +1660,21 @@ function ScanResultsTab() {
 
   const tabRef      = useRef(null)
   const alertTimer  = useRef(null)
+
+  // ── Jump to a specific category + finding from Top findings ──
+  useEffect(() => {
+    if (!jumpTarget) return
+    const { catId, findingId } = jumpTarget
+    setOpenCategoryId(catId)
+    setActiveCategoryId(catId)
+    setExpandedFindings(prev => { const n = new Set(prev); n.add(findingId); return n })
+    // Scroll after a brief paint delay so the accordion has rendered
+    setTimeout(() => {
+      const el = document.getElementById(`finding-${findingId}`)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      onJumpConsumed?.()
+    }, 120)
+  }, [jumpTarget])
 
   // ── Detect scroll container and track depth ──
   useEffect(() => {
@@ -1987,10 +1996,22 @@ const CRAWLED_PAGE_DATA = [
 ]
 
 function httpCodeStyle(code) {
-  if (code === 200)            return { color: '#16A34A' }
+  if (code === 200)              return { color: '#16A34A' }
   if (code >= 300 && code < 400) return { color: '#D97706' }
   if (code >= 400 && code < 500) return { color: '#DC2626' }
-  return                             { color: '#7C3AED' }
+  return                                { color: '#7C3AED' }
+}
+
+function httpCodeTag(code) {
+  if (code === 200)              return 'bg-success-50 border-success-200 text-success-700'
+  if (code >= 300 && code < 400) return 'bg-warning-100 border-warning-200 text-warning-600'
+  if (code >= 400 && code < 500) return 'bg-error-50 border-error-200 text-error-600'
+  return 'bg-purple-50 border-purple-200 text-purple-700'
+}
+
+function indexStatusTag(status) {
+  if (status === 'Ok') return 'bg-success-50 border-success-200 text-success-700'
+  return 'bg-warning-100 border-warning-200 text-warning-600'
 }
 
 const FOUND_LINKS_DATA = [
@@ -2753,6 +2774,19 @@ function CrawledPagesTab() {
     { id: 'notices',  label: 'Notices',  count: 11 },
   ]
 
+  const colPickerRef = useRef(null)
+
+  useEffect(() => {
+    if (!showColumns) return
+    function handleClickOutside(e) {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target)) {
+        setShowColumns(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showColumns])
+
   const toggleCol = id => setVisibleCols(v => ({ ...v, [id]: !v[id] }))
   const toggleRow = url => setSelected(s => s.includes(url) ? s.filter(u => u !== url) : [...s, url])
   const allSel    = selected.length === CRAWLED_PAGE_DATA.length
@@ -2760,11 +2794,7 @@ function CrawledPagesTab() {
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls
-        rightSlot={
-          <span className="text-[12px] text-gray-500">Pages crawled <span className="font-semibold text-gray-700">3/3</span></span>
-        }
-      />
+      <ReportControls />
 
       {/* Filter + action bar */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -2803,7 +2833,7 @@ function CrawledPagesTab() {
         )}
 
         <div className="ml-auto flex items-center gap-2">
-          <div className="relative">
+          <div className="relative" ref={colPickerRef}>
             {/* Column count trigger */}
             <button
               onClick={() => { setShowColumns(c => !c); setColSearch('') }}
@@ -2905,7 +2935,6 @@ function CrawledPagesTab() {
             {filteredData.map(page => {
               const isSel = selected.includes(page.url)
               const isExpanded = expandedRow === page.url
-              const codeStyle = httpCodeStyle(page.httpCode)
               const pageSel = selectedFindings[page.url] || []
               const colSpanCount = 2 + Object.values(visibleCols).filter(Boolean).length
 
@@ -2918,50 +2947,53 @@ function CrawledPagesTab() {
               return (
                 <>
                   <tr key={page.url} className={`border-b border-gray-50 transition-colors hover:bg-gray-50/40 ${isSel ? 'bg-primary-50/30' : ''} ${isExpanded ? 'border-b-0' : ''}`}>
-                    <td className="px-4 py-3">
+                    <td className="px-4 py-3.5">
                       <input type="checkbox" checked={isSel} onChange={() => toggleRow(page.url)} style={{ accentColor: '#155EEF', width: 15, height: 15 }} />
                     </td>
-                    <td className="px-4 py-3">
-                      <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[380px]">{page.url}</a>
+                    <td className="px-4 py-3.5">
+                      <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[360px]">{page.url}</a>
                     </td>
                     {visibleCols.results && (
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         <button
                           onClick={() => setExpandedRow(isExpanded ? null : page.url)}
-                          className="inline-flex items-center gap-2 group"
+                          className="inline-flex items-center gap-2.5 group"
                         >
-                          <div className="flex flex-col items-start">
-                            <span className="text-[15px] font-bold text-gray-900 leading-none">{page.results.cur}</span>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="text-[11px] font-medium text-primary-600">Cur {page.results.cur}</span>
-                              <span className="text-gray-200">·</span>
-                              <span className="text-[11px] font-medium text-warning-600">New {page.results.isNew}</span>
-                              <span className="text-gray-200">·</span>
-                              <span className="text-[11px] font-medium text-success-600">Fix {page.results.fix}</span>
-                            </div>
+                          <span className="text-[14px] font-bold text-gray-900 tabular-nums">{page.results.cur}</span>
+                          <div className="flex items-center gap-1">
+                            {page.results.isNew > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md border bg-warning-100 border-warning-200 text-[10px] font-semibold text-warning-600">+{page.results.isNew} new</span>
+                            )}
+                            {page.results.fix > 0 && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded-md border bg-success-50 border-success-200 text-[10px] font-semibold text-success-700">{page.results.fix} fix</span>
+                            )}
                           </div>
-                          <ChevronRight size={13} className={`text-gray-300 group-hover:text-gray-500 transition-all duration-150 ${isExpanded ? 'rotate-90 text-gray-500' : ''}`} />
+                          <ChevronRight size={12} className={`text-gray-300 group-hover:text-gray-500 transition-all duration-150 shrink-0 ${isExpanded ? 'rotate-90 text-gray-500' : ''}`} />
                         </button>
                       </td>
                     )}
-                    {visibleCols.traffic     && <td className="px-4 py-3 text-[13px] font-medium text-gray-800">{page.traffic.toLocaleString()}</td>}
-                    {visibleCols.httpCode    && <td className="px-4 py-3"><span className="text-[13px] font-semibold" style={{ color: codeStyle.color }}>{page.httpCode}</span></td>}
+                    {visibleCols.traffic     && <td className="px-4 py-3.5 text-[13px] text-gray-700 tabular-nums">{page.traffic.toLocaleString()}</td>}
+                    {visibleCols.httpCode    && (
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
+                      </td>
+                    )}
                     {visibleCols.indexable   && (
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3.5">
                         {page.indexable
-                          ? <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border bg-success-50 border-success-200 text-[11px] font-semibold text-success-700"><CircleCheck size={10} /> Indexable</span>
-                          : <span className="text-[13px] text-gray-400 font-medium">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border bg-success-50 border-success-200 text-[11px] font-semibold text-success-700"><CircleCheck size={9} />Indexable</span>
+                          : <span className="text-[13px] text-gray-400">—</span>
                         }
                       </td>
                     )}
                     {visibleCols.indexStatus && (
-                      <td className="px-4 py-3">
-                        <span className={`text-[12px] font-semibold ${page.indexStatus === 'Ok' ? 'text-success-600' : 'text-warning-600'}`}>{page.indexStatus}</span>
+                      <td className="px-4 py-3.5">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold ${indexStatusTag(page.indexStatus)}`}>{page.indexStatus}</span>
                       </td>
                     )}
-                    {visibleCols.referring   && <td className="px-4 py-3 text-[13px] text-gray-800">{page.referring}</td>}
-                    {visibleCols.depth       && <td className="px-4 py-3 text-[13px] text-gray-800">{page.depth}</td>}
-                    {visibleCols.keywords    && <td className="px-4 py-3 text-[13px] text-gray-800">{page.keywords.toLocaleString()}</td>}
+                    {visibleCols.referring   && <td className="px-4 py-3.5 text-[13px] text-gray-700 tabular-nums">{page.referring}</td>}
+                    {visibleCols.depth       && <td className="px-4 py-3.5 text-[13px] text-gray-700 tabular-nums">{page.depth}</td>}
+                    {visibleCols.keywords    && <td className="px-4 py-3.5 text-[13px] text-gray-700 tabular-nums">{page.keywords.toLocaleString()}</td>}
                   </tr>
 
                   {isExpanded && (
@@ -2971,10 +3003,10 @@ function CrawledPagesTab() {
                           <table className="w-full border-collapse text-left">
                             <thead>
                               <tr className="border-b border-gray-200 bg-gray-100/80">
-                                <th className="pl-14 pr-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide w-10">Select to fix</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide w-40">Severity</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide w-36">Status</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wide">Description</th>
+                                <th className="pl-14 pr-4 py-2.5 text-[11px] font-semibold text-gray-500 w-10">Select to fix</th>
+                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500 w-40">Severity</th>
+                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500 w-36">Status</th>
+                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-500">Description</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -3179,6 +3211,19 @@ function FoundLinksTab() {
     : filter === 'internal' ? FOUND_LINKS_DATA.filter(l => l.type === 'Internal')
     : FOUND_LINKS_DATA.filter(l => l.type === 'External')
 
+  const linkColPickerRef = useRef(null)
+
+  useEffect(() => {
+    if (!showColumns) return
+    function handleClickOutside(e) {
+      if (linkColPickerRef.current && !linkColPickerRef.current.contains(e.target)) {
+        setShowColumns(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showColumns])
+
   const toggleLinkCol = id => setLinkCols(v => ({ ...v, [id]: !v[id] }))
 
   return (
@@ -3238,7 +3283,7 @@ function FoundLinksTab() {
           <span>·</span>
           <span>{internalCount} internal · {externalCount} external</span>
         </div>
-        <div className="relative">
+        <div className="relative" ref={linkColPickerRef}>
           <button
             onClick={() => { setShowColumns(c => !c); setColSearch('') }}
             className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
@@ -3457,6 +3502,7 @@ function CrawlComparisonTab() {
   const DATE1 = '2026-06-30 06:52:29'
   const DATE2 = '2026-06-30 06:51:45'
 
+  /* Rule: ALL table column headers must use text-gray-500 — no severity colors in headers */
   const TH_CLS = 'px-5 py-3 text-[12px] font-semibold text-gray-500 border-b border-gray-100 bg-gray-50/60 whitespace-nowrap text-left'
   const TD_CLS = 'px-5 py-3.5 text-[13px] border-b border-gray-50 last:border-0'
 
@@ -3486,7 +3532,7 @@ function CrawlComparisonTab() {
       {/* Date selectors + toggle */}
       <div className="border border-gray-200 rounded-lg bg-white px-5 py-4 flex items-end gap-4 flex-wrap">
         <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">First audit date</p>
+          <p className="text-[11px] font-semibold text-gray-400">First audit date</p>
           <div className="relative">
             <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <select className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors">
@@ -3497,7 +3543,7 @@ function CrawlComparisonTab() {
           </div>
         </div>
         <div className="flex flex-col gap-1.5 flex-1 min-w-[200px]">
-          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wide">Second audit date</p>
+          <p className="text-[11px] font-semibold text-gray-400">Second audit date</p>
           <div className="relative">
             <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <select className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors">
@@ -3540,8 +3586,8 @@ function CrawlComparisonTab() {
               <th className={TH_CLS + ' w-[40%]'}>Results</th>
               <th className={TH_CLS}>{DATE1}</th>
               <th className={TH_CLS}>{DATE2}</th>
-              <th className={TH_CLS + ' text-success-600'}>Fixed</th>
-              <th className={TH_CLS + ' text-warning-600'}>New</th>
+              <th className={TH_CLS}>Fixed</th>
+              <th className={TH_CLS}>New</th>
             </tr>
           </thead>
           <tbody>
@@ -3575,8 +3621,8 @@ function CrawlComparisonTab() {
               <th className={TH_CLS + ' w-[40%]'}>Metric</th>
               <th className={TH_CLS}>{DATE1}</th>
               <th className={TH_CLS}>{DATE2}</th>
-              <th className={TH_CLS + ' text-success-600'}>Fixed</th>
-              <th className={TH_CLS + ' text-warning-600'}>New</th>
+              <th className={TH_CLS}>Fixed</th>
+              <th className={TH_CLS}>New</th>
             </tr>
           </thead>
           <tbody>
@@ -3606,8 +3652,8 @@ function CrawlComparisonTab() {
                 <th className={TH_CLS + ' w-[40%]'}>Issue</th>
                 <th className={TH_CLS}>{DATE1}</th>
                 <th className={TH_CLS}>{DATE2}</th>
-                <th className={TH_CLS + ' text-success-600'}>Fixed</th>
-                <th className={TH_CLS + ' text-warning-600'}>New</th>
+                <th className={TH_CLS}>Fixed</th>
+                <th className={TH_CLS}>New</th>
               </tr>
             </thead>
             <tbody>
@@ -3646,36 +3692,6 @@ const TABS = [
 
 // ─── Initial / pre-scan state ────────────────────────────────────────────────
 
-const FEATURES = [
-  { Icon: Globe,         color: '#0D9488', bg: '#F0FDFA', label: 'Crawl the site',    sub: 'Pages, links, and assets'  },
-  { Icon: AlertTriangle, color: '#D97706', bg: '#FFFBEB', label: 'Spot what matters', sub: 'Errors first'              },
-  { Icon: BarChart3,     color: '#7C3AED', bg: '#F5F3FF', label: 'Track progress',    sub: 'Compare every crawl'       },
-]
-
-const DETAIL_CARDS = [
-  {
-    Icon: LayoutDashboard, color: '#2563EB', bg: '#EFF6FF',
-    chip: 'Score + top issues',
-    title: 'Health snapshot',
-    desc: 'Get the big picture fast, then zoom into the fixes with the highest SEO impact.',
-    tabs: ['Overview', 'Scan results'],
-  },
-  {
-    Icon: Link2, color: '#0D9488', bg: '#F0FDFA',
-    chip: 'URLs + internal linking',
-    title: 'Page and link map',
-    desc: 'See which pages need attention and where broken or weak link paths are holding them back.',
-    tabs: ['Crawled pages', 'Found links'],
-  },
-  {
-    Icon: TrendingUp, color: '#7C3AED', bg: '#F5F3FF',
-    chip: 'Resources + change tracking',
-    title: 'Assets and trends',
-    desc: 'Catch heavy resources, rendering friction, and whether your last fixes improved the crawl.',
-    tabs: ['Resources', 'Crawl comparison'],
-  },
-]
-
 const WORKFLOW_STEPS = [
   { n: '01', Icon: Search,        color: '#2563EB', bg: '#EFF6FF', label: 'Discover',  desc: 'We crawl your site structure and collect URLs, links, and resources.' },
   { n: '02', Icon: AlertTriangle, color: '#D97706', bg: '#FFFBEB', label: 'Diagnose',  desc: 'Issues are grouped by severity so your team knows what to fix first.' },
@@ -3686,12 +3702,109 @@ function Toggle({ on, onChange }) {
   return (
     <button
       onClick={() => onChange(!on)}
-      className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${on ? 'bg-primary-600' : 'bg-gray-200'}`}
+      className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${on ? 'bg-primary-600' : 'bg-gray-200'}`}
     >
-      <span className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`} />
+      <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`} />
     </button>
   )
 }
+
+const TRUST_SIGNALS = [
+  { Icon: CircleCheck, color: '#16A34A', bg: '#F0FDF4', label: 'Safe & respectful crawl',  sub: 'We follow robots.txt and your settings' },
+  { Icon: Award,       color: '#7C3AED', bg: '#F5F3FF', label: 'Your data is private',      sub: 'Only you can see your audit data'       },
+  { Icon: Clock,       color: '#2563EB', bg: '#EFF6FF', label: 'Crawl history',             sub: 'Compare and track over time'            },
+]
+
+function InitialCardPreviewHealth() {
+  return (
+    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center gap-3">
+      <div className="shrink-0 flex flex-col items-center gap-0.5">
+        <div className="w-11 h-11 rounded-full border-[3px] flex items-center justify-center bg-white" style={{ borderColor: '#16A34A' }}>
+          <span className="text-[13px] font-bold text-gray-900">82</span>
+        </div>
+        <span className="text-[9px] text-gray-400">/100</span>
+      </div>
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        {[
+          { Icon: AlertTriangle, c: '#DC2626', label: 'Errors',   v: 124 },
+          { Icon: AlertTriangle, c: '#D97706', label: 'Warnings', v: 243 },
+          { Icon: CircleCheck,   c: '#2563EB', label: 'Notices',  v: 532 },
+        ].map(({ Icon, c, label, v }) => (
+          <div key={label} className="flex items-center justify-between">
+            <div className="flex items-center gap-1">
+              <Icon size={9} style={{ color: c }} />
+              <span className="text-[10px] text-gray-500">{label}</span>
+            </div>
+            <span className="text-[10px] font-bold" style={{ color: c }}>{v}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function InitialCardPreviewLinks() {
+  const items = [
+    { s: 'ok' }, { s: 'warn' }, { s: 'ok' },
+    { s: 'err' }, { s: 'ok' }, { s: 'warn' },
+  ]
+  return (
+    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3">
+      <div className="grid grid-cols-3 gap-1.5">
+        {items.map(({ s }, i) => (
+          <div key={i} className={`h-6 rounded-md flex items-center justify-center border text-[9px] font-semibold ${
+            s === 'ok'   ? 'bg-white border-gray-200 text-gray-300' :
+            s === 'warn' ? 'bg-warning-100 border-warning-200 text-warning-600' :
+                           'bg-error-50 border-error-200 text-error-600'
+          }`}>
+            {s === 'ok' ? <div className="w-5 h-0.5 bg-gray-200 rounded" /> : <AlertTriangle size={8} />}
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function InitialCardPreviewTrends() {
+  return (
+    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3">
+      <svg viewBox="0 0 120 36" className="w-full" style={{ height: 36, display: 'block' }}>
+        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4 L120,36 L0,36Z" fill="#EFF6FF" />
+        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        {[[0,30],[40,26],[80,16],[120,4]].map(([x,y], i) => (
+          <circle key={i} cx={x} cy={y} r="2.5" fill="#2563EB" />
+        ))}
+      </svg>
+    </div>
+  )
+}
+
+const DETAIL_CARDS_V2 = [
+  {
+    Icon: LayoutDashboard, color: '#2563EB', bg: '#EFF6FF',
+    chip: 'Score + top issues',
+    title: 'Health snapshot',
+    desc: 'Get your overall health score and the issues impacting SEO the most.',
+    tabs: ['Overview', 'Scan results'],
+    Preview: InitialCardPreviewHealth,
+  },
+  {
+    Icon: Link2, color: '#0D9488', bg: '#F0FDFA',
+    chip: 'URLs + internal linking',
+    title: 'Page & link map',
+    desc: 'Find out which pages need attention and where broken or weak links are holding you back.',
+    tabs: ['Crawled pages', 'Found links'],
+    Preview: InitialCardPreviewLinks,
+  },
+  {
+    Icon: TrendingUp, color: '#7C3AED', bg: '#F5F3FF',
+    chip: 'Resources + change tracking',
+    title: 'Assets & trends',
+    desc: 'Catch heavy resources, rendering friction, and track improvements over time.',
+    tabs: ['Resources', 'Crawl comparison'],
+    Preview: InitialCardPreviewTrends,
+  },
+]
 
 function SiteHealthInitialState({ onLaunch }) {
   const [url, setUrl]           = useState('')
@@ -3703,125 +3816,152 @@ function SiteHealthInitialState({ onLaunch }) {
   const [advanced, setAdvanced] = useState(false)
 
   const chips = [
-    agent, `${maxPages} pages`, `${speed} req/s`,
-    jsOn ? 'JS on' : 'JS off',
-    robotsOn ? 'robots.txt on' : 'robots.txt off',
+    { label: agent, active: true },
+    { label: `${maxPages} pages` },
+    { label: `${speed} req/s` },
+    { label: jsOn ? 'JS on' : 'JS off' },
+    { label: robotsOn ? 'robots.txt on' : 'robots.txt off' },
+  ]
+
+  const FEATURES_V2 = [
+    { Icon: Globe,         color: '#0D9488', bg: '#F0FDFA', label: 'Crawl the entire site', sub: 'Pages, links, assets & more'  },
+    { Icon: AlertTriangle, color: '#D97706', bg: '#FFFBEB', label: 'Spot what matters',     sub: 'Errors first, save time'       },
+    { Icon: BarChart3,     color: '#7C3AED', bg: '#F5F3FF', label: 'Track & improve',       sub: 'Compare every crawl'           },
   ]
 
   return (
-    /* Gray background with equal padding on all 4 sides — white card never crops */
     <div className="flex-1 min-w-0 min-h-0 h-full bg-gray-50 p-4 flex overflow-hidden">
       <div
-        className="flex-1 min-w-0 bg-white rounded-xl border border-gray-200 overflow-hidden"
-        style={{ boxShadow: '0 1px 4px rgba(0,0,0,.06)', display: 'grid', gridTemplateColumns: '1fr auto' }}
+        className="flex-1 min-w-0 bg-white rounded-xl overflow-hidden"
+        style={{ boxShadow: '0 2px 12px rgba(0,0,0,.08)', display: 'grid', gridTemplateColumns: '1fr 360px' }}
       >
 
-        {/* ── Left column: scrollable content ── */}
-        <div className="overflow-y-auto min-w-0 border-r border-gray-100" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
-          <div className="p-6 flex flex-col gap-6">
+        {/* ── Left: fixed, no scroll ── */}
+        <div className="overflow-hidden min-w-0 border-r border-gray-100 p-6 flex flex-col gap-5">
 
-            {/* Hero */}
-            <div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[11px] font-semibold text-primary-700 mb-3 block w-fit">
-                <Globe size={11} />
-                Website audit
-              </span>
-              <h1 className="text-[22px] font-bold text-gray-900 leading-snug mb-2 max-w-[560px]">
-                See what is blocking organic growth before your team fixes the wrong things
-              </h1>
-              <p className="text-[13px] text-gray-500 leading-relaxed max-w-[520px]">
-                Run one crawl, get a clean health snapshot, and move straight into the pages, links, resources, and trends that matter most for SEO performance.
-              </p>
-            </div>
-
-            {/* 3 quick features */}
-            <div className="grid grid-cols-3 gap-4">
-              {FEATURES.map(({ Icon, color, bg, label, sub }) => (
-                <div key={label} className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
-                    <Icon size={15} style={{ color }} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-gray-900">{label}</p>
-                    <p className="text-[12px] text-gray-400">{sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Detail cards */}
-            <div className="grid grid-cols-3 gap-3">
-              {DETAIL_CARDS.map(({ Icon, color, bg, chip, title, desc, tabs }) => (
-                <div key={title} className="border border-gray-200 rounded-lg p-4 flex flex-col gap-3 hover:border-gray-300 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center shrink-0" style={{ background: bg }}>
-                      <Icon size={14} style={{ color }} />
-                    </div>
-                    <span className="text-[11px] font-semibold text-gray-500 bg-gray-50 border border-gray-200 rounded-md px-2 py-0.5 leading-tight">{chip}</span>
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-bold text-gray-900 mb-1">{title}</p>
-                    <p className="text-[12px] text-gray-500 leading-relaxed">{desc}</p>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5 mt-auto">
-                    {tabs.map(t => (
-                      <span key={t} className="text-[11px] font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-full px-2.5 py-0.5">{t}</span>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* What happens next — moved here, below the cards */}
-            <div>
-              <div className="flex items-center gap-2 mb-4">
-                <p className="text-[13px] font-semibold text-gray-700">What happens next</p>
-                <div className="flex-1 h-px bg-gray-100" />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                {WORKFLOW_STEPS.map(({ n, Icon, color, bg, label, desc }) => (
-                  <div key={n} className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5" style={{ background: bg }}>
-                      <Icon size={15} style={{ color }} />
-                    </div>
-                    <div>
-                      <p className="text-[12px] font-bold text-gray-900 leading-snug">
-                        <span className="text-gray-400 font-normal mr-1">{n}</span>{label}
-                      </p>
-                      <p className="text-[12px] text-gray-400 leading-relaxed mt-0.5">{desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+          {/* Hero */}
+          <div>
+            <h1 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
+              Uncover what's holding back your{' '}
+              <span className="text-primary-600">organic growth</span>{' '}
+              <TrendingUp size={22} className="inline text-primary-600 -mt-1" />
+            </h1>
+            <p className="text-[13px] text-gray-500 leading-relaxed">
+              Run a complete crawl to get a clear snapshot of your site's health and fix what matters most for better SEO performance.
+            </p>
           </div>
+
+          {/* Feature strip */}
+          <div className="grid grid-cols-3 gap-4">
+            {FEATURES_V2.map(({ Icon, color, bg, label, sub }) => (
+              <div key={label} className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                  <Icon size={16} style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-[13px] font-semibold text-gray-900">{label}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Preview cards */}
+          <div className="grid grid-cols-3 gap-3">
+            {DETAIL_CARDS_V2.map(({ Icon, color, bg, chip, title, desc, tabs, Preview }) => (
+              <div key={title} className="border border-gray-200 rounded-xl p-4 flex flex-col hover:border-gray-300 hover:shadow-sm transition-all">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                    <Icon size={13} style={{ color }} />
+                  </div>
+                  <span className="text-[10px] font-semibold text-gray-500 bg-gray-50 border border-gray-100 rounded-md px-2 py-0.5 truncate">{chip}</span>
+                </div>
+                <p className="text-[13px] font-bold text-gray-900">{title}</p>
+                <p className="text-[11px] text-gray-400 leading-relaxed mt-1">{desc}</p>
+                <Preview />
+                <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
+                  {tabs.map(t => (
+                    <span key={t} className="text-[10px] font-medium text-gray-600 bg-white border border-gray-200 rounded-full px-2.5 py-0.5">{t}</span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* What happens next */}
+          <div>
+            <p className="text-[13px] font-semibold text-gray-700 mb-3">What happens next</p>
+            <div className="flex items-start">
+              {WORKFLOW_STEPS.map(({ n, Icon, color, bg, label, desc }, i) => (
+                <div key={n} className="flex items-start flex-1 min-w-0">
+                  {/* Step column: icon+label on top, description below — always aligned */}
+                  <div className="flex flex-col gap-2 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: bg }}>
+                        <Icon size={14} style={{ color }} />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 leading-none">{n}</p>
+                        <p className="text-[13px] font-bold text-gray-900 leading-tight">{label}</p>
+                      </div>
+                    </div>
+                    <p className="text-[11px] text-gray-400 leading-snug">{desc}</p>
+                  </div>
+                  {/* Dashed connector: fixed width, vertically centered with the icon (mt-4 = half of h-8) */}
+                  {i < WORKFLOW_STEPS.length - 1 && (
+                    <div className="shrink-0 w-12 mt-4 mx-3 border-t-2 border-dashed border-gray-200" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Trust signals */}
+          <div className="grid grid-cols-3 gap-4 pt-5 border-t border-gray-100">
+            {TRUST_SIGNALS.map(({ Icon, color, bg, label, sub }) => (
+              <div key={label} className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                  <Icon size={14} style={{ color }} />
+                </div>
+                <div>
+                  <p className="text-[12px] font-semibold text-gray-700">{label}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
         </div>
 
-        {/* ── Right column: config form, CTA always pinned at bottom via CSS Grid ── */}
-        <div
-          className="w-[340px] shrink-0 overflow-hidden"
-          style={{ display: 'grid', gridTemplateRows: '1fr auto' }}
-        >
-          {/* Row 1 — Config fields (scrolls if needed) */}
-          <div className="px-5 pt-6 pb-2 flex flex-col gap-4 overflow-y-auto min-h-0" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
-            <div>
-              <p className="text-[14px] font-bold text-gray-900 mb-0.5">Start your audit</p>
-              <p className="text-[12px] text-gray-400">Enter your website and launch the crawl</p>
+        {/* ── Right: config panel ── */}
+        <div className="flex flex-col overflow-hidden">
+
+          {/* Scrollable config */}
+          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
+
+            {/* Header */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+                <Zap size={18} className="text-primary-600" />
+              </div>
+              <div>
+                <p className="text-[15px] font-bold text-gray-900 leading-none">Start your audit</p>
+                <p className="text-[12px] text-gray-400 mt-0.5">Enter your website and launch the crawl</p>
+              </div>
             </div>
 
             {/* Config chips */}
             <div className="flex flex-wrap gap-1.5">
-              {chips.map(c => (
-                <span key={c} className="text-[11px] font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-full px-2.5 py-1">{c}</span>
+              {chips.map(({ label, active }) => (
+                <span key={label} className={`text-[11px] font-medium rounded-full px-2.5 py-1 border transition-colors ${active ? 'bg-primary-50 border-primary-200 text-primary-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>{label}</span>
               ))}
             </div>
 
             {/* URL input */}
             <div>
               <label className="text-[12px] font-semibold text-gray-700 mb-1.5 block">Website URL</label>
-              <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2.5 focus-within:border-primary-600 transition-colors bg-white">
-                <Globe size={13} className="text-gray-400 shrink-0" />
+              <div className="flex items-center gap-2 border border-gray-200 rounded-lg px-3 py-2.5 focus-within:border-primary-600 focus-within:shadow-focus-purple-sm transition-all bg-white">
+                <Globe size={14} className="text-gray-400 shrink-0" />
                 <input
                   value={url}
                   onChange={e => setUrl(e.target.value)}
@@ -3831,76 +3971,104 @@ function SiteHealthInitialState({ onLaunch }) {
               </div>
             </div>
 
-            {/* Advanced settings accordion */}
+            {/* Advanced settings */}
             <div className="border border-gray-200 rounded-lg overflow-hidden">
               <button
                 onClick={() => setAdvanced(a => !a)}
-                className="flex items-center justify-between w-full px-3 py-2.5 bg-white hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between w-full px-4 py-3 bg-white hover:bg-gray-50 transition-colors"
               >
-                <span className="text-[12px] font-semibold text-gray-700">Advanced settings</span>
-                <ChevronRight
-                  size={13}
-                  className="text-gray-400 transition-transform duration-200"
-                  style={{ transform: advanced ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                />
+                <span className="text-[13px] font-semibold text-gray-700">Advanced settings</span>
+                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
               </button>
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateRows: advanced ? '1fr' : '0fr',
-                  transition: 'grid-template-rows 200ms ease',
-                }}
-              >
+              <div style={{ display: 'grid', gridTemplateRows: advanced ? '1fr' : '0fr', transition: 'grid-template-rows 200ms ease' }}>
                 <div style={{ overflow: 'hidden' }}>
-                  <div className="border-t border-gray-100 bg-gray-50 p-3 grid grid-cols-2 gap-2">
-                    <div className="col-span-2">
-                      <p className="text-[11px] font-semibold text-gray-600 mb-1">Crawler user agent</p>
+                  <div className="border-t border-gray-100 px-4 py-4 flex flex-col gap-4 bg-gray-50/40">
+                    {/* User agent */}
+                    <div>
+                      <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Crawler user agent</p>
                       <div className="relative">
-                        <select
-                          value={agent}
-                          onChange={e => setAgent(e.target.value)}
-                          className="w-full appearance-none border border-gray-200 rounded-lg px-2.5 py-1.5 text-[12px] text-gray-800 bg-white outline-none focus:border-primary-600 pr-7"
-                        >
+                        <select value={agent} onChange={e => setAgent(e.target.value)}
+                          className="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600 pr-8 cursor-pointer">
                           <option>Custom bot</option>
                           <option>Googlebot</option>
                           <option>Bingbot</option>
                         </select>
-                        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       </div>
                     </div>
-                    <div>
-                      <p className="text-[11px] font-semibold text-gray-600 mb-1">Max pages</p>
-                      <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)} className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-[12px] text-gray-800 bg-white outline-none focus:border-primary-600" />
+                    {/* Max pages + speed */}
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Max pages</p>
+                        <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600" />
+                      </div>
+                      <div>
+                        <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Crawl speed</p>
+                        <div className="flex items-center border border-gray-200 rounded-lg bg-white focus-within:border-primary-600 overflow-hidden">
+                          <input type="number" value={speed} onChange={e => setSpeed(e.target.value)}
+                            className="flex-1 min-w-0 px-3 py-2 text-[13px] text-gray-800 bg-transparent outline-none" />
+                          <span className="px-2 text-[11px] text-gray-400 shrink-0 border-l border-gray-100">req/s</span>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[11px] font-semibold text-gray-600 mb-1">Crawl speed</p>
-                      <input type="number" value={speed} onChange={e => setSpeed(e.target.value)} className="w-full border border-gray-200 rounded-lg px-2.5 py-1.5 text-[12px] text-gray-800 bg-white outline-none focus:border-primary-600" />
-                    </div>
-                    <div className="flex items-center justify-between border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white">
-                      <span className="text-[11px] font-semibold text-gray-700">JS rendering</span>
+                    {/* JS rendering toggle */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[13px] font-semibold text-gray-700">JS rendering</p>
+                          <span title="Enables JavaScript execution during crawl. Slower but more accurate for SPA or React sites." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
+                        </div>
+                        <p className="text-[11px] text-gray-400 mt-0.5">Enable for JavaScript-heavy sites</p>
+                      </div>
                       <Toggle on={jsOn} onChange={setJsOn} />
                     </div>
-                    <div className="flex items-center justify-between border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white">
-                      <span className="text-[11px] font-semibold text-gray-700">robots.txt</span>
+                    {/* Respect robots.txt toggle */}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-[13px] font-semibold text-gray-700">Respect robots.txt</p>
+                          <span title="When enabled, the crawler follows your site's robots.txt rules — matching how Googlebot and other crawlers behave." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
+                        </div>
+                        <p className="text-[11px] text-gray-400 mt-0.5">Follow crawl directives</p>
+                      </div>
                       <Toggle on={robotsOn} onChange={setRobotsOn} />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+
+            {/* Smart defaults card */}
+            <div className="flex items-start gap-2.5 border border-primary-200 bg-primary-50 rounded-lg px-3 py-3">
+              <Sparkles size={15} className="text-primary-600 shrink-0 mt-0.5" />
+              <div>
+                <p className="text-[12px] font-semibold text-primary-700">Smart defaults on</p>
+                <p className="text-[11px] text-primary-600/70 mt-0.5 leading-snug">We've pre-selected the most reliable settings for accurate results.</p>
+              </div>
+            </div>
+
           </div>
 
-          {/* Row 2 — CTA always at bottom */}
-          <div className="px-5 pb-5 pt-3 border-t border-gray-100">
+          {/* CTA pinned at bottom */}
+          <div className="px-6 pb-6 pt-4 border-t border-gray-100 bg-white">
             <button
               onClick={() => onLaunch({ url, agent, maxPages, speed, jsOn, robotsOn })}
-              className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors shadow-sm"
             >
               <Zap size={15} />
               Crawl and run audit
             </button>
+            <p className="text-center text-[11px] text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
+                <rect x="1" y="5.5" width="8" height="6" rx="1.2" stroke="#98A2B3" strokeWidth="1.3" />
+                <path d="M3 5.5V3.5a2 2 0 014 0v2" stroke="#98A2B3" strokeWidth="1.3" strokeLinecap="round" />
+              </svg>
+              You can review results once the crawl completes
+            </p>
           </div>
+
         </div>
 
       </div>
@@ -4007,7 +4175,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
               {/* Badge */}
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary-200 bg-primary-50 w-fit">
                 <RefreshCw size={10} className="text-primary-600 animate-spin" style={{ animationDuration: '1.4s' }} />
-                <span className="text-[10px] font-bold text-primary-700 tracking-widest uppercase">Website audit in progress</span>
+                <span className="text-[10px] font-bold text-primary-700">Website audit in progress</span>
               </span>
 
               {/* Heading */}
@@ -4037,7 +4205,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
 
             {/* Right: config summary */}
             <div className="p-6 bg-gray-50/30">
-              <p className="text-[10px] font-bold text-gray-400 tracking-widest uppercase mb-5">Selected crawl setup</p>
+              <p className="text-[10px] font-bold text-gray-400 mb-5">Selected crawl setup</p>
               <div className="flex flex-col gap-4">
                 {CONFIG_ROWS.map(({ label, value }) => (
                   <div key={label} className="flex items-start justify-between gap-4">
@@ -4055,29 +4223,595 @@ function SiteHealthCrawlingState({ config, onComplete }) {
   )
 }
 
+// ─── Website Audit Settings Modal ─────────────────────────────────────────────
+
+function InfoTooltip({ text }) {
+  const icon = (
+    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 10, fontWeight: 600, color: '#98A2B3', cursor: 'help' }}>i</span>
+  )
+  if (!text) return <span style={{ flexShrink: 0 }}>{icon}</span>
+  return (
+    <span className="relative inline-flex group" style={{ flexShrink: 0 }}>
+      {icon}
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-64 bg-gray-900 text-white text-[12px] leading-relaxed rounded-lg px-3 py-2.5 pointer-events-none z-[300] shadow-lg whitespace-normal opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        {text}
+        <span className="absolute left-1/2 -translate-x-1/2 top-full" style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid #101828' }} />
+      </span>
+    </span>
+  )
+}
+
+function SettingsToggle({ value, onChange, label, description, tooltip }) {
+  return (
+    <div className="flex items-start justify-between gap-6">
+      <div className="flex flex-col gap-1 flex-1 min-w-0">
+        {label && (
+          <div className="flex items-center gap-1.5">
+            <span className="text-[14px] font-semibold text-gray-900">{label}</span>
+            <InfoTooltip text={tooltip} />
+          </div>
+        )}
+        {description && <p className="text-[13px] text-gray-500 leading-relaxed">{description}</p>}
+      </div>
+      <button
+        onClick={() => onChange(!value)}
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors mt-0.5 ${value ? 'bg-primary-600' : 'bg-gray-200'}`}
+      >
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${value ? 'translate-x-4' : 'translate-x-0.5'}`} />
+      </button>
+    </div>
+  )
+}
+
+function SettingsField({ label, description, tooltip, children }) {
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-1.5">
+        <p className="text-[14px] font-semibold text-gray-900">{label}</p>
+        <InfoTooltip text={tooltip} />
+      </div>
+      {description && <p className="text-[13px] text-gray-500 leading-relaxed">{description}</p>}
+      {children}
+    </div>
+  )
+}
+
+const AUDIT_SETTINGS_NAV = [
+  { id: 'schedule', label: 'Schedule' },
+  { id: 'source',   label: 'Source of pages' },
+  { id: 'rules',    label: 'Rules for scanning pages' },
+  { id: 'parser',   label: 'Parser settings' },
+  { id: 'limits',   label: 'Limits and restrictions' },
+  { id: 'report',   label: 'Report setup' },
+]
+
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+function WebsiteAuditSettingsModal({ onClose }) {
+  const [activeSection, setActiveSection] = useState('schedule')
+
+  // Schedule state
+  const [frequency, setFrequency]       = useState('weekly')
+  const [repeatEvery, setRepeatEvery]   = useState(false)
+  const [intervalVal, setIntervalVal]   = useState(2)
+  const [selectedDays, setSelectedDays] = useState(['mon'])
+  const [dayOfMonth, setDayOfMonth]     = useState(1)
+  const [auditTime, setAuditTime]       = useState('0:00')
+  const [emails, setEmails]             = useState(['gopal.rao@gohighlevel.com'])
+  const [emailInput, setEmailInput]     = useState('')
+
+  // Source of pages state
+  const [sitePages, setSitePages]         = useState(true)
+  const [subdomains, setSubdomains]       = useState(false)
+  const [xmlSitemap, setXmlSitemap]       = useState(true)
+  const [sitemaps, setSitemaps]           = useState([{ url: 'https://www.gohighlevel.com/sitemap.xml', urlCount: 775 }])
+  const [sitemapInput, setSitemapInput]   = useState('')
+
+  // Rules state
+  const [respectRobots, setRespectRobots]                   = useState(true)
+  const [ignoreNoindex, setIgnoreNoindex]                   = useState(false)
+  const [ignoreNofollow, setIgnoreNofollow]                 = useState(false)
+  const [onlyCrawlUrls, setOnlyCrawlUrls]                   = useState('/blog/\n/compare/')
+  const [skipUrls, setSkipUrls]                             = useState('/staging/\n/admin/')
+  const [hideUrls, setHideUrls]                             = useState('/cdn-cgi/\n/wp-json/')
+  const [ignoreUrlParams, setIgnoreUrlParams]               = useState('disabled')
+  const [customParams, setCustomParams]                     = useState('utm_source, utm_medium, gclid, fbclid')
+  const [ignoreExternalDomains, setIgnoreExternalDomains]   = useState('')
+
+  // Parser settings state
+  const [userAgent, setUserAgent]           = useState('custom')
+  const [jsRendering, setJsRendering]       = useState(false)
+
+  // Limits and restrictions state
+  const [maxPages, setMaxPages]             = useState(50)
+  const [maxCrawlDepth, setMaxCrawlDepth]   = useState(10)
+  const [maxReqPerSec, setMaxReqPerSec]     = useState(500)
+  const [maxRedirects, setMaxRedirects]     = useState(5)
+  const [maxPageSize, setMaxPageSize]       = useState(3000)
+
+  // Report setup state
+  const [sendReport, setSendReport]         = useState(true)
+  const [reportEmails, setReportEmails]     = useState(['gopal.rao@gohighlevel.com'])
+  const [reportEmailInput, setReportEmailInput] = useState('')
+
+  function toggleDay(d) {
+    const k = d.toLowerCase()
+    setSelectedDays(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])
+  }
+
+  function addEmail() {
+    const t = emailInput.trim()
+    if (t && !emails.includes(t)) { setEmails(p => [...p, t]); setEmailInput('') }
+  }
+
+  function addSitemap() {
+    const t = sitemapInput.trim()
+    if (t && !sitemaps.find(s => s.url === t)) { setSitemaps(p => [...p, { url: t, urlCount: 0 }]); setSitemapInput('') }
+  }
+
+  const TA = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors resize-none'
+
+  function EmailChips({ list, setList, inputVal, setInputVal }) {
+    function add() {
+      const t = inputVal.trim()
+      if (t && !list.includes(t)) { setList(p => [...p, t]); setInputVal('') }
+    }
+    return (
+      <div className="flex flex-col gap-2 mt-1">
+        <div className="flex items-center gap-2">
+          <input value={inputVal} onChange={e => setInputVal(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && add()}
+            placeholder="Add email address"
+            className="flex-1 h-9 border border-gray-200 rounded-lg px-3 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors"
+          />
+          <button onClick={add} className="h-9 px-4 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">Add</button>
+        </div>
+        {list.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {list.map(e => (
+              <span key={e} className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 text-[12px] font-medium text-gray-700">
+                {e}
+                <button onClick={() => setList(p => p.filter(x => x !== e))} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={11} /></button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  function renderSchedule() {
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Schedule</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+
+          {/* Scanning frequency — radio buttons */}
+          <SettingsField label="Scanning frequency" description="Choose whether audits run on a recurring cadence or only when started manually." tooltip="Weekly and monthly schedules automatically queue future crawls. Manual keeps audits on-demand only.">
+            <div className="flex items-center gap-5 mt-1">
+              {['Weekly', 'Monthly', 'Manual'].map(f => {
+                const checked = frequency === f.toLowerCase()
+                return (
+                  <label key={f} className="flex items-center gap-2 cursor-pointer select-none">
+                    <span className={`flex items-center justify-center w-4 h-4 rounded-full border-2 transition-colors shrink-0 ${checked ? 'border-primary-600' : 'border-gray-300'}`}>
+                      {checked && <span className="w-2 h-2 rounded-full bg-primary-600" />}
+                    </span>
+                    <input type="radio" className="sr-only" checked={checked} onChange={() => setFrequency(f.toLowerCase())} />
+                    <span className="text-[14px] text-gray-700 font-medium">{f}</span>
+                  </label>
+                )
+              })}
+            </div>
+          </SettingsField>
+
+          {/* Repeat every toggle (hidden for Manual) */}
+          {frequency !== 'manual' && (
+            <SettingsToggle
+              label="Repeat every"
+              description="Turn this on when you want the selected weekly or monthly cadence to repeat on a longer interval."
+              value={repeatEvery}
+              onChange={setRepeatEvery}
+            />
+          )}
+
+          {/* Interval — below repeat every */}
+          {frequency !== 'manual' && (
+            <SettingsField label="Interval" description="Set how many weekly or monthly cycles to skip between recurring runs.">
+              <div className="flex items-center gap-2 mt-1">
+                <input type="number" min={1} value={intervalVal} onChange={e => setIntervalVal(Number(e.target.value))}
+                  className="w-20 h-9 border border-gray-200 rounded-lg px-3 text-[14px] font-medium text-gray-900 outline-none focus:border-primary-600 transition-colors"
+                />
+                <span className="text-[13px] text-gray-500">{frequency === 'weekly' ? 'week' : 'month'}</span>
+              </div>
+            </SettingsField>
+          )}
+
+          {/* Days — weekly only */}
+          {frequency === 'weekly' && (
+            <SettingsField label="Days" description="Select one or more weekdays for recurring weekly audits.">
+              <div className="flex items-center gap-2 flex-wrap mt-1">
+                {WEEKDAYS.map(d => {
+                  const active = selectedDays.includes(d.toLowerCase())
+                  return (
+                    <button key={d} onClick={() => toggleDay(d)}
+                      className={`w-12 h-9 rounded-full text-[13px] font-medium border transition-colors ${
+                        active ? 'bg-primary-600 border-primary-600 text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
+                      }`}
+                    >{d}</button>
+                  )
+                })}
+              </div>
+            </SettingsField>
+          )}
+
+          {/* Day of month — monthly only */}
+          {frequency === 'monthly' && (
+            <SettingsField label="Day of month" description="Choose which calendar day should be used for monthly audits.">
+              <div className="relative mt-1">
+                <select value={dayOfMonth} onChange={e => setDayOfMonth(Number(e.target.value))}
+                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                >
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </SettingsField>
+          )}
+
+          {/* Time */}
+          {frequency !== 'manual' && (
+            <SettingsField label="Time (Asia/Calcutta)" description="Audit runs are scheduled against the workspace time zone shown beside this control.">
+              <div className="relative mt-1">
+                <select value={auditTime} onChange={e => setAuditTime(e.target.value)}
+                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                >
+                  {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
+            </SettingsField>
+          )}
+
+          {/* Notification emails — input always at top, chips below */}
+          <SettingsField label="Notification emails" description="Add one or more recipients who should receive the audit report after a scheduled run completes." tooltip="Everyone listed here receives the audit email after a scheduled run finishes.">
+            <EmailChips list={emails} setList={setEmails} inputVal={emailInput} setInputVal={setEmailInput} />
+          </SettingsField>
+        </div>
+      </div>
+    )
+  }
+
+  function renderSource() {
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Source of pages</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+          <SettingsToggle label="Site pages"    description="Scan pages discovered by starting at the site and following internal links."    value={sitePages}  onChange={setSitePages} />
+          <SettingsToggle label="Subdomains"    description="Include pages found on connected subdomains in the same audit scope."          value={subdomains} onChange={setSubdomains} />
+          <SettingsToggle label="XML sitemap"   description="Use one or more XML sitemaps as crawl seeds for the audit."                    value={xmlSitemap} onChange={setXmlSitemap} />
+          <SettingsField label="Sitemaps" description="Add multiple sitemap files and review the number of URLs surfaced from each one.">
+            <div className="border border-gray-200 rounded-lg overflow-hidden mt-1">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Sitemap</th>
+                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Number of URLs</th>
+                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sitemaps.map(s => (
+                    <tr key={s.url} className="border-b border-gray-100 last:border-0">
+                      <td className="px-4 py-3 text-[13px] text-gray-800">{s.url}</td>
+                      <td className="px-4 py-3 text-[13px] text-gray-700">{s.urlCount}</td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="text-[13px] font-medium text-primary-600 hover:underline">Remove</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex items-center gap-2 p-3 border-t border-gray-100">
+                <input value={sitemapInput} onChange={e => setSitemapInput(e.target.value)}
+                  placeholder="https://www.gohighlevel.com/sitemap-pages.xml"
+                  className="flex-1 h-9 border border-gray-200 rounded-lg px-3 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors"
+                />
+                <button onClick={addSitemap} className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">Add sitemap</button>
+              </div>
+            </div>
+          </SettingsField>
+        </div>
+      </div>
+    )
+  }
+
+  function renderRules() {
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Rules for scanning pages</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+          <SettingsToggle label="Respect robots.txt" description="Honor the site rules defined in robots.txt during the crawl."                   tooltip="Keeping this enabled matches how external crawlers see the site. Disable it only when you intentionally want an internal diagnostic crawl." value={respectRobots}   onChange={setRespectRobots} />
+          <SettingsToggle label="Ignore noindex"     description="Allow the audit to keep crawling pages even if they are marked noindex."        value={ignoreNoindex}   onChange={setIgnoreNoindex} />
+          <SettingsToggle label="Ignore nofollow"    description="Follow page links even when nofollow is present."                               value={ignoreNofollow}  onChange={setIgnoreNofollow} />
+          <SettingsField label="Only crawl URLs starting with" description="Limit the crawl to specific path prefixes."        tooltip="Add one path prefix per line to keep the crawl focused on a subset of the site.">
+            <textarea rows={3} value={onlyCrawlUrls} onChange={e => setOnlyCrawlUrls(e.target.value)} className={TA + ' font-mono'} />
+          </SettingsField>
+          <SettingsField label="Skip URLs starting with"        description="Exclude entire path groups from the crawl."       tooltip="Add one path prefix per line to keep internal, staging, or low-value areas out of the audit.">
+            <textarea rows={3} value={skipUrls} onChange={e => setSkipUrls(e.target.value)} className={TA + ' font-mono'} />
+          </SettingsField>
+          <SettingsField label="Hide URLs and resources starting with" description="Hide noisy resource paths from the report output." tooltip="Use this when technical resources are useful for crawling but should not clutter the findings view.">
+            <textarea rows={3} value={hideUrls} onChange={e => setHideUrls(e.target.value)} className={TA + ' font-mono'} />
+          </SettingsField>
+          <SettingsField label="Ignore URL parameters" description="Control whether query-string variations should be treated as unique URLs." tooltip="This prevents tracking parameters and similar variations from inflating the page count.">
+            <div className="relative mt-1">
+              <select value={ignoreUrlParams} onChange={e => setIgnoreUrlParams(e.target.value)}
+                className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+              >
+                <option value="disabled">Disabled</option>
+                <option value="all">Ignore all parameters</option>
+                <option value="custom">Ignore custom parameters</option>
+              </select>
+              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+          </SettingsField>
+          <SettingsField label="Custom parameters" description="List custom parameters to ignore when the custom option is selected.">
+            <textarea rows={3} value={customParams} onChange={e => setCustomParams(e.target.value)} className={TA} />
+          </SettingsField>
+          <SettingsField label="Ignore external domains and links" description="Exclude external domains or links from validation when they are not relevant to your audit scope." tooltip="List domains or full URLs that should be skipped during external link validation.">
+            <textarea rows={3} value={ignoreExternalDomains} onChange={e => setIgnoreExternalDomains(e.target.value)} className={TA} />
+          </SettingsField>
+        </div>
+      </div>
+    )
+  }
+
+  function renderParser() {
+    const agents = [
+      { value: 'custom',          label: 'Custom bot'      },
+      { value: 'googlebot',       label: 'Googlebot'       },
+      { value: 'googlebot-image', label: 'Googlebot-Image' },
+      { value: 'bingbot',         label: 'BingBot'         },
+      { value: 'chrome-desktop',  label: 'Chrome Desktop'  },
+    ]
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Parser settings</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+          <SettingsField label="User agent" description="Select which crawler identity should be used when the site is fetched.">
+            <div className="relative mt-1">
+              <select value={userAgent} onChange={e => setUserAgent(e.target.value)}
+                className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+              >
+                {agents.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
+              </select>
+              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
+          </SettingsField>
+          <SettingsToggle label="JavaScript rendering" description="Enable client-side rendering when important content loads only after JavaScript executes." tooltip="JavaScript rendering increases crawl time because the page must be rendered after the initial HTML load. Use it for JS-heavy sites or pages where important content is injected after load." value={jsRendering} onChange={setJsRendering} />
+        </div>
+      </div>
+    )
+  }
+
+  function renderLimits() {
+    function NumInput({ label, description, tooltip, value, onChange, min = 1 }) {
+      return (
+        <SettingsField label={label} description={description} tooltip={tooltip}>
+          <input type="number" min={min} value={value} onChange={e => onChange(Number(e.target.value))}
+            className="w-full h-10 border border-gray-200 rounded-lg px-3 text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors mt-1"
+          />
+        </SettingsField>
+      )
+    }
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Limits and restrictions</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+          <NumInput label="Maximum pages to scan"       description="Set the upper limit for how many pages can be crawled in one audit pass."                         tooltip="This cap controls the size of each audit run and helps you manage crawl scope and time."                                                          value={maxPages}      onChange={setMaxPages} />
+          <NumInput label="Maximum crawl depth"         description="Limit how far the crawler should continue following internal links from the starting pages."       tooltip="Lower values keep the audit focused near top-level pages. Higher values allow deeper template and content discovery."                              value={maxCrawlDepth} onChange={setMaxCrawlDepth} />
+          <NumInput label="Maximum requests per second" description="Throttle crawl speed to control load on the website during the audit."                            tooltip="Reduce this limit if you want a lighter crawl footprint on the site during the audit."                                                             value={maxReqPerSec}  onChange={setMaxReqPerSec} />
+          <NumInput label="Maximum redirects"           description="Define how many redirects can be followed before the crawler stops tracking a URL chain."          tooltip="This helps the audit stop long redirect loops and report redirect chain issues more clearly."                                                       value={maxRedirects}  onChange={setMaxRedirects} />
+          <NumInput label="Maximum page size (KB)"      description="Ignore oversized responses once they exceed this download limit."                                  tooltip="Large files can slow the crawl down. Use this limit to skip oversized pages and resources."                                                        value={maxPageSize}   onChange={setMaxPageSize} />
+        </div>
+      </div>
+    )
+  }
+
+  function renderReport() {
+    return (
+      <div className="flex flex-col gap-5 pb-4">
+        <p className="text-[18px] font-bold text-gray-900">Report setup</p>
+        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
+          <SettingsToggle label="Send report when the scan completes" description="Automatically email the audit report after the run finishes." tooltip="Turn this on when you want the completed report sent automatically after each run." value={sendReport} onChange={setSendReport} />
+          <SettingsField label="Report emails" description="Add one or more email addresses that should receive the finished audit report.">
+            <EmailChips list={reportEmails} setList={setReportEmails} inputVal={reportEmailInput} setInputVal={setReportEmailInput} />
+          </SettingsField>
+        </div>
+      </div>
+    )
+  }
+
+  function renderContent() {
+    switch (activeSection) {
+      case 'schedule': return renderSchedule()
+      case 'source':   return renderSource()
+      case 'rules':    return renderRules()
+      case 'parser':   return renderParser()
+      case 'limits':   return renderLimits()
+      case 'report':   return renderReport()
+      default:         return null
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-[1px]" onClick={onClose} />
+      <div className="relative bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden" style={{ width: 900, maxWidth: 'calc(100vw - 32px)', height: '86vh', maxHeight: 820 }}>
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
+          <p className="text-[18px] font-bold text-gray-900">Website audit settings</p>
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+            <X size={16} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="flex flex-1 min-h-0">
+          {/* Left nav — HLTabs left placement style */}
+          <div className="w-52 shrink-0 border-r border-gray-100 py-2 flex flex-col overflow-y-auto">
+            {AUDIT_SETTINGS_NAV.map(n => (
+              <button key={n.id} onClick={() => setActiveSection(n.id)}
+                className={`w-full text-left py-2.5 px-4 text-[14px] transition-colors whitespace-nowrap border-r-2 ${
+                  activeSection === n.id
+                    ? 'border-primary-600 text-primary-600 font-semibold'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 font-normal'
+                }`}
+              >{n.label}</button>
+            ))}
+          </div>
+
+          {/* Right scrollable content */}
+          <div className="flex-1 overflow-y-auto p-6 min-w-0">
+            {renderContent()}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0 bg-white">
+          <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            Cancel
+          </button>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors">
+            Apply changes
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Crawling progress view ───────────────────────────────────────────────────
+
+function CrawlingProgressView({ progress, message, config }) {
+  return (
+    <div className="flex-1 overflow-auto bg-gray-50 p-5 min-h-0">
+
+      {/* Centered progress card — not full width */}
+      <div className="max-w-md mx-auto mb-6">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center" style={{ boxShadow: '0 1px 8px rgba(0,0,0,.06)' }}>
+          <div className="w-11 h-11 rounded-full bg-primary-50 flex items-center justify-center mx-auto mb-4">
+            <RefreshCw size={18} className="text-primary-600 animate-spin" style={{ animationDuration: '1.2s' }} />
+          </div>
+          <p className="text-[15px] font-semibold text-gray-900 mb-0.5">Crawling your website</p>
+          {config?.url && (
+            <p className="text-[12px] text-gray-400 mb-5 truncate px-4">{config.url}</p>
+          )}
+          {/* Contained progress bar */}
+          <div className="bg-gray-100 rounded-full h-1.5 mb-2 overflow-hidden">
+            <div
+              className="bg-primary-600 h-full rounded-full transition-all duration-300 ease-out"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-1.5">
+            <p className="text-[11px] text-gray-400 text-left truncate pr-4">{message}</p>
+            <p className="text-[12px] font-bold text-gray-700 shrink-0">{progress}%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Skeleton placeholders — where the dashboard data will appear */}
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        {[40, 60, 50].map((w, i) => (
+          <div key={i} className="bg-white rounded-lg border border-gray-100 p-4">
+            <div className="h-2.5 bg-gray-100 rounded-full animate-pulse mb-3" style={{ width: `${w}%` }} />
+            <div className="h-7 bg-gray-100 rounded-lg animate-pulse w-1/3 mb-3" />
+            <div className="h-2 bg-gray-100 rounded-full animate-pulse w-full mb-1.5" />
+            <div className="h-2 bg-gray-100 rounded-full animate-pulse" style={{ width: '70%' }} />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-5 gap-4">
+        <div className="col-span-3 bg-white rounded-lg border border-gray-100 p-4 h-44">
+          <div className="h-2.5 bg-gray-100 rounded-full animate-pulse w-1/3 mb-4" />
+          <div className="space-y-2.5">
+            {[100, 80, 90, 65].map((w, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <div className="h-2 bg-gray-100 rounded-full animate-pulse flex-1" style={{ maxWidth: `${w}%` }} />
+                <div className="h-2 bg-gray-100 rounded-full animate-pulse w-8 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
+        <div className="col-span-2 bg-white rounded-lg border border-gray-100 p-4 h-44">
+          <div className="h-2.5 bg-gray-100 rounded-full animate-pulse w-2/5 mb-4" />
+          <div className="space-y-3">
+            {[70, 90, 55, 80].map((w, i) => (
+              <div key={i} className="h-2 bg-gray-100 rounded-full animate-pulse" style={{ width: `${w}%` }} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
 // ─── Main dashboard ───────────────────────────────────────────────────────────
 
 export default function SiteHealthDashboard() {
-  const [phase, setPhase]           = useState(() => sessionStorage.getItem('sh_hasScan') === '1' ? 'ready' : 'setup')
-  const [crawlConfig, setCrawlConfig] = useState(null)
-  const [activeTab, setActiveTab]   = useState('overview')
+  const [phase, setPhase]               = useState(() => sessionStorage.getItem('sh_hasScan') === '1' ? 'ready' : 'setup')
+  const [crawlConfig, setCrawlConfig]   = useState(null)
+  const [activeTab, setActiveTab]       = useState('overview')
+  const [showSettings, setShowSettings] = useState(false)
+  const [jumpTarget, setJumpTarget]     = useState(null)
+  const [isCrawling, setIsCrawling]     = useState(false)
+  const [crawlProgress, setCrawlProgress] = useState(0)
+  const crawlIntervalRef = useRef(null)
+
+  function handleFindingClick(catId, findingId) {
+    setJumpTarget({ catId, findingId })
+    setActiveTab('scan')
+  }
 
   function handleLaunch(config) {
     setCrawlConfig(config)
+    sessionStorage.setItem('sh_hasScan', '1')
     setPhase('crawling')
+    setIsCrawling(true)
+    setCrawlProgress(0)
   }
 
-  function handleCrawlComplete() {
-    sessionStorage.setItem('sh_hasScan', '1')
-    setPhase('ready')
-  }
+  useEffect(() => {
+    if (!isCrawling) return
+    crawlIntervalRef.current = setInterval(() => {
+      setCrawlProgress(p => {
+        const step = p < 50 ? 1.6 : p < 80 ? 0.9 : 0.4
+        const next = p + step
+        if (next >= 100) {
+          clearInterval(crawlIntervalRef.current)
+          setTimeout(() => {
+            setIsCrawling(false)
+            setCrawlProgress(0)
+            setPhase('ready')
+          }, 800)
+          return 100
+        }
+        return next
+      })
+    }, 80)
+    return () => clearInterval(crawlIntervalRef.current)
+  }, [isCrawling])
+
+  const crawlPct = Math.min(100, Math.round(crawlProgress))
+  const activeStageMsg = [...CRAWL_STAGES].reverse().find(s => crawlProgress >= s.at)?.msg || CRAWL_STAGES[0].msg
 
   if (phase === 'setup') {
     return <SiteHealthInitialState onLaunch={handleLaunch} />
   }
-  if (phase === 'crawling') {
-    return <SiteHealthCrawlingState config={crawlConfig} onComplete={handleCrawlComplete} />
-  }
+
+  const isCrawlingPhase = phase === 'crawling'
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
@@ -4095,22 +4829,31 @@ export default function SiteHealthDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+            <button
+              onClick={() => { sessionStorage.removeItem('sh_hasScan'); setPhase('setup'); setIsCrawling(false); setCrawlProgress(0) }}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              Preview initial state
+            </button>
+            <button onClick={() => setShowSettings(true)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
               <Settings size={15} />
             </button>
-            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-              <Download size={13} />
-              Export
-            </button>
-            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[13px] font-semibold transition-colors">
-              <RefreshCw size={13} />
-              Run scan
-            </button>
+            {isCrawlingPhase ? (
+              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 text-white text-[13px] font-semibold cursor-default select-none">
+                <RefreshCw size={13} className="animate-spin" style={{ animationDuration: '1.2s' }} />
+                Running audit {crawlPct}%
+              </button>
+            ) : (
+              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-[13px] font-semibold transition-colors">
+                <RefreshCw size={13} />
+                Run scan
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Tab nav with icons */}
-        <div className="flex items-center gap-1 -mx-1 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+        {/* Tab nav — dimmed and non-interactive while crawling */}
+        <div className={`flex items-center gap-1 -mx-1 overflow-x-auto transition-opacity ${isCrawlingPhase ? 'opacity-30 pointer-events-none' : 'opacity-100'}`} style={{ scrollbarWidth: 'none' }}>
           {TABS.map(({ id, label, Icon }) => {
             const isActive = activeTab === id
             return (
@@ -4131,15 +4874,21 @@ export default function SiteHealthDashboard() {
         </div>
       </div>
 
-      {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto min-h-0 p-5" style={{ scrollbarGutter: 'stable' }}>
-        {activeTab === 'overview'   && <OverviewTab />}
-        {activeTab === 'scan'       && <ScanResultsTab />}
-        {activeTab === 'crawled'    && <CrawledPagesTab />}
-        {activeTab === 'links'      && <FoundLinksTab />}
-        {activeTab === 'resources'  && <FoundResourcesTab />}
-        {activeTab === 'comparison' && <CrawlComparisonTab />}
-      </div>
+      {/* Content: crawling view OR dashboard tabs */}
+      {isCrawlingPhase ? (
+        <CrawlingProgressView progress={crawlPct} message={activeStageMsg} config={crawlConfig} />
+      ) : (
+        <div className="flex-1 overflow-y-auto min-h-0 p-5" style={{ scrollbarGutter: 'stable' }}>
+          {activeTab === 'overview'   && <OverviewTab onFindingClick={handleFindingClick} onTabSwitch={setActiveTab} />}
+          {activeTab === 'scan'       && <ScanResultsTab jumpTarget={jumpTarget} onJumpConsumed={() => setJumpTarget(null)} />}
+          {activeTab === 'crawled'    && <CrawledPagesTab />}
+          {activeTab === 'links'      && <FoundLinksTab />}
+          {activeTab === 'resources'  && <FoundResourcesTab />}
+          {activeTab === 'comparison' && <CrawlComparisonTab />}
+        </div>
+      )}
+
+      {showSettings && <WebsiteAuditSettingsModal onClose={() => setShowSettings(false)} />}
     </div>
   )
 }
