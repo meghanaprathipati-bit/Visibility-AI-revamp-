@@ -10,8 +10,10 @@ import {
   FolderPlus, MapPin,
   Circle, CircleCheck, LoadingCircle, Wand2,
   ArrowUp, Loader2,
+  LayoutGrid, MessageSquare, BarChart3, Lock01Icon,
 } from '../icons/index.js'
 import AppShell from '../shell/AppShell'
+import AiSearchPerformanceDashboard from '../components/dashboards/AiSearchPerformanceDashboard.jsx'
 import { ActionItemsPanel } from '../components/action-items/index.js'
 import { deriveChatTitle, deriveChatTitleFromSession } from '../data/chatTitles.js'
 import { buildScanResultsPayload, hydrateScanResultsMessages } from '../data/scanResults.js'
@@ -22,6 +24,9 @@ import ActionItemsSummaryCard from '../components/split-pane/ActionItemsSummaryC
 import DetailedReportPanel from '../components/split-pane/DetailedReportPanel.jsx'
 import VisibilityScanReport from '../components/reports/VisibilityScanReport.jsx'
 import AiRankTrackingDashboard from '../components/dashboards/AiRankTrackingDashboard.jsx'
+import OverviewDashboard from '../components/dashboards/OverviewDashboard.jsx'
+import PromptTrackingDashboard from '../components/dashboards/PromptTrackingDashboard.jsx'
+import SiteHealthDashboard from '../components/dashboards/SiteHealthDashboard.jsx'
 import AiSentimentChart from '../components/dashboards/AiSentimentChart.jsx'
 import EngineCoverageChart from '../components/dashboards/EngineCoverageChart.jsx'
 import { DASHBOARD_ITEMS } from '../data/aiRankDashboard.js'
@@ -260,10 +265,112 @@ const SCAN_INTRO = {
   generic: `Running your visibility scan. I'll keep you updated as each step completes.`,
 }
 
+const DASHBOARD_ACCORDION_SECTIONS = [
+  {
+    id: 'ai-search',
+    label: 'AI Search',
+    icon: Bot,
+    iconBg: 'bg-purple-50',
+    iconColor: 'text-purple-600',
+    children: [
+      { id: 'ai-search-performance', label: 'AI Search Performance' },
+      { id: 'prompt-tracking', label: 'Prompt Tracking' },
+      { id: 'ai-health', label: 'AI Health', locked: true },
+      { id: 'bot-activity-ai', label: 'Bot Activity', locked: true },
+    ],
+  },
+  {
+    id: 'search-engines',
+    label: 'Search Engines',
+    icon: Search,
+    iconBg: 'bg-teal-50',
+    iconColor: 'text-teal-600',
+    children: [
+      { id: 'search-performance', label: 'Search Performance', locked: true },
+      { id: 'keyword-rankings', label: 'Keyword Rankings', locked: true },
+      { id: 'keyword-research', label: 'Keyword Research', comingSoon: true },
+      { id: 'site-health', label: 'Site Health' },
+      { id: 'backlinks', label: 'Backlinks', locked: true },
+      { id: 'bot-activity', label: 'Bot Activity', comingSoon: true },
+    ],
+  },
+  {
+    id: 'google-business-profile',
+    label: 'Google Business Profile',
+    icon: MapPin,
+    iconBg: 'bg-success-50',
+    iconColor: 'text-success-600',
+    children: [
+      { id: 'profile-health', label: 'Profile Health' },
+      { id: 'map-rankings', label: 'Map Rankings' },
+      { id: 'post-scheduler', label: 'Post Scheduler', comingSoon: true },
+      { id: 'qa-automation', label: 'Q&A Automation', comingSoon: true },
+    ],
+  },
+  {
+    id: 'listings',
+    label: 'Listings',
+    icon: Link2,
+    iconBg: 'bg-success-50',
+    iconColor: 'text-success-600',
+    children: [
+      { id: 'listings-health', label: 'Listings Health' },
+      { id: 'listings-manager', label: 'Listings Manager', comingSoon: true },
+    ],
+  },
+  {
+    id: 'reviews',
+    label: 'Reviews',
+    icon: MessageSquare,
+    iconBg: 'bg-success-50',
+    iconColor: 'text-success-600',
+    children: [
+      { id: 'review-health', label: 'Review Health' },
+      { id: 'review-manager', label: 'Review Manager', comingSoon: true },
+    ],
+  },
+  {
+    id: 'content',
+    label: 'Content',
+    icon: FileText,
+    iconBg: 'bg-error-50',
+    iconColor: 'text-error-600',
+    children: [
+      { id: 'content-studio', label: 'Content Studio', comingSoon: true },
+      { id: 'content-research', label: 'Content Research', comingSoon: true },
+      { id: 'press-releases', label: 'Press Releases', comingSoon: true },
+    ],
+  },
+  {
+    id: 'competitors',
+    label: 'Competitors',
+    icon: Users,
+    iconBg: 'bg-teal-50',
+    iconColor: 'text-teal-600',
+    children: [
+      { id: 'ai-presence', label: 'AI Presence', comingSoon: true },
+      { id: 'search-presence', label: 'Search Presence', locked: true },
+      { id: 'local-presence', label: 'Local Presence', comingSoon: true },
+    ],
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics',
+    icon: BarChart3,
+    iconBg: 'bg-primary-50',
+    iconColor: 'text-primary-600',
+    children: [
+      { id: 'traffic-engagement', label: 'Traffic & Engagement' },
+      { id: 'roi-attribution', label: 'ROI & Attribution', comingSoon: true },
+      { id: 'reports', label: 'Reports', locked: true },
+    ],
+  },
+]
+
 export default function VisibilityAI() {
   const [activeSubTab, setActiveSubTab] = useState('Visibility AI')
   const [activePanel, setActivePanel] = useState('Chats')
-  const [selectedDashboardId, setSelectedDashboardId] = useState('ai-rank-tracking')
+  const [selectedDashboardId, setSelectedDashboardId] = useState('overview')
   const [chatPanelCollapsed, setChatPanelCollapsed] = useState(false)
   const [toolsPanelCollapsed, setToolsPanelCollapsed] = useState(false)
   const [composerFocusKey, setComposerFocusKey] = useState(0)
@@ -351,7 +458,13 @@ export default function VisibilityAI() {
         onSubTabChange: setActiveSubTab,
       }}
     >
-      <div className="flex flex-1 min-h-0 overflow-hidden bg-white">
+      <div
+        className="grid flex-1 min-w-0 min-h-0 overflow-hidden bg-white"
+        style={{
+          gridTemplateColumns: `${chatPanelCollapsed ? 56 : 280}px 1fr ${toolsPanelCollapsed ? 56 : 200}px`,
+          gridTemplateRows: 'minmax(0, 1fr)',
+        }}
+      >
         <ChatPanel
           activePanel={activePanel}
           activeChatId={activeChatId}
@@ -388,7 +501,15 @@ export default function VisibilityAI() {
         />
         <div className="flex flex-1 min-w-0 min-h-0 overflow-hidden">
           {activePanel === 'Dashboards' ? (
-            <AiRankTrackingDashboard />
+            selectedDashboardId === 'overview'
+              ? <OverviewDashboard />
+              : selectedDashboardId === 'ai-search-performance'
+                ? <AiSearchPerformanceDashboard />
+                : selectedDashboardId === 'prompt-tracking'
+                  ? <PromptTrackingDashboard />
+                  : selectedDashboardId === 'site-health'
+                    ? <SiteHealthDashboard />
+                    : <AiRankTrackingDashboard />
           ) : (
             <>
               <MainContent
@@ -569,6 +690,7 @@ function ChatPanel({
   const [nextId, setNextId] = useState(INITIAL_CHATS.length + 1)
   const [searchQuery, setSearchQuery] = useState('')
   const [dashboardSearchQuery, setDashboardSearchQuery] = useState('')
+  const [expandedSections, setExpandedSections] = useState(new Set(['ai-search']))
   const [projects, setProjects] = useState(INITIAL_PROJECTS)
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false)
   const [activeProjectId, setActiveProjectId] = useState(1)
@@ -885,29 +1007,120 @@ function ChatPanel({
           })}
         </div>
         ) : (
-          <div className="flex flex-col gap-0.5 px-2 pt-1">
-            {DASHBOARD_ITEMS.filter(d =>
-              d.label.toLowerCase().includes(dashboardSearchQuery.toLowerCase())
-            ).map(dashboard => {
-              const isActive = dashboard.id === selectedDashboardId
-              return (
-                <button
-                  key={dashboard.id}
-                  type="button"
-                  onClick={() => onSelectDashboard?.(dashboard.id)}
-                  className={`flex items-center gap-2 px-2.5 h-9 rounded-lg w-full transition-colors text-left ${
-                    isActive ? 'bg-primary-50' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="w-6 h-6 rounded-md bg-gray-100 flex items-center justify-center shrink-0">
-                    <TrendingUp size={13} className="text-gray-500" />
+          <div className="flex flex-col px-2 pt-1 gap-0.5">
+            {/* Overview — always visible top item */}
+            {(!dashboardSearchQuery || 'overview'.includes(dashboardSearchQuery.toLowerCase())) && (
+              <button
+                type="button"
+                onClick={() => onSelectDashboard?.('overview')}
+                className={`flex items-center gap-2.5 px-2.5 h-9 rounded-lg w-full transition-colors text-left ${
+                  selectedDashboardId === 'overview' ? 'bg-primary-50' : 'hover:bg-gray-50'
+                }`}
+              >
+                <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0 bg-primary-50">
+                  <LayoutGrid size={14} className="text-primary-600" />
+                </div>
+                <span className={`flex-1 min-w-0 text-[13px] truncate ${
+                  selectedDashboardId === 'overview' ? 'font-semibold text-primary-600' : 'font-medium text-gray-700'
+                }`}>
+                  Overview
+                </span>
+                {selectedDashboardId === 'overview' && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
+                )}
+              </button>
+            )}
+
+            {/* Accordion sections */}
+            <div className="mt-3 flex flex-col gap-0.5">
+              {DASHBOARD_ACCORDION_SECTIONS.map(section => {
+                const query = dashboardSearchQuery.toLowerCase()
+                const sectionMatches = !query || section.label.toLowerCase().includes(query)
+                const matchingChildren = query
+                  ? section.children.filter(c => c.label.toLowerCase().includes(query))
+                  : section.children
+                if (query && !sectionMatches && matchingChildren.length === 0) return null
+
+                const visibleChildren = sectionMatches ? section.children : matchingChildren
+                const isExpanded = expandedSections.has(section.id) || (query && matchingChildren.length > 0)
+                const SectionIcon = section.icon
+
+                return (
+                  <div key={section.id} className="flex flex-col">
+                    {/* Section header — icon left, chevron right */}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setExpandedSections(prev => {
+                          const next = new Set(prev)
+                          if (next.has(section.id)) next.delete(section.id)
+                          else next.add(section.id)
+                          return next
+                        })
+                      }}
+                      className="flex items-center gap-2.5 px-2.5 h-9 rounded-lg w-full hover:bg-gray-50 transition-colors text-left"
+                    >
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${section.iconBg}`}>
+                        <SectionIcon size={14} className={section.iconColor} />
+                      </div>
+                      <span className="flex-1 min-w-0 text-[13px] font-semibold text-gray-800 truncate">
+                        {section.label}
+                      </span>
+                      <ChevronDown
+                        size={13}
+                        className={`text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+
+                    {/* Children — indented, no border-l line */}
+                    {isExpanded && (
+                      <div className="flex flex-col gap-0.5 mt-0.5 mb-1 ml-9">
+                        {visibleChildren.map(child => {
+                          const isActive = selectedDashboardId === child.id
+                          const isDisabled = child.locked || child.comingSoon
+                          return (
+                            <button
+                              key={child.id}
+                              type="button"
+                              disabled={isDisabled}
+                              onClick={() => !isDisabled && onSelectDashboard?.(child.id)}
+                              className={`flex items-center gap-2 w-full px-3 h-8 rounded-lg text-left transition-colors ${
+                                isActive
+                                  ? 'bg-primary-50'
+                                  : isDisabled
+                                    ? 'cursor-default'
+                                    : 'hover:bg-gray-50'
+                              }`}
+                            >
+                              {isActive && (
+                                <span className="w-1.5 h-1.5 rounded-full bg-primary-600 shrink-0" />
+                              )}
+                              <span className={`flex-1 min-w-0 text-[13px] truncate ${
+                                isActive
+                                  ? 'font-semibold text-primary-600'
+                                  : isDisabled
+                                    ? 'text-gray-400'
+                                    : 'text-gray-600'
+                              }`}>
+                                {child.label}
+                              </span>
+                              {child.comingSoon && (
+                                <span className="shrink-0 text-[10px] font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5 leading-none">
+                                  Soon
+                                </span>
+                              )}
+                              {child.locked && (
+                                <Lock01Icon size={12} className="text-gray-300 shrink-0" />
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    )}
                   </div>
-                  <span className={`flex-1 min-w-0 text-[13px] truncate ${isActive ? 'font-medium text-gray-900' : 'text-gray-700'}`}>
-                    {dashboard.label}
-                  </span>
-                </button>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         )}
       </div>
