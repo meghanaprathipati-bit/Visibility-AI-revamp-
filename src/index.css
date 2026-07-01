@@ -44,6 +44,11 @@
   --teal-50:  #F0FDFA;
   --teal-200: #99F6E4;
   --teal-600: #0D9488;
+:root {
+  --warning-250: #ffa35a;
+  --hr-warning-250: #ffa35a;
+  --warning-300: #fa9209;
+  --hr-warning-300: #fa9209;
 }
 
 @theme {
@@ -78,6 +83,7 @@
   --color-error-600:   var(--error-600);
   --color-warning-25:  var(--warning-25);
   --color-warning-100: var(--warning-100);
+  --color-warning-250: var(--warning-250);
   --color-warning-300: var(--warning-300);
   --color-warning-600: var(--warning-600);
   --color-warning-700: var(--warning-700);
@@ -319,4 +325,376 @@ body {
 
 .hr-v-4-7-2 .hr-checkbox--disabled .hr-checkbox__label {
   color: var(--n-text-color-disabled);
+}
+
+/* HLInput — mirrors @platform-ui/highrise naive input styles (highrise948.mjs) */
+.hr-v-4-7-2 .hr-input {
+  max-width: 100%;
+  width: 100%;
+  cursor: text;
+  line-height: 1.5;
+  z-index: auto;
+  outline: none;
+  box-sizing: border-box;
+  position: relative;
+  display: inline-flex;
+  border-radius: var(--n-border-radius);
+  background-color: var(--n-color);
+  transition: background-color 0.3s var(--n-bezier);
+  font-size: var(--n-font-size);
+  font-weight: var(--n-font-weight);
+  --n-padding-vertical: calc((var(--n-height) - 1.5 * var(--n-font-size)) / 2);
+}
+
+.hr-v-4-7-2 .hr-input-wrapper {
+  overflow: hidden;
+  display: inline-flex;
+  flex-grow: 1;
+  position: relative;
+  align-items: center;
+  padding-left: var(--n-padding-left);
+  padding-right: var(--n-padding-right);
+}
+
+.hr-v-4-7-2 .hr-input__input {
+  overflow: hidden;
+  flex-grow: 1;
+  position: relative;
+}
+
+.hr-v-4-7-2 .hr-input__input-el {
+  box-sizing: border-box;
+  font-size: inherit;
+  line-height: 1.5;
+  font-family: inherit;
+  border: none;
+  outline: none;
+  background-color: transparent;
+  -webkit-appearance: none;
+  width: 100%;
+  min-width: 0;
+  color: var(--n-text-color);
+  caret-color: var(--n-caret-color);
+  padding: 0;
+  height: var(--n-height);
+  line-height: var(--n-height);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hr-v-4-7-2 .hr-input__input-el::placeholder {
+  color: var(--n-placeholder-color);
+  opacity: 1;
+}
+
+.hr-v-4-7-2 .hr-input__prefix {
+  margin-right: 4px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: var(--n-height);
+  color: var(--n-suffix-text-color);
+}
+
+.hr-v-4-7-2 .hr-input__suffix {
+  margin-left: 4px;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  line-height: var(--n-height);
+  color: var(--n-suffix-text-color);
+}
+
+.hr-v-4-7-2 .hr-input-text .hr-input__prefix-container,
+.hr-v-4-7-2 .hr-input-text .hr-input__suffix-container {
+  display: flex;
+  align-items: center;
+  font-size: var(--n-suffix-icon-font-size);
+  gap: var(--n-icon-gap, 8px);
+  flex-shrink: 0;
+  color: var(--gray-400);
+}
+
+.hr-v-4-7-2 .hr-input-text .hr-input__prefix-container .hr-input__prefix-icon,
+.hr-v-4-7-2 .hr-input-text .hr-input__suffix-container .hr-input__prefix-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--n-prefix-icon-size);
+  height: var(--n-prefix-icon-size);
+}
+
+.hr-v-4-7-2 .hr-input__border,
+.hr-v-4-7-2 .hr-input__state-border {
+  box-sizing: border-box;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  border: var(--n-border);
+  transition:
+    box-shadow 0.3s var(--n-bezier),
+    border-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-input__state-border {
+  border-color: transparent;
+  z-index: 1;
+}
+
+.hr-v-4-7-2 .hr-input:hover:not(.hr-input--disabled):not(.hr-input--readonly) .hr-input__state-border {
+  border: var(--n-border-hover);
+}
+
+.hr-v-4-7-2 .hr-input:focus-within:not(.hr-input--disabled):not(.hr-input--readonly) {
+  background-color: var(--n-color-focus, var(--n-color));
+}
+
+.hr-v-4-7-2 .hr-input:focus-within:not(.hr-input--disabled):not(.hr-input--readonly) .hr-input__state-border {
+  border: var(--n-border-focus);
+  box-shadow: var(--n-box-shadow-focus);
+}
+
+.hr-v-4-7-2 .hr-input--disabled {
+  cursor: not-allowed;
+  background-color: var(--n-color-disabled);
+}
+
+.hr-v-4-7-2 .hr-input--disabled .hr-input__border {
+  border: var(--n-border-disabled);
+}
+
+.hr-v-4-7-2 .hr-input--disabled .hr-input__input-el {
+  cursor: not-allowed;
+  color: var(--n-text-color-disabled);
+}
+
+.hr-v-4-7-2 .hr-input--disabled .hr-input__input-el::placeholder {
+  color: var(--n-placeholder-color-disabled);
+}
+
+/* HLButton — mirrors @platform-ui/highrise naive button styles (highrise819.mjs) */
+.hr-v-4-7-2 .hr-button {
+  margin: 0;
+  font-weight: var(--n-font-weight);
+  line-height: 1;
+  font-family: inherit;
+  padding: var(--n-padding);
+  height: var(--n-height);
+  font-size: var(--n-font-size);
+  border-radius: var(--n-border-radius);
+  color: var(--n-text-color);
+  background-color: var(--n-color);
+  width: var(--n-width);
+  white-space: nowrap;
+  outline: none;
+  position: relative;
+  z-index: auto;
+  border: none;
+  display: inline-flex;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  -webkit-user-select: none;
+  text-align: center;
+  cursor: pointer;
+  text-decoration: none;
+  box-shadow: var(--n-box-shadow);
+  transition:
+    color 0.3s var(--n-bezier),
+    background-color 0.3s var(--n-bezier),
+    opacity 0.3s var(--n-bezier),
+    border-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-button__content,
+.hr-v-4-7-2 .hr-button__content-default-slot {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  min-width: 0;
+}
+
+.hr-v-4-7-2 .hr-button__border,
+.hr-v-4-7-2 .hr-button__state-border {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  transition: border-color 0.3s var(--n-bezier);
+  pointer-events: none;
+}
+
+.hr-v-4-7-2 .hr-button__border {
+  border: var(--n-border);
+}
+
+.hr-v-4-7-2 .hr-button__state-border {
+  border: var(--n-border);
+  border-color: transparent;
+  z-index: 1;
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):hover {
+  background-color: var(--n-color-hover);
+  color: var(--n-text-color-hover);
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):hover .hr-button__state-border {
+  border: var(--n-border-hover);
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):focus-visible {
+  background-color: var(--n-color-focus);
+  color: var(--n-text-color-focus);
+  outline: var(--n-outline-focus) !important;
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):focus-visible .hr-button__state-border {
+  border: var(--n-border-focus);
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):active {
+  background-color: var(--n-color-pressed);
+  color: var(--n-text-color-pressed);
+}
+
+.hr-v-4-7-2 .hr-button:not(.hr-button--disabled):not(.hr-button--ghost):not(.hr-button--text):active .hr-button__state-border {
+  border: var(--n-border-pressed);
+}
+
+.hr-v-4-7-2 .hr-button--disabled {
+  cursor: not-allowed;
+  background-color: var(--n-color-disabled) !important;
+  color: var(--n-text-color-disabled) !important;
+  opacity: 1 !important;
+}
+
+.hr-v-4-7-2 .hr-button--disabled .hr-button__border {
+  border: var(--n-border-disabled);
+}
+
+.hr-v-4-7-2 .hr-button--loading {
+  cursor: wait;
+}
+
+/* HLTabs — mirrors @platform-ui/highrise naive tabs styles (highrise1024.mjs) */
+.hr-v-4-7-2 .hr-tabs {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  transition:
+    background-color 0.3s var(--n-bezier),
+    border-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-tabs-nav {
+  box-sizing: border-box;
+  line-height: 1.5;
+  display: flex;
+  transition: border-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-tabs--segment-type .hr-tabs-nav--segment-type {
+  border-radius: var(--n-tab-border-radius);
+  background-color: var(--n-color-segment);
+}
+
+.hr-v-4-7-2 .hr-tabs-rail {
+  position: relative;
+  padding: 3px;
+  border-radius: var(--n-tab-border-radius);
+  width: 100%;
+  background-color: var(--n-color-segment);
+  transition: background-color 0.3s var(--n-bezier);
+  display: flex;
+  align-items: center;
+}
+
+.hr-v-4-7-2 .hr-tabs-capsule {
+  border-radius: var(--n-tab-border-radius);
+  position: absolute;
+  pointer-events: none;
+  background-color: var(--n-tab-color-segment);
+  box-shadow:
+    0 1px 2px 0 color-mix(in srgb, var(--gray-900) 6%, transparent),
+    0 1px 3px 0 color-mix(in srgb, var(--gray-900) 10%, transparent);
+  transition: transform 0.3s var(--n-bezier), width 0.3s var(--n-bezier), height 0.3s var(--n-bezier);
+  left: 0;
+  top: 0;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab-wrapper {
+  flex-basis: 0;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab-pad {
+  width: 2px;
+  flex-shrink: 0;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab {
+  overflow: hidden;
+  border-radius: var(--n-tab-border-radius);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--n-tab-height);
+  padding: var(--n-tab-padding);
+  font-size: var(--n-tab-font-size);
+  line-height: var(--n-tab-line-height);
+  font-weight: var(--n-tab-font-weight);
+  color: var(--n-tab-text-color);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color 0.3s var(--n-bezier);
+  border: none;
+  background: transparent;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab__label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: inherit;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab:hover:not(.hr-tabs-tab--disabled):not(.hr-tabs-tab--active) {
+  color: var(--n-tab-text-color-hover);
+}
+
+.hr-v-4-7-2 .hr-tabs-tab--active {
+  font-weight: var(--n-tab-font-weight-active);
+  color: var(--n-tab-text-color-active);
+}
+
+.hr-v-4-7-2 .hr-tabs-tab--disabled {
+  color: var(--n-tab-text-color-disabled);
+  cursor: not-allowed;
+}
+
+.hr-v-4-7-2 .hr-tabs-pane-wrapper {
+  width: 100%;
+}
+
+.hr-v-4-7-2 .hr-tab-pane {
+  padding: var(--n-pane-padding-top) var(--n-pane-padding-right) var(--n-pane-padding-bottom) var(--n-pane-padding-left);
 }

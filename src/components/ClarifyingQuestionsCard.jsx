@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { InfoCircleIcon } from '@gohighlevel/ghl-icons/24/outline'
 import { ChevronDown } from '../icons/index.js'
+import HLTooltip from './HLTooltip.jsx'
 
 function ChevronUp({ size = 12, className = '' }) {
   return (
@@ -11,11 +13,12 @@ function ChevronUp({ size = 12, className = '' }) {
  * ClarifyingQuestionsCard
  *
  * Props:
- *   questions        — array of { id, label, required?, type, placeholder?, options?[], icon? }
+ *   questions        — array of { id, label, required?, type, placeholder?, helperText?, options?[], icon? }
  *   onSubmit(answers) — called with answer map when Continue/Submit is pressed on last question
  *   onSkip()         — skip the whole block
  *   embedded         — if true, no outer border/radius (sits inside PromptComposer)
  *   attachedToEditor — if true, light lavender top panel (no outer border — parent shell wraps composer)
+ *   title            — card header title (default: Questions)
  */
 export default function ClarifyingQuestionsCard({
   questions = [],
@@ -23,24 +26,29 @@ export default function ClarifyingQuestionsCard({
   onSkip,
   embedded = false,
   attachedToEditor = false,
+  title = 'Questions',
+  /** When true, show every question at once with a single Submit action */
+  singleStep = false,
+  /** When false, labels omit the "1." style prefix */
+  showQuestionNumbers = true,
 }) {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState({})
 
   if (!questions.length) return null
 
-  const isLastQuestion = currentIdx === questions.length - 1
+  const isLastQuestion = singleStep || currentIdx === questions.length - 1
 
   function setAnswer(id, val) {
     setAnswers(prev => ({ ...prev, [id]: val }))
   }
 
   function handleContinue() {
-    if (!isLastQuestion) {
-      setCurrentIdx(i => i + 1)
-    } else {
+    if (singleStep || isLastQuestion) {
       onSubmit?.(answers)
+      return
     }
+    setCurrentIdx(i => i + 1)
   }
 
   const inner = (
@@ -51,54 +59,79 @@ export default function ClarifyingQuestionsCard({
           <div className="w-6 h-6 rounded-md bg-gray-800 flex items-center justify-center shrink-0">
             <span className="text-white text-[11px] font-bold leading-none select-none">?</span>
           </div>
-          <span className="text-[14px] font-semibold text-gray-900">Questions</span>
+          <span className="text-[14px] font-semibold text-gray-900">{title}</span>
         </div>
-        <div className="flex items-center">
-          <button
-            type="button"
-            onClick={() => setCurrentIdx(i => Math.max(0, i - 1))}
-            disabled={currentIdx === 0}
-            className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            aria-label="Previous question"
-          >
-            <ChevronUp size={13} />
-          </button>
-          <span className="text-[13px] text-gray-500 tabular-nums px-1 select-none">
-            {currentIdx + 1} of {questions.length}
-          </span>
-          <button
-            type="button"
-            onClick={() => setCurrentIdx(i => Math.min(questions.length - 1, i + 1))}
-            disabled={currentIdx === questions.length - 1}
-            className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-            aria-label="Next question"
-          >
-            <ChevronDown size={13} />
-          </button>
-        </div>
+        {!singleStep && (
+          <div className="flex items-center">
+            <button
+              type="button"
+              onClick={() => setCurrentIdx(i => Math.max(0, i - 1))}
+              disabled={currentIdx === 0}
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              aria-label="Previous question"
+            >
+              <ChevronUp size={13} />
+            </button>
+            <span className="text-[13px] text-gray-500 tabular-nums px-1 select-none">
+              {currentIdx + 1} of {questions.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => setCurrentIdx(i => Math.min(questions.length - 1, i + 1))}
+              disabled={currentIdx === questions.length - 1}
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              aria-label="Next question"
+            >
+              <ChevronDown size={13} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Questions */}
       <div className={`flex flex-col ${attachedToEditor ? 'gap-4' : 'gap-5'}`}>
         {questions.map((q, idx) => {
-          const isActive = idx === currentIdx
+          const isActive = singleStep || idx === currentIdx
           const answer = answers[q.id] ?? ''
 
           return (
             <div
               key={q.id}
               className="flex flex-col gap-2.5"
-              onClick={() => !isActive && setCurrentIdx(idx)}
+              onClick={() => !singleStep && !isActive && setCurrentIdx(idx)}
             >
               <p
-                className={`text-[14px] leading-snug transition-colors ${
+                className={`flex items-center gap-1 text-[14px] leading-snug transition-colors ${
                   isActive
                     ? 'font-semibold text-gray-900'
                     : 'font-medium text-gray-400 cursor-pointer'
                 }`}
               >
-                {idx + 1}.&nbsp;{q.label}
+                {showQuestionNumbers ? `${idx + 1}.\u00A0` : ''}
+                {q.label}
                 {q.required && <span className="text-error-600 ml-1">*</span>}
+                {q.helperText && (singleStep || isActive) && (
+                  <HLTooltip
+                    id={`${q.id}-helper-tooltip`}
+                    content={q.helperText}
+                    variant="dark"
+                    placement="top"
+                    wrap
+                  >
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      className="inline-flex shrink-0 text-gray-400"
+                      aria-label={q.helperText}
+                      onClick={e => e.stopPropagation()}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') e.stopPropagation()
+                      }}
+                    >
+                      <InfoCircleIcon size={20} color="var(--gray-400)" />
+                    </span>
+                  </HLTooltip>
+                )}
               </p>
 
               {q.type === 'text' && (
@@ -115,7 +148,29 @@ export default function ClarifyingQuestionsCard({
                     value={answer}
                     onChange={e => setAnswer(q.id, e.target.value)}
                     placeholder={q.placeholder}
-                    onKeyDown={e => e.key === 'Enter' && answer.trim() && handleContinue()}
+                    onKeyDown={e => e.key === 'Enter' && (singleStep || answer.trim()) && handleContinue()}
+                    className="flex-1 text-[14px] text-gray-900 placeholder:text-gray-400 bg-transparent outline-none"
+                    autoFocus={isActive && idx === 0}
+                    tabIndex={isActive ? 0 : -1}
+                  />
+                </div>
+              )}
+
+              {q.type === 'password' && (
+                <div
+                  className={`flex items-center gap-2 px-3 h-10 bg-white border rounded-lg transition-all ${
+                    isActive
+                      ? 'border-purple-200 focus-within:border-purple-600 focus-within:shadow-focus-purple-sm'
+                      : 'border-gray-100 opacity-50 pointer-events-none'
+                  }`}
+                >
+                  {q.icon && <q.icon size={14} className="text-gray-400 shrink-0" />}
+                  <input
+                    type="password"
+                    value={answer}
+                    onChange={e => setAnswer(q.id, e.target.value)}
+                    placeholder={q.placeholder}
+                    onKeyDown={e => e.key === 'Enter' && (singleStep || answer.trim()) && handleContinue()}
                     className="flex-1 text-[14px] text-gray-900 placeholder:text-gray-400 bg-transparent outline-none"
                     autoFocus={isActive && idx === 0}
                     tabIndex={isActive ? 0 : -1}
@@ -192,7 +247,7 @@ export default function ClarifyingQuestionsCard({
           onClick={handleContinue}
           className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-[14px] font-semibold rounded-lg transition-colors shadow-xs"
         >
-          {isLastQuestion ? 'Submit' : 'Continue'}
+          {singleStep || isLastQuestion ? 'Submit' : 'Continue'}
           <span className="text-[13px] leading-none">↵</span>
         </button>
       </div>

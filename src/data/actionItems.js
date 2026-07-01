@@ -62,7 +62,7 @@ export const actionItems = [
     autofix: true,
     manualFix: false,
     tags: ['Meta tags'],
-    affectedPages: 5,
+    affectedPages: 3,
     detailType: 'table',
     tableColumns: { page: 'Page', current: 'Current title', recommendation: 'Recommended title' },
     tableRows: [
@@ -284,6 +284,48 @@ export const actionItems = [
     recommendationLabel: 'Recommendation',
     recommendation: 'Set cache-control headers for static assets to improve repeat visit load times.',
   },
+  {
+    id: 'listing-e-1',
+    title: 'Fix NAP inconsistency on Yelp listing',
+    priority: 'error',
+    source: 'listing',
+    autofix: true,
+    manualFix: false,
+    tags: ['NAP'],
+    detailType: 'single',
+    fieldName: 'Name, address, phone',
+    currentValue: 'Phone number mismatch',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Update Yelp listing phone to match your Google Business Profile and website.',
+  },
+  {
+    id: 'listing-w-1',
+    title: 'Update business hours on directory listings',
+    priority: 'warning',
+    source: 'listing',
+    autofix: false,
+    manualFix: true,
+    tags: ['Hours'],
+    detailType: 'single',
+    fieldName: 'Business hours',
+    currentValue: 'Out of date on 3 directories',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Sync hours across Yelp, Bing Places, and Apple Maps to match your current schedule.',
+  },
+  {
+    id: 'listing-n-1',
+    title: 'Add missing business description on Foursquare',
+    priority: 'notice',
+    source: 'listing',
+    autofix: true,
+    manualFix: false,
+    tags: ['Description'],
+    detailType: 'single',
+    fieldName: 'Business description',
+    currentValue: '(missing)',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Add a concise business description so directory users understand your services.',
+  },
 ]
 
 export const actionItemsGbp = actionItems.filter(i => i.source === 'gbp')
@@ -429,16 +471,22 @@ export const ACTION_PLAN_ITEMS = [
 
 /** Fixed action item sets for canonical prompts — same every run */
 const CANONICAL_SEO_ACTION_ITEM_IDS = [
+  // Website — 2 errors, 2 warnings, 1 notice
   '4',
-  '5',
+  'seo-af-2',
   '6',
   '8',
-  'seo-af-2',
-  'seo-af-3',
-  'seo-af-4',
-  'seo-af-5',
   'seo-n-1',
-  'seo-n-2',
+  // GBP — 2 errors, 1 warning, 2 notices
+  '1',
+  'gbp-af-1',
+  'gbp-w-1',
+  'gbp-n-1',
+  'gbp-n-2',
+  // Listing — 1 error, 1 warning, 1 notice
+  'listing-e-1',
+  'listing-w-1',
+  'listing-n-1',
 ]
 const CANONICAL_GBP_ACTION_ITEM_IDS = ['1', '2', 'gbp-w-1', 'gbp-w-2', 'gbp-n-1', 'gbp-n-2']
 const CANONICAL_GENERIC_ACTION_ITEM_IDS = ['1', '4', '6', 'gbp-w-1', '8', 'seo-n-1']

@@ -16,6 +16,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@vitejs/plugin-react": "^6.0.1",
+    "agentation": "^3.0.2",
     "tailwindcss": "^4.2.4",
     "vercel": "^53.1.1",
     "vite": "^8.0.10"
