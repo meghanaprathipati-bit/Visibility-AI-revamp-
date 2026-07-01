@@ -14,8 +14,8 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5174,
-    strictPort: true,
+    port: 6174,
+    strictPort: false,
   },
   build: {
     cssMinify: 'esbuild',
