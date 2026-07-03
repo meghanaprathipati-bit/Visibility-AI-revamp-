@@ -44,7 +44,8 @@
   --teal-50:  #F0FDFA;
   --teal-200: #99F6E4;
   --teal-600: #0D9488;
-:root {
+
+  /* Warning extensions */
   --warning-250: #ffa35a;
   --hr-warning-250: #ffa35a;
   --warning-300: #fa9209;

@@ -376,6 +376,14 @@ const DASHBOARD_ACCORDION_SECTIONS = [
   },
 ]
 
+// Panel layout: 1 product sidebar · 2 chat list · 3 conversational center · 4 contextual detail · 5 tools
+function isChatConversational(chatId, sessions, activeChatUsed) {
+  if (activeChatUsed) return true
+  const session = sessions[chatId]
+  if (!session) return false
+  return Boolean(session.chatMode || session.messages?.length)
+}
+
 export default function VisibilityAI() {
   const [activePanel, setActivePanel] = useState('Chats')
   const [selectedDashboardId, setSelectedDashboardId] = useState('overview')
@@ -636,17 +644,6 @@ export default function VisibilityAI() {
         />
       </div>
     </AppShell>
-  )
-}
-
-function VaLogo() {
-  return (
-    <div className="w-9 h-9 rounded-full bg-brand-deep flex items-center justify-center shrink-0 overflow-hidden">
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M2.5 5.5L6.5 16.5L7.5 16.5L4.5 5.5L2.5 5.5Z" fill="var(--va-accent-green)"/>
-        <path d="M11.5 5.5L7.5 16.5L8.5 16.5L9.6 13.6L13.4 13.6L14.5 16.5L15.5 16.5L11.5 5.5ZM10 12.2L11.5 8.4L13 12.2L10 12.2Z" fill="#F97316"/>
-      </svg>
-    </div>
   )
 }
 
@@ -957,10 +954,9 @@ function ChatPanel({
   if (collapsed) {
     return (
       <aside className="relative w-full min-w-0 shrink-0 border-r border-gray-200 bg-white flex flex-col items-center pt-3 pb-3">
-        <VaLogo />
         <button
           onClick={onToggleCollapse}
-          className="mt-2 w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+          className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
           aria-label="Expand panel"
         >
           <PanelLeftIcon size={16} />
@@ -1115,11 +1111,10 @@ function ChatPanel({
     <aside className="w-full min-w-0 shrink-0 border-r border-gray-200 bg-white flex flex-col hover-shows-scrollbar">
 
       {/* Visibility — product title */}
-      <div className="flex items-center gap-2.5 px-3 pt-3 pb-3 border-b border-gray-200">
-        <VaLogo />
+      <div className="flex items-center px-3 pt-3 pb-3 border-b border-gray-200">
         <div className="flex-1 min-w-0">
           <div className="text-[14px] font-semibold text-gray-900 leading-tight truncate">Visibility</div>
-          <div className="text-[12px] text-gray-500 leading-tight truncate">Search, AI, and local</div>
+          <div className="text-[12px] text-gray-500 leading-tight truncate">Search · AI · Local</div>
         </div>
         <button
           onClick={onToggleCollapse}

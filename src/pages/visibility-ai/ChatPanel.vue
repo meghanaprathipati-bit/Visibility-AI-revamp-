@@ -5,7 +5,6 @@ import {
   MessageChatSquareIcon, Grid01Icon, PanelLeftIcon, FolderPlus,
 } from '../../icons/index.js'
 import { DASHBOARD_ITEMS } from '../../data/aiRankDashboard.js'
-import VaLogo from './VaLogo.vue'
 import NewProjectModal from './NewProjectModal.vue'
 import { INITIAL_PROJECTS } from './constants.js'
 
@@ -145,10 +144,9 @@ function toggleCollapse() {
       v-if="collapsed"
       class="flex flex-col items-center flex-1 min-h-0 w-full pt-3 pb-3"
     >
-      <VaLogo />
       <button
         type="button"
-        class="mt-2 w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
+        class="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
         aria-label="Expand panel"
         title="Expand panel"
         @click="toggleCollapse"
@@ -308,11 +306,10 @@ function toggleCollapse() {
       v-else
       class="flex flex-col flex-1 min-h-0 w-full hover-shows-scrollbar"
     >
-      <div class="flex items-center gap-2.5 px-3 pt-3 pb-3 border-b border-gray-200 shrink-0">
-        <VaLogo />
+      <div class="flex items-center px-3 pt-3 pb-3 border-b border-gray-200 shrink-0">
         <div class="flex-1 min-w-0">
-          <div class="text-[14px] font-semibold text-gray-900 leading-tight truncate">Visibility AI</div>
-          <div class="text-[12px] text-gray-500 leading-tight truncate">Search, AI, and local</div>
+          <div class="text-[14px] font-semibold text-gray-900 leading-tight truncate">Visibility</div>
+          <div class="text-[12px] text-gray-500 leading-tight truncate">Search · AI · Local</div>
         </div>
         <button
           type="button"
