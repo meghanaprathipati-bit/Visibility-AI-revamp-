@@ -2908,7 +2908,7 @@ function CrawledPagesTab() {
             }`}
           >
             <Zap size={13} />
-            {totalSelectedFindings > 0 ? 'Connect WordPress to implement the changes' : 'Apply changes'}
+            Apply fixes
           </button>
         </div>
       </div>
@@ -3079,7 +3079,7 @@ function CrawledPagesTab() {
       {/* Connect WordPress modal */}
       {showConnectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4" onClick={() => setShowConnectModal(false)}>
-          <div className="bg-white rounded-xl shadow-card w-full max-w-[600px] flex flex-col" onClick={e => e.stopPropagation()}>
+          <div className="bg-white rounded-xl shadow-card w-full max-w-[700px] flex flex-col" onClick={e => e.stopPropagation()}>
             {/* Modal header */}
             <div className="flex items-start gap-4 px-6 pt-6 pb-5 border-b border-gray-100">
               <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
@@ -3120,11 +3120,14 @@ function CrawledPagesTab() {
                   <p className="text-[13px] font-semibold text-gray-900 mb-1">2. Install in WordPress</p>
                   <p className="text-[12px] text-gray-500 leading-relaxed">Open WordPress admin, go to Plugins, Add New, Upload Plugin, then activate it.</p>
                 </div>
-                <div className={`mt-auto inline-flex items-center justify-center px-3 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
-                  pluginDownloaded
-                    ? 'bg-primary-600 text-white border-primary-600 hover:bg-primary-700 cursor-pointer'
-                    : 'bg-warning-100 text-warning-700 border-warning-300 cursor-default'
-                }`}>
+                <div
+                  className={`mt-auto inline-flex items-center justify-center px-3 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
+                    pluginDownloaded
+                      ? 'bg-primary-600 text-white border-primary-600 hover:bg-primary-700 cursor-pointer'
+                      : 'bg-warning-100 text-warning-600 cursor-default'
+                  }`}
+                  style={!pluginDownloaded ? { borderColor: 'var(--warning-600)' } : undefined}
+                >
                   {pluginDownloaded ? 'Open WordPress admin →' : 'Download the plugin first'}
                 </div>
               </div>
@@ -3157,13 +3160,13 @@ function CrawledPagesTab() {
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 shrink-0">
+            <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0">
               <button onClick={() => setShowConnectModal(false)} className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">Cancel</button>
               <button
                 disabled={!apiToken.trim()}
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                <CircleCheck size={14} /> Connect WordPress to implement the changes
+                Connect
               </button>
             </div>
           </div>
