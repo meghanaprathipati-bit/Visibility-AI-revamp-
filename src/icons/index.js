@@ -1,6 +1,8 @@
 // Auto-generated GHL icon React components
 // Source: @gohighlevel/ghl-icons v1.0.47 (converted from Vue)
 
+export { CircleX } from './CircleX.jsx';
+export { Info } from './Info.jsx';
 export { ArrowLeft } from './ArrowLeft.jsx';
 export { MoreHorizontal } from './MoreHorizontal.jsx';
 export { ChevronRight } from './ChevronRight.jsx';
