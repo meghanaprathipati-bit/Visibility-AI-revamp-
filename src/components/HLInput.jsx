@@ -84,22 +84,28 @@ const INPUT_SIZE_STYLE = {
 }
 
 /** Mirrors getInputThemeOverrides() from highrise620.mjs */
-function getInputThemeOverrides() {
+function getInputThemeOverrides(color = 'primary') {
+  const palette = color === 'purple' ? 'purple' : 'primary'
+  const focusRing =
+    color === 'purple'
+      ? '0px 0px 0px 4px var(--purple-50), var(--shadow-xs)'
+      : '0px 0px 0px 4px var(--primary-100), var(--shadow-xs)'
+
   return {
     bezier: 'cubic-bezier(.4, 0, .2, 1)',
-    border: '1px solid var(--gray-300)',
-    borderHover: '1px solid var(--primary-600)',
-    borderFocus: '1px solid var(--primary-600)',
+    border: color === 'purple' ? '1px solid var(--purple-200)' : '1px solid var(--gray-300)',
+    borderHover: `1px solid var(--${palette}-600)`,
+    borderFocus: `1px solid var(--${palette}-600)`,
     borderDisabled: '1px solid var(--gray-300)',
-    boxShadowFocus: '0px 0px 0px 4px var(--primary-100), var(--shadow-xs)',
+    boxShadowFocus: focusRing,
     color: 'var(--base-white)',
     colorDisabled: 'var(--gray-50)',
     textColor: 'var(--gray-900)',
     textColorDisabled: 'var(--gray-400)',
     placeholderColor: 'var(--gray-500)',
     placeholderColorDisabled: 'var(--gray-400)',
-    caretColor: 'var(--primary-500)',
-    loadingColor: 'var(--primary-600)',
+    caretColor: `var(--${palette}-600)`,
+    loadingColor: `var(--${palette}-600)`,
     iconColor: 'var(--gray-400)',
     iconColorDisabled: 'var(--gray-300)',
     iconGap: '4px',
@@ -109,10 +115,10 @@ function getInputThemeOverrides() {
   }
 }
 
-function getInputThemeVars(size = 'md') {
+function getInputThemeVars(size = 'md', color = 'primary') {
   const sizeStyle = INPUT_SIZE_STYLE[size] ?? INPUT_SIZE_STYLE.md
   return toNaiveVars({
-    ...getInputThemeOverrides(),
+    ...getInputThemeOverrides(color),
     ...sizeStyle,
     borderRadius: sizeStyle.borderRadius,
   })
@@ -129,6 +135,7 @@ const HLInput = forwardRef(function HLInput(
     placeholder,
     type = 'text',
     size = 'md',
+    color = 'primary',
     disabled = false,
     readOnly = false,
     autoFocus = false,
@@ -142,7 +149,7 @@ const HLInput = forwardRef(function HLInput(
 ) {
   const resolvedSize = INPUT_SIZE_STYLE[size] ? size : 'md'
   const sizeStyle = INPUT_SIZE_STYLE[resolvedSize]
-  const themeVars = getInputThemeVars(resolvedSize)
+  const themeVars = getInputThemeVars(resolvedSize, color)
   const prefixIconSize = Number.parseInt(sizeStyle.prefixIconSize, 10)
 
   return (

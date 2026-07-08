@@ -26,6 +26,7 @@ export default function HLTooltip({
   variant = 'dark',
   disabled = false,
   wrap = false,
+  triggerClassName = '',
   children,
 }) {
   const triggerRef = useRef(null)
@@ -131,7 +132,7 @@ export default function HLTooltip({
     <>
       <span
         ref={triggerRef}
-        className="inline-flex"
+        className={`inline-flex min-w-0 ${triggerClassName}`.trim()}
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocusCapture={show}

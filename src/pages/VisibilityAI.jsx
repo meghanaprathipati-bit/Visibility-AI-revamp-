@@ -34,6 +34,9 @@ import HLInput from '../components/HLInput.jsx'
 import HLButton from '../components/HLButton.jsx'
 import { DASHBOARD_ITEMS } from '../data/aiRankDashboard.js'
 import ClarifyingQuestionsCard from '../components/ClarifyingQuestionsCard.jsx'
+import InChatOnboardingCard from '../components/InChatOnboardingCard.jsx'
+import AiVisibilitySetupCard from '../components/AiVisibilitySetupCard.jsx'
+import { buildOnboardingPrefill, buildOnboardingSummaryLines, ONBOARDING_SETUP_COMPLETE_MESSAGE } from '../data/onboardingData.js'
 import CloudflareTokenCard from '../components/implement/CloudflareTokenCard.jsx'
 import ImplementProgressBlock from '../components/implement/ImplementProgressBlock.jsx'
 import ImplementSummaryCard from '../components/implement/ImplementSummaryCard.jsx'
@@ -397,12 +400,33 @@ export default function VisibilityAI() {
   /** Prototype implement flow state — replace with API job state in production */
   const [implementFlow, setImplementFlow] = useState(null)
   const [activeChatId, setActiveChatId] = useState(1)
+  const [projects, setProjects] = useState(INITIAL_PROJECTS)
+  const [activeProjectId, setActiveProjectId] = useState(1)
+  const [nextProjectId, setNextProjectId] = useState(INITIAL_PROJECTS.length + 1)
   const [chatSessions, setChatSessions] = useState({
     [SEO_SCAN_CHAT_ID]: createSeoScanSession(),
   })
   const [chatLabels, setChatLabels] = useState(INITIAL_CHAT_LABELS)
   const sessionDraftRef = useRef({})
   const prevConversationalRef = useRef(false)
+
+  function handleCreateProject(data) {
+    const id = nextProjectId
+    const websiteUrl = data.websiteUrl?.trim() || undefined
+    const gbpUrl = data.gbpUrl?.trim() || undefined
+    setProjects(prev => [
+      {
+        id,
+        label: data.name,
+        ...(websiteUrl ? { websiteUrl } : {}),
+        ...(gbpUrl ? { gbpUrl } : {}),
+        ...(!websiteUrl && !gbpUrl ? { createdAt: new Date().toISOString().slice(0, 10) } : {}),
+      },
+      ...prev,
+    ])
+    setActiveProjectId(id)
+    setNextProjectId(n => n + 1)
+  }
 
   function applyAutoChatTitle(chatId, titleOrMessage, useAsIs = false) {
     if (chatId == null || !titleOrMessage?.trim()) return
@@ -570,6 +594,10 @@ export default function VisibilityAI() {
           activePanel={activePanel}
           activeChatId={activeChatId}
           chatLabels={chatLabels}
+          projects={projects}
+          activeProjectId={activeProjectId}
+          onActiveProjectChange={setActiveProjectId}
+          onCreateProject={handleCreateProject}
           onChatLabelChange={(chatId, label) => {
             setChatLabels(prev => ({ ...prev, [chatId]: label }))
           }}
@@ -602,6 +630,7 @@ export default function VisibilityAI() {
               <MainContent
                 activeChatId={activeChatId}
                 loadedSession={chatSessions[activeChatId]}
+                activeProject={projects.find(p => p.id === activeProjectId)}
                 onSessionDraft={handleSessionDraft}
                 onChatAutoTitle={(title, useAsIs) => applyAutoChatTitle(activeChatId, title, useAsIs)}
                 composerFocusKey={composerFocusKey}
@@ -797,6 +826,10 @@ function ChatPanel({
   activePanel,
   activeChatId,
   chatLabels = {},
+  projects,
+  activeProjectId,
+  onActiveProjectChange,
+  onCreateProject,
   onChatLabelChange,
   onSelectChat,
   onPanelChange,
@@ -815,31 +848,14 @@ function ChatPanel({
   const [searchQuery, setSearchQuery] = useState('')
   const [dashboardSearchQuery, setDashboardSearchQuery] = useState('')
   const [expandedSections, setExpandedSections] = useState(new Set(['ai-search']))
-  const [projects, setProjects] = useState(INITIAL_PROJECTS)
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false)
-  const [activeProjectId, setActiveProjectId] = useState(1)
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false)
-  const [nextProjectId, setNextProjectId] = useState(INITIAL_PROJECTS.length + 1)
   const [collapsedSearchOpen, setCollapsedSearchOpen] = useState(false)
   const dropdownRef = useRef(null)
   const collapsedSearchRef = useRef(null)
 
   function handleCreateProject(data) {
-    const id = nextProjectId
-    const websiteUrl = data.websiteUrl?.trim() || undefined
-    const gbpUrl = data.gbpUrl?.trim() || undefined
-    setProjects(prev => [
-      {
-        id,
-        label: data.name,
-        ...(websiteUrl ? { websiteUrl } : {}),
-        ...(gbpUrl ? { gbpUrl } : {}),
-        ...(!websiteUrl && !gbpUrl ? { createdAt: new Date().toISOString().slice(0, 10) } : {}),
-      },
-      ...prev,
-    ])
-    setActiveProjectId(id)
-    setNextProjectId(n => n + 1)
+    onCreateProject?.(data)
   }
 
   useEffect(() => {
@@ -942,7 +958,7 @@ function ChatPanel({
             project={project}
             isActive={project.id === activeProjectId}
             onSelect={() => {
-              setActiveProjectId(project.id)
+              onActiveProjectChange(project.id)
               setProjectDropdownOpen(false)
             }}
           />
@@ -1165,7 +1181,7 @@ function ChatPanel({
                     project={project}
                     isActive={project.id === activeProjectId}
                     onSelect={() => {
-                      setActiveProjectId(project.id)
+                      onActiveProjectChange(project.id)
                       setProjectDropdownOpen(false)
                     }}
                   />
@@ -1534,9 +1550,11 @@ function ScanProgressList({ scanKind = 'seo', onComplete, completed = false }) {
   )
 }
 
-function ScanConversationBlock({ scanKind = 'seo', onComplete }) {
+function ScanConversationBlock({ scanKind = 'seo', onComplete, loaderIntro }) {
   const isSeoScan = scanKind === 'seo'
-  const intro = !isSeoScan ? (SCAN_INTRO[scanKind] || SCAN_INTRO.generic) : null
+  const intro =
+    loaderIntro ??
+    (!isSeoScan ? SCAN_INTRO[scanKind] || SCAN_INTRO.generic : null)
 
   return (
     <div className="flex flex-col gap-3.5">
@@ -1549,9 +1567,9 @@ function ScanConversationBlock({ scanKind = 'seo', onComplete }) {
   )
 }
 
-function appendScanMessages(prev, scanKind, ts) {
+function appendScanMessages(prev, scanKind, ts, extra = {}) {
   const withoutScan = prev.filter(m => m.content !== 'scan')
-  return [...withoutScan, { id: Date.now(), type: 'ai', content: 'scan', scanKind, ts }]
+  return [...withoutScan, { id: Date.now(), type: 'ai', content: 'scan', scanKind, ts, ...extra }]
 }
 
 const MAX_COMPOSER_HEIGHT = 160 // px — ~5 lines before scroll
@@ -1730,6 +1748,7 @@ function AiFeedbackRow({ ts }) {
 function MainContent({
   activeChatId,
   loadedSession,
+  activeProject,
   onSessionDraft,
   onChatAutoTitle,
   composerFocusKey,
@@ -1755,7 +1774,17 @@ function MainContent({
   const [aiVisibilityPending, setAiVisibilityPending] = useState(false)
   // true while waiting for user to answer an in-chat ai-question bubble
   const [awaitingAnswer, setAwaitingAnswer] = useState(false)
+  // in-chat onboarding wizard — Check AI visibility chip only (3rd quick action)
+  const [onboardingPending, setOnboardingPending] = useState(false)
+  const [onboardingCompleted, setOnboardingCompleted] = useState(false)
+  const [pendingScanKind, setPendingScanKind] = useState('generic')
+  const onboardingPrefill = useMemo(
+    () => buildOnboardingPrefill(activeProject),
+    [activeProject],
+  )
   const messagesEndRef = useRef(null)
+  const chatScrollRef = useRef(null)
+  const prevOnboardingPendingRef = useRef(false)
   const inputRef = useRef(null)
   const skipDraftRef = useRef(false)
   const prevActiveChatIdRef = useRef(activeChatId)
@@ -1790,7 +1819,8 @@ function MainContent({
       (
         (loadedIsEmpty && chatMode && messages.length > 0) ||
         messages.length > (session.messages?.length ?? 0) ||
-        (isScanning && messages.some(m => m.content === 'scan'))
+        (isScanning && messages.some(m => m.content === 'scan')) ||
+        onboardingPending
       )
     ) {
       skipDraftRef.current = false
@@ -1804,6 +1834,9 @@ function MainContent({
     setPendingQuestions(null)
     setAiVisibilityPending(false)
     setAwaitingAnswer(false)
+    setOnboardingPending(session.onboardingPending ?? false)
+    setOnboardingCompleted(session.onboardingCompleted ?? false)
+    setPendingScanKind(session.pendingScanKind ?? 'generic')
     onSessionDraft?.({ ...session, messages: hydratedMessages })
     skipDraftRef.current = false
   // eslint-disable-next-line react-hooks/exhaustive-deps -- only reload when switching chats / parent snapshot
@@ -1816,6 +1849,9 @@ function MainContent({
       isScanning,
       messages,
       inputValue,
+      onboardingPending,
+      onboardingCompleted,
+      pendingScanKind,
     })
 
     const hasResults = messages.some(m => m.content === 'scan-results')
@@ -1826,15 +1862,33 @@ function MainContent({
     if (isScanning || !hasResults) {
       scanCompleteSyncedRef.current = false
     }
-  }, [chatMode, isScanning, messages, inputValue, onSessionDraft, onMessageSent])
+  }, [chatMode, isScanning, messages, inputValue, onboardingPending, onboardingCompleted, pendingScanKind, onSessionDraft, onMessageSent])
 
   useEffect(() => {
     if (!isScanning) inputRef.current?.focus()
   }, [composerFocusKey, isScanning])
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isScanning, implementFlow?.step])
+    const didOpenOnboarding = onboardingPending && !prevOnboardingPendingRef.current
+    prevOnboardingPendingRef.current = onboardingPending
+
+    // Start scroll the same frame the card slide-in begins (300ms) — not after it finishes
+    if (didOpenOnboarding) {
+      requestAnimationFrame(() => {
+        const scrollEl = chatScrollRef.current
+        if (scrollEl) {
+          scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: 'smooth' })
+        } else {
+          messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+        }
+      })
+      return
+    }
+
+    if (!onboardingPending) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+  }, [messages, isScanning, implementFlow?.step, onboardingPending])
 
   useEffect(() => {
     if (!implementFlow?.initKey || implementInitKeyRef.current === implementFlow.initKey) return
@@ -2001,7 +2055,14 @@ function MainContent({
       }
 
       if (prev.some(m => m.content === 'scan-results')) return prev.filter(m => m.content !== 'scan')
-      const lastUser = [...prev].reverse().find(m => m.type === 'user' && m.content !== 'answers-formatted')
+      const lastUser = [...prev]
+        .reverse()
+        .find(
+          m =>
+            m.type === 'user' &&
+            m.content !== 'answers-formatted' &&
+            m.content !== 'onboarding-summary',
+        )
       const payload = buildScanResultsPayload(lastUser?.content, scanKind)
       const ts = getTimestamp()
       return prev
@@ -2081,6 +2142,59 @@ function MainContent({
     }, 400)
   }
 
+  function formatOnboardingScanIntro(payload) {
+    const domain =
+      payload?.gbp?.websiteUrl?.trim()?.replace(/^https?:\/\//, '').replace(/\/$/, '') ||
+      payload?.gbp?.brandName?.trim() ||
+      'your site'
+    return `Initiating AI visibility scan for ${domain}. This usually takes 2–5 minutes.`
+  }
+
+  function handleAiVisibilitySetupContinue() {
+    setPendingScanKind('ai-visibility')
+    setOnboardingPending(true)
+    setMessages(prev =>
+      prev.map(m =>
+        m.content === 'ai-visibility-setup' ? { ...m, setupStarted: true } : m,
+      ),
+    )
+  }
+
+  function handleOnboardingComplete(payload) {
+    const ts = getTimestamp()
+    const summaryLines = buildOnboardingSummaryLines(payload)
+    const scanIntro = formatOnboardingScanIntro(payload)
+    setOnboardingPending(false)
+    setOnboardingCompleted(true)
+
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        type: 'user',
+        content: 'onboarding-summary',
+        summaryLines,
+        rawAnswers: payload,
+        ts,
+      },
+      {
+        id: Date.now() + 1,
+        type: 'ai',
+        content: 'onboarding-setup-complete',
+        ts,
+      },
+    ])
+
+    setIsScanning(true)
+    setTimeout(() => {
+      setMessages(prev =>
+        appendScanMessages(prev, pendingScanKind || 'ai-visibility', getTimestamp(), {
+          loaderIntro: scanIntro,
+        }),
+      )
+    }, 400)
+  }
+
   // Called when user clicks an answer option inside an ai-question chat bubble
   function handleOptionSelect(option) {
     if (awaitingAnswer === false) return
@@ -2125,7 +2239,17 @@ function MainContent({
   }
 
   function submitPrompt(trimmed, { chatTitle, chatTitleAsIs = false } = {}) {
-    if (!trimmed || isScanning || pendingQuestions || awaitingAnswer || aiVisibilityPending || implementCredentialsPending) return
+    if (
+      !trimmed ||
+      isScanning ||
+      pendingQuestions ||
+      awaitingAnswer ||
+      aiVisibilityPending ||
+      implementCredentialsPending ||
+      onboardingPending
+    ) {
+      return
+    }
 
     const ts = getTimestamp()
     const userMsg = { id: Date.now(), type: 'user', content: trimmed, ts }
@@ -2170,24 +2294,40 @@ function MainContent({
       return
     }
 
-    // AI visibility: start with prep scan (first loader), then show inline questions after
+    // Check AI visibility (3rd chip) — greeting first, then onboarding wizard on CTA
     if (scanKind === 'ai-visibility') {
       const nextMessages = enteringChat ? [userMsg] : [...messages, userMsg]
       finishSubmit({
         nextChatMode: true,
         nextMessages,
-        nextIsScanning: true,
         trimmed,
         chatTitle,
         chatTitleAsIs,
       })
+      if (!onboardingCompleted) {
+        setPendingScanKind('ai-visibility')
+        setTimeout(() => {
+          setMessages(prev => [
+            ...prev,
+            {
+              id: Date.now() + 100,
+              type: 'ai',
+              content: 'ai-visibility-setup',
+              ts: getTimestamp(),
+            },
+          ])
+        }, 600)
+        return
+      }
+      setIsScanning(true)
       setTimeout(() => {
-        setMessages(prev => appendScanMessages(prev, 'ai-visibility-prep', getTimestamp()))
+        setMessages(prev => appendScanMessages(prev, 'ai-visibility', getTimestamp()))
       }, 450)
       return
     }
 
     const nextMessages = enteringChat ? [userMsg] : [...messages, userMsg]
+
     finishSubmit({
       nextChatMode: true,
       nextMessages,
@@ -2212,6 +2352,25 @@ function MainContent({
     const scanMessages = messages.filter(m => m.content === 'scan')
     return scanMessages[scanMessages.length - 1]?.id ?? null
   }, [messages])
+
+  // AI visibility — keep composer in attached layout from prompt send through onboarding (matches SEO crawl Cloudflare pattern)
+  const aiVisibilityAttachedComposer = useMemo(() => {
+    if (onboardingPending) return true
+    if (messages.some(m => m.content === 'ai-visibility-setup')) return true
+    const lastUser = [...messages]
+      .reverse()
+      .find(
+        m =>
+          m.type === 'user' &&
+          m.content !== 'answers-formatted' &&
+          m.content !== 'onboarding-summary',
+      )
+    return Boolean(
+      lastUser &&
+        getScanKindFromPrompt(lastUser.content) === 'ai-visibility' &&
+        !onboardingCompleted,
+    )
+  }, [messages, onboardingPending, onboardingCompleted])
 
 
   const chatFooter = (
@@ -2238,6 +2397,37 @@ function MainContent({
                 singleStep
                 showQuestionNumbers={false}
               />
+            </div>
+            <div className="relative z-10 -mt-2">
+              <PromptComposer
+                value={inputValue}
+                onChange={e => setInputValue(e.target.value)}
+                onSend={handleSend}
+                inputRef={inputRef}
+                focusKey={composerFocusKey}
+                scanning={isScanning}
+                onStop={handleStopScan}
+                placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+              />
+            </div>
+          </div>
+        ) : aiVisibilityAttachedComposer ? (
+          <div className="w-full relative">
+            <div
+              className="mx-2.5 relative z-0 grid transition-[grid-template-rows,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{
+                gridTemplateRows: onboardingPending ? '1fr' : '0fr',
+                opacity: onboardingPending ? 1 : 0,
+              }}
+            >
+              <div className={onboardingPending ? 'min-h-0' : 'overflow-hidden min-h-0'}>
+                {onboardingPending && (
+                  <InChatOnboardingCard
+                    prefill={onboardingPrefill}
+                    onComplete={handleOnboardingComplete}
+                  />
+                )}
+              </div>
             </div>
             <div className="relative z-10 -mt-2">
               <PromptComposer
@@ -2347,7 +2537,7 @@ function MainContent({
 
   return (
     <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
-      <div className="flex-1 min-h-0 overflow-y-auto py-8">
+      <div ref={chatScrollRef} className="flex-1 min-h-0 overflow-y-auto py-8">
         <div
           className={`mx-auto flex flex-col gap-6 px-6 ${
             detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'
@@ -2359,6 +2549,23 @@ function MainContent({
             const agentTopSpacing = afterUserBubble ? 'mt-1.5' : ''
 
             if (msg.type === 'user') {
+              // onboarding-summary: user bubble after Finish and run scan
+              if (msg.content === 'onboarding-summary') {
+                return (
+                  <div key={msg.id} className="flex justify-end">
+                    <div className="max-w-[80%] min-w-0 px-4 py-3 bg-gray-100 rounded-2xl rounded-br-sm">
+                      <p className="text-[13px] font-semibold text-gray-900 mb-2">Setup summary</p>
+                      <ul className="flex flex-col gap-1 m-0 p-0 list-none">
+                        {(msg.summaryLines ?? []).map(line => (
+                          <li key={line} className="text-[14px] text-gray-700 leading-relaxed">
+                            {line}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )
+              }
               // answers-formatted: specially styled bubble showing submitted question answers
               if (msg.content === 'answers-formatted') {
                 return (
@@ -2372,7 +2579,10 @@ function MainContent({
                 )
               }
               const firstUserIndex = messages.findIndex(
-                m => m.type === 'user' && m.content !== 'answers-formatted',
+                m =>
+                  m.type === 'user' &&
+                  m.content !== 'answers-formatted' &&
+                  m.content !== 'onboarding-summary',
               )
               const showScanContext = messages.indexOf(msg) === firstUserIndex
               return (
@@ -2407,6 +2617,7 @@ function MainContent({
                 <div key={msg.id} className={`flex flex-col ${agentTopSpacing}`}>
                   <ScanConversationBlock
                     scanKind={msg.scanKind || 'seo'}
+                    loaderIntro={msg.loaderIntro}
                     onComplete={onScanComplete}
                   />
                 </div>
@@ -2453,7 +2664,31 @@ function MainContent({
               )
             }
 
-            // implement flow — connect website message (step 1)
+            // onboarding wizard finished — agent ack before scan loader
+            if (msg.content === 'onboarding-setup-complete') {
+              return (
+                <div key={msg.id} className={`flex flex-col gap-2 ${agentTopSpacing}`}>
+                  <p className="text-[14px] text-gray-700 leading-relaxed m-0">
+                    {ONBOARDING_SETUP_COMPLETE_MESSAGE}
+                  </p>
+                  <AiFeedbackRow ts={msg.ts} />
+                </div>
+              )
+            }
+
+            // AI visibility onboarding — greeting before 3-step wizard
+            if (msg.content === 'ai-visibility-setup') {
+              return (
+                <div key={msg.id} className={`flex flex-col gap-3 ${agentTopSpacing}`}>
+                  <AiVisibilitySetupCard
+                    onContinue={handleAiVisibilitySetupContinue}
+                    actionsDisabled={Boolean(msg.setupStarted || onboardingPending)}
+                  />
+                  <AiFeedbackRow ts={msg.ts} />
+                </div>
+              )
+            }
+
             if (msg.content === 'implement-cloudflare-token') {
               return (
                 <div key={msg.id} className={`flex flex-col gap-3 ${agentTopSpacing}`}>
@@ -2616,7 +2851,7 @@ function MainContent({
               // ── AI Visibility results ──
               if (scanKind === 'ai-visibility') {
                 const aiReport = msg.report ?? buildVisibilityReport(
-                  [...messages].slice(0, messages.indexOf(msg)).reverse().find(m => m.type === 'user' && m.content !== 'answers-formatted')?.content || SEO_SCAN_PROMPT,
+                  [...messages].slice(0, messages.indexOf(msg)).reverse().find(m => m.type === 'user' && m.content !== 'answers-formatted' && m.content !== 'onboarding-summary')?.content || SEO_SCAN_PROMPT,
                 )
                 return (
                   <div key={msg.id} className="flex flex-col gap-4">
