@@ -36,24 +36,25 @@ function camelToKebab(value) {
 }
 
 /** Mirrors checkboxThemeOverrides() + JSONtoNaiveVars() from @platform-ui/highrise */
-function getCheckboxThemeVars(size = 'md', indeterminate = false) {
+function getCheckboxThemeVars(size = 'md', indeterminate = false, color = 'primary') {
   const sizeKey = SIZE_OVERRIDES[size] ? size : 'md'
+  const palette = color === 'purple' ? 'purple' : 'primary'
   const theme = {
     border: '1px solid var(--gray-400)',
-    borderChecked: '1px solid var(--primary-600)',
-    borderDisabled: `1px solid ${indeterminate ? 'var(--primary-200)' : 'var(--gray-300)'}`,
-    borderDisabledChecked: '1px solid var(--primary-200)',
-    borderFocus: '1px solid var(--primary-300)',
+    borderChecked: `1px solid var(--${palette}-600)`,
+    borderDisabled: `1px solid ${indeterminate ? `var(--${palette}-200)` : 'var(--gray-300)'}`,
+    borderDisabledChecked: `1px solid var(--${palette}-200)`,
+    borderFocus: `1px solid var(--${palette}-300)`,
     borderRadius: '2px',
-    boxShadowFocus: '0px 0px 0px 4px var(--primary-100)',
+    boxShadowFocus: `0px 0px 0px 4px var(--${palette}-100)`,
     checkMarkColor: 'var(--base-white)',
     checkMarkColorDisabled: 'var(--base-white)',
     checkMarkColorDisabledChecked: 'var(--base-white)',
     color: 'var(--base-white)',
-    colorChecked: 'var(--primary-600)',
-    colorDisabled: indeterminate ? 'var(--primary-200)' : 'var(--gray-100)',
-    colorDisabledChecked: 'var(--primary-200)',
-    colorHover: 'var(--primary-100)',
+    colorChecked: `var(--${palette}-600)`,
+    colorDisabled: indeterminate ? `var(--${palette}-200)` : 'var(--gray-100)',
+    colorDisabledChecked: `var(--${palette}-200)`,
+    colorHover: `var(--${palette}-100)`,
     textColor: 'var(--gray-900)',
     textColorDisabled: 'var(--gray-400)',
     labelPadding: '0',
@@ -87,6 +88,7 @@ export default function HLCheckbox({
   indeterminate = false,
   disabled = false,
   size = 'md',
+  color = 'primary',
   value,
   className = '',
   'aria-label': ariaLabel,
@@ -96,7 +98,7 @@ export default function HLCheckbox({
 }) {
   const resolvedSize = SIZE_OVERRIDES[size] ? size : 'md'
   const labelId = children ? `${id}-label` : undefined
-  const themeVars = getCheckboxThemeVars(resolvedSize, indeterminate)
+  const themeVars = getCheckboxThemeVars(resolvedSize, indeterminate, color)
 
   function handleChange(event) {
     if (disabled) return
@@ -115,13 +117,12 @@ export default function HLCheckbox({
           checked && 'hr-checkbox--checked',
           indeterminate && 'hr-checkbox--indeterminate',
           disabled && 'hr-checkbox--disabled',
-          children && 'hr-checkbox--show-label',
+          children ? 'hr-checkbox--show-label' : 'hr-checkbox--no-label',
         ]
           .filter(Boolean)
           .join(' ')}
       >
         <span className="hr-checkbox-box-wrapper">
-          {'\u00A0'}
           <span className="hr-checkbox-box">
             <span className="hr-checkbox-icon">
               {indeterminate ? <CheckboxLineIcon /> : <CheckboxCheckIcon />}

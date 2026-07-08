@@ -4,9 +4,13 @@
 :root {
   /* Primary blue */
   --primary-50:  #EEF4FF;
+  --primary-100: #EEF4FF;
   --primary-200: #B2CCFF;
+  --primary-300: #84ADFF;
   --primary-600: #155EEF;
   --primary-700: #1249C0;
+
+  --base-white: #FFFFFF;
 
   /* Gray scale */
   --gray-50:  #F9FAFB;
@@ -33,7 +37,9 @@
 
   /* Purple (AI / Reputation) */
   --purple-50:  #F4F3FF;
+  --purple-100: #EBE9FE;
   --purple-200: #E9D7FE;
+  --purple-300: #C4B5FD;
   --purple-600: #6938EF;
   --purple-700: #5B2FD0;
 
@@ -256,10 +262,13 @@ body {
 .hr-v-4-7-2 .hr-checkbox-box-wrapper {
   position: relative;
   width: var(--n-size);
+  height: var(--n-size);
   flex-shrink: 0;
   flex-grow: 0;
   user-select: none;
   -webkit-user-select: none;
+  line-height: 0;
+  font-size: 0;
 }
 
 .hr-v-4-7-2 .hr-checkbox-box {
@@ -298,7 +307,12 @@ body {
   left: 1px;
   right: 1px;
   top: 1px;
-  bottom: 10px;
+  bottom: 1px;
+}
+
+.hr-v-4-7-2 .hr-checkbox.hr-checkbox--no-label {
+  align-items: center;
+  line-height: 0;
 }
 
 .hr-v-4-7-2 .hr-checkbox-icon .check-icon,
@@ -476,6 +490,11 @@ body {
 
 .hr-v-4-7-2 .hr-input--disabled .hr-input__input-el::placeholder {
   color: var(--n-placeholder-color-disabled);
+}
+
+/* Onboarding custom keyword/competitor inputs — 13px placeholder + value */
+.hr-v-4-7-2.onboarding-custom-input .hr-input {
+  font-size: 13px;
 }
 
 /* HLButton — mirrors @platform-ui/highrise naive button styles (highrise819.mjs) */
