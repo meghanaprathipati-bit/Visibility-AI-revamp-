@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
   TrendingUp, Globe, Search, Plus, MapPin, Link2,
   ChevronRight, ChevronDown, ExternalLink, MessageCircle, HelpCircle,
   LayoutList, Megaphone, Calendar, Sparkles, BarChart3, Award, ArrowUp,
-  Users, ArrowLeft, Check, Bot, Star,
+  Users, ArrowLeft, Check, Bot, Star, X,
 } from '../../icons/index.js'
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
@@ -64,12 +64,12 @@ function MultiLineChart({ lines, xLabels, height = 180 }) {
       {Y_TICKS.map(y => (
         <g key={y}>
           <line x1={PAD_L} y1={yP(y)} x2={VW - PAD_R} y2={yP(y)} stroke="#E5E7EB" strokeWidth="1" />
-          <text x={PAD_L - 6} y={yP(y) + 4} fontSize="10" fill="#9CA3AF" textAnchor="end">{y}</text>
+          <text x={PAD_L - 6} y={yP(y) + 4} fontSize="10" fill="var(--gray-400)" textAnchor="end">{y}</text>
         </g>
       ))}
       {xLabels.map((label, i) =>
         i % 2 === 0
-          ? <text key={i} x={xP(i)} y={VH - 4} fontSize="10" fill="#9CA3AF" textAnchor="middle">{label}</text>
+          ? <text key={i} x={xP(i)} y={VH - 4} fontSize="10" fill="var(--gray-400)" textAnchor="middle">{label}</text>
           : null
       )}
       {lines.map(line => {
@@ -87,7 +87,7 @@ function MultiLineChart({ lines, xLabels, height = 180 }) {
 
 function MentionBadge() {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[11px] font-medium border border-purple-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[12px] font-medium border border-gray-200">
       Mention
     </span>
   )
@@ -95,7 +95,7 @@ function MentionBadge() {
 
 function LinkBadge() {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[11px] font-medium border border-success-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">
       Link
     </span>
   )
@@ -107,7 +107,7 @@ function TypeBadge({ type }) {
 
 function EngineBadge({ label }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border border-gray-200 text-gray-600 bg-gray-50 whitespace-nowrap">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border border-gray-200 text-gray-600 bg-gray-50 whitespace-nowrap">
       {label}
     </span>
   )
@@ -120,7 +120,7 @@ function EngineList({ engines }) {
     <div className="flex items-center gap-1 flex-nowrap">
       {first && <EngineBadge label={first.label} />}
       {overflow > 0 && (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium border border-gray-200 text-gray-500 bg-gray-50 whitespace-nowrap">
+        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border border-gray-200 text-gray-500 bg-gray-50 whitespace-nowrap">
           +{overflow}
         </span>
       )}
@@ -128,13 +128,9 @@ function EngineList({ engines }) {
   )
 }
 
-function BrandPill({ name, highlight }) {
+function BrandPill({ name }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded border text-[11px] font-medium ${
-      highlight
-        ? 'bg-purple-50 text-purple-600 border-purple-200'
-        : 'bg-gray-50 text-gray-600 border-gray-200'
-    }`}>
+    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium bg-gray-50 text-gray-600 border-gray-200">
       {name}
     </span>
   )
@@ -269,14 +265,14 @@ function BrandsCell({ brands, extraBrands = 0 }) {
 
   return (
     <div className="flex items-center gap-1 flex-wrap">
-      {visible.map(b => <BrandPill key={b} name={b} highlight={b === 'Gohighlevel'} />)}
+      {visible.map(b => <BrandPill key={b} name={b} />)}
       {overflowCount > 0 && (
         <>
           <span
             ref={chipRef}
             onMouseEnter={showTooltip}
             onMouseLeave={hideTooltip}
-            className="inline-flex items-center px-2 py-0.5 rounded border border-gray-300 text-[11px] font-medium text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors select-none"
+            className="inline-flex items-center px-2 py-0.5 rounded border border-gray-300 text-[12px] font-medium text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors select-none"
           >
             +{overflowCount}
           </span>
@@ -288,12 +284,12 @@ function BrandsCell({ brands, extraBrands = 0 }) {
               className="flex flex-col gap-1.5 bg-white border border-gray-200 rounded-lg shadow-lg p-2.5 min-w-[148px]"
             >
               {hidden.map(b => (
-                <span key={b} className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[11px] font-medium text-gray-600 bg-gray-50">
+                <span key={b} className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[12px] font-medium text-gray-600 bg-gray-50">
                   {b}
                 </span>
               ))}
               {extraBrands > 0 && (
-                <span className="text-[11px] text-gray-400 px-1">+{extraBrands} more</span>
+                <span className="text-[12px] text-gray-400 px-1">+{extraBrands} more</span>
               )}
             </div>,
             document.body
@@ -306,11 +302,11 @@ function BrandsCell({ brands, extraBrands = 0 }) {
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-const COMPETITOR_COLORS = ['#6938EF', '#16A34A', '#2563EB', '#D97706', '#DC2626', '#4F46E5']
+const COMPETITOR_COLORS = ['#6938EF', '#16A34A', 'var(--primary-600)', '#D97706', '#DC2626', '#4F46E5']
 
 const KPI_CARDS = [
   { label: 'Brand presence',         value: '418',   change: '8.2%',  up: true,  data: [260, 290, 330, 365, 395, 418],             color: '#6938EF', Icon: Award    },
-  { label: 'AI opportunity traffic', value: '12.4K', change: '12.8%', up: true,  data: [8200, 9100, 9800, 10600, 11400, 12400],    color: '#2563EB', Icon: BarChart3 },
+  { label: 'AI opportunity traffic', value: '12.4K', change: '12.8%', up: true,  data: [8200, 9100, 9800, 10600, 11400, 12400],    color: 'var(--primary-600)', Icon: BarChart3 },
   { label: 'Link presence',          value: '137',   change: '5.7%',  up: true,  data: [105, 112, 118, 124, 130, 137],             color: '#16A34A', Icon: Link2     },
   { label: 'Average position',       value: '5.3',   change: '0.8',   up: false, data: [6.1, 6.0, 5.8, 5.6, 5.4, 5.3],           color: '#D97706', Icon: TrendingUp },
   { label: 'Organic traffic',        value: '90.4K', change: '3.4%',  up: true,  data: [82000, 84000, 86000, 87500, 89200, 90400], color: '#E11D48', Icon: Globe     },
@@ -319,7 +315,7 @@ const KPI_CARDS = [
 const COMPETITORS = [
   { name: 'Gohighlevel',    domain: 'gohighlevel.com',    pct: 14.20, color: '#6938EF' },
   { name: 'HubSpot',        domain: 'hubspot.com',        pct: 22.80, color: '#16A34A' },
-  { name: 'ActiveCampaign', domain: 'activecampaign.com', pct: 18.60, color: '#2563EB' },
+  { name: 'ActiveCampaign', domain: 'activecampaign.com', pct: 18.60, color: 'var(--primary-600)' },
   { name: 'ClickFunnels',   domain: 'clickfunnels.com',   pct: 15.90, color: '#D97706' },
   { name: 'Klaviyo',        domain: 'klaviyo.com',        pct: 12.70, color: '#DC2626' },
   { name: 'Keap',           domain: 'keap.com',           pct: 11.40, color: '#4F46E5' },
@@ -328,7 +324,7 @@ const COMPETITORS = [
 const AI_ENGINES = [
   { name: 'AI overview', subtitle: 'AI overview', pct: 49, color: '#6938EF' },
   { name: 'AI mode',     subtitle: 'AI mode',     pct: 22, color: '#16A34A' },
-  { name: 'Gemini',      subtitle: 'Gemini',      pct: 28, color: '#2563EB' },
+  { name: 'Gemini',      subtitle: 'Gemini',      pct: 28, color: 'var(--primary-600)' },
   { name: 'ChatGPT',     subtitle: 'ChatGPT',     pct: 18, color: '#D97706' },
   { name: 'Perplexity',  subtitle: 'Perplexity',  pct: 20, color: '#DC2626' },
 ]
@@ -343,7 +339,7 @@ const TOPIC_PRESENCE = [
 
 const OVERVIEW_KPI_CARDS = [
   { label: 'Visibility score',  value: '70/100', change: '+6 vs prior period', up: true,  sub: null,                  Icon: Award,      color: '#6938EF' },
-  { label: 'Competitive rank',  value: '#3 / 7', change: null,                 up: null,  sub: '— Latest period rank', Icon: Users,      color: '#2563EB' },
+  { label: 'Competitive rank',  value: '#3 / 7', change: null,                 up: null,  sub: '— Latest period rank', Icon: Users,      color: 'var(--primary-600)' },
   { label: 'Avg position',      value: '#2.9',   change: '0.6 pts better',     up: true,  sub: null,                  Icon: TrendingUp,  color: '#16A34A' },
   { label: 'Citation rate',     value: '49%',    change: '+5.7 pp',            up: true,  sub: null,                  Icon: Link2,       color: '#D97706' },
 ]
@@ -367,9 +363,9 @@ const COMPETITOR_RANKING_DATA = [
 ]
 
 const ENGINE_COVERAGE_DATA = [
-  { name: 'Perplexity',  abbr: 'P',  color: '#1E40AF', bg: '#EFF6FF', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
-  { name: 'Claude',      abbr: 'C',  color: '#7C3AED', bg: '#F5F3FF', sub: 'US · English · 12 prompts', vis: 71, presence: '63.0%', avgPos: '#2.9', urlsAnswer: '5.1 URLs / answer', citRate: '47.0%', insight: 'Visibility is present, but citations still lag the strongest engines.' },
-  { name: 'Gemini',      abbr: 'G',  color: '#1D4ED8', bg: '#EFF6FF', sub: 'US · English · 12 prompts', vis: 64, presence: '56.0%', avgPos: '#3.7', urlsAnswer: '4.8 URLs / answer', citRate: '41.0%', insight: 'Brand named often enough, but answer prominence is still uneven.' },
+  { name: 'Perplexity',  abbr: 'P',  color: 'var(--primary-800)', bg: 'var(--primary-50)', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
+  { name: 'Claude',      abbr: 'C',  color: 'var(--purple-600)', bg: 'var(--purple-50)', sub: 'US · English · 12 prompts', vis: 71, presence: '63.0%', avgPos: '#2.9', urlsAnswer: '5.1 URLs / answer', citRate: '47.0%', insight: 'Visibility is present, but citations still lag the strongest engines.' },
+  { name: 'Gemini',      abbr: 'G',  color: '#1D4ED8', bg: 'var(--primary-50)', sub: 'US · English · 12 prompts', vis: 64, presence: '56.0%', avgPos: '#3.7', urlsAnswer: '4.8 URLs / answer', citRate: '41.0%', insight: 'Brand named often enough, but answer prominence is still uneven.' },
   { name: 'AI Mode',     abbr: 'AM', color: '#0D9488', bg: '#F0FDFA', sub: 'US · English · 12 prompts', vis: 68, presence: '61.0%', avgPos: '#3.1', urlsAnswer: '5.3 URLs / answer', citRate: '46.0%', insight: 'Strong middle-of-answer pickup with room to improve citation consistency.' },
   { name: 'AI Overview', abbr: 'AO', color: '#16A34A', bg: '#F0FDF4', sub: 'US · English · 12 prompts', vis: 73, presence: '65.0%', avgPos: '#2.6', urlsAnswer: '5.0 URLs / answer', citRate: '52.0%', insight: 'Strongly tied to your organic rankings — keep traditional SEO healthy.' },
 ]
@@ -402,19 +398,19 @@ const TREND_X_LABELS = ['May 24','May 26','May 28','May 30','Jun 1','Jun 3','Jun
 
 const TREND_LINES_MAP = {
   Visibility: [
-    { label: 'Go High Level', color: '#2563EB', data: [82,83,82,84,83,85,84,86,85,87,86,88,87,90] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [82,83,82,84,83,85,84,86,85,87,86,88,87,90] },
     { label: 'HubSpot',       color: '#EF4444', data: [97,97,98,98,99,98,99,99,100,99,100,100,99,100] },
     { label: 'Calendly',      color: '#06B6D4', data: [78,79,79,80,79,81,80,82,81,82,83,82,83,84] },
     { label: 'Pipedrive',     color: '#6B7280', data: [70,71,70,72,71,73,72,74,73,75,74,75,76,78] },
   ],
   Mentions: [
-    { label: 'Go High Level', color: '#2563EB', data: [54,58,55,61,57,63,59,65,58,62,60,67,63,69] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [54,58,55,61,57,63,59,65,58,62,60,67,63,69] },
     { label: 'HubSpot',       color: '#EF4444', data: [82,80,84,83,87,85,88,86,90,89,88,91,90,92] },
     { label: 'Calendly',      color: '#06B6D4', data: [71,73,70,75,72,74,76,73,78,75,77,79,76,80] },
     { label: 'Pipedrive',     color: '#6B7280', data: [38,36,40,37,35,39,33,37,34,32,36,31,33,30] },
   ],
   Citations: [
-    { label: 'Go High Level', color: '#2563EB', data: [31,29,33,35,32,38,36,40,37,43,41,46,44,49] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [31,29,33,35,32,38,36,40,37,43,41,46,44,49] },
     { label: 'HubSpot',       color: '#EF4444', data: [76,74,78,76,79,77,81,79,82,80,83,81,84,82] },
     { label: 'Calendly',      color: '#06B6D4', data: [58,60,57,62,59,64,61,66,63,65,67,64,68,66] },
     { label: 'Pipedrive',     color: '#6B7280', data: [18,20,17,22,19,16,21,18,15,19,17,14,16,13] },
@@ -424,15 +420,15 @@ const TREND_LINES_MAP = {
 const DETAIL_X_LABELS = ['May 22','May 24','May 26','May 28','May 30','Jun 1','Jun 3','Jun 5','Jun 7','Jun 9','Jun 11','Jun 13','Jun 15','Jun 17','Jun 18']
 
 const DETAIL_TREND_LINES = [
-  { label: 'Perplexity', color: '#1E40AF', data: [76,78,80,81,82,83,84,86,87,88,90,91,93,95,97] },
-  { label: 'Claude',     color: '#7C3AED', data: [72,74,75,76,77,78,79,80,80,81,82,82,83,83,83] },
-  { label: 'Gemini',     color: '#2563EB', data: [65,67,68,69,70,71,72,73,74,74,75,76,76,77,77] },
+  { label: 'Perplexity', color: 'var(--primary-800)', data: [76,78,80,81,82,83,84,86,87,88,90,91,93,95,97] },
+  { label: 'Claude',     color: 'var(--purple-600)', data: [72,74,75,76,77,78,79,80,80,81,82,82,83,83,83] },
+  { label: 'Gemini',     color: 'var(--primary-600)', data: [65,67,68,69,70,71,72,73,74,74,75,76,76,77,77] },
   { label: 'AI Mode',    color: '#059669', data: [65,66,68,68,69,70,71,72,73,73,74,75,75,76,77] },
 ]
 
 const AI_RESPONSES_DATA = [
   { engine: 'AI Mode', abbr: 'AM', color: '#0D9488', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Gohighlevel', 'Calendly', 'HubSpot'], sources: 1, created: 'Jun 18, 2026' },
-  { engine: 'Claude',  abbr: 'C',  color: '#7C3AED', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Gohighlevel', 'HubSpot', 'Calendly'], sources: 1, created: 'Jun 18, 2026' },
+  { engine: 'Claude',  abbr: 'C',  color: 'var(--purple-600)', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Gohighlevel', 'HubSpot', 'Calendly'], sources: 1, created: 'Jun 18, 2026' },
   { engine: 'Gemini',  abbr: 'G',  color: '#1D4ED8', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['HubSpot', 'Gohighlevel', 'Calendly'], sources: 1, created: 'Jun 18, 2026' },
 ]
 
@@ -705,13 +701,13 @@ function PromptDetailContent({ prompt, onBack }) {
             <span className="text-[12px] text-gray-400">Last 30 days</span>
             <span className="text-[12px] text-gray-400">US</span>
           </div>
-          <h2 className="text-[22px] font-bold text-gray-900 leading-snug mb-3">{prompt}</h2>
+          <h2 className="text-[24px] font-bold text-gray-900 leading-snug mb-3">{prompt}</h2>
           <p className="text-[13px] text-gray-500 leading-relaxed">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
         </div>
 
         {/* Right: snapshot card */}
         <div className="w-[220px] shrink-0 border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-primary-600 mb-3">Prompt snapshot</p>
+          <p className="text-[12px] font-bold uppercase tracking-wide text-primary-600 mb-3">Prompt snapshot</p>
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: 'Brand',          value: 'Go High Level' },
@@ -720,12 +716,12 @@ function PromptDetailContent({ prompt, onBack }) {
               { label: 'Prompt Sources', value: '2'             },
             ].map(item => (
               <div key={item.label} className="border border-gray-200 rounded-md bg-white p-2.5">
-                <p className="text-[10px] text-gray-400 font-medium mb-1">{item.label}</p>
+                <p className="text-[12px] text-gray-400 font-medium mb-1">{item.label}</p>
                 <p className="text-[13px] font-semibold text-gray-900">{item.value}</p>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-gray-400 mt-3">Topic: AI Visibility · 2 source domains · US</p>
+          <p className="text-[12px] text-gray-400 mt-3">Topic: AI Visibility · 2 source domains · US</p>
         </div>
       </div>
 
@@ -733,9 +729,9 @@ function PromptDetailContent({ prompt, onBack }) {
       <div className="grid grid-cols-4 gap-3">
         {DETAIL_KPI.map(kpi => (
           <div key={kpi.label} className="border border-gray-200 rounded-lg bg-white p-4">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-2">{kpi.label}</p>
-            <p className="text-[26px] font-bold text-gray-900 leading-none mb-1">{kpi.value}</p>
-            <p className="text-[11px] text-gray-400 leading-snug">{kpi.desc}</p>
+            <p className="text-[12px] font-bold uppercase tracking-wide text-gray-400 mb-2">{kpi.label}</p>
+            <p className="text-[24px] font-bold text-gray-900 leading-none mb-1">{kpi.value}</p>
+            <p className="text-[12px] text-gray-400 leading-snug">{kpi.desc}</p>
           </div>
         ))}
       </div>
@@ -801,12 +797,12 @@ function PromptDetailContent({ prompt, onBack }) {
                   <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold shrink-0" style={{ background: row.color }}>
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: row.color }}>
                           {row.abbr}
                         </span>
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{row.engine}</p>
-                          <p className="text-[11px] text-success-600 font-medium">{row.status}</p>
+                          <p className="text-[12px] text-success-600 font-medium">{row.status}</p>
                         </div>
                       </div>
                     </td>
@@ -917,10 +913,10 @@ function PromptTrackingContent() {
         {OVERVIEW_KPI_CARDS.map(kpi => (
           <div key={kpi.label} className="border border-gray-200 rounded-lg bg-white p-4">
             <div className="flex items-start justify-between mb-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">{kpi.label}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">{kpi.label}</p>
               <kpi.Icon size={16} style={{ color: kpi.color }} className="shrink-0" />
             </div>
-            <p className="text-[28px] font-bold text-gray-900 leading-none mb-2">{kpi.value}</p>
+            <p className="text-[30px] font-bold text-gray-900 leading-none mb-2">{kpi.value}</p>
             {kpi.change && (
               <div className="flex items-center gap-1">
                 <ArrowUp size={12} className={`shrink-0 ${kpi.up ? 'text-success-600' : 'text-error-600 rotate-180'}`} />
@@ -940,8 +936,8 @@ function PromptTrackingContent() {
               key={m.label}
               className={`p-5 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{m.label}</p>
-              <p className="text-[28px] font-bold text-gray-900 leading-none mb-2">{m.value}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{m.label}</p>
+              <p className="text-[30px] font-bold text-gray-900 leading-none mb-2">{m.value}</p>
               <p className="text-[12px] text-gray-500 leading-snug">{m.desc}</p>
             </div>
           ))}
@@ -998,7 +994,7 @@ function PromptTrackingContent() {
             </div>
           </div>
           {/* Header row */}
-          <div className="grid text-[11px] font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100 mb-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
+          <div className="grid text-[12px] font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100 mb-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
             <span>Rank</span>
             <span className="pl-8">Brand</span>
             <span className="text-right">Pos.</span>
@@ -1012,12 +1008,12 @@ function PromptTrackingContent() {
                 style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
                 <span className="text-[12px] font-semibold text-gray-500">#{c.rank}</span>
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[10px] font-bold shrink-0" style={{ background: c.color }}>
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: c.color }}>
                     {c.initials}
                   </span>
                   <div className="min-w-0">
                     <p className={`text-[12px] font-semibold truncate ${c.isMe ? 'text-purple-700' : 'text-gray-900'}`}>{c.name}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{c.domain}</p>
+                    <p className="text-[12px] text-gray-400 truncate">{c.domain}</p>
                   </div>
                 </div>
                 <span className="text-[12px] text-gray-600 text-right">{c.pos}</span>
@@ -1054,12 +1050,12 @@ function PromptTrackingContent() {
                   <tr key={eng.name} className={`border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors`}>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-bold shrink-0" style={{ background: eng.color }}>
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: eng.color }}>
                           {eng.abbr}
                         </span>
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
-                          <p className="text-[11px] text-gray-400">{eng.sub}</p>
+                          <p className="text-[12px] text-gray-400">{eng.sub}</p>
                         </div>
                       </div>
                     </td>
@@ -1074,7 +1070,7 @@ function PromptTrackingContent() {
                     <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <p className="text-[13px] font-semibold text-gray-900">{eng.avgPos}</p>
-                      <p className="text-[11px] text-gray-400">{eng.urlsAnswer}</p>
+                      <p className="text-[12px] text-gray-400">{eng.urlsAnswer}</p>
                     </td>
                     <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
                     <td className="px-3 py-3 text-[13px] text-gray-500">{eng.insight}</td>
@@ -1105,7 +1101,7 @@ function PromptTrackingContent() {
         <div className="grid grid-cols-5 border border-gray-100 rounded-lg overflow-hidden mb-4">
           {SENTIMENT_DATA.map((s, i) => (
             <div key={s.label} className={`p-4 ${i < SENTIMENT_DATA.length - 1 ? 'border-r border-gray-100' : ''}`}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{s.label}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{s.label}</p>
               <p className="text-[24px] font-bold text-gray-900 leading-none">{s.value}%</p>
             </div>
           ))}
@@ -1130,15 +1126,15 @@ function PromptTrackingContent() {
         <div className="grid gap-4" style={{ gridTemplateColumns: '180px 200px 1fr' }}>
           {/* Overlap % */}
           <div className="border border-gray-100 rounded-lg p-4 bg-gray-50">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Overlap %</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Overlap %</p>
             <p className="text-[36px] font-bold text-gray-900 leading-none mb-2">34%</p>
             <p className="text-[12px] text-gray-500 leading-snug">High overlap means traditional SEO is feeding your AIO visibility.</p>
           </div>
 
           {/* Drift Watch */}
           <div className="border border-gray-100 rounded-lg p-4 bg-gray-50">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Drift Watch</p>
-            <p className="text-[22px] font-bold text-gray-900 leading-snug mb-2">2 prompts flagged</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">Drift Watch</p>
+            <p className="text-[24px] font-bold text-gray-900 leading-snug mb-2">2 prompts flagged</p>
             <p className="text-[12px] text-gray-500 leading-snug">Watch prompts where overlap is slipping while AIO position is weakening.</p>
           </div>
 
@@ -1150,7 +1146,7 @@ function PromptTrackingContent() {
                 <div className="flex items-center gap-2 shrink-0 text-right">
                   <div className="text-right">
                     <p className="text-[12px] font-bold text-gray-900">{item.overlap}</p>
-                    <p className="text-[11px] text-gray-400">AIO position {item.aioPos}</p>
+                    <p className="text-[12px] text-gray-400">AIO position {item.aioPos}</p>
                   </div>
                   <span className={`text-[12px] font-semibold whitespace-nowrap w-[80px] text-right ${item.status === 'Watch drift' ? 'text-warning-600' : 'text-success-600'}`}>
                     {item.status}
@@ -1176,9 +1172,9 @@ function PromptTrackingContent() {
         <div className="flex items-center gap-4 pb-2 border-b border-gray-100 mb-1">
           <div className="flex-1" />
           <div className="flex items-center gap-6 shrink-0 pr-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 w-[80px] text-right">Visibility</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 w-[80px] text-right">Visibility</p>
             <div className="flex items-center gap-1 w-[100px] justify-end">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Trend score Δ</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">Trend score Δ</p>
               <HelpCircle size={11} className="text-gray-300" />
             </div>
           </div>
@@ -1191,13 +1187,13 @@ function PromptTrackingContent() {
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-semibold text-gray-900 mb-1">{item.prompt}</p>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[11px] font-medium border border-purple-200">{item.tag}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">{item.tag}</span>
                   <span className="text-[12px] text-gray-400">{item.volume}</span>
                   <span className="text-[12px] text-gray-400">{item.engines}</span>
                 </div>
               </div>
               <div className="flex items-center gap-6 shrink-0">
-                <p className="text-[22px] font-bold text-gray-900 w-[80px] text-right">{item.visibility}</p>
+                <p className="text-[24px] font-bold text-gray-900 w-[80px] text-right">{item.visibility}</p>
                 <p className={`text-[16px] font-bold w-[100px] text-right ${item.up ? 'text-success-600' : 'text-error-600'}`}>{item.trendScore}</p>
               </div>
             </div>
@@ -1236,7 +1232,7 @@ function OverviewContent() {
             <p className="text-[12px] text-gray-400 font-medium mb-1">Share of voice</p>
             <p className="text-[38px] font-bold text-gray-900 leading-none tracking-tight">14.20%</p>
             <div className="flex items-center gap-2 mt-2">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[12px] font-semibold border border-success-200">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">
                 <ArrowUp size={10} />
                 +6.8%
               </span>
@@ -1254,7 +1250,7 @@ function OverviewContent() {
         <div className="flex-1 flex flex-col" style={{ height: '180px' }}>
           <div className="px-6 pt-5 pb-2 flex items-center justify-between shrink-0">
             <p className="text-[12px] font-medium text-gray-400">12-month trend</p>
-            <span className="text-[11px] text-gray-300">Apr 2025 – Apr 2026</span>
+            <span className="text-[12px] text-gray-300">Apr 2025 – Apr 2026</span>
           </div>
           <div className="flex-1 min-h-0 w-full flex items-end px-6 pb-5">
             <Sparkline data={[6, 7, 8, 9, 8, 10, 11, 10, 12, 13, 12, 14, 13, 15, 14, 16]} color="#6938EF" width="100%" height={110} filled />
@@ -1275,7 +1271,7 @@ function OverviewContent() {
               <ArrowUp size={12} className={`shrink-0 ${kpi.up ? 'text-success-600' : 'text-error-600 rotate-180'}`} />
               <span className={`text-[13px] font-semibold ${kpi.up ? 'text-success-600' : 'text-error-600'}`}>{kpi.change}</span>
             </div>
-            <p className="text-[11px] text-gray-400 mb-4">vs previous period</p>
+            <p className="text-[12px] text-gray-400 mb-4">vs previous period</p>
             <div className="mt-auto w-full">
               <Sparkline data={kpi.data} color={kpi.color} width="100%" height={56} filled />
             </div>
@@ -1311,7 +1307,7 @@ function OverviewContent() {
               <div key={c.name} className="flex items-center gap-4">
                 <div className="w-[148px] shrink-0">
                   <p className="text-[13px] font-semibold text-gray-900">{c.name}</p>
-                  <p className="text-[11px] text-gray-400">{isEngines ? c.subtitle : c.domain}</p>
+                  <p className="text-[12px] text-gray-400">{isEngines ? c.subtitle : c.domain}</p>
                 </div>
                 <div className="flex-1 bg-gray-200 rounded-full h-5 relative overflow-hidden">
                   <div
@@ -1328,7 +1324,7 @@ function OverviewContent() {
           </div>
 
           <div className="w-[196px] shrink-0 border border-gray-100 rounded-lg p-3 bg-gray-50">
-            <p className="text-[10px] font-bold uppercase tracking-wide text-gray-400 mb-3">Metric logic</p>
+            <p className="text-[12px] font-bold uppercase tracking-wide text-gray-400 mb-3">Metric logic</p>
             <div className="flex flex-col gap-2.5 text-[12px] text-gray-600 leading-relaxed">
               <p><strong className="text-gray-800 font-semibold">Overall presence</strong> uses share of voice across mentions and links.</p>
               <p><strong className="text-gray-800 font-semibold">Brand presence</strong> counts brand-name appearances in AI answers.</p>
@@ -1382,12 +1378,113 @@ function OverviewContent() {
   )
 }
 
+// ── Shared filter chip (multi-select) ─────────────────────────────────────
+
+function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, dropdownRef, open, onOpen, onClose }) {
+  const [search, setSearch] = useState('')
+  const orderedSelected = options.filter(o => selected.has(o.id))
+  const chipLabel = selected.size >= options.length
+    ? 'All'
+    : orderedSelected.length === 1
+      ? orderedSelected[0].label
+      : `${orderedSelected[0]?.label} +${orderedSelected.length - 1}`
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={onOpen}
+        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
+      >
+        {label}
+        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600 max-w-[120px] truncate">
+          {chipLabel}
+        </span>
+        <span
+          onClick={e => { e.stopPropagation(); onSelectAll(); onClose() }}
+          className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          <X size={11} />
+        </span>
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl z-30 p-1" style={{ minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
+          {options.length > 10 && (
+            <div className="mb-1 pb-1 border-b border-gray-100">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
+                <Search size={12} className="text-gray-400 shrink-0" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[12px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col gap-0.5">
+            <button onClick={onSelectAll} className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] text-gray-700 hover:bg-gray-50 transition-colors">
+              All
+            </button>
+            {options
+              .filter(o => options.length <= 10 || o.label.toLowerCase().includes(search.toLowerCase()))
+              .map(opt => {
+                const checked = selected.has(opt.id)
+                return (
+                  <button key={opt.id} onClick={() => onToggle(opt.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                  >
+                    <span className={checked ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt.label}</span>
+                    {checked && <Check size={13} className="text-primary-600 shrink-0" />}
+                  </button>
+                )
+              })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Filter constants ────────────────────────────────────────────────────────
+
+const TYPE_FILTER_OPTIONS = [
+  { id: 'Mention', label: 'Mention' },
+  { id: 'Link',    label: 'Link'    },
+]
+
+const ALL_PROMPT_BRANDS = [...new Set(
+  PROMPT_TOPICS.flatMap(t => t.children.flatMap(c => c.brands))
+)].sort()
+
+const BRAND_FILTER_OPTIONS = ALL_PROMPT_BRANDS.map(b => ({ id: b, label: b }))
+
+const CITING_TOPIC_OPTIONS = [...new Set(
+  CITING_DOMAINS_DATA.flatMap(d => d.children.map(c => c.topic))
+)].sort().map(t => ({ id: t, label: t }))
+
 // ── Prompts Tab ────────────────────────────────────────────────────────────
 
 function PromptsContent() {
   const [expanded, setExpanded] = useState(new Set([1]))
   const [searchQuery, setSearchQuery] = useState('')
   const [detailPrompt, setDetailPrompt] = useState(null)
+
+  const [typeFilter, setTypeFilter]   = useState(new Set(['Mention', 'Link']))
+  const [brandFilter, setBrandFilter] = useState(new Set(ALL_PROMPT_BRANDS))
+  const [typeDropOpen, setTypeDropOpen]   = useState(false)
+  const [brandDropOpen, setBrandDropOpen] = useState(false)
+  const typeDropRef  = useRef(null)
+  const brandDropRef = useRef(null)
+
+  useEffect(() => {
+    function onDoc(e) {
+      if (typeDropOpen  && typeDropRef.current  && !typeDropRef.current.contains(e.target))  setTypeDropOpen(false)
+      if (brandDropOpen && brandDropRef.current && !brandDropRef.current.contains(e.target)) setBrandDropOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [typeDropOpen, brandDropOpen])
+
+  function toggleTypeFilter(id) {
+    setTypeFilter(prev => { const n = new Set(prev); if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id); return n })
+  }
+  function toggleBrandFilter(id) {
+    setBrandFilter(prev => { const n = new Set(prev); if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id); return n })
+  }
 
   function toggleRow(id) {
     setExpanded(prev => {
@@ -1397,9 +1494,13 @@ function PromptsContent() {
     })
   }
 
-  const filtered = PROMPT_TOPICS.filter(t =>
-    !searchQuery || t.topic.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filtered = PROMPT_TOPICS.filter(t => {
+    const matchSearch = !searchQuery || t.topic.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchType   = typeFilter.size >= 2 || t.types.some(ty => typeFilter.has(ty))
+    const matchBrand  = brandFilter.size >= ALL_PROMPT_BRANDS.length ||
+      t.children.some(c => c.brands.some(b => brandFilter.has(b)))
+    return matchSearch && matchType && matchBrand
+  })
 
   const thClass = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-700 bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
   const tdClass = "px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle"
@@ -1425,23 +1526,37 @@ function PromptsContent() {
         </div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
+            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
               <Plus size={13} className="text-gray-500" />
               Add filter
             </button>
-            <button className="flex items-center gap-1 pl-3 pr-2 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
+            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
               <span className="text-gray-400 text-[12px] font-normal mr-0.5">Grouping:</span>
               Topic
               <ChevronDown size={12} className="text-gray-400 ml-0.5" />
             </button>
-            <button className="flex items-center gap-1 pl-3 pr-2 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
-              Topic
-              <ChevronDown size={12} className="text-gray-400 ml-0.5" />
-            </button>
-            <button className="flex items-center gap-1 pl-3 pr-2 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
-              Brands
-              <ChevronDown size={12} className="text-gray-400 ml-0.5" />
-            </button>
+            <FilterChipDropdown
+              label="Type"
+              options={TYPE_FILTER_OPTIONS}
+              selected={typeFilter}
+              onToggle={toggleTypeFilter}
+              onSelectAll={() => setTypeFilter(new Set(['Mention', 'Link']))}
+              dropdownRef={typeDropRef}
+              open={typeDropOpen}
+              onOpen={() => setTypeDropOpen(true)}
+              onClose={() => setTypeDropOpen(false)}
+            />
+            <FilterChipDropdown
+              label="Brands"
+              options={BRAND_FILTER_OPTIONS}
+              selected={brandFilter}
+              onToggle={toggleBrandFilter}
+              onSelectAll={() => setBrandFilter(new Set(ALL_PROMPT_BRANDS))}
+              dropdownRef={brandDropRef}
+              open={brandDropOpen}
+              onOpen={() => setBrandDropOpen(true)}
+              onClose={() => setBrandDropOpen(false)}
+            />
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg bg-white" style={{ width: '220px' }}>
             <Search size={13} className="text-gray-400 shrink-0" />
@@ -1487,7 +1602,7 @@ function PromptsContent() {
                     </td>
                     <td className={tdClass}>
                       <p className="text-[13px] font-semibold text-gray-900 break-words">{row.topic}</p>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{row.prompts} prompts</p>
+                      <p className="text-[12px] text-gray-400 mt-0.5">{row.prompts} prompts</p>
                     </td>
                     <td className={tdClass}>{row.size}</td>
                     <td className={tdClass}><div className="flex items-center gap-1 flex-wrap">{row.types.map(t => <TypeBadge key={t} type={t} />)}</div></td>
@@ -1535,6 +1650,29 @@ function CitationsContent() {
   const { widths: citW, onResizeStart: citResize } = useColumnResize([28, 280, 80, 108, 88, 44, 68, 140])
   const citTh = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-700 bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
 
+  const [citTypeFilter,  setCitTypeFilter]  = useState(new Set(['Mention', 'Link']))
+  const [citTopicFilter, setCitTopicFilter] = useState(new Set(CITING_TOPIC_OPTIONS.map(o => o.id)))
+  const [citTypeDropOpen,  setCitTypeDropOpen]  = useState(false)
+  const [citTopicDropOpen, setCitTopicDropOpen] = useState(false)
+  const citTypeDropRef  = useRef(null)
+  const citTopicDropRef = useRef(null)
+
+  useEffect(() => {
+    function onDoc(e) {
+      if (citTypeDropOpen  && citTypeDropRef.current  && !citTypeDropRef.current.contains(e.target))  setCitTypeDropOpen(false)
+      if (citTopicDropOpen && citTopicDropRef.current && !citTopicDropRef.current.contains(e.target)) setCitTopicDropOpen(false)
+    }
+    document.addEventListener('mousedown', onDoc)
+    return () => document.removeEventListener('mousedown', onDoc)
+  }, [citTypeDropOpen, citTopicDropOpen])
+
+  function toggleCitTypeFilter(id) {
+    setCitTypeFilter(prev => { const n = new Set(prev); if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id); return n })
+  }
+  function toggleCitTopicFilter(id) {
+    setCitTopicFilter(prev => { const n = new Set(prev); if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id); return n })
+  }
+
   function toggleRow(id) {
     setExpanded(prev => {
       const next = new Set(prev)
@@ -1543,9 +1681,13 @@ function CitationsContent() {
     })
   }
 
-  const filtered = CITING_DOMAINS_DATA.filter(d =>
-    !searchQuery || d.domain.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filtered = CITING_DOMAINS_DATA.filter(d => {
+    const matchSearch = !searchQuery || d.domain.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchType   = citTypeFilter.size >= 2 || d.types.some(t => citTypeFilter.has(t))
+    const matchTopic  = citTopicFilter.size >= CITING_TOPIC_OPTIONS.length ||
+      d.children.some(c => citTopicFilter.has(c.topic))
+    return matchSearch && matchType && matchTopic
+  })
 
   return (
     <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
@@ -1556,19 +1698,37 @@ function CitationsContent() {
         </div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
+            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
               <Plus size={13} className="text-gray-500" />
               Add filter
             </button>
-            <button className="flex items-center gap-1 pl-3 pr-2 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
+            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
               <span className="text-gray-400 text-[12px] font-normal mr-0.5">Grouping:</span>
               Domain
               <ChevronDown size={12} className="text-gray-400 ml-0.5" />
             </button>
-            <button className="flex items-center gap-1 pl-3 pr-2 py-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
-              Topics
-              <ChevronDown size={12} className="text-gray-400 ml-0.5" />
-            </button>
+            <FilterChipDropdown
+              label="Type"
+              options={TYPE_FILTER_OPTIONS}
+              selected={citTypeFilter}
+              onToggle={toggleCitTypeFilter}
+              onSelectAll={() => setCitTypeFilter(new Set(['Mention', 'Link']))}
+              dropdownRef={citTypeDropRef}
+              open={citTypeDropOpen}
+              onOpen={() => setCitTypeDropOpen(true)}
+              onClose={() => setCitTypeDropOpen(false)}
+            />
+            <FilterChipDropdown
+              label="Topics"
+              options={CITING_TOPIC_OPTIONS}
+              selected={citTopicFilter}
+              onToggle={toggleCitTopicFilter}
+              onSelectAll={() => setCitTopicFilter(new Set(CITING_TOPIC_OPTIONS.map(o => o.id)))}
+              dropdownRef={citTopicDropRef}
+              open={citTopicDropOpen}
+              onOpen={() => setCitTopicDropOpen(true)}
+              onClose={() => setCitTopicDropOpen(false)}
+            />
           </div>
           <div className="flex items-center gap-2 px-3 py-1.5 border border-gray-200 rounded-lg bg-white" style={{ width: '220px' }}>
             <Search size={13} className="text-gray-400 shrink-0" />
@@ -1614,7 +1774,7 @@ function CitationsContent() {
                     </td>
                     <td className="px-3 py-3 border-b border-r border-gray-200 align-middle overflow-hidden">
                       <TruncatedCell className="text-[13px] font-semibold text-gray-900">{row.domain}</TruncatedCell>
-                      <p className="text-[11px] text-gray-400 mt-0.5">{row.pages.toLocaleString()} pages</p>
+                      <p className="text-[12px] text-gray-400 mt-0.5">{row.pages.toLocaleString()} pages</p>
                     </td>
                     <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.citations}</td>
                     <td className="px-3 py-3 border-b border-r border-gray-200 align-middle"><div className="flex items-center gap-1 flex-wrap">{row.types.map(t => <TypeBadge key={t} type={t} />)}</div></td>

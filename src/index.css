@@ -50,6 +50,19 @@
   --hr-warning-250: #ffa35a;
   --warning-300: #fa9209;
   --hr-warning-300: #fa9209;
+  --warning-400: #F59E0B;
+  --warning-700: #B45309;
+
+  /* Success extensions */
+  --success-100: #DCFCE7;
+  --success-200: #BBF7D0;
+  --success-500: #22C55E;
+
+  /* Error extensions */
+  --error-800: #991B1B;
+
+  /* Primary extensions */
+  --primary-800: #1E40AF;
 }
 
 @theme {
@@ -76,16 +89,22 @@
 
   /* ── Semantic — maps to HighRise success / error / warning ── */
   --color-success-50:  var(--success-50);
+  --color-success-100: var(--success-100);
+  --color-success-200: var(--success-200);
+  --color-success-500: var(--success-500);
   --color-success-600: var(--success-600);
   --color-success-700: var(--success-700);
   --color-success-800: var(--success-800);
   --color-success-900: var(--success-900);
   --color-error-50:    var(--error-50);
   --color-error-600:   var(--error-600);
+  --color-error-800:   var(--error-800);
+  --color-primary-800: var(--primary-800);
   --color-warning-25:  var(--warning-25);
   --color-warning-100: var(--warning-100);
   --color-warning-250: var(--warning-250);
   --color-warning-300: var(--warning-300);
+  --color-warning-400: var(--warning-400);
   --color-warning-600: var(--warning-600);
   --color-warning-700: var(--warning-700);
 

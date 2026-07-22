@@ -70,6 +70,7 @@ export { MessageCircle } from './MessageCircle.jsx';
 export { Pencil } from './Pencil.jsx';
 export { Refresh } from './Refresh.jsx';
 export { Share2 } from './Share2.jsx';
+export { Minus } from './Minus.jsx';
 export { Trash2 } from './Trash2.jsx';
 export { User } from './User.jsx';
 export { Wand2 } from './Wand2.jsx';

@@ -113,11 +113,11 @@ function StatusPill({ status }) {
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
 const SETUP_ITEMS = [
-  { Icon: Globe,     status: 'connected',  title: 'Website',          desc: 'ramada.9hf9h.com',                  cta: 'Open Site Health' },
-  { Icon: MapPin,    status: 'needsSetup', title: 'Business Profile', desc: 'Unlock local visibility & reviews', cta: 'Connect GBP'      },
-  { Icon: Search,    status: 'needsSetup', title: 'Search Console',   desc: 'Rankings, clicks, indexing',        cta: 'Connect GSC'      },
-  { Icon: BarChart3, status: 'needsSetup', title: 'Google Analytics', desc: 'Traffic and engagement data',       cta: 'Connect GA4'      },
-  { Icon: Link2,     status: 'needsSetup', title: 'Listings',         desc: 'Business name & citations',         cta: 'Set up listings'  },
+  { Icon: Globe,     status: 'connected',  title: 'Website',          desc: 'ramada.9hf9h.com',  cta: 'Open Site Health', iconBg: '#F0FDF4', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
+  { Icon: MapPin,    status: 'needsSetup', title: 'Business Profile', desc: 'Unlocks 2 modules', cta: 'Connect GBP',      iconBg: '#DCFCE7', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
+  { Icon: Search,    status: 'needsSetup', title: 'Search Console',   desc: 'Unlocks 2 modules', cta: 'Connect GSC',      iconBg: '#EEF4FF', iconColor: '#155EEF', iconBorder: '#C7D7FD' },
+  { Icon: BarChart3, status: 'needsSetup', title: 'Google Analytics', desc: 'Unlocks 1 module',  cta: 'Connect GA4',      iconBg: '#FFFBEB', iconColor: '#D97706', iconBorder: '#FDE68A' },
+  { Icon: Link2,     status: 'needsSetup', title: 'Listings',         desc: 'Unlocks 1 module',  cta: 'Set up listings',  iconBg: '#F0FDF4', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
 ]
 
 const QUICK_STATS = [
@@ -242,9 +242,9 @@ const MODULE_SECTIONS = [
   },
 ]
 
-// ─── Hero Section (with embedded KPI cards) ───────────────────────────────────
+// ─── Hero Section (with embedded KPI cards + inline CTA) ─────────────────────
 
-function HeroSection() {
+function HeroSection({ showAction = false }) {
   return (
     <div style={{
       background: '#fff',
@@ -269,11 +269,11 @@ function HeroSection() {
       </div>
 
       {/* KPI cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: showAction ? 16 : 0 }}>
         {QUICK_STATS.map(({ label, value, Icon, accent, bg }) => (
           <div
             key={label}
-            style={{ background: '#F9FAFB', border: '1px solid #EAECF0', borderRadius: 8, padding: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}
+            style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}
           >
             <div>
               <p style={{ fontSize: 12, color: '#98A2B3', margin: '0 0 4px', fontWeight: 500 }}>{label}</p>
@@ -285,99 +285,124 @@ function HeroSection() {
           </div>
         ))}
       </div>
-    </div>
-  )
-}
 
-// ─── Recommended Action ───────────────────────────────────────────────────────
-
-function RecommendedAction() {
-  return (
-    <div style={{ background: '#EEF4FF', border: '1px solid #C7D7FD', borderRadius: 8, padding: '14px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: '#C7D7FD', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <MapPin size={14} style={{ color: '#155EEF' }} />
-        </div>
-        {/* Title row + subtext below */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-            <span style={{ fontSize: 14, fontWeight: 500, color: '#101828' }}>Connect Google Business Profile</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: '#155EEF', background: '#D1E0FF', borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-              Next step
-            </span>
-            <span style={{ fontSize: 12, color: '#667085' }}>· Est. 2 min</span>
+      {/* Inline CTA: Connect Google Business Profile */}
+      {showAction && (
+        <div style={{ background: '#EEF4FF', border: '1px solid #C7D7FD', borderRadius: 8, padding: '14px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#C7D7FD', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <MapPin size={14} style={{ color: '#155EEF' }} />
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                <span style={{ fontSize: 14, fontWeight: 500, color: '#101828' }}>Connect Google Business Profile</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: '#155EEF', background: '#D1E0FF', borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                  Next step
+                </span>
+                <span style={{ fontSize: 12, color: '#667085' }}>· Est. 2 min</span>
+              </div>
+              <span style={{ fontSize: 13, color: '#475467' }}>
+                Unlock local SEO audits, map-pack visibility, and AI-powered local recommendations.
+              </span>
+            </div>
+            <button style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#155EEF', color: '#fff', border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
+              Connect now <ChevronRight size={13} />
+            </button>
           </div>
-          <span style={{ fontSize: 13, color: '#475467' }}>
-            Unlock local SEO audits, map-pack visibility, and AI-powered local recommendations.
-          </span>
         </div>
-        <button style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#155EEF', color: '#fff', border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-          Connect now <ChevronRight size={13} />
-        </button>
-      </div>
+      )}
     </div>
   )
 }
+
 
 // ─── Setup Timeline ───────────────────────────────────────────────────────────
 
 function SetupTimeline() {
+  const pendingCount = SETUP_ITEMS.filter(i => i.status !== 'connected').length
+  const nextIdx = SETUP_ITEMS.findIndex(i => i.status !== 'connected')
+
   return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid #EAECF0',
-      borderRadius: 8,
-      padding: '24px 28px',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+    <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '20px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: '0 0 2px' }}>Project setup</h2>
+          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: '0 0 2px' }}>Needs your attention</h2>
           <p style={{ fontSize: 12, color: '#98A2B3', margin: 0 }}>Complete each integration to unlock full dashboard coverage.</p>
         </div>
-        <span style={{ fontSize: 12, fontWeight: 600, color: '#16A34A' }}>1 / 5 complete</span>
+        {pendingCount > 0 && (
+          <span style={{ fontSize: 12, fontWeight: 600, color: '#D97706' }}>{pendingCount} connections pending</span>
+        )}
       </div>
 
-      {/* Equal-width 5-column grid with absolute connector track behind circles */}
-      <div style={{ position: 'relative' }}>
-        {/* Connector track: runs between center of step 1 and center of step 5 */}
-        <div style={{ position: 'absolute', top: 16, left: '10%', right: '10%', height: 2, background: '#E5E7EB', borderRadius: 2, zIndex: 0 }} />
-        {/* Done segment: step 1 center (10%) to step 2 center (30%) = 20% of track width */}
-        <div style={{ position: 'absolute', top: 16, left: '10%', width: '20%', height: 2, background: '#16A34A', borderRadius: 2, zIndex: 0 }} />
+      <div style={{ display: 'flex', alignItems: 'center' }}>
+        {SETUP_ITEMS.flatMap((item, i) => {
+          const done = item.status === 'connected'
+          const isNext = i === nextIdx
+          const isPending = !done && !isNext
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 0, position: 'relative', zIndex: 1 }}>
-          {SETUP_ITEMS.map((item) => {
-            const done = item.status === 'connected'
-            return (
-              <div key={item.title} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10 }}>
-                {/* Circle */}
-                <div style={{
-                  width: 32, height: 32, borderRadius: '50%',
-                  background: done ? '#16A34A' : '#fff',
-                  border: `1px solid ${done ? '#16A34A' : '#D0D5DD'}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  boxShadow: done ? '0 0 0 4px rgba(22,163,74,0.10)' : '0 1px 3px rgba(0,0,0,0.06)',
-                  transition: 'all 200ms ease',
-                  flexShrink: 0,
-                }}>
-                  {done
-                    ? <Check size={13} style={{ color: '#fff', strokeWidth: 3 }} />
-                    : <item.Icon size={12} style={{ color: '#9CA3AF' }} />
-                  }
-                </div>
-
-                {/* Labels */}
-                <div style={{ textAlign: 'center', padding: '0 6px' }}>
-                  <p style={{ fontSize: 12, fontWeight: 700, color: '#101828', margin: '0 0 2px', lineHeight: 1.3, whiteSpace: 'nowrap' }}>{item.title}</p>
-                  <p style={{ fontSize: 11, color: '#98A2B3', margin: '0 0 6px', lineHeight: 1.4 }}>{item.desc}</p>
-                  {done
-                    ? <span style={{ fontSize: 11, fontWeight: 600, color: '#16A34A' }}>✓ Connected</span>
-                    : <button style={{ fontSize: 11, fontWeight: 600, color: '#155EEF', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>{item.cta} →</button>
-                  }
-                </div>
+          const card = (
+            <div
+              key={`card-${item.title}`}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                background: isPending ? '#F2F4F7' : '#fff',
+                border: isNext ? '2px solid #155EEF' : '1px solid #EAECF0',
+                borderRadius: 10,
+                padding: '16px 10px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                textAlign: 'center',
+                gap: 5,
+                boxShadow: isNext ? '0 0 0 4px rgba(21,94,239,0.06)' : 'none',
+                transition: 'box-shadow 150ms ease',
+              }}
+            >
+              {/* Icon circle */}
+              <div style={{
+                width: 34, height: 34, borderRadius: '50%',
+                background: done ? '#16A34A' : item.iconBg,
+                border: done ? 'none' : `1.5px solid ${item.iconBorder}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 4,
+                opacity: isPending ? 0.65 : 1,
+                flexShrink: 0,
+              }}>
+                {done
+                  ? <Check size={14} style={{ color: '#fff', strokeWidth: 3 }} />
+                  : <item.Icon size={13} style={{ color: item.iconColor }} />
+                }
               </div>
-            )
-          })}
-        </div>
+
+              <p style={{ fontSize: 13, fontWeight: 700, color: isPending ? '#667085' : '#101828', margin: 0, lineHeight: 1.3 }}>
+                {item.title}
+              </p>
+
+              <p style={{ fontSize: 11, color: '#98A2B3', margin: 0, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
+                {item.desc}
+              </p>
+
+              {done ? (
+                <span style={{ fontSize: 12, fontWeight: 600, color: '#16A34A', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  <Check size={10} strokeWidth={3} /> Connected
+                </span>
+              ) : (
+                <button style={{ fontSize: 12, fontWeight: 700, color: '#155EEF', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: 2, whiteSpace: 'nowrap' }}>
+                  {isNext ? 'Connect now' : 'Connect'} →
+                </button>
+              )}
+            </div>
+          )
+
+          if (i === SETUP_ITEMS.length - 1) return [card]
+
+          const connector = (
+            <div key={`conn-${i}`} style={{ width: 14, height: 2, background: done ? '#16A34A' : '#E5E7EB', flexShrink: 0 }} />
+          )
+
+          return [card, connector]
+        })}
       </div>
     </div>
   )
@@ -550,7 +575,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <thead>
-            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Keyword</th>
               <th style={TABLE_TH}>Monthly searches</th>
@@ -590,7 +615,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         <p style={{ fontSize: 12, color: '#667085', padding: '0 16px 12px', margin: 0 }}>No prompt suggestions are ready yet. You can still add your own prompts below.</p>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <thead>
-            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Prompt</th>
             </tr>
@@ -647,7 +672,7 @@ function SetupStep3({ competitors, setCompetitors, newBrand, setNewBrand, newDom
             <col />
           </colgroup>
           <thead>
-            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Brand name</th>
               <th style={TABLE_TH}>Competitor domain</th>
@@ -788,11 +813,170 @@ function SetupSuccessBanner() {
   )
 }
 
+// ─── Module Summary Card ─────────────────────────────────────────────────────
+
+function ModuleSummaryCard() {
+  const sections = MODULE_SECTIONS.map(s => ({
+    ...s,
+    ready: s.cards.filter(c => c.status === 'ready').length,
+    needs: s.cards.filter(c => c.status === 'needsSetup').length,
+  }))
+  const totalNeeds = sections.reduce((a, s) => a + s.needs, 0)
+  const total = sections.reduce((a, s) => a + s.ready + s.needs, 0)
+
+  return (
+    <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+
+        {/* Left: total */}
+        <div style={{ flexShrink: 0, minWidth: 96 }}>
+          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, lineHeight: 1 }}>
+            <span style={{ fontSize: 30, fontWeight: 700, color: '#101828', letterSpacing: '-1px' }}>{totalNeeds}</span>
+            <span style={{ fontSize: 18, color: '#D0D5DD', fontWeight: 300, margin: '0 2px' }}>/</span>
+            <span style={{ fontSize: 18, fontWeight: 600, color: '#98A2B3' }}>{total}</span>
+          </div>
+          <p style={{ fontSize: 12, color: '#98A2B3', margin: '5px 0 0', fontWeight: 500 }}>modules need setup</p>
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: 1, height: 44, background: '#EAECF0', flexShrink: 0 }} />
+
+        {/* Section count cards */}
+        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+          {sections.map(s => {
+            const allReady = s.needs === 0
+            const iconColor = allReady ? '#16A34A' : '#D97706'
+            const iconBg    = allReady ? '#F0FDF4'  : '#FFFBEB'
+            return (
+              <div
+                key={s.id}
+                style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}
+              >
+                <div>
+                  <p style={{ fontSize: 11, color: '#98A2B3', margin: '0 0 5px', fontWeight: 500 }}>
+                    {s.title.charAt(0).toUpperCase() + s.title.slice(1)}
+                  </p>
+                  <p style={{ fontSize: 22, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1 }}>
+                    {s.ready}<span style={{ fontSize: 14, color: '#D0D5DD', margin: '0 3px' }}>/</span>{s.ready + s.needs}
+                  </p>
+                  <p style={{ fontSize: 11, fontWeight: 600, margin: '5px 0 0', color: iconColor }}>
+                    {allReady ? 'All ready' : `${s.needs} need setup`}
+                  </p>
+                </div>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <s.Icon size={13} style={{ color: iconColor }} />
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+      </div>
+    </div>
+  )
+}
+
+// ─── Module Section Table ─────────────────────────────────────────────────────
+
+function ModuleSectionTable({ Icon, accent, accentBg, title, desc, cards }) {
+  return (
+    <section>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <div style={{ width: 28, height: 28, borderRadius: 7, background: accentBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <Icon size={13} style={{ color: accent }} />
+        </div>
+        <span style={{ fontSize: 15, fontWeight: 700, color: '#101828' }}>{title.charAt(0).toUpperCase() + title.slice(1)}</span>
+        <span style={{ fontSize: 12, color: '#98A2B3' }}>· {desc}</span>
+      </div>
+
+      <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <table className="w-full border-collapse">
+          <thead>
+            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
+              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '26%' }}>Module</th>
+              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '34%' }}>Primary metric</th>
+              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '32%' }}>Secondary metric</th>
+              <th className="px-4 py-3 text-right text-[13px] font-semibold text-gray-700" style={{ width: '8%' }}></th>
+            </tr>
+          </thead>
+          <tbody>
+            {cards.map(card => {
+              const ready = card.status === 'ready'
+              const primary = card.metrics[0]
+              const secondary = card.metrics[1]
+              return (
+                <tr key={card.title} className="border-b border-gray-100 last:border-b-0 transition-colors" style={{ background: '#fff' }} onMouseEnter={e => e.currentTarget.style.background = '#F2F4F7'} onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2.5">
+                      <span className="inline-block rounded-full shrink-0" style={{ width: 8, height: 8, background: ready ? '#16A34A' : '#D97706' }} />
+                      <span className="text-[13px] font-semibold text-gray-900">{card.title}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    {primary && (
+                      <>
+                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                          <span className="text-[14px] font-bold text-gray-900">{primary.value}</span>
+                          {primary.starValue != null && (
+                            <span style={{ color: '#F59E0B', fontSize: 12, letterSpacing: '-1px' }}>
+                              {[1,2,3,4,5].map(i => i <= Math.round(primary.starValue) ? '★' : '☆').join('')}
+                            </span>
+                          )}
+                          {primary.trend != null && primary.trend !== 0 && (
+                            <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${primary.trend > 0 ? 'text-success-600' : 'text-error-600'}`}>
+                              <ArrowUp size={9} style={{ transform: primary.trend > 0 ? 'none' : 'rotate(180deg)', flexShrink: 0 }} />
+                              {Math.abs(primary.trend)}%
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-gray-400 m-0">{primary.label}</p>
+                      </>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    {secondary && (
+                      <>
+                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                          <span className="text-[14px] font-bold text-gray-900">{secondary.value}</span>
+                          {secondary.starValue != null && (
+                            <span style={{ color: '#F59E0B', fontSize: 12, letterSpacing: '-1px' }}>
+                              {[1,2,3,4,5].map(i => i <= Math.round(secondary.starValue) ? '★' : '☆').join('')}
+                            </span>
+                          )}
+                          {secondary.trend != null && secondary.trend !== 0 && (
+                            <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${secondary.trend > 0 ? 'text-success-600' : 'text-error-600'}`}>
+                              <ArrowUp size={9} style={{ transform: secondary.trend > 0 ? 'none' : 'rotate(180deg)', flexShrink: 0 }} />
+                              {Math.abs(secondary.trend)}%
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-gray-400 m-0">{secondary.label}</p>
+                      </>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      className={`text-[12px] font-semibold inline-flex items-center gap-1 whitespace-nowrap ${ready ? 'text-primary-600' : 'text-warning-600'}`}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      {card.cta} <ChevronRight size={11} />
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
+}
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export default function OverviewDashboard() {
   const [showSetupModal, setShowSetupModal] = useState(false)
-  const [setupComplete, setSetupComplete] = useState(false)
+  const [setupComplete, setSetupComplete]   = useState(false)
 
   function handleSetupComplete() {
     setSetupComplete(true)
@@ -800,7 +984,7 @@ export default function OverviewDashboard() {
   }
 
   return (
-    <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col" style={{ background: '#F2F4F7' }}>
       {showSetupModal && (
         <SetupModal
           onClose={() => setShowSetupModal(false)}
@@ -810,25 +994,25 @@ export default function OverviewDashboard() {
       <div className="flex-1 overflow-y-auto min-h-0" style={{ scrollbarGutter: 'stable' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-          <HeroSection />
+          <HeroSection showAction={!setupComplete} />
 
-          {setupComplete ? <SetupSuccessBanner /> : <RecommendedAction />}
+          {setupComplete && <SetupSuccessBanner />}
 
           <SetupTimeline />
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 32, marginTop: 16 }}>
-            {MODULE_SECTIONS.map(s => (
-              <ModuleSection
-                key={s.id}
-                Icon={s.Icon}
-                accent={s.accent}
-                accentBg={s.accentBg}
-                title={s.title}
-                desc={s.desc}
-                cards={s.cards}
-              />
-            ))}
-          </div>
+          <ModuleSummaryCard />
+
+          {MODULE_SECTIONS.map(s => (
+            <ModuleSectionTable
+              key={s.id}
+              Icon={s.Icon}
+              accent={s.accent}
+              accentBg={s.accentBg}
+              title={s.title}
+              desc={s.desc}
+              cards={s.cards}
+            />
+          ))}
 
         </div>
       </div>
