@@ -2,7 +2,7 @@ import { useState } from 'react'
 import {
   Globe, MapPin, Search, BarChart3, Link2,
   AlertTriangle, CircleCheck, ChevronRight, ChevronDown, Zap, Bot, FileText,
-  Sparkles, ArrowUp, Check, X, ArrowLeft, RefreshCw, Plus,
+  Sparkles, ArrowUp, Check,
 } from '../../icons/index.js'
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
