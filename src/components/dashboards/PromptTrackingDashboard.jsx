@@ -6,6 +6,7 @@ import {
   MessageCircle, Check, BarChart3, Search, Plus,
   ArrowLeft, ExternalLink, Calendar,
 } from '../../icons/index.js'
+import SourceInventoryContent from './SourceInventoryContent'
 
 // ── MultiLineChart ─────────────────────────────────────────────────────────
 
@@ -44,12 +45,12 @@ function MultiLineChart({ lines, xLabels, height = 180, filled = false }) {
       {Y_TICKS.map(y => (
         <g key={y}>
           <line x1={PAD_L} y1={yP(y)} x2={VW - PAD_R} y2={yP(y)} stroke="#E5E7EB" strokeWidth="1" />
-          <text x={PAD_L - 6} y={yP(y) + 4} fontSize="10" fill="#9CA3AF" textAnchor="end">{y}</text>
+          <text x={PAD_L - 6} y={yP(y) + 4} fontSize="10" fill="var(--gray-400)" textAnchor="end">{y}</text>
         </g>
       ))}
       {xLabels.map((label, i) =>
         i % 2 === 0
-          ? <text key={i} x={xP(i)} y={VH - 4} fontSize="10" fill="#9CA3AF" textAnchor="middle">{label}</text>
+          ? <text key={i} x={xP(i)} y={VH - 4} fontSize="10" fill="var(--gray-400)" textAnchor="middle">{label}</text>
           : null
       )}
       {filled && lines.map(line => (
@@ -99,19 +100,17 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1.5 rounded-lg shadow-xl overflow-hidden z-50 w-[200px]" style={{ background: '#2D3748' }}>
+        <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl z-50 p-1" style={{ minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
           {options.map(opt => {
             const isSelected = value === opt
             return (
               <button
                 key={opt}
                 onClick={() => { onChange(opt); setOpen(false) }}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[13px] transition-colors text-left hover:bg-white/10"
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
               >
-                <span className="w-4 shrink-0 flex items-center justify-center">
-                  {isSelected && <Check size={13} color="#fff" />}
-                </span>
-                <span className={isSelected ? 'text-white font-medium' : 'text-gray-300'}>{opt}</span>
+                <span className={isSelected ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt}</span>
+                {isSelected && <Check size={13} className="text-primary-600 shrink-0" />}
               </button>
             )
           })}
@@ -128,7 +127,7 @@ const PERIOD_OPTIONS  = ['Last 3 days', 'Last 7 days', 'Last 15 days', 'Last 30 
 
 const OVERVIEW_KPI_CARDS = [
   { label: 'Visibility score',  value: '76/100', change: '+6 vs prior period', up: true,  sub: null,                   Icon: Award,      color: '#6938EF' },
-  { label: 'Competitive rank',  value: '#3 / 7', change: null,                 up: null,  sub: '— Latest period rank', Icon: Users,      color: '#2563EB' },
+  { label: 'Competitive rank',  value: '#3 / 7', change: null,                 up: null,  sub: '— Latest period rank', Icon: Users,      color: 'var(--primary-600)' },
   { label: 'Avg position',      value: '#2.3',   change: '0.6 pts better',     up: true,  sub: null,                   Icon: TrendingUp, color: '#16A34A' },
   { label: 'Citation rate',     value: '58%',    change: '+5.7 pp',            up: true,  sub: null,                   Icon: Link2,      color: '#D97706' },
 ]
@@ -152,8 +151,8 @@ const COMPETITOR_RANKING_DATA = [
 ]
 
 const ENGINE_COVERAGE_DATA = [
-  { name: 'Perplexity',  abbr: 'P',  color: '#1E40AF', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
-  { name: 'Claude',      abbr: 'C',  color: '#7C3AED', sub: 'US · English · 12 prompts', vis: 71, presence: '63.0%', avgPos: '#2.9', urlsAnswer: '5.1 URLs / answer', citRate: '47.0%', insight: 'Visibility is present, but citations still lag the strongest engines.' },
+  { name: 'Perplexity',  abbr: 'P',  color: 'var(--primary-800)', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
+  { name: 'Claude',      abbr: 'C',  color: 'var(--purple-600)', sub: 'US · English · 12 prompts', vis: 71, presence: '63.0%', avgPos: '#2.9', urlsAnswer: '5.1 URLs / answer', citRate: '47.0%', insight: 'Visibility is present, but citations still lag the strongest engines.' },
   { name: 'Gemini',      abbr: 'G',  color: '#1D4ED8', sub: 'US · English · 12 prompts', vis: 64, presence: '56.0%', avgPos: '#3.7', urlsAnswer: '4.8 URLs / answer', citRate: '41.0%', insight: 'Brand named often enough, but answer prominence is still uneven.' },
   { name: 'AI Mode',     abbr: 'AM', color: '#0D9488', sub: 'US · English · 12 prompts', vis: 68, presence: '61.0%', avgPos: '#3.1', urlsAnswer: '5.3 URLs / answer', citRate: '46.0%', insight: 'Strong middle-of-answer pickup with room to improve citation consistency.' },
   { name: 'AI Overview', abbr: 'AO', color: '#16A34A', sub: 'US · English · 12 prompts', vis: 73, presence: '65.0%', avgPos: '#2.6', urlsAnswer: '5.0 URLs / answer', citRate: '52.0%', insight: 'Strongly tied to your organic rankings — keep traditional SEO healthy.' },
@@ -187,19 +186,19 @@ const TREND_X_LABELS = ['May 24','May 26','May 28','May 30','Jun 1','Jun 3','Jun
 
 const TREND_LINES_MAP = {
   Visibility: [
-    { label: 'Go High Level', color: '#2563EB', data: [82,83,82,84,83,85,84,86,85,87,86,88,87,90] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [82,83,82,84,83,85,84,86,85,87,86,88,87,90] },
     { label: 'HubSpot',       color: '#EF4444', data: [97,97,98,98,99,98,99,99,100,99,100,100,99,100] },
     { label: 'Calendly',      color: '#06B6D4', data: [78,79,79,80,79,81,80,82,81,82,83,82,83,84] },
     { label: 'Pipedrive',     color: '#6B7280', data: [70,71,70,72,71,73,72,74,73,75,74,75,76,78] },
   ],
   Mentions: [
-    { label: 'Go High Level', color: '#2563EB', data: [71,72,73,74,73,75,74,76,75,77,76,78,77,79] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [71,72,73,74,73,75,74,76,75,77,76,78,77,79] },
     { label: 'HubSpot',       color: '#EF4444', data: [88,89,88,90,89,91,90,92,91,92,93,92,93,94] },
     { label: 'Calendly',      color: '#06B6D4', data: [65,66,65,67,66,68,67,68,67,69,68,70,69,71] },
     { label: 'Pipedrive',     color: '#6B7280', data: [58,59,58,60,59,61,60,62,61,62,63,62,63,64] },
   ],
   Citations: [
-    { label: 'Go High Level', color: '#2563EB', data: [42,43,44,43,45,44,46,45,47,46,48,47,48,49] },
+    { label: 'Go High Level', color: 'var(--primary-600)', data: [42,43,44,43,45,44,46,45,47,46,48,47,48,49] },
     { label: 'HubSpot',       color: '#EF4444', data: [68,69,68,70,69,71,70,72,71,72,73,72,73,74] },
     { label: 'Calendly',      color: '#06B6D4', data: [35,36,35,37,36,38,37,38,37,39,38,40,39,41] },
     { label: 'Pipedrive',     color: '#6B7280', data: [28,29,28,30,29,31,30,31,30,32,31,32,31,33] },
@@ -209,23 +208,23 @@ const TREND_LINES_MAP = {
 // ── Prompts tab data ───────────────────────────────────────────────────────
 
 const PROMPTS_KPIS = [
-  { label: 'Tracked prompts', value: '5',      Icon: Search,     color: '#2563EB' },
+  { label: 'Tracked prompts', value: '5',      Icon: Search,     color: 'var(--primary-600)' },
   { label: 'Avg visibility',  value: '52/100', Icon: TrendingUp, color: '#6938EF' },
   { label: 'Avg search vol.', value: '1.1K',   Icon: BarChart3,  color: '#0D9488' },
   { label: 'Engine coverage', value: '48%',    Icon: Bot,        color: '#D97706' },
 ]
 
 const TOPIC_VIS_DATA = [
-  { topic: 'AI Visibility',  sub: '1 prompt · avg position 1.8', pct: 82, color: '#1E40AF' },
+  { topic: 'AI Visibility',  sub: '1 prompt · avg position 1.8', pct: 82, color: 'var(--primary-800)' },
   { topic: 'Comparisons',    sub: '1 prompt · avg position 2.4', pct: 71, color: '#1D4ED8' },
-  { topic: 'Sources',        sub: '1 prompt · avg position 3.7', pct: 54, color: '#2563EB' },
+  { topic: 'Sources',        sub: '1 prompt · avg position 3.7', pct: 54, color: 'var(--primary-600)' },
   { topic: 'Citations',      sub: '1 prompt · avg position 6.8', pct: 29, color: '#3B82F6' },
   { topic: 'Brand Presence', sub: '1 prompt · avg position 7.4', pct: 24, color: '#60A5FA' },
 ]
 
 const TOPIC_TAG_STYLES = {
-  'AI Visibility':  { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' },
-  'Comparisons':    { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' },
+  'AI Visibility':  { bg: 'var(--primary-50)', text: '#1D4ED8', border: '#BFDBFE' },
+  'Comparisons':    { bg: 'var(--primary-50)', text: '#1D4ED8', border: '#BFDBFE' },
   'Sources':        { bg: '#F0FDFA', text: '#0D9488', border: '#99F6E4' },
   'Citations':      { bg: '#F4F3FF', text: '#6938EF', border: '#E9D7FE' },
   'Brand Presence': { bg: '#FEF3C7', text: '#D97706', border: '#FDE68A' },
@@ -267,23 +266,23 @@ const SEGMENTS = ['All (5)', 'Winning (2)', 'Opportunity (0)', 'Losing (2)']
 const DETAIL_X_LABELS = ['May 22','May 24','May 26','May 28','May 30','Jun 1','Jun 3','Jun 5','Jun 7','Jun 9','Jun 11','Jun 13','Jun 15','Jun 17','Jun 18']
 
 const DETAIL_TREND_LINES = [
-  { label: 'Perplexity', color: '#1E40AF', data: [76,78,80,81,82,83,84,86,87,88,90,91,93,95,97] },
-  { label: 'Claude',     color: '#7C3AED', data: [72,74,75,76,77,78,79,80,80,81,82,82,83,83,83] },
-  { label: 'Gemini',     color: '#2563EB', data: [65,67,68,69,70,71,72,73,74,74,75,76,76,77,77] },
+  { label: 'Perplexity', color: 'var(--primary-800)', data: [76,78,80,81,82,83,84,86,87,88,90,91,93,95,97] },
+  { label: 'Claude',     color: 'var(--purple-600)', data: [72,74,75,76,77,78,79,80,80,81,82,82,83,83,83] },
+  { label: 'Gemini',     color: 'var(--primary-600)', data: [65,67,68,69,70,71,72,73,74,74,75,76,76,77,77] },
   { label: 'AI Mode',    color: '#059669', data: [65,66,68,68,69,70,71,72,73,73,74,75,75,76,77] },
 ]
 
 const DETAIL_AI_RESPONSES = [
   { engine: 'AI Mode',    abbr: 'AM', color: '#0D9488', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['HubSpot', 'Go High Level', 'Calendly'], sources: 2, created: 'Jun 1, 2026' },
-  { engine: 'Claude',     abbr: 'C',  color: '#7C3AED', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Calendly', 'Go High Level', 'HubSpot'], sources: 2, created: 'Jun 1, 2026' },
+  { engine: 'Claude',     abbr: 'C',  color: 'var(--purple-600)', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Calendly', 'Go High Level', 'HubSpot'], sources: 2, created: 'Jun 1, 2026' },
   { engine: 'Gemini',     abbr: 'G',  color: '#1D4ED8', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Go High Level', 'HubSpot', 'Calendly'], sources: 2, created: 'Jun 1, 2026' },
-  { engine: 'Perplexity', abbr: 'P',  color: '#1E40AF', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Go High Level', 'Calendly', 'HubSpot'], sources: 2, created: 'Jun 1, 2026' },
+  { engine: 'Perplexity', abbr: 'P',  color: 'var(--primary-800)', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof, strong source pages, and structured comparisons.', brands: ['Go High Level', 'Calendly', 'HubSpot'], sources: 2, created: 'Jun 1, 2026' },
   { engine: 'AI Mode',    abbr: 'AM', color: '#0D9488', status: 'Succeeded', text: 'Direct answer: Go High Level is visible for this prompt, but the response quality depends on whether the engine can find clear proof.', brands: ['Go High Level'], sources: 1, created: 'May 31, 2026' },
 ]
 
 const ENGINE_PERF_DATA = [
-  { engine: 'Perplexity', abbr: 'P',  color: '#1E40AF', mentionPct: '96%', citRate: '66%', urlsAnswer: '6.4', trend: '+10', trendUp: true },
-  { engine: 'Claude',     abbr: 'C',  color: '#7C3AED', mentionPct: '83%', citRate: '58%', urlsAnswer: '5.1', trend: '+9',  trendUp: true },
+  { engine: 'Perplexity', abbr: 'P',  color: 'var(--primary-800)', mentionPct: '96%', citRate: '66%', urlsAnswer: '6.4', trend: '+10', trendUp: true },
+  { engine: 'Claude',     abbr: 'C',  color: 'var(--purple-600)', mentionPct: '83%', citRate: '58%', urlsAnswer: '5.1', trend: '+9',  trendUp: true },
   { engine: 'Gemini',     abbr: 'G',  color: '#1D4ED8', mentionPct: '74%', citRate: '52%', urlsAnswer: '4.8', trend: '+8',  trendUp: true },
   { engine: 'AI Mode',    abbr: 'AM', color: '#059669', mentionPct: '65%', citRate: '46%', urlsAnswer: '5.3', trend: '+7',  trendUp: true },
 ]
@@ -299,7 +298,7 @@ function TopicTag({ topic }) {
   const s = TOPIC_TAG_STYLES[topic] || { bg: '#F9FAFB', text: '#344054', border: '#EAECF0' }
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap"
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap"
       style={{ background: s.bg, color: s.text, border: `1px solid ${s.border}` }}
     >
       {topic}
@@ -445,7 +444,7 @@ function PromptsTabContent() {
             <div key={item.topic} className="flex items-center gap-4">
               <div className="w-[200px] shrink-0">
                 <p className="text-[13px] font-semibold text-gray-900">{item.topic}</p>
-                <p className="text-[11px] text-gray-400 mt-0.5">{item.sub}</p>
+                <p className="text-[12px] text-gray-400 mt-0.5">{item.sub}</p>
               </div>
               <div className="flex-1 bg-gray-200 rounded-full h-5 relative overflow-hidden">
                 <div
@@ -478,7 +477,7 @@ function PromptsTabContent() {
           <div className="border border-gray-200 rounded-lg overflow-x-auto">
             <table className="border-collapse table-fixed" style={{ width: '960px' }}>
               <colgroup>
-                <col style={{ width: '300px' }} />
+                <col style={{ width: '260px' }} />
                 <col style={{ width: '112px' }} />
                 <col style={{ width: '60px' }} />
                 <col style={{ width: '72px' }} />
@@ -486,7 +485,7 @@ function PromptsTabContent() {
                 <col style={{ width: '112px' }} />
                 <col style={{ width: '92px' }} />
                 <col style={{ width: '68px' }} />
-                <col style={{ width: '60px' }} />
+                <col style={{ width: '100px' }} />
               </colgroup>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
@@ -506,7 +505,7 @@ function PromptsTabContent() {
                   <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100">
                       <p className="text-[13px] font-semibold text-gray-900 leading-snug">{row.prompt}</p>
-                      <p className="text-[11px] text-gray-400 mt-1">
+                      <p className="text-[12px] text-gray-400 mt-1">
                         Trend <span className={row.trend.startsWith('+') ? 'text-success-600' : 'text-error-600'}>{row.trend}</span>
                         {' · '}{row.engFilled} / 5 engines mentioning
                         {' · '}<button className="text-primary-600 hover:underline">View details</button>
@@ -549,11 +548,8 @@ function PromptsTabContent() {
 // ── Prompt detail helpers ─────────────────────────────────────────────────
 
 function BrandPill({ name }) {
-  const isGHL = name === 'Go High Level'
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded border text-[11px] font-medium ${
-      isGHL ? 'bg-purple-50 text-purple-600 border-purple-200' : 'bg-gray-50 text-gray-600 border-gray-200'
-    }`}>
+    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium bg-gray-50 text-gray-600 border-gray-200">
       {name}
     </span>
   )
@@ -597,7 +593,7 @@ function PromptDetailView({ prompt, onBack }) {
   const DETAIL_KPI = [
     { label: 'Visibility score', value: '82/100', desc: 'Current prompt-level visibility across tracked engines.', Icon: Award,      color: '#6938EF' },
     { label: 'Avg position',     value: '#1.8',   desc: 'Average cited position when the brand appears.',          Icon: TrendingUp,  color: '#16A34A' },
-    { label: 'AI responses',     value: '112',    desc: 'Latest prompt responses available for drill-down.',        Icon: Bot,         color: '#2563EB' },
+    { label: 'AI responses',     value: '112',    desc: 'Latest prompt responses available for drill-down.',        Icon: Bot,         color: 'var(--primary-600)' },
     { label: 'Search volume',    value: '1.9K',   desc: 'Demand proxy carried through from the tracked prompt.',   Icon: BarChart3,   color: '#D97706' },
   ]
 
@@ -619,11 +615,11 @@ function PromptDetailView({ prompt, onBack }) {
             <span className="text-[12px] text-gray-400">Last 30 days</span>
             <span className="text-[12px] text-gray-400">US</span>
           </div>
-          <h2 className="text-[22px] font-bold text-gray-900 leading-snug mb-3">{prompt.prompt}</h2>
+          <h2 className="text-[24px] font-bold text-gray-900 leading-snug mb-3">{prompt.prompt}</h2>
           <p className="text-[13px] text-gray-500 leading-relaxed">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
         </div>
         <div className="w-[220px] shrink-0 border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-primary-600 mb-3">Prompt snapshot</p>
+          <p className="text-[12px] font-bold uppercase tracking-wide text-primary-600 mb-3">Prompt snapshot</p>
           <div className="grid grid-cols-2 gap-2">
             {[
               { label: 'Brand',          value: 'Go High Level' },
@@ -632,12 +628,12 @@ function PromptDetailView({ prompt, onBack }) {
               { label: 'Prompt sources', value: '2'             },
             ].map(item => (
               <div key={item.label} className="border border-gray-200 rounded-md bg-white p-2.5">
-                <p className="text-[10px] text-gray-400 font-medium mb-1">{item.label}</p>
+                <p className="text-[12px] text-gray-400 font-medium mb-1">{item.label}</p>
                 <p className="text-[13px] font-semibold text-gray-900">{item.value}</p>
               </div>
             ))}
           </div>
-          <p className="text-[11px] text-gray-400 mt-3">Topic: AI Visibility · 2 source domains · US</p>
+          <p className="text-[12px] text-gray-400 mt-3">Topic: AI Visibility · 2 source domains · US</p>
         </div>
       </div>
 
@@ -720,12 +716,12 @@ function PromptDetailView({ prompt, onBack }) {
                   <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold shrink-0" style={{ background: row.color }}>
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: row.color }}>
                           {row.abbr}
                         </span>
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{row.engine}</p>
-                          <p className="text-[11px] text-success-600 font-medium">{row.status}</p>
+                          <p className="text-[12px] text-success-600 font-medium">{row.status}</p>
                         </div>
                       </div>
                     </td>
@@ -776,7 +772,7 @@ function PromptDetailView({ prompt, onBack }) {
                   <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[11px] font-bold shrink-0" style={{ background: eng.color }}>
+                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: eng.color }}>
                           {eng.abbr}
                         </span>
                         <p className="text-[13px] font-semibold text-gray-900">{eng.engine}</p>
@@ -905,8 +901,8 @@ function OverviewContent() {
         <div className="grid grid-cols-3">
           {OVERVIEW_METRICS.map((m, i) => (
             <div key={m.label} className={`p-5 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{m.label}</p>
-              <p className="text-[28px] font-bold text-gray-900 leading-none mb-2">{m.value}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{m.label}</p>
+              <p className="text-[30px] font-bold text-gray-900 leading-none mb-2">{m.value}</p>
               <p className="text-[12px] text-gray-500 leading-snug">{m.desc}</p>
             </div>
           ))}
@@ -962,7 +958,7 @@ function OverviewContent() {
             <HelpCircle size={14} className="text-gray-300 mt-0.5" />
           </div>
           <p className="text-[12px] text-gray-400 mb-3 -mt-2">Visibility score analysis across your tracked brands</p>
-          <div className="grid text-[11px] font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100 mb-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
+          <div className="grid text-[12px] font-semibold text-gray-400 uppercase tracking-wide pb-2 border-b border-gray-100 mb-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
             <span>Rank</span>
             <span className="pl-8">Brand</span>
             <span className="text-right">Pos.</span>
@@ -978,12 +974,12 @@ function OverviewContent() {
               >
                 <span className="text-[12px] font-semibold text-gray-500">#{c.rank}</span>
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[10px] font-bold shrink-0" style={{ background: c.color }}>
+                  <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: c.color }}>
                     {c.initials}
                   </span>
                   <div className="min-w-0">
                     <p className={`text-[12px] font-semibold truncate ${c.isMe ? 'text-purple-700' : 'text-gray-900'}`}>{c.name}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{c.domain}</p>
+                    <p className="text-[12px] text-gray-400 truncate">{c.domain}</p>
                   </div>
                 </div>
                 <span className="text-[12px] text-gray-600 text-right">{c.pos}</span>
@@ -1023,12 +1019,12 @@ function OverviewContent() {
                   <tr key={eng.name} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100">
                       <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-bold shrink-0" style={{ background: eng.color }}>
+                        <span className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: eng.color }}>
                           {eng.abbr}
                         </span>
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
-                          <p className="text-[11px] text-gray-400">{eng.sub}</p>
+                          <p className="text-[12px] text-gray-400">{eng.sub}</p>
                         </div>
                       </div>
                     </td>
@@ -1043,7 +1039,7 @@ function OverviewContent() {
                     <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <p className="text-[13px] font-semibold text-gray-900">{eng.avgPos}</p>
-                      <p className="text-[11px] text-gray-400">{eng.urlsAnswer}</p>
+                      <p className="text-[12px] text-gray-400">{eng.urlsAnswer}</p>
                     </td>
                     <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
                     <td className="px-3 py-3 text-[13px] text-gray-500">{eng.insight}</td>
@@ -1070,7 +1066,7 @@ function OverviewContent() {
         <div className="grid grid-cols-5 border border-gray-100 rounded-lg overflow-hidden mb-4">
           {SENTIMENT_DATA.map((s, i) => (
             <div key={s.label} className={`p-4 ${i < SENTIMENT_DATA.length - 1 ? 'border-r border-gray-100' : ''}`}>
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{s.label}</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 mb-2">{s.label}</p>
               <p className="text-[24px] font-bold text-gray-900 leading-none">{s.value}%</p>
             </div>
           ))}
@@ -1093,13 +1089,13 @@ function OverviewContent() {
         <div className="grid gap-4" style={{ gridTemplateColumns: '300px 1fr' }}>
           <div className="flex flex-col gap-3">
             <div className="border border-gray-100 rounded-lg p-5 bg-gray-50">
-              <p className="text-[11px] font-semibold tracking-wide text-gray-400 mb-2">Overlap %</p>
+              <p className="text-[12px] font-semibold tracking-wide text-gray-400 mb-2">Overlap %</p>
               <p className="text-[36px] font-bold text-gray-900 leading-none mb-2">34%</p>
               <p className="text-[12px] text-gray-500 leading-snug">High overlap means traditional SEO is feeding your AIO visibility.</p>
             </div>
             <div className="border border-gray-100 rounded-lg p-5 bg-gray-50">
-              <p className="text-[11px] font-semibold tracking-wide text-gray-400 mb-2">Drift watch</p>
-              <p className="text-[22px] font-bold text-gray-900 leading-snug mb-2">2 prompts flagged</p>
+              <p className="text-[12px] font-semibold tracking-wide text-gray-400 mb-2">Drift watch</p>
+              <p className="text-[24px] font-bold text-gray-900 leading-snug mb-2">2 prompts flagged</p>
               <p className="text-[12px] text-gray-500 leading-snug">Watch prompts where overlap is slipping while AIO position is weakening.</p>
             </div>
           </div>
@@ -1113,7 +1109,7 @@ function OverviewContent() {
                 <div className="flex items-start justify-between gap-4">
                   <p className="text-[14px] font-semibold text-gray-900 leading-snug flex-1">{item.prompt}</p>
                   <div className="text-right shrink-0">
-                    <p className="text-[22px] font-bold text-gray-900 leading-none">{item.overlap}</p>
+                    <p className="text-[24px] font-bold text-gray-900 leading-none">{item.overlap}</p>
                     <p className={`text-[13px] font-semibold mt-0.5 ${item.status === 'Watch drift' ? 'text-warning-600' : 'text-success-600'}`}>{item.status}</p>
                   </div>
                 </div>
@@ -1136,9 +1132,9 @@ function OverviewContent() {
         <div className="flex items-center pb-2 border-b border-gray-100 mb-1">
           <div className="flex-1" />
           <div className="flex items-center gap-8 shrink-0">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400 w-[110px] text-right">Visibility</p>
+            <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400 w-[110px] text-right">Visibility</p>
             <div className="flex items-center gap-1 w-[140px] justify-end">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">Trend score Δ</p>
+              <p className="text-[12px] font-semibold uppercase tracking-wide text-gray-400">Trend score Δ</p>
               <HelpCircle size={11} className="text-gray-300" />
             </div>
           </div>
@@ -1150,7 +1146,7 @@ function OverviewContent() {
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-medium text-gray-900 mb-1">{item.prompt}</p>
                 <div className="flex items-center gap-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[11px] font-medium border border-purple-200">{item.tag}</span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">{item.tag}</span>
                   <span className="text-[12px] text-gray-400">{item.volume}</span>
                   <span className="text-[12px] text-gray-400">{item.engines}</span>
                 </div>
@@ -1215,7 +1211,7 @@ export default function PromptTrackingDashboard() {
           </span>
           <div>
             <p className="text-[13px] font-semibold text-gray-900">Go High Level</p>
-            <div className="flex items-center gap-1 text-[11px] text-gray-400">
+            <div className="flex items-center gap-1 text-[12px] text-gray-400">
               <span>gohighlevel.com</span>
               <span>•</span>
               <span>Updated Jun 19, 2026</span>
@@ -1250,11 +1246,12 @@ export default function PromptTrackingDashboard() {
 
       {/* Scrollable tab content */}
       <div className="flex-1 overflow-y-auto min-h-0 px-5 pt-5 pb-5" style={{ scrollbarGutter: 'stable' }}>
-        {activeTab === 'Overview' && <OverviewContent />}
-        {activeTab === 'Prompts'  && <PromptsTabContent />}
-        {activeTab !== 'Overview' && activeTab !== 'Prompts' && (
+        {activeTab === 'Overview'    && <OverviewContent />}
+        {activeTab === 'Prompts'     && <PromptsTabContent />}
+        {activeTab === 'Sources'     && <SourceInventoryContent />}
+        {activeTab === 'Competitors' && (
           <div className="border border-gray-200 rounded-lg bg-white p-12 flex flex-col items-center justify-center text-center">
-            <p className="text-[15px] font-semibold text-gray-900 mb-1">{activeTab}</p>
+            <p className="text-[15px] font-semibold text-gray-900 mb-1">Competitors</p>
             <p className="text-[13px] text-gray-400">This section is coming soon.</p>
           </div>
         )}

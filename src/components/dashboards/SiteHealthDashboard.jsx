@@ -3,7 +3,7 @@ import {
   Globe, RefreshCw, Download, AlertTriangle, ChevronRight, ChevronDown,
   Link2, Code2, BarChart3, ArrowUp, CircleCheck, CircleX, Info, X, FileText, Clock,
   ImageIcon, TrendingUp, Award, Check, Star, Calendar, ExternalLink,
-  Plus, Search, Zap, LayoutDashboard, Package, Sparkles, Settings,
+  Plus, Minus, Search, Zap, LayoutDashboard, Package, Sparkles, Settings, Pencil, Trash2,
 } from '../../icons/index.js'
 
 // ─── Data ───────────────────────────────────────────────────────────────────
@@ -24,7 +24,7 @@ const HEALTH = { score: 74, prev: 70, delta: 4 }
 const RESULTS_BY_TYPE = [
   { label: 'Errors',   count: 14, prev: 17, color: '#DC2626' },
   { label: 'Warnings', count: 22, prev: 18, color: '#D97706' },
-  { label: 'Notices',  count: 48, prev: 48, color: '#2563EB' },
+  { label: 'Notices',  count: 48, prev: 48, color: 'var(--primary-600)' },
 ]
 
 const TOTAL_PAGES   = 1000
@@ -32,11 +32,9 @@ const HEALTHY_PAGES = 977
 const ISSUE_PAGES   = 23
 
 const FIX_COVERAGE = [
-  { label: 'Auto-fix ready',        value: 39, effort: 'Low effort',           color: '#2563EB', accent: '#EFF6FF', effortColor: 'text-success-600'  },
-  { label: 'Assisted fix',          value: 11, effort: 'Medium effort',        color: '#7C3AED', accent: '#F5F3FF', effortColor: 'text-warning-600'  },
-  { label: 'Recommendation only',   value: 13, effort: 'Manual work required', color: '#D97706', accent: '#FFFBEB', effortColor: 'text-error-600'    },
-  { label: 'Fixed from baseline',   value: 25, effort: null,                   color: '#16A34A', accent: '#F0FDF4', effortColor: ''                  },
-  { label: 'Fixed since last scan', value: 25, effort: null,                   color: '#0D9488', accent: '#F0FDFA', effortColor: ''                  },
+  { label: 'Auto-fix ready',      value: 39, effort: 'Low effort',           color: '#16A34A',            accent: '#F0FDF4',             effortColor: 'text-success-600'  },
+  { label: 'Assisted fix',        value: 11, effort: 'Medium effort',        color: 'var(--primary-600)', accent: 'var(--primary-50)',   effortColor: 'text-warning-600'  },
+  { label: 'Recommendation only', value: 13, effort: 'Manual work required', color: '#D97706',            accent: 'var(--warning-100)',  effortColor: 'text-error-600'    },
 ]
 const RESOLUTION_PROGRESS = 28
 
@@ -46,11 +44,11 @@ const REDIRECTING   = 2
 const CANONICALIZED = 1
 
 const CRAWL_KPIS = [
-  { label: 'Pages crawled',      value: '1,000', icon: FileText,  iconBg: '#2563EB14', iconColor: '#2563EB' },
-  { label: 'Found links',        value: '2,847', icon: Link2,     iconBg: '#7C3AED14', iconColor: '#7C3AED' },
-  { label: 'Resources scanned',  value: '156',   icon: ImageIcon, iconBg: '#DC262614', iconColor: '#DC2626' },
-  { label: 'Avg response time',  value: '1.2 s', icon: Clock,     iconBg: '#D9770614', iconColor: '#D97706' },
-  { label: 'Redirecting pages',  value: '2',     icon: RefreshCw, iconBg: '#0D948814', iconColor: '#0D9488' },
+  { label: 'Pages crawled',     value: '1,000', delta: 1.6,  deltaPositive: true,  spark: [960,971,985,1000,1000]    },
+  { label: 'Found links',       value: '2,847', delta: 2.4,  deltaPositive: true,  spark: [2400,2512,2650,2780,2847] },
+  { label: 'Resources scanned', value: '156',   delta: 0.6,  deltaPositive: true,  spark: [142,148,151,155,156]      },
+  { label: 'Avg response time', value: '1.2 s', delta: 7.7,  deltaPositive: true,  spark: [1.8,1.6,1.5,1.3,1.2]     },
+  { label: 'Redirecting pages', value: '2',     delta: 33.3, deltaPositive: true,  spark: [5,4,3,3,2]                },
 ]
 
 const TOP_FINDINGS = [
@@ -62,11 +60,11 @@ const TOP_FINDINGS = [
 ]
 
 const HTTP_CODES = [
-  { code: '1XX', count: 0,   color: '#9CA3AF' },
+  { code: '1XX', count: 0,   color: 'var(--gray-400)' },
   { code: '2XX', count: 977, color: '#16A34A' },
   { code: '3XX', count: 2,   color: '#D97706' },
   { code: '4XX', count: 14,  color: '#DC2626' },
-  { code: '5XX', count: 7,   color: '#7C3AED' },
+  { code: '5XX', count: 7,   color: 'var(--purple-600)' },
 ]
 
 const DOMAIN_METRICS = [
@@ -78,23 +76,23 @@ const DOMAIN_METRICS = [
 ]
 
 const LINK_ATTRIBUTES = [
-  { label: 'Internal dofollow',  count: 1847, color: '#2563EB' },
-  { label: 'Internal nofollow',  count: 23,   color: '#60A5FA' },
-  { label: 'External dofollow',  count: 412,  color: '#16A34A' },
-  { label: 'External nofollow',  count: 156,  color: '#F97316' },
+  { label: 'Internal dofollow',  count: 1847, color: 'var(--primary-600)' },
+  { label: 'Internal nofollow',  count: 23,   color: '#D97706' },
+  { label: 'External dofollow',  count: 412,  color: 'var(--primary-600)' },
+  { label: 'External nofollow',  count: 156,  color: '#D97706' },
 ]
 
 const ROBOTS_META = [
   { label: 'Index & follow',    count: 977, color: '#16A34A' },
   { label: 'Noindex & follow',  count: 3,   color: '#D97706' },
-  { label: 'Index & nofollow',  count: 0,   color: '#2563EB' },
+  { label: 'Index & nofollow',  count: 0,   color: 'var(--primary-600)' },
   { label: 'Noindex & nofollow',count: 14,  color: '#DC2626' },
-  { label: 'No robots tag',     count: 6,   color: '#9CA3AF' },
+  { label: 'No robots tag',     count: 6,   color: 'var(--gray-400)' },
 ]
 
 const REDIRECT_PROFILE = [
-  { label: '0 redirects', count: 998, color: '#2563EB' },
-  { label: '1 redirect',  count: 2,   color: '#7C3AED' },
+  { label: '0 redirects', count: 998, color: 'var(--primary-600)' },
+  { label: '1 redirect',  count: 2,   color: 'var(--purple-600)' },
   { label: '2+ redirects',count: 0,   color: '#D97706' },
 ]
 
@@ -104,11 +102,14 @@ const CORE_WEB_VITALS = [
   { label: 'INP', value: '210 ms', pass: false, threshold: '< 200 ms'},
 ]
 
+const CWV_RANGES     = { LCP: 6, CLS: 0.25, INP: 500 }
+const CWV_THRESHOLDS = { LCP: 2.5, CLS: 0.1, INP: 200 }
+
 const SEVERITY_STYLE = {
   critical: { bar: '#DC2626', bg: 'bg-error-50',    text: 'text-error-600',   border: 'border-error-200',   label: 'Critical' },
   high:     { bar: '#D97706', bg: 'bg-warning-100', text: 'text-warning-600', border: 'border-warning-200', label: 'High'     },
-  medium:   { bar: '#2563EB', bg: 'bg-primary-50',  text: 'text-primary-600', border: 'border-blue-200',    label: 'Medium'   },
-  low:      { bar: '#9CA3AF', bg: 'bg-gray-100',    text: 'text-gray-500',    border: 'border-gray-200',    label: 'Low'      },
+  medium:   { bar: 'var(--primary-600)', bg: 'bg-primary-50',  text: 'text-primary-600', border: 'border-blue-200',    label: 'Medium'   },
+  low:      { bar: 'var(--gray-400)', bg: 'bg-gray-100',    text: 'text-gray-500',    border: 'border-gray-200',    label: 'Low'      },
 }
 
 // ─── Shared helpers ──────────────────────────────────────────────────────────
@@ -122,7 +123,7 @@ function Badge({ label, color = 'gray' }) {
     gray:   'bg-gray-100 text-gray-500 border-gray-200',
   }
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium ${map[color] || map.gray}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${map[color] || map.gray}`}>
       {label}
     </span>
   )
@@ -146,340 +147,1053 @@ function SectionCard({ children, className = '' }) {
   )
 }
 
-// ─── Semicircle gauge ────────────────────────────────────────────────────────
+// ─── Chart primitives ────────────────────────────────────────────────────────
 
-function SemicircleGauge({ score, delta }) {
-  const noData = score == null
-  const color = noData ? '#E5E7EB'
-    : score >= 80 ? '#16A34A'
-    : score >= 60 ? '#D97706'
-    : '#DC2626'
-  const pct = noData ? 0 : Math.min(100, Math.max(0, score))
-
+function RadialGauge({ score, delta }) {
+  const size = 160, sw = 14, r = (size - sw) / 2
+  const circ = 2 * Math.PI * r
+  const pct = Math.min(score / 100, 1)
+  const color = score >= 80 ? '#16A34A' : score >= 60 ? '#D97706' : '#DC2626'
+  const bandLabel = score >= 80 ? 'Good' : score >= 60 ? 'Fair' : 'Poor'
+  const bandColor = score >= 80 ? '#15803D' : score >= 60 ? 'var(--warning-700)' : 'var(--error-800)'
+  const bandBg   = score >= 80 ? '#F0FDF4' : score >= 60 ? 'var(--warning-100)' : '#FEF2F2'
+  // Target marker at 90/100
+  const targetAngle = (-Math.PI / 2) + (0.9 * 2 * Math.PI)
+  const tXo = (size/2) + (r + sw/2 + 3) * Math.cos(targetAngle)
+  const tYo = (size/2) + (r + sw/2 + 3) * Math.sin(targetAngle)
+  const tXi = (size/2) + (r - sw/2 - 3) * Math.cos(targetAngle)
+  const tYi = (size/2) + (r - sw/2 - 3) * Math.sin(targetAngle)
+  // Endpoint dot on score arc
+  const endAngle = -Math.PI / 2 + pct * 2 * Math.PI
+  const ex = parseFloat(((size/2) + r * Math.cos(endAngle)).toFixed(2))
+  const ey = parseFloat(((size/2) + r * Math.sin(endAngle)).toFixed(2))
   return (
-    <div className="flex flex-col items-center">
-      <svg width="100%" viewBox="0 0 180 108" style={{ maxWidth: 180 }} className="overflow-visible">
-        {/* Track */}
-        <path d="M 12,100 A 78,78 0 0,1 168,100" fill="none" stroke="#F2F4F7" strokeWidth="13" strokeLinecap="round" />
-        {/* Filled */}
-        {!noData && (
-          <path
-            d="M 12,100 A 78,78 0 0,1 168,100"
-            fill="none" stroke={color} strokeWidth="13" strokeLinecap="round"
-            pathLength="100"
-            strokeDasharray={`${pct} 100`}
-          />
-        )}
-        {/* Score */}
-        <text x="90" y="86" textAnchor="middle" fontSize="30" fontWeight="800" fill={noData ? '#D0D5DD' : '#101828'} fontFamily="inherit">
-          {noData ? '—' : score}
-        </text>
-        <text x="90" y="102" textAnchor="middle" fontSize="11" fill="#9CA3AF" fontFamily="inherit">/100</text>
-      </svg>
-      {/* Legend */}
-      <div className="flex items-center justify-center w-full mt-0.5">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-success-600 shrink-0" />
-          <span className="text-[12px] text-gray-500">Recommended</span>
-          <span className="text-[12px] font-semibold text-gray-800">90+</span>
+    <div className="flex flex-col items-center gap-2 shrink-0">
+      <div className="relative" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
+          {/* Track */}
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F2F4F7" strokeWidth={sw} />
+          {/* Score arc */}
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw}
+            strokeDasharray={`${pct * circ} ${circ}`} strokeDashoffset={circ / 4} strokeLinecap="round" />
+          {/* Endpoint dot */}
+          <circle cx={ex} cy={ey} r={sw / 2} fill={color} />
+          <circle cx={ex} cy={ey} r={3} fill="white" />
+          {/* Target marker */}
+          <line x1={tXi} y1={tYi} x2={tXo} y2={tYo} stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-[36px] font-extrabold text-gray-900 leading-none">{score}</span>
+          <span className="text-[12px] text-gray-400 mt-1">/ 100</span>
         </div>
       </div>
-      {delta != null && (
-        <div className="mt-2 flex items-center gap-1.5">
+      <span style={{ display:'inline-flex', padding:'2px 10px', borderRadius:999, background:bandBg, fontSize:12, fontWeight:600, color:bandColor }}>{bandLabel}</span>
+      {delta != null && delta !== 0 && (
+        <div className="flex items-center gap-1">
           <Delta value={delta} />
-          <span className="text-[12px] text-gray-400">from previous scan</span>
+          <span className="text-[12px] text-gray-400">from last scan</span>
         </div>
       )}
     </div>
   )
 }
 
-// ─── Section 2: Health Summary ───────────────────────────────────────────────
-
-function HealthSummarySection({ compare, onTabSwitch }) {
-  const total = RESULTS_BY_TYPE.reduce((s, r) => s + r.count, 0)
+function SemiGauge({ score, delta }) {
+  const W = 300, r = 88, sw = 15, cx = 150, cy = 102
+  const H = cy + 14
+  const circ = 2 * Math.PI * r
+  const semiCirc = Math.PI * r
+  const pct = Math.min(score / 100, 1)
+  const bandLabel = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 30 ? 'Fair' : 'Poor'
+  const bandColor = score >= 80 ? '#15803D' : score >= 60 ? '#16A34A' : score >= 30 ? 'var(--warning-700)' : 'var(--error-800)'
+  const bandBg   = score >= 80 ? 'var(--success-100)' : score >= 60 ? '#F0FDF4' : score >= 30 ? 'var(--warning-100)' : '#FEF2F2'
+  const recAngle = Math.PI * 0.1
+  const cos18 = Math.cos(recAngle), sin18 = Math.sin(recAngle)
+  const rmIx = (cx + (r - sw / 2 - 4) * cos18).toFixed(1)
+  const rmIy = (cy - (r - sw / 2 - 4) * sin18).toFixed(1)
+  const rmOx = (cx + (r + sw / 2 + 4) * cos18).toFixed(1)
+  const rmOy = (cy - (r + sw / 2 + 4) * sin18).toFixed(1)
   return (
-    <div className="grid grid-cols-3 gap-4 min-w-0">
-
-      {/* Health Score */}
-      <SectionCard className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
-        <p className="text-[13px] font-semibold text-gray-700">Health score</p>
-        <SemicircleGauge score={HEALTH.score} delta={compare ? HEALTH.delta : null} />
-      </SectionCard>
-
-      {/* Results By Type */}
-      <SectionCard className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] font-semibold text-gray-700">Results by type</p>
-          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline">View results</button>
-        </div>
-        {/* Distribution bar */}
-        <div className="flex h-2.5 rounded-full overflow-hidden">
-          {RESULTS_BY_TYPE.map(r => (
-            <div key={r.label} style={{ flex: r.count, background: r.color }} />
-          ))}
-        </div>
-        {/* Rows */}
-        <div className="flex flex-col gap-2 mt-1">
-          {RESULTS_BY_TYPE.map(r => {
-            const diff = r.count - r.prev
-            return (
-              <div key={r.label} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: r.color }} />
-                  <span className="text-[13px] text-gray-600">{r.label}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-bold text-gray-900">{r.count}</span>
-                  {compare && diff !== 0 && (
-                    <Delta value={diff} positive={diff < 0} />
-                  )}
-                  {compare && diff === 0 && (
-                    <span className="text-[12px] text-gray-400">—</span>
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </SectionCard>
-
-      {/* Page Health Ratio */}
-      <SectionCard className="p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
-        <div className="flex items-center justify-between">
-          <p className="text-[13px] font-semibold text-gray-700">Page health ratio</p>
-          <button onClick={() => onTabSwitch?.('crawled')} className="text-[12px] font-medium text-primary-600 hover:underline">View by pages</button>
-        </div>
-        <div>
-          <p className="text-[28px] font-bold text-gray-900 leading-none">{TOTAL_PAGES.toLocaleString()}</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">Total pages</p>
-        </div>
-        {/* Stacked bar */}
-        <div className="flex h-2.5 rounded-full overflow-hidden">
-          <div className="bg-success-600" style={{ flex: HEALTHY_PAGES }} />
-          <div className="bg-error-600" style={{ flex: ISSUE_PAGES }} />
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-success-600 shrink-0" />
-              <span className="text-[13px] text-gray-600">Healthy</span>
-            </div>
-            <span className="text-[13px] font-semibold text-gray-900">{HEALTHY_PAGES.toLocaleString()}</span>
+    <div className="flex flex-col items-center w-full gap-1.5">
+      <svg width="100%" viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
+        <defs>
+          <linearGradient id="sg-track" x1={cx - r} y1="0" x2={cx + r} y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stopColor="#DC2626" stopOpacity="0.12" />
+            <stop offset="30%"  stopColor="var(--warning-400)" stopOpacity="0.12" />
+            <stop offset="60%"  stopColor="var(--success-500)" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#15803D" stopOpacity="0.12" />
+          </linearGradient>
+          <linearGradient id="sg-value" x1={cx - r} y1="0" x2={cx + r} y2="0" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stopColor="#DC2626" />
+            <stop offset="30%"  stopColor="var(--warning-400)" />
+            <stop offset="60%"  stopColor="var(--success-500)" />
+            <stop offset="100%" stopColor="#15803D" />
+          </linearGradient>
+        </defs>
+        {/* Subtle zone track */}
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="url(#sg-track)" strokeWidth={sw}
+          strokeDasharray={`${semiCirc.toFixed(1)} ${circ.toFixed(1)}`}
+          strokeDashoffset={semiCirc.toFixed(1)} />
+        {/* Gradient value arc */}
+        {pct > 0 && (
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="url(#sg-value)" strokeWidth={sw}
+            strokeDasharray={`${(pct * semiCirc).toFixed(1)} ${circ.toFixed(1)}`}
+            strokeDashoffset={semiCirc.toFixed(1)}
+            strokeLinecap="round" />
+        )}
+        {/* Recommended marker at 90 */}
+        <line x1={rmIx} y1={rmIy} x2={rmOx} y2={rmOy} stroke="var(--gray-400)" strokeWidth="2" strokeLinecap="round" />
+        {/* Score */}
+        <text x={cx} y={cy - 26} textAnchor="middle" fontSize="36" fontWeight="800" fill="#101828">{score}</text>
+        <text x={cx} y={cy - 8} textAnchor="middle" fontSize="10" fill="var(--gray-400)">/ 100</text>
+        {/* End labels */}
+        <text x={cx - r + 8} y={H - 1} textAnchor="middle" fontSize="9" fill="var(--gray-400)">0</text>
+        <text x={cx + r - 8} y={H - 1} textAnchor="middle" fontSize="9" fill="var(--gray-400)">100</text>
+      </svg>
+      <div className="flex items-center gap-2 flex-wrap justify-center">
+        <span style={{ display:'inline-flex', padding:'2px 10px', borderRadius:999, background:bandBg, fontSize:12, fontWeight:600, color:bandColor }}>{bandLabel}</span>
+        <span className="text-[12px] text-gray-400">Recommended: 90</span>
+        {delta != null && delta !== 0 && (
+          <div className="flex items-center gap-0.5">
+            <Delta value={delta} />
           </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-error-600 shrink-0" />
-              <span className="text-[13px] text-gray-600">Have errors & warnings</span>
-            </div>
-            <span className="text-[13px] font-semibold text-error-600">{ISSUE_PAGES}</span>
-          </div>
-        </div>
-      </SectionCard>
+        )}
+      </div>
     </div>
   )
 }
 
-// ─── Section 3 & 4: Fix Coverage + Indexability ──────────────────────────────
-
-function FixAndIndexSection({ onTabSwitch }) {
-  const autoFixed = FIX_COVERAGE.find(f => f.label === 'Fixed since last scan')?.value ?? 0
-  const total = FIX_COVERAGE.filter(f => !f.label.startsWith('Fixed')).reduce((s, f) => s + f.value, 0)
-  const [autoW, assistW, recW] = FIX_COVERAGE.slice(0, 3).map(f => ((f.value / (total || 1)) * 100).toFixed(1))
-  const maxVal = Math.max(...FIX_COVERAGE.map(f => f.value))
-
+function WaffleChart({ healthy, total }) {
+  const cells = 100
+  const healthyCells = Math.round((healthy / total) * cells)
+  const sz = 88, cellSize = sz / 10, gap = 1.5, inner = cellSize - gap
   return (
-    <div className="grid grid-cols-2 gap-4 min-w-0">
-
-      {/* Fix Coverage — left */}
-      <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-[14px] font-semibold text-gray-900">Fix coverage</p>
-            <p className="text-[12px] text-gray-400 mt-0.5">A split of what can be auto-fixed, assisted, or manual-only</p>
-          </div>
-          <button onClick={() => onTabSwitch?.('scan')} className="shrink-0 text-[12px] font-medium text-primary-600 hover:underline">
-            Review in scan results
-          </button>
-        </div>
-
-        {/* Fix stat rows — each with its own progress bar */}
-        <div className="flex flex-col divide-y divide-gray-100">
-          {FIX_COVERAGE.map(f => (
-            <div key={f.label} className="flex items-center gap-3 py-2">
-              {/* Label only */}
-              <div className="w-44 shrink-0">
-                <span className="text-[13px] text-gray-700">{f.label}</span>
-              </div>
-              {/* Progress bar */}
-              <div className="flex-1 bg-gray-100 rounded-full h-2 overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-500"
-                  style={{ width: `${(f.value / maxVal) * 100}%`, background: f.color }}
-                />
-              </div>
-              {/* Count */}
-              <span className="text-[14px] font-bold text-gray-900 w-8 text-right shrink-0">{f.value}</span>
-            </div>
-          ))}
-        </div>
-
-      </SectionCard>
-
-      {/* Indexability Snapshot — right */}
-      <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="text-[14px] font-semibold text-gray-900">Indexability snapshot</p>
-            <p className="text-[12px] text-gray-400 mt-0.5">Discoverability across your crawled pages</p>
-          </div>
-          <button className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">
-            View affected pages →
-          </button>
-        </div>
-
-        {/* Stacked bar */}
-        <div className="flex h-2.5 rounded-full overflow-hidden">
-          <div style={{ background: '#16A34A', flex: INDEXABLE }} />
-          <div style={{ background: '#DC2626', flex: NOT_INDEXABLE - REDIRECTING - CANONICALIZED, minWidth: (NOT_INDEXABLE - REDIRECTING - CANONICALIZED) > 0 ? 8 : 0 }} />
-          <div style={{ background: '#D97706', flex: REDIRECTING, minWidth: REDIRECTING > 0 ? 8 : 0 }} />
-          <div style={{ background: '#7C3AED', flex: CANONICALIZED, minWidth: CANONICALIZED > 0 ? 8 : 0 }} />
-        </div>
-
-        {/* Stat cards grid */}
-        {(() => {
-          const stats = [
-            { label: 'Indexable',     count: INDEXABLE,                                       color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
-            { label: 'Not indexable', count: NOT_INDEXABLE - REDIRECTING - CANONICALIZED,     color: '#DC2626', bg: '#FEF2F2', border: '#FECACA' },
-            { label: 'Redirecting',   count: REDIRECTING,                                     color: '#D97706', bg: '#FFFBEB', border: '#FDE68A' },
-            { label: 'Canonicalized', count: CANONICALIZED,                                   color: '#7C3AED', bg: '#F5F3FF', border: '#DDD6FE' },
-          ]
-          return (
-            <div className="grid grid-cols-2 gap-2">
-              {stats.map(s => (
-                <div key={s.label} className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-gray-200 bg-white">
-                  <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[11px] text-gray-500 leading-none mb-0.5">{s.label}</p>
-                    <p className="text-[18px] font-bold leading-none" style={{ color: s.color }}>{s.count.toLocaleString()}</p>
-                  </div>
-                  <span className="text-[11px] text-gray-400 shrink-0">{((s.count / TOTAL_PAGES) * 100).toFixed(1)}%</span>
-                </div>
-              ))}
-            </div>
-          )
-        })()}
-
-      </SectionCard>
-    </div>
+    <svg width={sz} height={sz} viewBox={`0 0 ${sz} ${sz}`} className="shrink-0">
+      {Array.from({ length: cells }, (_, i) => (
+        <rect key={i}
+          x={(i % 10) * cellSize + gap / 2} y={Math.floor(i / 10) * cellSize + gap / 2}
+          width={inner} height={inner} rx="1.5"
+          fill={i < healthyCells ? '#16A34A' : '#DC2626'}
+          opacity={i < healthyCells ? 0.8 : 0.95}
+        />
+      ))}
+    </svg>
   )
 }
 
-// ─── Section 5: Crawl Snapshot strip ────────────────────────────────────────
-
-function CrawlSnapshotStrip() {
+function RoseChart({ size = 96 }) {
+  const data = [
+    { label: 'Errors',   count: 14, color: '#DC2626' },
+    { label: 'Warnings', count: 22, color: '#D97706' },
+    { label: 'Notices',  count: 48, color: 'var(--primary-600)' },
+  ]
+  const cx = size / 2, cy = size / 2
+  const maxR = size / 2 - 2
+  const sqrtMax = Math.sqrt(Math.max(...data.map(d => d.count)))
+  const n = data.length
+  const angleStep = (2 * Math.PI) / n
   return (
-    <div className="grid grid-cols-5 gap-3 min-w-0">
-      {CRAWL_KPIS.map(({ label, value, icon: Icon, iconBg, iconColor }) => (
-        <div key={label} className="border border-gray-200 rounded-lg bg-white p-4 flex items-start justify-between gap-3 min-w-0">
-          <div className="flex flex-col gap-1 min-w-0">
-            <p className="text-[12px] font-medium text-gray-500">{label}</p>
-            <p className="text-[24px] font-bold text-gray-900 leading-none">{value}</p>
-          </div>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: iconBg }}>
-            <Icon size={16} style={{ color: iconColor }} />
-          </div>
-        </div>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+      {data.map((seg, i) => {
+        const r = Math.max((Math.sqrt(seg.count) / sqrtMax) * maxR, 10)
+        const startAngle = i * angleStep - Math.PI / 2
+        const endAngle = (i + 1) * angleStep - Math.PI / 2
+        const x1 = (cx + r * Math.cos(startAngle)).toFixed(2)
+        const y1 = (cy + r * Math.sin(startAngle)).toFixed(2)
+        const x2 = (cx + r * Math.cos(endAngle)).toFixed(2)
+        const y2 = (cy + r * Math.sin(endAngle)).toFixed(2)
+        return (
+          <path key={seg.label}
+            d={`M ${cx} ${cy} L ${x1} ${y1} A ${r.toFixed(2)} ${r.toFixed(2)} 0 0 1 ${x2} ${y2} Z`}
+            fill={seg.color}
+            fillOpacity="0.82"
+            stroke="white"
+            strokeWidth="2"
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
+function PieChart({ data, size = 176 }) {
+  const cx = size / 2, cy = size / 2, r = size / 2 - 4
+  const total = data.reduce((s, d) => s + d.value, 0) || 1
+  let cumAngle = -Math.PI / 2
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {data.map((seg, i) => {
+        const angle = (seg.value / total) * 2 * Math.PI
+        if (angle < 0.001) return null
+        const startAngle = cumAngle
+        const endAngle = cumAngle + angle
+        cumAngle = endAngle
+        if (angle >= 2 * Math.PI - 0.001) {
+          return <circle key={i} cx={cx} cy={cy} r={r} fill={seg.color} />
+        }
+        const x1 = (cx + r * Math.cos(startAngle)).toFixed(2)
+        const y1 = (cy + r * Math.sin(startAngle)).toFixed(2)
+        const x2 = (cx + r * Math.cos(endAngle)).toFixed(2)
+        const y2 = (cy + r * Math.sin(endAngle)).toFixed(2)
+        const largeArc = angle > Math.PI ? 1 : 0
+        return (
+          <path key={i}
+            d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`}
+            fill={seg.color}
+            stroke="white"
+            strokeWidth="2.5"
+            strokeLinejoin="round"
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
+function StackedDistributionBar({ segments, height = 14 }) {
+  const total = segments.reduce((s, seg) => s + seg.value, 0) || 1
+  return (
+    <div className="w-full flex rounded-md overflow-hidden" style={{ height }}>
+      {segments.map((seg, i) => (
+        <div key={i} style={{ width:`${(seg.value / total) * 100}%`, background:seg.color, minWidth:seg.value > 0 ? 3 : 0 }} />
       ))}
     </div>
   )
 }
 
-// ─── Section 6: Top Findings ─────────────────────────────────────────────────
+// Rose/polar-area chart — equal angle slices, radius scales with sqrt(value)
+function PolarRoseChart({ segments, size = 110 }) {
+  const cx = size / 2, cy = size / 2, maxR = size / 2 - 4
+  const n = segments.length
+  const maxVal = Math.max(...segments.map(s => s.value))
+  const angleSlice = (2 * Math.PI) / n
+  const GAP = 0.1  // radian gap between segments
 
-function TopFindingsSection({ onFindingClick, onTabSwitch }) {
   return (
-    <SectionCard>
-      <div className="p-4 flex items-start justify-between gap-4">
-        <div>
-          <p className="text-[14px] font-semibold text-gray-900">Top findings</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">Most impactful issues from this scan — prioritised by severity and page count</p>
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      {/* Gray track at full radius */}
+      {segments.map((_, i) => {
+        const startA = i * angleSlice - Math.PI / 2
+        const endA = startA + angleSlice - GAP
+        const x1 = (cx + maxR * Math.cos(startA)).toFixed(2)
+        const y1 = (cy + maxR * Math.sin(startA)).toFixed(2)
+        const x2 = (cx + maxR * Math.cos(endA)).toFixed(2)
+        const y2 = (cy + maxR * Math.sin(endA)).toFixed(2)
+        return (
+          <path key={`tr-${i}`}
+            d={`M ${cx} ${cy} L ${x1} ${y1} A ${maxR} ${maxR} 0 0 1 ${x2} ${y2} Z`}
+            fill="#EAECF0"
+          />
+        )
+      })}
+      {/* Colored value segments */}
+      {segments.map((s, i) => {
+        const r = Math.max(Math.sqrt(s.value / maxVal) * maxR, 4)
+        const startA = i * angleSlice - Math.PI / 2
+        const endA = startA + angleSlice - GAP
+        const x1 = (cx + r * Math.cos(startA)).toFixed(2)
+        const y1 = (cy + r * Math.sin(startA)).toFixed(2)
+        const x2 = (cx + r * Math.cos(endA)).toFixed(2)
+        const y2 = (cy + r * Math.sin(endA)).toFixed(2)
+        return (
+          <path key={i}
+            d={`M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`}
+            fill={s.color} fillOpacity="0.88"
+            stroke="white" strokeWidth="2.5" strokeLinejoin="round"
+          />
+        )
+      })}
+    </svg>
+  )
+}
+
+// Semicircle arc gauge — for a single large % metric
+function IndexArcGauge({ pct, value, label, color, size = 150 }) {
+  const cx = size / 2
+  const cy = Math.round(size * 0.58)
+  const r  = Math.round(size * 0.36)
+  const sw = 11
+  // Endpoint: arc goes CW from left (cx-r, cy) via top to position at pct
+  // angle from positive x-axis = π(1-pct); ey negated for SVG y-down
+  const a = Math.PI * (1 - pct)
+  const ex = (cx + r * Math.cos(a)).toFixed(2)
+  const ey = (cy - r * Math.sin(a)).toFixed(2)
+  const h = Math.round(size * 0.62)
+
+  return (
+    <svg width={size} height={h} viewBox={`0 0 ${size} ${h}`}>
+      {/* Track */}
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+        fill="none" stroke="#EAECF0" strokeWidth={sw} strokeLinecap="round" />
+      {/* Value arc */}
+      {pct > 0.005 && (
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${ex} ${ey}`}
+          fill="none" stroke={color} strokeWidth={sw} strokeLinecap="round" />
+      )}
+      <text x={cx} y={cy - 4} textAnchor="middle"
+        fontSize="20" fontWeight="800" fill="#101828" fontFamily="Inter,system-ui,sans-serif">
+        {value}
+      </text>
+      <text x={cx} y={cy + 13} textAnchor="middle"
+        fontSize="9" fill="var(--gray-400)" fontFamily="Inter,system-ui,sans-serif">
+        {label}
+      </text>
+    </svg>
+  )
+}
+
+function ResultsBarList() {
+  const maxCount = Math.max(...RESULTS_BY_TYPE.map(r => r.count))
+  const total    = RESULTS_BY_TYPE.reduce((s, r) => s + r.count, 0)
+  const MAX_BAR_H = 72
+
+  return (
+    <div className="flex flex-col gap-3 w-full">
+      <div className="flex items-end gap-2" style={{ height: MAX_BAR_H + 30 }}>
+        {RESULTS_BY_TYPE.map(r => {
+          const barH = Math.max(6, Math.round((r.count / maxCount) * MAX_BAR_H))
+          const pct  = Math.round((r.count / total) * 100)
+          return (
+            <div key={r.label} className="flex-1 flex flex-col items-start" style={{ height: barH + 30 }}>
+              <span className="text-[17px] font-bold text-gray-800 tabular-nums leading-none" style={{ marginBottom: 8 }}>{pct}%</span>
+              <div className="w-full flex-1 rounded-t-lg" style={{ background: r.color }} />
+            </div>
+          )
+        })}
+      </div>
+      <div className="flex items-center gap-4">
+        {RESULTS_BY_TYPE.map(r => (
+          <div key={r.label} className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: r.color }} />
+            <span className="text-[12px] text-gray-500">{r.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function Sparkline({ data, color = '#94A3B8', height = 26 }) {
+  const w = 80, h = height, pad = 3
+  const min = Math.min(...data), max = Math.max(...data)
+  const range = max - min || 1
+  const ptArr = data.map((v, i) => ({
+    x: parseFloat(((i / (data.length - 1)) * w).toFixed(1)),
+    y: parseFloat((h - pad - ((v - min) / range) * (h - pad * 2)).toFixed(1)),
+  }))
+  const pts = ptArr.map(p => `${p.x},${p.y}`).join(' ')
+  const last = ptArr[ptArr.length - 1]
+  const gradId = `spk-${color.replace('#', '')}`
+  const areaPoints = [
+    ...ptArr,
+    { x: w, y: h - pad },
+    { x: 0, y: h - pad },
+  ].map(p => `${p.x},${p.y}`).join(' ')
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      <defs>
+        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.15" />
+          <stop offset="100%" stopColor={color} stopOpacity="0" />
+        </linearGradient>
+      </defs>
+      <polygon points={areaPoints} fill={`url(#${gradId})`} />
+      <polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx={last.x} cy={last.y} r="2.5" fill={color} />
+    </svg>
+  )
+}
+
+function DonutChart({ segments, totalLabel, totalSub, size = 112, sw = 13 }) {
+  const r = (size - sw) / 2
+  const circ = 2 * Math.PI * r
+  const total = segments.reduce((s, seg) => s + seg.value, 0) || 1
+  let cumLen = 0
+  return (
+    <div className="relative flex items-center justify-center shrink-0" style={{ width: size, height: size }}>
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
+        <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F2F4F7" strokeWidth={sw} />
+        {segments.map((seg, i) => {
+          const len = (seg.value / total) * circ
+          const offset = circ / 4 - cumLen
+          cumLen += len
+          return <circle key={i} cx={size/2} cy={size/2} r={r} fill="none" stroke={seg.color} strokeWidth={sw}
+            strokeDasharray={`${len} ${circ}`} strokeDashoffset={offset} strokeLinecap="butt" />
+        })}
+      </svg>
+      <div className="flex flex-col items-center justify-center z-10 pointer-events-none">
+        <span className="text-[17px] font-bold text-gray-900 leading-none">{totalLabel}</span>
+        {totalSub && <span className="text-[10px] text-gray-400 mt-0.5">{totalSub}</span>}
+      </div>
+    </div>
+  )
+}
+
+function NestedDonutChart({ outerSegments, innerSegments, size = 108 }) {
+  const cx = size / 2, cy = size / 2
+  const outerR = 40, outerSw = 12, innerR = 23, innerSw = 10
+  const oCirc = 2 * Math.PI * outerR, iCirc = 2 * Math.PI * innerR
+  const oTotal = outerSegments.reduce((s, seg) => s + seg.value, 0) || 1
+  const iTotal = innerSegments.reduce((s, seg) => s + seg.value, 0) || 1
+  let oCum = 0, iCum = 0
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+      <circle cx={cx} cy={cy} r={outerR} fill="none" stroke="#F2F4F7" strokeWidth={outerSw} />
+      <circle cx={cx} cy={cy} r={innerR} fill="none" stroke="#F2F4F7" strokeWidth={innerSw} />
+      {outerSegments.map((seg, i) => {
+        const len = (seg.value / oTotal) * oCirc
+        const off = oCirc / 4 - oCum; oCum += len
+        return <circle key={`o${i}`} cx={cx} cy={cy} r={outerR} fill="none" stroke={seg.color} strokeWidth={outerSw}
+          strokeDasharray={`${len} ${oCirc}`} strokeDashoffset={off} strokeLinecap="butt" />
+      })}
+      {innerSegments.map((seg, i) => {
+        const len = (seg.value / iTotal) * iCirc
+        const off = iCirc / 4 - iCum; iCum += len
+        return <circle key={`i${i}`} cx={cx} cy={cy} r={innerR} fill="none" stroke={seg.color} strokeWidth={innerSw}
+          strokeDasharray={`${len} ${iCirc}`} strokeDashoffset={off} strokeLinecap="butt" />
+      })}
+    </svg>
+  )
+}
+
+function ColumnChart({ data }) {
+  const MAX_H = 110
+  const logMax = Math.log10(Math.max(...data.map(d => d.count), 1) + 1)
+  const barH = d => d.count === 0 ? 0 : Math.max(Math.round((Math.log10(d.count + 1) / logMax) * MAX_H), 5)
+
+  return (
+    <div className="flex items-end gap-3 w-full">
+      {data.map(d => {
+        const h = barH(d)
+        return (
+          <div key={d.code} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+            <span className="text-[12px] font-bold text-gray-700 leading-none">{d.count}</span>
+            <div className="w-full rounded-t-md" style={{ height: h, background: d.color }} />
+            <span className="text-[10px] font-medium text-gray-400 truncate w-full text-center">{d.label}</span>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ConcentricArcRings({ rings }) {
+  const size = 88, cx = 44, cy = 44
+  const radii = [16, 27, 38]
+  const sw = 7
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+      {rings.map((ring, i) => {
+        const r = radii[i]
+        const circ = 2 * Math.PI * r
+        const arcLen = ring.pct * circ
+        return (
+          <g key={i}>
+            <circle cx={cx} cy={cy} r={r} fill="none" stroke="#F2F4F7" strokeWidth={sw} />
+            {ring.pct > 0 && (
+              <circle cx={cx} cy={cy} r={r} fill="none" stroke={ring.color} strokeWidth={sw}
+                strokeDasharray={`${arcLen} ${circ}`} strokeDashoffset={circ / 4}
+                strokeLinecap="round" />
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+const CWV_COLORS = { green: '#039855', yellow: '#F79009', red: '#D92D20' }
+
+function CWVSlider({ metrics }) {
+  return (
+    <div className="flex flex-col gap-5">
+      {metrics.map(m => {
+        const rawVal = parseFloat(m.value)
+        const maxVal = CWV_RANGES[m.label]
+        const goodLimit = CWV_THRESHOLDS[m.label]
+        const goodPct  = (goodLimit / maxVal) * 100
+        const needsPct = Math.min((goodLimit * 1.33 / maxVal) * 100, 100)
+        const valuePct = Math.min((rawVal / maxVal) * 100, 100)
+        // Dot color = whichever zone the dot sits in
+        const dotColor = valuePct <= goodPct ? CWV_COLORS.green
+          : valuePct <= needsPct ? CWV_COLORS.yellow
+          : CWV_COLORS.red
+        const dotLeft = Math.min(valuePct, 97)
+        return (
+          <div key={m.label} className="flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[13px] font-bold text-gray-800">{m.label}</span>
+              <span className="text-[13px] font-bold leading-none" style={{ color: dotColor }}>{m.value}</span>
+            </div>
+            {/* Track with zone bands */}
+            <div className="relative" style={{ paddingTop: 11, paddingBottom: 11 }}>
+              <div className="h-1 w-full rounded-full overflow-hidden flex">
+                <div style={{ width: `${goodPct}%`,           background: CWV_COLORS.green  }} />
+                <div style={{ width: `${needsPct - goodPct}%`, background: CWV_COLORS.yellow }} />
+                <div style={{ flex: 1,                         background: CWV_COLORS.red    }} />
+              </div>
+              {/* Threshold tick */}
+              <div className="absolute top-0 bottom-0 flex items-center" style={{ left: `${goodPct}%` }}>
+                <div className="w-px h-5 bg-gray-500" />
+              </div>
+              {/* Value dot — color matches current zone */}
+              <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-white"
+                style={{ left: `${dotLeft}%`, background: dotColor, boxShadow: '0 1px 6px rgba(0,0,0,0.32)' }} />
+            </div>
+            {/* Scale labels */}
+            <div className="flex items-center justify-between">
+              <span className="text-[10px] text-gray-400">0</span>
+              <span className="text-[10px] text-gray-400">{m.threshold} <span className="text-gray-300">good</span></span>
+              <span className="text-[10px] text-gray-400">{maxVal}{m.label === 'INP' ? ' ms' : m.label === 'LCP' ? ' s' : ''}</span>
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function CWVRing({ metric }) {
+  const size = 60, sw = 6, r = (size - sw) / 2
+  const circ = 2 * Math.PI * r
+  const rawVal = parseFloat(metric.value)
+  const pct = Math.min(rawVal / CWV_RANGES[metric.label], 1)
+  const color = metric.pass ? '#16A34A' : '#DC2626'
+  const arcLen = pct * circ
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <div className="relative shrink-0" style={{ width: size, height: size }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="absolute inset-0">
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#F2F4F7" strokeWidth={sw} />
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke={color} strokeWidth={sw}
+            strokeDasharray={`${arcLen} ${circ}`} strokeDashoffset={circ / 4} strokeLinecap="round" />
+        </svg>
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-[14px] font-bold" style={{ color }}>{metric.pass ? '✓' : '!'}</span>
         </div>
-        <button onClick={() => onTabSwitch?.('scan')} className="shrink-0 text-[12px] font-medium text-primary-600 hover:underline">Open findings</button>
+      </div>
+      <span className="text-[12px] font-bold text-gray-900 leading-none">{metric.value}</span>
+      <span className="text-[12px] font-semibold text-gray-500">{metric.label}</span>
+      <span className="text-[9px] text-gray-400">{metric.threshold}</span>
+    </div>
+  )
+}
+
+function TrendBarChart() {
+  const [hovered, setHovered] = useState(null)
+  const scanData = [...SCAN_OPTIONS].reverse()
+  const series = [
+    { key: 'errors',   label: 'Errors',   color: '#DC2626' },
+    { key: 'warnings', label: 'Warnings', color: '#D97706' },
+    { key: 'notices',  label: 'Notices',  color: 'var(--primary-600)' },
+  ]
+  const maxTotal = Math.max(...scanData.map(s => s.errors + s.warnings + s.notices))
+  const W = 220, H = 84
+  const n = scanData.length
+  const barW = 28
+  const barGap = (W - n * barW) / (n + 1)
+
+  const handleMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const svgX = ((e.clientX - rect.left) / rect.width) * W
+    let closest = 0, minDist = Infinity
+    scanData.forEach((_, si) => {
+      const cx = barGap + si * (barW + barGap) + barW / 2
+      const d = Math.abs(svgX - cx)
+      if (d < minDist) { minDist = d; closest = si }
+    })
+    setHovered(minDist < barW * 1.5 ? { idx: closest, px: e.clientX - rect.left } : null)
+  }
+
+  return (
+    <div className="flex flex-col gap-1.5 w-full">
+      <div className="relative" onMouseLeave={() => setHovered(null)}>
+        <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}
+          preserveAspectRatio="none" style={{ display: 'block' }}
+          onMouseMove={handleMove}>
+          {/* Horizontal grid */}
+          {[0.33, 0.66, 1].map(f => (
+            <line key={f} x1="0" y1={(H - H * f).toFixed(1)} x2={W} y2={(H - H * f).toFixed(1)}
+              stroke="#F2F4F7" strokeWidth="1" />
+          ))}
+          {/* Stacked bars */}
+          {scanData.map((scan, si) => {
+            const x = barGap + si * (barW + barGap)
+            const total = scan.errors + scan.warnings + scan.notices
+            const isHov = hovered?.idx === si
+            let yBottom = H
+            return [
+              ...series.map((s, bi) => {
+                const val = scan[s.key]
+                const segH = Math.max((val / maxTotal) * H, 1)
+                const y = yBottom - segH
+                yBottom = y
+                const isTop = bi === series.length - 1
+                return (
+                  <rect key={`${si}-${s.key}`}
+                    x={x.toFixed(1)} y={y.toFixed(1)}
+                    width={barW} height={segH.toFixed(1)}
+                    rx={isTop ? 3 : 0} ry={isTop ? 3 : 0}
+                    fill={s.color} fillOpacity={isHov ? 1 : 0.82}
+                  />
+                )
+              }),
+              // Total label above bar
+              <text key={`lbl-${si}`}
+                x={(x + barW / 2).toFixed(1)}
+                y={(H - (total / maxTotal) * H - 4).toFixed(1)}
+                textAnchor="middle" fontSize="8" fill={isHov ? '#374151' : 'var(--gray-400)'} fontWeight="600">
+                {total}
+              </text>,
+            ]
+          })}
+        </svg>
+        {/* Hover tooltip */}
+        {hovered && (
+          <div className="absolute z-10 pointer-events-none"
+            style={{ left: hovered.px > 140 ? hovered.px - 130 : hovered.px + 8, top: 4 }}>
+            <div className="bg-gray-900 rounded-lg px-2.5 py-2" style={{ minWidth: 130 }}>
+              <p className="text-[10px] font-semibold text-gray-300 mb-1.5">{scanData[hovered.idx].label}</p>
+              {[...series].reverse().map(s => (
+                <div key={s.key} className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: s.color }} />
+                    <span className="text-[10px] text-gray-300">{s.label}</span>
+                  </div>
+                  <span className="text-[10px] font-semibold text-white">{scanData[hovered.idx][s.key]}</span>
+                </div>
+              ))}
+              <div className="border-t border-gray-700 mt-1.5 pt-1.5 flex justify-between">
+                <span className="text-[10px] text-gray-400">Total</span>
+                <span className="text-[10px] font-bold text-white">
+                  {scanData[hovered.idx].errors + scanData[hovered.idx].warnings + scanData[hovered.idx].notices}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      {/* X-axis date labels — HTML so they use card typography, not SVG scaling */}
+      <div className="flex justify-between">
+        <span className="text-[10px] text-gray-400">{scanData[0].label.replace(', 2026', '')}</span>
+        <span className="text-[10px] text-gray-400">{scanData[scanData.length - 1].label.replace(', 2026', '')}</span>
+      </div>
+    </div>
+  )
+}
+
+// ─── Health Score Card (enterprise redesign) ─────────────────────────────────
+
+function HealthScoreCard({ compare }) {
+  const score  = HEALTH.score  // 74
+  const delta  = HEALTH.delta  // +4
+  const target = 90
+  const gap    = target - score  // 16
+
+  const zone = score >= 80
+    ? { label: 'Excellent', color: '#15803D' }
+    : score >= 60
+    ? { label: 'Good',      color: '#16A34A' }
+    : score >= 30
+    ? { label: 'Fair',      color: '#D97706' }
+    :   { label: 'Poor',    color: '#DC2626' }
+
+  const W = 220, cy = 108, r = 70, sw = 13
+  const cx = W / 2
+
+  const arcPt = v => {
+    const a = Math.PI * (1 - v / 100)
+    return { x: +(cx + r * Math.cos(a)).toFixed(2), y: +(cy - r * Math.sin(a)).toFixed(2) }
+  }
+
+  const scorePt  = arcPt(score)
+  const targetA  = Math.PI * (1 - target / 100)
+  const tickIn   = { x: +(cx + (r - sw / 2 - 1) * Math.cos(targetA)).toFixed(2), y: +(cy - (r - sw / 2 - 1) * Math.sin(targetA)).toFixed(2) }
+  const tickOut  = { x: +(cx + (r + sw / 2 + 2) * Math.cos(targetA)).toFixed(2), y: +(cy - (r + sw / 2 + 2) * Math.sin(targetA)).toFixed(2) }
+
+  const sparkData = [...SCAN_OPTIONS].reverse().map(s => s.score)
+
+  return (
+    <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
+
+      {/* Header with delta badge */}
+      <div className="flex items-center justify-between">
+        <p className="text-[13px] font-semibold text-gray-700">Health score</p>
+        {delta !== 0 && (
+          <span className={`inline-flex items-center gap-1 text-[12px] font-semibold px-2 py-0.5 rounded-full ${delta > 0 ? 'bg-success-50 text-success-700' : 'bg-error-50 text-error-700'}`}>
+            {delta > 0 ? `↑${delta}` : `↓${Math.abs(delta)}`} pts
+          </span>
+        )}
       </div>
 
-      <div className="px-4 pb-4 flex flex-col gap-1.5">
-        {TOP_FINDINGS.map((finding, i) => (
-          <button
-            key={i}
-            onClick={() => onFindingClick(finding.catId, finding.findingId)}
-            className="flex items-center gap-3 border border-gray-100 rounded-lg px-3 py-2.5 hover:border-primary-200 hover:bg-primary-50/30 transition-all cursor-pointer min-w-0 text-left w-full"
-          >
-            <p className="flex-1 min-w-0 text-[13px] font-medium text-gray-800 truncate">{finding.title}</p>
-            <span className="shrink-0 text-[13px] text-gray-500 whitespace-nowrap">{finding.pages} pages</span>
-            <ChevronRight size={14} className="text-gray-300 shrink-0" />
-          </button>
-        ))}
+      {/* Gauge */}
+      <div className="flex justify-center" style={{ marginTop: -4, marginBottom: -4 }}>
+        <svg width={W} height="142" viewBox={`0 0 ${W} 142`}>
+          <defs>
+            <linearGradient id="hs-grad" x1={cx - r} y1="0" x2={cx + r} y2="0" gradientUnits="userSpaceOnUse">
+              <stop offset="0%"     stopColor="#EF4444" />
+              <stop offset="20.6%"  stopColor="var(--warning-400)" />
+              <stop offset="34.5%"  stopColor="var(--success-500)" />
+              <stop offset="65.5%"  stopColor="#16A34A" />
+              <stop offset="100%"   stopColor="#15803D" />
+            </linearGradient>
+          </defs>
+          <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            fill="none" stroke="#EAECF0" strokeWidth={sw} strokeLinecap="round" />
+          <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
+            fill="none" stroke="url(#hs-grad)" strokeWidth={sw} strokeLinecap="round" />
+          <line x1={tickIn.x} y1={tickIn.y} x2={tickOut.x} y2={tickOut.y}
+            stroke="white" strokeWidth="2.5" />
+          <circle cx={scorePt.x} cy={scorePt.y} r={sw / 2 - 1}
+            fill="white" stroke={zone.color} strokeWidth="2.5"
+            style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.18))' }} />
+          <text x={cx} y={cy - 4} textAnchor="middle"
+            fontSize="36" fontWeight="800" fill="#101828" fontFamily="Inter,system-ui,sans-serif">
+            {score}
+          </text>
+          <text x={cx} y={cy + 18} textAnchor="middle"
+            fontSize="12" fontWeight="600" fill={zone.color} fontFamily="Inter,system-ui,sans-serif">
+            {zone.label}
+          </text>
+        </svg>
+      </div>
+
+      {/* Trend + gap-to-target */}
+      <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] text-gray-400">Score trend</span>
+          <span className="text-[12px] text-gray-400">{gap} pts to Excellent</span>
+        </div>
+        <Sparkline data={sparkData} color={zone.color} height={36} />
+        <div className="flex items-center justify-between">
+          <span className="text-[12px] text-gray-400">Mar — May</span>
+          <span className="text-[12px] text-gray-500">Target: <span className="font-bold text-gray-700">{target}</span></span>
+        </div>
+      </div>
+
+    </SectionCard>
+  )
+}
+
+// ─── Section 1: Health Summary ───────────────────────────────────────────────
+
+function HealthSummarySection({ compare, onTabSwitch }) {
+  const resultsTotal = RESULTS_BY_TYPE.reduce((s, r) => s + r.count, 0)
+  const healthPct = Math.round((HEALTHY_PAGES / TOTAL_PAGES) * 100)
+  const dominantType = RESULTS_BY_TYPE.reduce((a, b) => a.count > b.count ? a : b)
+  const gap = 90 - HEALTH.score
+
+  return (
+    <div className="grid grid-cols-3 gap-4 min-w-0">
+
+      {/* Card 1: Health Score */}
+      <HealthScoreCard compare={compare} />
+
+      {/* Card 2: Findings */}
+      <SectionCard className="p-4 flex flex-col gap-5 min-w-0">
+        <div className="flex items-center justify-between">
+          <p className="text-[13px] font-semibold text-gray-700">Results by type</p>
+          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View →</button>
+        </div>
+        <div className="flex items-end justify-between gap-2">
+          <div>
+            <span className="text-[40px] font-extrabold text-gray-900 leading-none tabular-nums">{resultsTotal}</span>
+            <p className="text-[12px] text-gray-400 mt-1.5">total findings</p>
+          </div>
+          <div className="flex flex-col items-end gap-0.5 pb-0.5">
+            <span className="text-[12px] font-semibold text-success-700">↓{SCAN_OPTIONS[1].findings - resultsTotal}</span>
+            <span className="text-[12px] text-gray-400">since last scan</span>
+          </div>
+        </div>
+        <ResultsBarList />
+      </SectionCard>
+
+      {/* Card 3: Page health ratio */}
+      <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
+        <div className="flex items-center justify-between">
+          <p className="text-[13px] font-semibold text-gray-700">Page health ratio</p>
+          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View results by pages →</button>
+        </div>
+        <PageHealthCard onTabSwitch={onTabSwitch} />
+      </SectionCard>
+
+    </div>
+  )
+}
+
+// ─── Section 2: Recovery & Indexing ─────────────────────────────────────────
+
+function FixAndIndexSection({ onTabSwitch }) {
+  const total = FIX_COVERAGE.reduce((s, f) => s + f.value, 0) || 1
+  const autoPct = Math.round((FIX_COVERAGE[0].value / total) * 100)
+  const not = NOT_INDEXABLE - REDIRECTING - CANONICALIZED
+  const indexStats = [
+    { label: 'Indexable',     count: INDEXABLE,                  color: '#16A34A' },
+    { label: 'Not indexable', count: not,                         color: '#DC2626' },
+    { label: 'Other',         count: REDIRECTING + CANONICALIZED, color: 'var(--gray-400)' },
+  ]
+  const indexPct = Math.round((INDEXABLE / TOTAL_PAGES) * 100)
+  const notPct = Math.round((not / TOTAL_PAGES) * 100)
+
+  return (
+    <div className="grid grid-cols-2 gap-4 min-w-0">
+
+      {/* Fix Coverage — Rose/polar-area chart */}
+      <SectionCard className="p-5 flex flex-col gap-6 min-w-0">
+        <div className="flex items-center justify-between gap-2">
+          <div>
+            <p className="text-[13px] font-semibold text-gray-700">Fix coverage</p>
+            <p className="text-[13px] text-gray-400 mt-0.5">How each issue can be resolved</p>
+          </div>
+          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Review →</button>
+        </div>
+        <div className="flex items-center gap-4 flex-1">
+          <div className="shrink-0">
+            <PolarRoseChart segments={FIX_COVERAGE.map(f => ({ value: f.value, color: f.color }))} size={112} />
+          </div>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-0">
+            <div className="flex items-baseline gap-1.5 mb-1">
+              <span className="text-[24px] font-extrabold text-gray-900 leading-none">{total}</span>
+              <span className="text-[12px] text-gray-400">fixable issues</span>
+            </div>
+            {FIX_COVERAGE.map(f => {
+              const pct = Math.round((f.value / total) * 100)
+              return (
+                <div key={f.label} className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="w-2 h-2 rounded-sm shrink-0" style={{ background: f.color }} />
+                    <span className="text-[12px] text-gray-600 truncate">{f.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[13px] font-bold text-gray-900">{f.value}</span>
+                    <span className="text-[12px] text-gray-400">{pct}%</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+        <p className="text-[13px] text-gray-400 border-t border-gray-100 pt-3">{autoPct}% of issues can be auto-fixed.</p>
+      </SectionCard>
+
+      {/* Indexability Snapshot */}
+      <SectionCard className="p-5 flex flex-col gap-4 min-w-0">
+
+        {/* Header */}
+        <p className="text-[13px] font-semibold text-gray-700">Indexability snapshot</p>
+
+        {/* Three KPI tiles */}
+        <div className="grid grid-cols-3 gap-2">
+          {indexStats.map(s => (
+            <div key={s.label} className="border border-gray-200 rounded-lg px-3 py-2.5 flex flex-col gap-1">
+              <span className="text-[20px] font-extrabold leading-none tabular-nums" style={{ color: s.color }}>
+                {s.count.toLocaleString()}
+              </span>
+              <span className="text-[12px] text-gray-500 leading-tight">{s.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Overall indexability + inline bar */}
+        <div className="flex flex-col gap-1.5">
+          <p className="text-[12px] text-gray-400 font-medium">Overall indexability</p>
+          <div className="flex items-center gap-3">
+            <span className="text-[24px] font-extrabold leading-none shrink-0" style={{ color: '#16A34A' }}>
+              {indexPct}%
+            </span>
+            <div className="flex h-2.5 rounded-full overflow-hidden flex-1">
+              {indexStats.map(s => (
+                <div key={s.label}
+                  style={{ width: `${(s.count / TOTAL_PAGES) * 100}%`, background: s.color, minWidth: s.count > 0 ? 4 : 0 }} />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Insight */}
+        <p className="text-[13px] text-gray-400 border-t border-gray-100 pt-3">
+          <span className="text-success-700 font-semibold">+12</span> indexable pages since last crawl
+        </p>
+
+      </SectionCard>
+    </div>
+  )
+}
+
+// ─── Section 3: Crawl Overview KPI strip ────────────────────────────────────
+
+function CrawlSnapshotStrip() {
+  return (
+    <div className="grid grid-cols-5 gap-3">
+      {CRAWL_KPIS.map(({ label, value, delta, deltaPositive }) => (
+        <SectionCard key={label} className="p-4 flex flex-col gap-2 min-w-0">
+          <p className="text-[14px] font-medium text-gray-400 leading-tight">{label}</p>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-[24px] font-bold text-gray-900 leading-none">{value}</span>
+            {delta != null && (
+              <span
+                className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[12px] font-medium leading-none"
+                style={{
+                  background: deltaPositive ? 'var(--success-100)' : '#FEE2E2',
+                  color: deltaPositive ? '#15803D' : '#DC2626',
+                }}
+              >
+                <ArrowUp size={10} style={deltaPositive ? {} : { transform: 'rotate(180deg)' }} />
+                {delta}%
+              </span>
+            )}
+          </div>
+        </SectionCard>
+      ))}
+    </div>
+  )
+}
+
+// ─── Section 4: Priority Issues ──────────────────────────────────────────────
+
+const SEV_CHIP = {
+  critical: { label: 'Critical', color: 'var(--error-800)', bg: '#FEF2F2', border: '#DC2626' },
+  high:     { label: 'High',     color: 'var(--warning-700)', bg: 'var(--warning-100)', border: '#D97706' },
+  medium:   { label: 'Medium',   color: 'var(--primary-800)', bg: 'var(--primary-50)', border: 'var(--primary-600)' },
+  low:      { label: 'Low',      color: '#374151', bg: '#F9FAFB', border: 'var(--gray-400)' },
+}
+
+function PriorityIssuesSection({ onFindingClick, onTabSwitch }) {
+  return (
+    <SectionCard className="p-5 flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[13px] font-semibold text-gray-700">Top findings</p>
+          <p className="text-[12px] text-gray-400 mt-0.5">Highest-impact findings from this scan</p>
+        </div>
+        <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Open findings →</button>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        {TOP_FINDINGS.map((f, i) => {
+          const sc = SEV_CHIP[f.severity] || SEV_CHIP.low
+          return (
+            <button key={i} onClick={() => onFindingClick(f.catId, f.findingId)}
+              className="flex flex-col gap-2.5 border border-gray-200 rounded-lg p-4 hover:bg-gray-50/40 transition-all cursor-pointer text-left min-w-0 overflow-hidden"
+              style={{ borderLeftColor: sc.border, borderLeftWidth: 3 }}>
+              <div className="flex items-start justify-between gap-2">
+                <p className="text-[13px] font-semibold text-gray-800 leading-snug min-w-0">{f.title}</p>
+                <span className="shrink-0 text-[12px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
+                  style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
+              </div>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-[24px] font-extrabold leading-none" style={{ color: sc.border }}>{f.pages}</span>
+                <span className="text-[12px] text-gray-400">pages affected</span>
+              </div>
+            </button>
+          )
+        })}
       </div>
     </SectionCard>
   )
 }
 
-// ─── Section 7: Technical Diagnostics ───────────────────────────────────────
-
-function DiagRow({ children }) {
-  return <div className="flex items-center justify-between py-2.5 border-b border-gray-50 last:border-0">{children}</div>
-}
-
-function DiagLabel({ label }) {
-  return <span className="text-[13px] text-gray-600">{label}</span>
-}
+// ─── Section 5: Technical Diagnostics ────────────────────────────────────────
 
 function HealthBadge({ status }) {
   const map = {
-    healthy:  { label: 'Healthy',  bg: '#F0FDF4', color: '#15803D', dot: '#16A34A' },
-    warning:  { label: 'Warning',  bg: '#FFFBEB', color: '#B45309', dot: '#D97706' },
-    critical: { label: 'Critical', bg: '#FEF2F2', color: '#991B1B', dot: '#DC2626' },
+    healthy:  { label: 'Healthy',  bg: '#F0FDF4', color: '#15803D' },
+    warning:  { label: 'Warning',  bg: 'var(--warning-100)', color: 'var(--warning-700)' },
+    critical: { label: 'Critical', bg: '#FEF2F2', color: 'var(--error-800)' },
   }
   const s = map[status] || map.healthy
   return (
-    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '2px 8px', borderRadius: 999, background: s.bg, fontSize: 11, fontWeight: 600, color: s.color }}>
+    <span style={{ display:'inline-flex', alignItems:'center', padding:'2px 9px', borderRadius:999, background:s.bg, fontSize:12, fontWeight:600, color:s.color }}>
       {s.label}
     </span>
   )
 }
 
+function DiagRow({ children }) {
+  return <div className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">{children}</div>
+}
+
 function HttpStatusCard() {
-  const total = HTTP_CODES.reduce((s, c) => s + c.count, 0) || 1
-  const errorCount = HTTP_CODES.filter(c => c.code === '4XX' || c.code === '5XX').reduce((s, c) => s + c.count, 0)
-  const health = errorCount > 10 ? 'critical' : errorCount > 0 ? 'warning' : 'healthy'
+  const total        = HTTP_CODES.reduce((s, c) => s + c.count, 0) || 1
+  const successCode  = HTTP_CODES.find(c => c.code === '2XX')
+  const successCount = successCode?.count ?? 0
+  const errorTotal   = HTTP_CODES.filter(c => c.code !== '2XX' && c.code !== '1XX').reduce((s, c) => s + c.count, 0)
+  const successPct   = ((successCount / total) * 100).toFixed(1)
+  const health       = errorTotal === 0 ? 'healthy' : errorTotal <= 5 ? 'warning' : 'critical'
+
+  // 2-segment donut: success (green) + combined errors (red)
+  // Minimum visible arc for errors so they're always readable even at <1%
+  const SIZE = 120, SW = 10, R = (SIZE - SW) / 2
+  const CX = SIZE / 2, CY = SIZE / 2
+  const CIRC = 2 * Math.PI * R
+  const GAP_ARC = SW + 2  // gap wider than stroke so round caps don't hide it
+  const MIN_ERROR_ARC = SW * 3  // always at least 3 stroke-widths of error arc
+  const gapDeg = (GAP_ARC / CIRC) * 360
+
+  let successArc = CIRC, errorArc = 0, successRot = -90, errorRot = 0
+  if (errorTotal > 0) {
+    errorArc   = Math.max(MIN_ERROR_ARC, (errorTotal / total) * CIRC - GAP_ARC)
+    successArc = Math.max(0, CIRC - errorArc - GAP_ARC * 2)
+    successRot = -90 + gapDeg / 2
+    errorRot   = successRot + ((successArc + GAP_ARC) / CIRC) * 360
+  }
+
+  const codeInfo = {
+    '3XX': { bg: 'var(--warning-100)', color: 'var(--warning-700)', label: 'Redirect'     },
+    '4XX': { bg: 'var(--error-50)',    color: 'var(--error-600)',    label: 'Client error' },
+    '5XX': { bg: 'var(--purple-50)',   color: 'var(--purple-600)',   label: 'Server error' },
+  }
+  const errorRows = HTTP_CODES.filter(c => c.code !== '2XX' && c.code !== '1XX' && c.count > 0)
+
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <HealthBadge status={health} />
-      </div>
-      <p className="text-[12px] text-gray-500 leading-relaxed">
-        {errorCount > 0
-          ? `${errorCount} pages returned errors — 4XX responses waste crawl budget, 5XX signal server instability.`
-          : 'All pages returning successful responses. No crawl errors detected.'
-        }
-      </p>
-      {HTTP_CODES.map(c => (
-        <div key={c.code} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DiagLabel label={c.code} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-semibold text-gray-900">{c.count}</span>
-              <span className="text-[11px] text-gray-400">{((c.count / total) * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full transition-all" style={{ width: `${(c.count / total) * 100}%`, background: c.color }} />
+    <div className="flex flex-col gap-4">
+      <div><HealthBadge status={health} /></div>
+
+      <div className="flex justify-center">
+        <div className="relative" style={{ width: SIZE, height: SIZE }}>
+          <svg width={SIZE} height={SIZE}>
+            {successArc > 0 && (
+              <circle cx={CX} cy={CY} r={R} fill="none" stroke="#16A34A" strokeWidth={SW}
+                strokeDasharray={`${successArc} ${CIRC}`} strokeLinecap="round"
+                transform={`rotate(${successRot} ${CX} ${CY})`} />
+            )}
+            {errorArc > 0 && (
+              <circle cx={CX} cy={CY} r={R} fill="none" stroke="#DC2626" strokeWidth={SW}
+                strokeDasharray={`${errorArc} ${CIRC}`} strokeLinecap="round"
+                transform={`rotate(${errorRot} ${CX} ${CY})`} />
+            )}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-[24px] font-extrabold leading-none tabular-nums text-success-600">{successPct}%</span>
+            <span className="text-[12px] text-gray-400 mt-1">success rate</span>
           </div>
         </div>
-      ))}
+      </div>
+
+      <div className="border-t border-gray-100" />
+
+      {errorRows.length > 0 ? (
+        <div className="flex flex-col gap-0.5">
+          {errorRows.map(c => {
+            const info = codeInfo[c.code] || {}
+            const pct = ((c.count / total) * 100).toFixed(1)
+            return (
+              <div key={c.code} className="flex items-center justify-between px-2 py-2 rounded-md">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="text-[12px] font-bold px-2 py-0.5 rounded-md shrink-0"
+                    style={{ background: info.bg, color: info.color }}>{c.code}</span>
+                  <span className="text-[13px] text-gray-500">{info.label}</span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className="text-[12px] text-gray-400">{pct}%</span>
+                  <span className="text-[13px] font-semibold tabular-nums text-gray-900">{c.count}</span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      ) : (
+        <p className="text-[13px] text-success-600 font-medium">All pages returning 2XX — no crawl errors.</p>
+      )}
     </div>
   )
 }
@@ -487,75 +1201,156 @@ function HttpStatusCard() {
 function DomainMetricsCard() {
   const trust = 42
   const health = trust < 30 ? 'critical' : trust < 50 ? 'warning' : 'healthy'
-  const metricHealth = { 'Domain trust': health, 'Domain expiry': 'warning' }
-  const dotColor = { healthy: '#16A34A', warning: '#D97706', critical: '#DC2626' }
+  const gaugeColor = trust < 30 ? '#DC2626' : trust < 50 ? '#D97706' : '#16A34A'
+
+  // 270° arc gauge geometry
+  const SIZE = 120, SW = 10, R = (SIZE - SW) / 2
+  const CX = SIZE / 2, CY = SIZE / 2
+  const C = 2 * Math.PI * R
+  const TRACK = 0.75 * C
+  const GAP   = C - TRACK
+  const fillLen = (trust / 100) * TRACK
+
+  const stats = [
+    { label: 'Backlinks',         value: '1,284'        },
+    { label: 'Referring domains', value: '89'           },
+    { label: 'Indexed pages',     value: '142'          },
+    { label: 'Domain expiry',     value: 'Dec 15, 2026' },
+  ]
+
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <HealthBadge status={health} />
+    <div className="flex flex-col gap-4">
+      <div><HealthBadge status={health} /></div>
+
+      {/* 270° arc gauge — centered */}
+      <div className="flex flex-col items-center gap-2">
+        <div className="relative" style={{ width: SIZE, height: SIZE }}>
+          <svg width={SIZE} height={SIZE}>
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#F2F4F7" strokeWidth={SW}
+              strokeDasharray={`${TRACK} ${GAP}`} strokeLinecap="round"
+              transform={`rotate(135 ${CX} ${CY})`} />
+            {fillLen > 0 && (
+              <circle cx={CX} cy={CY} r={R} fill="none" stroke={gaugeColor} strokeWidth={SW}
+                strokeDasharray={`${fillLen} ${C - fillLen}`} strokeLinecap="round"
+                transform={`rotate(135 ${CX} ${CY})`} />
+            )}
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-[28px] font-extrabold leading-none tabular-nums" style={{ color: gaugeColor }}>{trust}</span>
+            <span className="text-[12px] text-gray-400 mt-1">/ 100</span>
+          </div>
+        </div>
+        <p className="text-[13px] text-gray-500">
+          Needs <span className="font-semibold text-gray-700">+{100 - trust} points</span> to reach best practice
+        </p>
       </div>
-      <p className="text-[12px] text-gray-500 leading-relaxed">
-        Domain trust score {trust} is below the 50+ benchmark. Domain expires Dec 2026 — renew early to avoid ranking drops.
-      </p>
-      <div className="grid grid-cols-2 gap-2">
-        {DOMAIN_METRICS.map(m => {
-          const mh = metricHealth[m.label]
-          return (
-            <div key={m.label} className="border border-gray-100 rounded-lg p-3 bg-gray-50/60">
-              <div className="flex items-center justify-between mb-1">
-                <p className="text-[11px] text-gray-400 font-medium">{m.label}</p>
-              </div>
-              <p className="text-[15px] font-bold text-gray-900">{m.value}</p>
-              {m.label === 'Domain trust' && (
-                <div className="h-1 bg-gray-200 rounded-full mt-1.5 overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${trust}%`, background: dotColor[mh] }} />
-                </div>
-              )}
-            </div>
-          )
-        })}
+
+      <div className="border-t border-gray-100" />
+
+      {/* Stat rows */}
+      <div className="flex flex-col gap-0.5">
+        {stats.map(s => (
+          <div key={s.label} className="flex items-center justify-between px-2 py-2 rounded-md">
+            <span className="text-[13px] text-gray-500">{s.label}</span>
+            <span className="text-[13px] font-semibold tabular-nums text-gray-900">{s.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function LinkRing({ dofollow, nofollow, total, pct, size = 96 }) {
+  const SIZE = size, SW = 10, R = (SIZE - SW) / 2
+  const CX = SIZE / 2, CY = SIZE / 2
+  const CIRC = 2 * Math.PI * R
+  const hasBoth = dofollow > 0 && nofollow > 0
+  // SW+4 gives a clean small notch; round caps (5px each end) leave ~4px visual gap
+  const GAP_ARC = hasBoth ? SW + 4 : 0
+  const gapDeg  = (GAP_ARC / CIRC) * 360
+
+  // Two segments = two gaps; allocate arc budget from the remainder
+  const budget   = hasBoth ? CIRC - 2 * GAP_ARC : CIRC
+  const MIN_ARC  = SW * 2
+  const rawNfArc = nofollow > 0 ? (nofollow / total) * budget : 0
+  const nfArc    = nofollow > 0 ? Math.max(MIN_ARC, rawNfArc) : 0
+  const dfArc    = Math.max(0, budget - nfArc)
+  // Center gap 1 at top; gap 2 falls naturally after nfArc
+  const dfRot    = -90 + gapDeg / 2
+  const nfRot    = dfRot + ((dfArc + GAP_ARC) / CIRC) * 360
+
+  return (
+    <div className="relative shrink-0" style={{ width: SIZE, height: SIZE }}>
+      <svg width={SIZE} height={SIZE}>
+        {dfArc > 0 && (
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="var(--primary-600)" strokeWidth={SW}
+            strokeDasharray={`${dfArc} ${CIRC}`} strokeLinecap="round"
+            transform={`rotate(${dfRot} ${CX} ${CY})`} />
+        )}
+        {nfArc > 0 && (
+          <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D97706" strokeWidth={SW}
+            strokeDasharray={`${nfArc} ${CIRC}`} strokeLinecap="round"
+            transform={`rotate(${nfRot} ${CX} ${CY})`} />
+        )}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[16px] font-extrabold leading-none tabular-nums text-primary-600">{pct}%</span>
+        <span className="text-[12px] text-gray-400 mt-0.5">dofollow</span>
       </div>
     </div>
   )
 }
 
 function LinkAttributesCard() {
-  const totalInternal = LINK_ATTRIBUTES.filter(l => l.label.startsWith('Internal')).reduce((s, l) => s + l.count, 0)
-  const totalExternal = LINK_ATTRIBUTES.filter(l => l.label.startsWith('External')).reduce((s, l) => s + l.count, 0)
-  const total = totalInternal + totalExternal
-  const externalDofollowPct = Math.round((412 / (412 + 156)) * 100)
+  const internalLinks = LINK_ATTRIBUTES.filter(l => l.label.startsWith('Internal'))
+  const externalLinks = LINK_ATTRIBUTES.filter(l => l.label.startsWith('External'))
+  const iTotal    = internalLinks.reduce((s, l) => s + l.count, 0)
+  const eTotal    = externalLinks.reduce((s, l) => s + l.count, 0)
+  const iDofollow = internalLinks.find(l => l.label.includes('dofollow'))?.count ?? 0
+  const eDofollow = externalLinks.find(l => l.label.includes('dofollow'))?.count ?? 0
+  const iNofollow = internalLinks.find(l => l.label.includes('nofollow'))?.count ?? 0
+  const eNofollow = externalLinks.find(l => l.label.includes('nofollow'))?.count ?? 0
+  const iPct = Math.round((iDofollow / iTotal) * 100)
+  const ePct = Math.round((eDofollow / eTotal) * 100)
+
+  const groups = [
+    { label: 'Internal', total: iTotal, dofollow: iDofollow, nofollow: iNofollow, pct: iPct, health: iPct >= 90 ? 'good' : 'warn' },
+    { label: 'External', total: eTotal, dofollow: eDofollow, nofollow: eNofollow, pct: ePct, health: ePct >= 70 ? 'good' : 'warn' },
+  ]
+
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <HealthBadge status="healthy" />
-      </div>
-      <p className="text-[12px] text-gray-500 leading-relaxed">
-        Healthy link mix. {externalDofollowPct}% of external links pass equity. Internal nofollow rate is low at {Math.round((23 / totalInternal) * 100)}%.
-      </p>
-      <div>
-        <div className="flex justify-between text-[11px] text-gray-400 mb-1">
-          <span>Internal ({totalInternal.toLocaleString()})</span>
-          <span>External ({totalExternal.toLocaleString()})</span>
-        </div>
-        <div className="flex h-2 rounded-full overflow-hidden">
-          {LINK_ATTRIBUTES.map((l, i) => (
-            <div
-              key={l.label}
-              style={{ width: `${(l.count / total) * 100}%`, background: l.color }}
-              className={i === 0 ? 'rounded-l-full' : i === LINK_ATTRIBUTES.length - 1 ? 'rounded-r-full' : ''}
-            />
-          ))}
-        </div>
-      </div>
-      {LINK_ATTRIBUTES.map(l => (
-        <div key={l.label} className="flex items-center justify-between py-1.5 border-b border-gray-50 last:border-0">
-          <div className="flex items-center gap-2">
-            <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: l.color }} />
-            <DiagLabel label={l.label} />
+    <div className="grid grid-cols-2 gap-3 h-full">
+      {groups.map(g => (
+        <div key={g.label} className="flex flex-col gap-4 rounded-lg border border-gray-100 bg-gray-50/60 p-4">
+          {/* Header */}
+          <div className="flex items-start gap-1">
+            <div>
+              <p className="text-[13px] font-semibold text-gray-800">{g.label}</p>
+              <p className="text-[12px] text-gray-400 mt-0.5">{g.total.toLocaleString()} links</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold text-gray-900">{l.count.toLocaleString()}</span>
-            <span className="text-[11px] text-gray-400">{Math.round((l.count / total) * 100)}%</span>
+
+          {/* Ring centered */}
+          <div className="flex justify-center py-1">
+            <LinkRing dofollow={g.dofollow} nofollow={g.nofollow} total={g.total} pct={g.pct} />
+          </div>
+
+          {/* Stat rows */}
+          <div className="flex flex-col gap-2 border-t border-gray-100 pt-3">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2 h-2 rounded-full shrink-0 bg-primary-600" />
+                <span className="text-[12px] text-gray-500">Dofollow</span>
+              </div>
+              <span className="text-[13px] font-bold text-gray-800 tabular-nums">{g.dofollow.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: '#D97706' }} />
+                <span className="text-[12px] text-gray-500">Nofollow</span>
+              </div>
+              <span className="text-[13px] font-bold text-gray-800 tabular-nums">{g.nofollow.toLocaleString()}</span>
+            </div>
           </div>
         </div>
       ))}
@@ -564,106 +1359,169 @@ function LinkAttributesCard() {
 }
 
 function RobotsMetaCard() {
-  const total = ROBOTS_META.reduce((s, r) => s + r.count, 0) || 1
-  const blocked = ROBOTS_META.filter(r => r.label.toLowerCase().includes('noindex')).reduce((s, r) => s + r.count, 0)
-  const health = blocked > 10 ? 'critical' : blocked > 0 ? 'warning' : 'healthy'
+  const total      = ROBOTS_META.reduce((s, r) => s + r.count, 0) || 1
+  const blocked    = ROBOTS_META.filter(r => r.label.toLowerCase().includes('noindex')).reduce((s, r) => s + r.count, 0)
+  const blockedPct = (blocked / total) * 100
+  const health     = blockedPct >= 10 ? 'critical' : blockedPct >= 2 ? 'warning' : blocked > 0 ? 'warning' : 'healthy'
+  const indexed    = ROBOTS_META.find(r => r.label === 'Index & follow')?.count ?? 0
+  const indexedPct = ((indexed / total) * 100).toFixed(1)
+
+  // All 5 categories shown — including zero-count and dominant 977
+  const maxCount  = Math.max(...ROBOTS_META.map(r => r.count), 1)
+  const MAX_BAR_H = 80
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <HealthBadge status={health} />
-      </div>
-      <p className="text-[12px] text-gray-500 leading-relaxed">
-        {blocked > 0
-          ? `${blocked} pages are excluded from Google's index. Verify these are intentionally blocked.`
-          : 'All pages are configured for indexing. No unexpected blocks detected.'
-        }
-      </p>
-      {ROBOTS_META.map(r => (
-        <div key={r.label} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <DiagLabel label={r.label} />
-            </div>
-            <div className="flex items-center gap-2">
-              <span className="text-[13px] font-semibold text-gray-900">{r.count}</span>
-              <span className="text-[11px] text-gray-400">{((r.count / total) * 100).toFixed(1)}%</span>
-            </div>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${(r.count / total) * 100}%`, background: r.color }} />
-          </div>
+    <div className="flex flex-col gap-4">
+      <div><HealthBadge status={health} /></div>
+
+      {/* Bar chart — all 5 categories */}
+      <div className="flex flex-col gap-2">
+        <div className="flex gap-2" style={{ height: MAX_BAR_H + 28 }}>
+          {ROBOTS_META.map(r => {
+            const barH = r.count > 0 ? Math.max(5, Math.round((r.count / maxCount) * MAX_BAR_H)) : 0
+            return (
+              <div key={r.label} className="flex-1 h-full flex flex-col items-center justify-end relative group">
+                {/* Hover tooltip */}
+                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 z-50 px-2.5 py-1.5 rounded-md bg-gray-900 text-white text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                  {r.label}
+                </div>
+                <span className="text-[12px] font-bold text-gray-700 tabular-nums leading-none" style={{ marginBottom: 6 }}>{r.count}</span>
+                {r.count > 0
+                  ? <div className="w-full rounded-t-md" style={{ height: barH, background: r.color }} />
+                  : <div className="w-full rounded-full" style={{ height: 3, background: r.color, opacity: 0.35 }} />
+                }
+              </div>
+            )
+          })}
         </div>
-      ))}
+        <div className="flex gap-2">
+          {ROBOTS_META.map(r => {
+            const [line1, line2] = r.label === 'No robots tag'
+              ? ['No robots', 'tag']
+              : r.label.split(' & ').map((p, i) => i === 0 ? p : '& ' + p)
+            return (
+              <div key={r.label} className="flex-1 text-center">
+                <span className="text-[12px] text-gray-400 leading-tight block">{line1}</span>
+                <span className="text-[12px] text-gray-400 leading-tight block">{line2}</span>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="border-t border-gray-100" />
+
+      {/* Legend rows */}
+      <div className="flex flex-col gap-0.5">
+        {ROBOTS_META.filter(r => r.count > 0).map(r => {
+          const pct = ((r.count / total) * 100).toFixed(1)
+          return (
+            <div key={r.label} className="flex items-center justify-between px-2 py-2 rounded-md">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="w-2 h-2 rounded-full shrink-0" style={{ background: r.color }} />
+                <span className="text-[13px] text-gray-500 truncate">{r.label}</span>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <span className="text-[12px] text-gray-400">{pct}%</span>
+                <span className="text-[13px] font-semibold tabular-nums text-gray-900">{r.count}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
 function RedirectProfileCard() {
-  const total = REDIRECT_PROFILE.reduce((s, r) => s + r.count, 0) || 1
+  const direct   = REDIRECT_PROFILE.find(r => r.label === '0 redirects')
+  const single   = REDIRECT_PROFILE.find(r => r.label === '1 redirect')
+  const chain    = REDIRECT_PROFILE.find(r => r.label === '2+ redirects')
+  const total    = REDIRECT_PROFILE.reduce((s, r) => s + r.count, 0)
+  const multiHop = chain?.count ?? 0
+  const oneHop   = single?.count ?? 0
+  const health   = multiHop > 0 ? 'warning' : oneHop > 5 ? 'warning' : 'healthy'
+  const directPct = +((( direct?.count ?? 0) / total) * 100).toFixed(1)
+
+  const exceptionRows = [
+    { label: '1 redirect',  hops: '↗',  count: oneHop,   color: 'var(--purple-600)', bg: 'var(--purple-50)', border: 'var(--purple-200)' },
+    { label: '2+ redirects', hops: '↗↗', count: multiHop, color: '#D97706',           bg: 'var(--warning-100)', border: '#FDE68A'          },
+  ]
+
   return (
-    <div className="flex flex-col gap-3">
-      {REDIRECT_PROFILE.map(r => (
-        <div key={r.label} className="flex flex-col gap-1">
-          <div className="flex items-center justify-between">
-            <DiagLabel color={r.color} label={r.label} />
-            <span className="text-[13px] font-semibold text-gray-900">{r.count}</span>
-          </div>
-          <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${(r.count / total) * 100}%`, background: r.color }} />
-          </div>
+    <div className="flex flex-col gap-5">
+      {/* Hero + badge inline */}
+      <div>
+        <div className="flex items-center gap-3">
+          <span className="text-[40px] font-extrabold text-gray-900 leading-none tabular-nums">{directPct}%</span>
+          <HealthBadge status={health} />
         </div>
-      ))}
+        <p className="text-[13px] text-gray-400 mt-1">pages load direct — no redirect</p>
+      </div>
+
+      {/* Exception rows in a contained block */}
+      <div className="border border-gray-100 rounded-lg overflow-hidden">
+        {exceptionRows.map((r, i) => (
+          <div key={r.label} className={`flex items-center justify-between px-3 py-2.5 gap-3 ${i > 0 ? 'border-t border-gray-100' : ''}`}>
+            <div className="flex items-center gap-2 min-w-0">
+              <span className="text-[11px] font-bold shrink-0" style={{ color: r.color }}>{r.hops}</span>
+              <span className="text-[13px] text-gray-600">{r.label}</span>
+            </div>
+            <span
+              className="text-[13px] font-semibold tabular-nums px-2 py-0.5 rounded-md shrink-0"
+              style={{ color: r.count > 0 ? r.color : 'var(--gray-400)', background: r.count > 0 ? r.bg : 'var(--gray-50)' }}
+            >
+              {r.count}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {/* Insight */}
+      <p className="text-[13px] text-gray-400 leading-snug">
+        {oneHop > 0 ? `${oneHop} page${oneHop > 1 ? 's' : ''} could skip a redirect hop.` : 'No redirect chains detected — all pages load direct.'}
+      </p>
     </div>
   )
 }
 
 function CoreWebVitalsCard() {
+  const failCount = CORE_WEB_VITALS.filter(m => !m.pass).length
+  const overallStatus = failCount === 0 ? 'healthy' : failCount >= 2 ? 'critical' : 'warning'
+  const insight = failCount === 0
+    ? 'All core metrics pass. Page experience is in good shape.'
+    : failCount === 1
+      ? `1 metric needs attention — LCP is above the 2.5 s threshold.`
+      : `${failCount} metrics need attention. Prioritize LCP and INP for the biggest ranking impact.`
   return (
-    <div className="flex flex-col gap-2">
-      {CORE_WEB_VITALS.map(m => (
-        <DiagRow key={m.label}>
-          <div className="flex items-center gap-2">
-            {m.pass
-              ? <CircleCheck size={14} className="text-success-600 shrink-0" />
-              : <AlertTriangle size={14} className="text-error-600 shrink-0" />
-            }
-            <span className="text-[13px] text-gray-700 font-medium">{m.label}</span>
-            <span className="text-[11px] text-gray-400">{m.threshold}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-bold text-gray-900">{m.value}</span>
-          </div>
-        </DiagRow>
-      ))}
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center justify-between">
+        <HealthBadge status={overallStatus} />
+      </div>
+      <p className="text-[14px] text-gray-500 leading-[20px]">{insight}</p>
+      <CWVSlider metrics={CORE_WEB_VITALS} />
     </div>
   )
 }
 
 const DIAG_PANELS = [
-  { id: 'http',     label: 'HTTP status codes',  sub: 'Response outcomes across the crawled page set',   Component: HttpStatusCard   },
-  { id: 'domain',   label: 'Domain metrics',      sub: 'Competitive context and crawl coverage signals',  Component: DomainMetricsCard },
-  { id: 'links',    label: 'Link attributes',     sub: 'Internal and external link mix',                  Component: LinkAttributesCard },
-  { id: 'robots',   label: 'Robots meta tags',    sub: 'Robots directive coverage across crawled pages',  Component: RobotsMetaCard    },
-  { id: 'redirect', label: 'Redirect profile',    sub: 'URLs resolving directly vs through hops',         Component: RedirectProfileCard },
-  { id: 'cwv',      label: 'Core Web Vitals',     sub: 'LCP, CLS, INP — measured across crawled pages',  Component: CoreWebVitalsCard  },
+  { id: 'http',     label: 'HTTP status codes', sub: 'Response outcomes across crawled pages', Component: HttpStatusCard    },
+  { id: 'robots',   label: 'Robots meta tags',   sub: 'Crawl directive coverage across all pages', Component: RobotsMetaCard    },
+  { id: 'domain',   label: 'Domain metrics',     sub: 'Authority signals and crawl coverage',     Component: DomainMetricsCard  },
 ]
 
 function TechnicalDiagnostics() {
   return (
-    <SectionCard>
-      {/* Section header */}
-      <div className="px-4 py-4 border-b border-gray-100">
-        <p className="text-[14px] font-semibold text-gray-900">Technical diagnostics</p>
-        <p className="text-[12px] text-gray-400 mt-0.5">Lower-priority signals across crawl, links, and performance</p>
+    <SectionCard className="p-5 flex flex-col gap-6">
+      <div>
+        <p className="text-[13px] font-semibold text-gray-700">Technical diagnostics</p>
+        <p className="text-[13px] text-gray-400 mt-0.5">Crawl, links, and performance signals</p>
       </div>
-
-      {/* 2-column grid of panels — always expanded */}
-      <div className="p-4 grid grid-cols-2 gap-3 min-w-0">
+      <div className="grid grid-cols-3 gap-3 min-w-0">
         {DIAG_PANELS.map(({ id, label, sub, Component }) => (
           <div key={id} className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100">
               <p className="text-[13px] font-semibold text-gray-800">{label}</p>
-              <p className="text-[11px] text-gray-400 mt-0.5 leading-tight">{sub}</p>
+              <p className="text-[13px] text-gray-400 mt-0.5">{sub}</p>
             </div>
             <div className="px-4 py-4">
               <Component />
@@ -672,6 +1530,324 @@ function TechnicalDiagnostics() {
         ))}
       </div>
     </SectionCard>
+  )
+}
+
+// ─── Section label divider ───────────────────────────────────────────────────
+
+function SectionLabel({ title }) {
+  return (
+    <div className="flex items-center gap-3 pt-1">
+      <span className="text-[12px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">{title}</span>
+      <div className="flex-1 h-px bg-gray-100" />
+    </div>
+  )
+}
+
+// ─── Extracted: Indexability card (used in EXECUTIVE row) ────────────────────
+
+function IndexabilityCard({ onTabSwitch }) {
+  const not = NOT_INDEXABLE - REDIRECTING - CANONICALIZED
+  const indexPct = Math.round((INDEXABLE / TOTAL_PAGES) * 100)
+  const notPct   = Math.round((not        / TOTAL_PAGES) * 100)
+  const otherPct = 100 - indexPct - notPct
+  const subItems = [
+    { label: 'Redirecting pages',   count: REDIRECTING,   color: '#D97706' },
+    { label: 'Canonicalized pages', count: CANONICALIZED, color: 'var(--purple-600)' },
+  ]
+  return (
+    <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
+      <p className="text-[13px] font-semibold text-gray-700">Indexability</p>
+
+      {/* Two stats side-by-side — clean number hierarchy, no tinted boxes */}
+      <div className="flex items-start gap-4">
+        <div className="flex-1 min-w-0">
+          <span className="text-[40px] font-extrabold leading-none tabular-nums text-gray-900">{INDEXABLE.toLocaleString()}</span>
+          <div className="flex items-center gap-1.5 mt-1.5">
+            <span className="w-2 h-2 rounded-full bg-success-600 shrink-0" />
+            <span className="text-[12px] text-gray-500">Indexed</span>
+            <span className="text-[12px] font-semibold text-success-700">{indexPct}%</span>
+          </div>
+        </div>
+        <div className="shrink-0 text-right">
+          <span className="text-[28px] font-extrabold leading-none tabular-nums text-gray-900">{NOT_INDEXABLE}</span>
+          <div className="flex items-center gap-1.5 mt-1.5 justify-end">
+            <span className="w-2 h-2 rounded-full bg-error-600 shrink-0" />
+            <span className="text-[12px] text-gray-500">Blocked</span>
+            <span className="text-[12px] font-semibold text-error-600">{Math.round((NOT_INDEXABLE / TOTAL_PAGES) * 100)}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Sub-breakdown */}
+      <div className="flex flex-col gap-2">
+        {subItems.map(s => (
+          <div key={s.label} className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full shrink-0" style={{ background: s.color }} />
+              <span className="text-[12px] text-gray-600">{s.label}</span>
+            </div>
+            <span className="text-[13px] font-semibold tabular-nums text-gray-700">{s.count}</span>
+          </div>
+        ))}
+      </div>
+
+      <p className="text-[12px] text-gray-400 border-t border-gray-100 pt-3 mt-auto">
+        <span className="text-success-700 font-semibold">+12</span> indexable pages since last crawl
+      </p>
+    </SectionCard>
+  )
+}
+
+// ─── Extracted: Page Health card (used in SEO Health > Content tab) ──────────
+
+function PageHealthCard({ onTabSwitch }) {
+  const healthy   = 916
+  const affected  = 84
+  const total     = healthy + affected
+  const healthPct = Math.round((healthy / total) * 100)
+  const affectedPct = 100 - healthPct
+
+  return (
+    <div className="flex flex-col gap-5 w-full">
+      {/* Hero */}
+      <div>
+        <div className="flex items-baseline gap-2">
+          <span className="text-[40px] font-extrabold leading-none tabular-nums text-success-600">{healthPct}%</span>
+          <span className="text-[13px] text-gray-400">of pages healthy</span>
+        </div>
+        <p className="text-[12px] text-gray-400 mt-1">{total.toLocaleString()} pages scanned</p>
+      </div>
+
+      {/* Proportion bar */}
+      <div className="flex h-[6px] rounded-full overflow-hidden gap-0.5">
+        <div className="rounded-full" style={{ flex: healthy, background: 'var(--success-500)' }} />
+        <div className="rounded-full" style={{ flex: affected, background: 'var(--warning-400)' }} />
+      </div>
+
+      {/* Two stats */}
+      <div className="flex items-center gap-5">
+        <div className="flex items-center gap-2.5 flex-1">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'var(--success-500)' }} />
+          <div>
+            <span className="text-[20px] font-extrabold text-gray-900 leading-none tabular-nums">{healthy.toLocaleString()}</span>
+            <p className="text-[12px] text-gray-400 mt-0.5">Healthy</p>
+          </div>
+        </div>
+        <div className="w-px h-8 bg-gray-100 shrink-0" />
+        <div className="flex items-center gap-2.5 flex-1">
+          <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'var(--warning-400)' }} />
+          <div>
+            <span className="text-[20px] font-extrabold text-gray-900 leading-none tabular-nums">{affected}</span>
+            <p className="text-[12px] text-gray-400 mt-0.5">Need attention</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// ─── Action Center ────────────────────────────────────────────────────────────
+
+function ActionCenterSection({ onFindingClick, onTabSwitch }) {
+  const total          = FIX_COVERAGE.reduce((s, f) => s + f.value, 0) || 1
+  const autoPct        = Math.round((FIX_COVERAGE[0].value / total) * 100)
+  const fixedBaseline  = 25
+  const fixedSinceScan = 4
+  const maxV           = Math.max(...FIX_COVERAGE.map(f => f.value))
+
+  return (
+    <div className="grid grid-cols-2 gap-4 min-w-0">
+
+      {/* ── Top Findings ── */}
+      <SectionCard className="p-5 flex flex-col gap-0">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-[13px] font-semibold text-gray-800">Top findings</p>
+              <span className="inline-flex items-center justify-center w-[22px] h-[22px] rounded-full bg-gray-100 text-[12px] font-semibold text-gray-500">{TOP_FINDINGS.length}</span>
+            </div>
+            <p className="text-[12px] text-gray-400 mt-0.5">Highest-impact issues from this scan</p>
+          </div>
+          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View all →</button>
+        </div>
+
+        {/* Finding rows — each is a clearly clickable card row */}
+        <div className="flex flex-col gap-1.5">
+          {TOP_FINDINGS.map((f, i) => {
+            const sc = SEV_CHIP[f.severity] || SEV_CHIP.low
+            return (
+              <button
+                key={i}
+                onClick={() => onFindingClick(f.catId, f.findingId)}
+                className="w-full flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-all text-left group cursor-pointer"
+              >
+                {/* Severity bar accent */}
+                <div className="w-[3px] h-[18px] rounded-full shrink-0" style={{ background: sc.border }} />
+                {/* Title */}
+                <p className="text-[13px] font-medium text-gray-700 flex-1 truncate group-hover:text-gray-900 leading-snug transition-colors">{f.title}</p>
+                {/* Chip + chevron */}
+                <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap border shrink-0"
+                  style={{ color: sc.color, background: sc.bg, borderColor: sc.border + '40' }}>{sc.label}</span>
+                <ChevronRight size={13} className="text-gray-400 shrink-0" />
+              </button>
+            )
+          })}
+        </div>
+      </SectionCard>
+
+      {/* ── Fix Coverage ── */}
+      <SectionCard className="p-5 flex flex-col">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-2">
+          <div>
+            <p className="text-[13px] font-semibold text-gray-800">Fix coverage</p>
+            <p className="text-[12px] text-gray-400 mt-0.5">How each issue can be resolved</p>
+          </div>
+          <button onClick={() => onTabSwitch?.('scan')} className="flex items-center gap-1 text-[12px] font-medium text-primary-600 hover:underline shrink-0">
+            Review in scan results <ExternalLink size={11} />
+          </button>
+        </div>
+
+        {/* KPI */}
+        <div className="mt-4">
+          <span className="text-[36px] font-extrabold text-gray-900 leading-none tabular-nums">{total}</span>
+          <p className="text-[12px] text-gray-500 mt-1">Fixable issues</p>
+        </div>
+
+        {/* Bar chart with Y-axis */}
+        {(() => {
+          const chartH = 120
+          const maxY = 80
+          const yTicks = [0, 20, 40, 60, 80]
+          const xLabels = ['Auto-fix', 'Assisted', 'Recommendation only']
+          return (
+            <div className="flex mt-4">
+              {/* Y-axis labels — absolutely positioned to match gridlines exactly */}
+              <div className="relative shrink-0 pr-2" style={{ width: 28, height: chartH }}>
+                {yTicks.map(t => (
+                  <span key={t} className="absolute right-2 text-[12px] text-gray-400 tabular-nums leading-none"
+                    style={{ bottom: `${(t / maxY) * 100}%`, transform: 'translateY(50%)' }}>
+                    {t}
+                  </span>
+                ))}
+              </div>
+              {/* Chart body */}
+              <div className="flex-1 flex flex-col">
+                {/* Bars + gridlines */}
+                <div className="relative" style={{ height: chartH }}>
+                  {yTicks.map(t => (
+                    <div key={t} className="absolute left-0 right-0 border-t border-gray-100"
+                      style={{ bottom: `${(t / maxY) * 100}%` }} />
+                  ))}
+                  <div className="absolute inset-0 flex items-end">
+                    {FIX_COVERAGE.map(f => (
+                      <div key={f.label} className="flex-1 flex justify-center items-end h-full">
+                        <div style={{ width: 28, height: `${(f.value / maxY) * 100}%`, background: f.color, borderRadius: '3px 3px 0 0' }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* X-axis baseline */}
+                <div className="h-px bg-gray-200" />
+                {/* X-axis labels */}
+                <div className="flex mt-2">
+                  {xLabels.map(lbl => (
+                    <div key={lbl} className="flex-1 text-center">
+                      <span className="text-[12px] text-gray-500 leading-tight">{lbl}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Divider */}
+        <div className="h-px bg-gray-100 mt-4" />
+
+        {/* Bottom stats */}
+        <div className="flex mt-4">
+          <div className="flex-1">
+            <p className="text-[12px] text-gray-500 mb-1">Fixed from baseline</p>
+            <span className="text-[22px] font-extrabold text-gray-900 leading-none tabular-nums block">{fixedBaseline}</span>
+            <p className="text-[12px] text-gray-400 mt-1">Recurred since initial audit</p>
+          </div>
+          <div className="w-px bg-gray-100 shrink-0 mx-4" />
+          <div className="flex-1">
+            <p className="text-[12px] text-gray-500 mb-1">Fixed since last scan</p>
+            <span className="text-[22px] font-extrabold leading-none tabular-nums block" style={{ color: 'var(--success-700)' }}>{fixedSinceScan}</span>
+            <p className="text-[12px] text-gray-400 mt-1">New fixes after previous scan</p>
+          </div>
+        </div>
+      </SectionCard>
+    </div>
+  )
+}
+
+// ─── SEO Health (tabbed) ──────────────────────────────────────────────────────
+
+const SEO_HEALTH_TABS = [
+  { id: 'performance', label: 'Performance' },
+  { id: 'content',     label: 'Content'     },
+  { id: 'schema',      label: 'Schema'      },
+  { id: 'links',       label: 'Links'       },
+  { id: 'indexability',label: 'Indexability'},
+]
+
+function SchemaPlaceholderCard() {
+  const schemas = [
+    { type: 'Organization',    count: 1,  status: 'valid'   },
+    { type: 'BreadcrumbList',  count: 48, status: 'valid'   },
+    { type: 'FAQPage',         count: 12, status: 'warning' },
+  ]
+  return (
+    <div className="flex flex-col gap-3">
+      <HealthBadge status="healthy" />
+      <p className="text-[14px] text-gray-500 leading-[20px]">3 schema types detected. No critical errors found.</p>
+      <div className="flex flex-col gap-2">
+        {schemas.map(s => (
+          <div key={s.type} className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-100 bg-gray-50/60">
+            <span className="flex-1 text-[12px] font-medium text-gray-700">{s.type}</span>
+            <span className="text-[12px] tabular-nums text-gray-500">{s.count} pages</span>
+            <span className={`text-[12px] font-medium px-1.5 py-0.5 rounded-full ${s.status === 'warning' ? 'bg-warning-100 text-warning-600' : 'bg-success-50 text-success-600'}`}>
+              {s.status === 'warning' ? 'Warning' : 'Valid'}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function SeoHealthSection({ onTabSwitch }) {
+  return (
+    <div className="flex flex-col gap-4 min-w-0">
+      {/* Row 1: Performance + Indexability — similar content density, same height */}
+      <div className="grid grid-cols-2 gap-4 items-stretch">
+        <SectionCard className="p-5 flex flex-col gap-6">
+          <p className="text-[13px] font-semibold text-gray-700">Core web vitals</p>
+          <CoreWebVitalsCard />
+        </SectionCard>
+
+        <SectionCard className="p-5 flex flex-col gap-6">
+          <p className="text-[13px] font-semibold text-gray-700">Link attributes</p>
+          <LinkAttributesCard />
+        </SectionCard>
+      </div>
+
+      {/* Row 2: Indexability + Redirect Profile */}
+      <div className="grid grid-cols-2 gap-4 items-stretch">
+        <IndexabilityCard onTabSwitch={onTabSwitch} />
+
+        <SectionCard className="p-5 flex flex-col gap-6">
+          <p className="text-[13px] font-semibold text-gray-700">Redirect profile</p>
+          <RedirectProfileCard />
+        </SectionCard>
+      </div>
+    </div>
   )
 }
 
@@ -687,7 +1863,7 @@ function OverviewTab({ onFindingClick, onTabSwitch }) {
     <div className="flex flex-col gap-4 min-w-0 pb-8">
 
       {/* Section 1: Scan comparison controls */}
-      <div className="border border-gray-200 rounded-lg bg-white px-4 py-3 flex items-center gap-3 flex-wrap min-w-0">
+      <div className="flex items-center gap-3 flex-wrap min-w-0">
         {/* Current report dropdown */}
         <div className="flex items-center gap-2">
           <span className="text-[12px] font-medium text-gray-500 shrink-0">Current report</span>
@@ -734,26 +1910,12 @@ function OverviewTab({ onFindingClick, onTabSwitch }) {
           {compare ? 'Hide compare' : 'Compare scan'}
         </button>
 
-        {/* Separator + stats */}
-        <div className="w-px h-4 bg-gray-200 shrink-0" />
-        <div className="flex items-center gap-3">
-          <span className="text-[12px] text-gray-500">Total findings <span className="font-semibold text-gray-700">{currentScan.findings}</span></span>
-        </div>
       </div>
 
-      {/* Section 2: Health Summary */}
       <HealthSummarySection compare={compare} onTabSwitch={onTabSwitch} />
-
-      {/* Section 3 + 4: Fix Coverage + Indexability */}
-      <FixAndIndexSection onTabSwitch={onTabSwitch} />
-
-      {/* Section 5: Crawl Snapshot */}
+      <ActionCenterSection onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} />
+      <SeoHealthSection onTabSwitch={onTabSwitch} />
       <CrawlSnapshotStrip />
-
-      {/* Section 6: Top Findings */}
-      <TopFindingsSection onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} />
-
-      {/* Section 7: Technical Diagnostics */}
       <TechnicalDiagnostics />
     </div>
   )
@@ -764,7 +1926,7 @@ function OverviewTab({ onFindingClick, onTabSwitch }) {
 const SEV_META = {
   error:   { label: 'Error',   Icon: CircleX,      barColor: '#DC2626', bg: 'bg-error-50',    text: 'text-error-600',   border: 'border-error-200'   },
   warning: { label: 'Warning', Icon: AlertTriangle, barColor: '#D97706', bg: 'bg-warning-100', text: 'text-warning-600', border: 'border-warning-200' },
-  notice:  { label: 'Notice',  Icon: Info,          barColor: '#2563EB', bg: 'bg-primary-50',  text: 'text-primary-600', border: 'border-primary-200' },
+  notice:  { label: 'Notice',  Icon: Info,          barColor: 'var(--primary-600)', bg: 'bg-primary-50',  text: 'text-primary-600', border: 'border-primary-200' },
 }
 
 const FIX_META = {
@@ -1211,7 +2373,7 @@ const CATEGORY_SHORTS = {
 function SevBadge({ severity }) {
   const s = SEV_META[severity]
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[11px] font-semibold ${s.bg} ${s.text} ${s.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${s.bg} ${s.text} ${s.border}`}>
       <s.Icon size={10} />
       {s.label}
     </span>
@@ -1222,7 +2384,7 @@ function FixBadge({ fixType }) {
   const f = FIX_META[fixType]
   if (!f) return null
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[11px] font-medium ${f.bg} ${f.text} ${f.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${f.bg} ${f.text} ${f.border}`}>
       {f.Icon && <f.Icon size={10} />}
       {f.label}
     </span>
@@ -1233,7 +2395,7 @@ function ImpactBadge({ impact }) {
   const m = IMPACT_META[impact]
   if (!m) return null
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[11px] font-medium ${m.bg} ${m.text} ${m.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${m.bg} ${m.text} ${m.border}`}>
       {m.label}
     </span>
   )
@@ -1249,6 +2411,10 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
   const [selectedPageUrls, setSelectedPageUrls] = useState(new Set())
   const [tablePage, setTablePage]               = useState(1)
   const TABLE_PER_PAGE = 6
+
+  const [editingUrl,  setEditingUrl]  = useState(null)       // URL whose AI value is being edited
+  const [editValues,  setEditValues]  = useState({})          // { url: customValue }
+  const [reEditSet,   setReEditSet]   = useState(new Set())   // fixed URLs opened for re-editing
 
   const fixedSet        = fixedPages || new Set()
   const fixedForFinding = finding.pages.filter(p => fixedSet.has(`${finding.id}::${p.url}`)).length
@@ -1273,7 +2439,19 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
   }
 
   const selectedOpenCount = [...selectedPageUrls].filter(u => !fixedSet.has(`${finding.id}::${u}`)).length
-  const fixAllLabel = selectedOpenCount > 0 ? `Fix (${selectedOpenCount})` : `Fix all (${openCount})`
+  const manualFix = finding.fixType === 'manual'
+
+  // Assisted fix: selectable = open rows where user has entered a valid value (non-empty, not same as current)
+  const assistedSelectableUrls = assistedFix
+    ? visiblePages.filter(p => {
+        const val = (editValues[p.url] || '').trim()
+        const hasError = val !== '' && val === p.current?.trim()
+        return !fixedSet.has(`${finding.id}::${p.url}`) && val !== '' && !hasError
+      }).map(p => p.url)
+    : []
+  const assistedAllChecked = assistedSelectableUrls.length > 0 && assistedSelectableUrls.every(u => selectedPageUrls.has(u))
+  const assistedSomeChecked = assistedSelectableUrls.some(u => selectedPageUrls.has(u))
+  const assistedIndeterminate = assistedSomeChecked && !assistedAllChecked
 
   return (
     <div id={`finding-${finding.id}`} className={`bg-white transition-colors ${isExpanded ? 'bg-gray-50/30' : 'hover:bg-gray-50/60'}`}>
@@ -1303,8 +2481,8 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-[13px] font-semibold text-gray-900 leading-snug">{finding.title}</p>
-            {finding.isNew && <span className="text-[10px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
-            {finding.isRegression && <span className="text-[10px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
+            {finding.isNew && <span className="text-[12px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
+            {finding.isRegression && <span className="text-[12px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
           </div>
           <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{finding.description}</p>
         </div>
@@ -1312,23 +2490,23 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
         {/* Right metadata */}
         <div className="flex items-center gap-2.5 shrink-0 mt-0.5">
           {autoFixable && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-[11px] font-semibold text-purple-700 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-50 border border-purple-200 text-[12px] font-medium text-purple-700 whitespace-nowrap">
               <Zap size={9} /> Auto fix
             </span>
           )}
           {assistedFix && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-gray-500 text-[11px] font-medium text-gray-500 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white border border-gray-500 text-[12px] font-medium text-gray-500 whitespace-nowrap">
               Assisted fix
             </span>
           )}
           {finding.fixType === 'manual' && (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-[11px] font-medium text-gray-400 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-[12px] font-medium text-gray-400 whitespace-nowrap">
               Manual fix
             </span>
           )}
-          <span className={`text-[11px] font-semibold ${s.text} hidden sm:inline`}>{s.label}</span>
-          {fixedForFinding > 0 && <span className="text-[11px] font-semibold text-success-600">{fixedForFinding} fixed</span>}
-          {openCount > 0 && <span className="text-[11px] text-gray-500">{openCount} open</span>}
+          <span className={`text-[12px] font-semibold ${s.text} hidden sm:inline`}>{s.label}</span>
+          {fixedForFinding > 0 && <span className="text-[12px] font-semibold text-success-600">{fixedForFinding} fixed</span>}
+          {openCount > 0 && <span className="text-[12px] text-gray-500">{openCount} open</span>}
         </div>
       </div>
 
@@ -1359,11 +2537,29 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
             </div>
             {autoFixable && openCount > 0 && (
               <button
-                onClick={e => { e.stopPropagation(); onFixAll && onFixAll(finding, selectedOpenCount > 0 ? selectedOpenCount : openCount) }}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[12px] font-semibold transition-colors whitespace-nowrap"
+                onClick={e => { e.stopPropagation(); onFixAll && onFixAll(finding, openCount) }}
+                className="self-center inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[12px] font-semibold transition-colors whitespace-nowrap"
               >
-                <Zap size={11} /> {fixAllLabel}
+                <Zap size={11} /> Fix all ({openCount})
               </button>
+            )}
+            {assistedFix && openCount > 0 && (
+              <div className="relative group/fixcta self-center">
+                <button
+                  onClick={e => { e.stopPropagation(); if (selectedOpenCount > 0) onFixAll && onFixAll(finding, selectedOpenCount) }}
+                  disabled={selectedOpenCount === 0}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-colors whitespace-nowrap ${selectedOpenCount > 0 ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                >
+                  <Zap size={11} /> Fix{selectedOpenCount > 0 ? ` (${selectedOpenCount})` : ''}
+                </button>
+                {selectedOpenCount === 0 && (
+                  <div className="absolute right-0 top-full mt-1.5 z-50 hidden group-hover/fixcta:block pointer-events-none">
+                    <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
+                      Enter and select a value to apply the fix
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
 
@@ -1393,77 +2589,208 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <table className="w-full table-fixed text-left border-collapse">
                     <colgroup>
-                      <col style={{ width: '28px' }} />
-                      <col style={{ width: '36%' }} />
-                      <col style={{ width: '24%' }} />
+                      {assistedFix && <col style={{ width: '28px' }} />}
+                      <col style={{ width: assistedFix ? '34%' : '38%' }} />
                       <col style={{ width: '24%' }} />
                       <col />
+                      {autoFixable && <col style={{ width: '76px' }} />}
                     </colgroup>
                     <thead>
                       <tr className="bg-gray-50 border-b border-gray-200">
-                        <th className="pl-3 pr-1 py-2">
-                          <div
-                            className={`w-3.5 h-3.5 rounded border flex items-center justify-center cursor-pointer transition-colors ${
-                              allVisibleChecked ? 'bg-purple-600 border-purple-600' : 'border-gray-300 hover:border-purple-400'
-                            }`}
-                            onClick={e => { e.stopPropagation(); toggleAllVisible() }}
-                          >
-                            {allVisibleChecked && <Check size={9} className="text-white" />}
-                          </div>
+                        {assistedFix && (
+                          <th className="pl-3 pr-1 py-2">
+                            <div
+                              className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors ${
+                                assistedAllChecked
+                                  ? 'bg-purple-600 border-purple-600 cursor-pointer'
+                                  : assistedSelectableUrls.length > 0
+                                    ? 'border-gray-300 hover:border-purple-400 cursor-pointer'
+                                    : 'border-gray-200 bg-gray-50 cursor-default'
+                              }`}
+                              onClick={e => {
+                                e.stopPropagation()
+                                if (assistedSelectableUrls.length === 0) return
+                                setSelectedPageUrls(prev => {
+                                  const n = new Set(prev)
+                                  if (assistedAllChecked) {
+                                    assistedSelectableUrls.forEach(u => n.delete(u))
+                                  } else {
+                                    assistedSelectableUrls.forEach(u => n.add(u))
+                                  }
+                                  return n
+                                })
+                              }}
+                            >
+                              {assistedAllChecked && <Check size={9} className="text-white" />}
+                              {assistedIndeterminate && <Minus size={9} className="text-purple-600" />}
+                            </div>
+                          </th>
+                        )}
+                        <th className="px-3 py-2 text-[12px] font-semibold text-gray-500">URL</th>
+                        <th className="px-3 py-2 text-[12px] font-semibold text-gray-500">Current state</th>
+                        <th className="px-3 py-2 text-[12px] font-semibold text-gray-500">
+                          {manualFix ? 'Recommendation' : assistedFix ? 'Value to be applied' : 'Recommended'}
                         </th>
-                        <th className="px-3 py-2 text-[11px] font-semibold text-gray-500">URL</th>
-                        <th className="px-3 py-2 text-[11px] font-semibold text-gray-500">Current state</th>
-                        <th className="px-3 py-2 text-[11px] font-semibold text-gray-500">Recommended</th>
-                        <th className="px-3 py-2 text-[11px] font-semibold text-gray-500 text-right">Action</th>
+                        {autoFixable && <th className="py-2" />}
                       </tr>
                     </thead>
                     <tbody>
                       {visiblePages.map((page, i) => {
-                        const pageKey  = `${finding.id}::${page.url}`
-                        const isFixed  = fixedSet.has(pageKey)
-                        const isRowSel = selectedPageUrls.has(page.url)
+                        const pageKey    = `${finding.id}::${page.url}`
+                        const isFixed    = fixedSet.has(pageKey)
+                        const isRowSel   = selectedPageUrls.has(page.url)
+                        const isEditing  = editingUrl === page.url
+                        const isReEdit   = reEditSet.has(page.url)
+                        const autoEditVal  = editValues[page.url] !== undefined ? editValues[page.url] : page.recommended
+                        const assistedVal  = editValues[page.url] || ''
+                        const valError     = assistedVal.trim() !== '' && assistedVal.trim() === page.current?.trim()
+                          ? 'Value matches current state — no change will be applied'
+                          : null
+                        const canCheck     = assistedFix && assistedVal.trim() !== '' && !valError && !isFixed
+
+                        function openEdit() {
+                          setEditingUrl(page.url)
+                          setEditValues(prev => ({ ...prev, [page.url]: prev[page.url] ?? page.recommended }))
+                        }
+                        function saveEdit() {
+                          setEditingUrl(null)
+                          onFixPage && onFixPage(finding.id, page.url)
+                        }
+                        function openReEdit() {
+                          setReEditSet(prev => { const n = new Set(prev); n.add(page.url); return n })
+                          setEditValues(prev => ({ ...prev, [page.url]: prev[page.url] ?? page.recommended }))
+                        }
+                        function saveReEdit() {
+                          setReEditSet(prev => { const n = new Set(prev); n.delete(page.url); return n })
+                          setSelectedPageUrls(prev => { const n = new Set(prev); n.delete(page.url); return n })
+                          onFixPage && onFixPage(finding.id, page.url)
+                        }
+
                         return (
-                          <tr key={i} className={`border-b border-gray-100 last:border-0 transition-colors ${isRowSel ? 'bg-purple-50/40' : 'bg-white hover:bg-gray-50/50'}`}>
-                            <td className="pl-3 pr-1 py-2.5">
-                              {!isFixed && (
-                                <div
-                                  className={`w-3.5 h-3.5 rounded border flex items-center justify-center cursor-pointer transition-colors ${
-                                    isRowSel ? 'bg-purple-600 border-purple-600' : 'border-gray-300 hover:border-purple-400'
-                                  }`}
-                                  onClick={e => { e.stopPropagation(); togglePageSelect(page.url) }}
-                                >
-                                  {isRowSel && <Check size={9} className="text-white" />}
+                          <tr key={i} className={`border-b border-gray-100 last:border-0 transition-colors ${isEditing || isReEdit ? 'bg-purple-50/30' : isRowSel ? 'bg-purple-50/40' : 'bg-white hover:bg-gray-50/50'}`}>
+
+                            {/* Checkbox with tooltip — assisted fix only */}
+                            {assistedFix && (
+                              <td className="pl-3 pr-1 py-2.5" style={{ verticalAlign: 'top' }}>
+                                <div className="relative group/chk">
+                                  <div
+                                    className={`w-3.5 h-3.5 rounded border flex items-center justify-center transition-colors mt-0.5 ${
+                                      canCheck
+                                        ? isRowSel ? 'bg-purple-600 border-purple-600 cursor-pointer' : 'border-gray-300 hover:border-purple-400 cursor-pointer'
+                                        : 'border-gray-200 bg-gray-100 cursor-not-allowed'
+                                    }`}
+                                    onClick={e => { e.stopPropagation(); if (canCheck) togglePageSelect(page.url) }}
+                                  >
+                                    {canCheck && isRowSel && <Check size={9} className="text-white" />}
+                                  </div>
+                                  {!canCheck && !isFixed && (
+                                    <div className="absolute left-5 top-0 z-50 hidden group-hover/chk:block pointer-events-none">
+                                      <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
+                                        {assistedVal.trim() === '' ? 'Enter a value to enable this fix' : 'Fix the value error before selecting'}
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </td>
-                            <td className="px-3 py-2.5">
-                              <div className="flex items-center gap-1.5 min-w-0">
+                              </td>
+                            )}
+
+                            {/* URL */}
+                            <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
+                              <div className="flex items-center gap-1.5 min-w-0 pt-0.5">
                                 <span className="text-[12px] font-medium truncate text-primary-600">{page.url}</span>
                                 <ExternalLink size={11} className="shrink-0 text-primary-600" />
                               </div>
                             </td>
-                            <td className="px-3 py-2.5">
-                              <span className={`text-[12px] font-mono ${isFixed ? 'text-gray-400' : 'text-error-700'}`}>{page.current}</span>
+
+                            {/* Current state */}
+                            <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
+                              <span className={`text-[12px] font-mono ${isFixed && !isReEdit ? 'text-gray-400' : 'text-error-700'}`}>{page.current}</span>
                             </td>
-                            <td className="px-3 py-2.5">
-                              <span className="text-[12px] font-mono text-success-700">{page.recommended}</span>
+
+                            {/* Recommended / Value to be applied / Recommendation */}
+                            <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
+                              {manualFix ? (
+                                <span className="text-[12px] text-gray-600 leading-relaxed">{page.recommended}</span>
+                              ) : assistedFix ? (
+                                <div onClick={e => e.stopPropagation()}>
+                                  <textarea
+                                    value={assistedVal}
+                                    onChange={e => {
+                                      const val = e.target.value
+                                      setEditValues(prev => ({ ...prev, [page.url]: val }))
+                                      if (!val.trim()) {
+                                        setSelectedPageUrls(prev => { const n = new Set(prev); n.delete(page.url); return n })
+                                      }
+                                    }}
+                                    rows={2}
+                                    placeholder="Enter value to apply..."
+                                    className={`w-full text-[12px] font-mono text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
+                                      valError ? 'border-error-600 bg-error-50/40 focus:border-error-600' : 'border-gray-200 focus:border-primary-600'
+                                    }`}
+                                  />
+                                  {valError && (
+                                    <p className="flex items-center gap-1 mt-1 text-[12px] text-error-600">
+                                      <CircleX size={11} className="shrink-0" />{valError}
+                                    </p>
+                                  )}
+                                </div>
+                              ) : isEditing || isReEdit ? (
+                                <div className="flex flex-col gap-1.5" onClick={e => e.stopPropagation()}>
+                                  <textarea
+                                    value={autoEditVal}
+                                    onChange={e => setEditValues(prev => ({ ...prev, [page.url]: e.target.value }))}
+                                    rows={2}
+                                    className="w-full text-[12px] font-mono text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all"
+                                    onFocus={e => { e.target.style.borderColor = 'var(--primary-600)' }}
+                                    onBlur={e => { e.target.style.borderColor = '' }}
+                                  />
+                                  <div className="flex items-center gap-2.5">
+                                    <button
+                                      onClick={e => { e.stopPropagation(); isReEdit ? saveReEdit() : saveEdit() }}
+                                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success-700 hover:bg-success-800 text-white text-[12px] font-semibold transition-colors"
+                                    >
+                                      <Check size={9} /> {isReEdit ? 'Re-apply' : 'Save'}
+                                    </button>
+                                    <button
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        isReEdit ? setReEditSet(prev => { const n = new Set(prev); n.delete(page.url); return n }) : setEditingUrl(null)
+                                      }}
+                                      className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                                    >Cancel</button>
+                                  </div>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
+                                  <span className="text-[12px] font-mono text-success-700">{autoEditVal}</span>
+                                  <button
+                                    onClick={e => { e.stopPropagation(); isFixed ? openReEdit() : openEdit() }}
+                                    className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+                                    title="Edit fix"
+                                  >
+                                    <Pencil size={11} />
+                                  </button>
+                                </div>
+                              )}
                             </td>
-                            <td className="px-3 py-2.5 text-right">
-                              {isFixed ? (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-success-600"><CircleCheck size={11} /> Fixed</span>
-                              ) : finding.fixType === 'auto' ? (
-                                <button
-                                  onClick={e => { e.stopPropagation(); onFixPage && onFixPage(finding.id, page.url) }}
-                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[11px] font-semibold transition-colors"
-                                >
-                                  <Zap size={10} /> Fix
-                                </button>
-                              ) : finding.fixType === 'assisted' ? (
-                                <button className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-purple-200 bg-purple-50 text-purple-700 text-[11px] font-semibold hover:bg-purple-100 transition-colors">
-                                  Review
-                                </button>
-                              ) : null}
-                            </td>
+
+                            {/* Fix button / Fixed badge — auto fix only */}
+                            {autoFixable && (
+                              <td className="px-3 py-2.5 text-right" style={{ verticalAlign: 'top' }}>
+                                {isFixed && !isReEdit ? (
+                                  <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success-600">
+                                    <CircleCheck size={11} /> Fixed
+                                  </span>
+                                ) : !isEditing && !isReEdit ? (
+                                  <button
+                                    onClick={e => { e.stopPropagation(); onFixPage && onFixPage(finding.id, page.url) }}
+                                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-600 hover:border-primary-600 hover:text-primary-600 transition-colors"
+                                  >
+                                    Fix
+                                  </button>
+                                ) : null}
+                              </td>
+                            )}
                           </tr>
                         )
                       })}
@@ -1473,21 +2800,21 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                   {/* Pagination — only if >6 pages */}
                   {totalTablePages > 1 && (
                     <div className="flex items-center justify-between px-3 py-2.5 border-t border-gray-100 bg-gray-50/50">
-                      <span className="text-[11px] text-gray-400">
+                      <span className="text-[12px] text-gray-400">
                         {(tablePage - 1) * TABLE_PER_PAGE + 1}–{Math.min(tablePage * TABLE_PER_PAGE, filteredPages.length)} of {filteredPages.length}
                       </span>
                       <div className="flex items-center gap-1">
                         <button
                           onClick={e => { e.stopPropagation(); setTablePage(p => Math.max(1, p - 1)) }}
                           disabled={tablePage === 1}
-                          className="h-6 px-2 text-[11px] font-medium rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          className="h-6 px-2 text-[12px] font-medium rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
                           Previous
                         </button>
                         <button
                           onClick={e => { e.stopPropagation(); setTablePage(p => Math.min(totalTablePages, p + 1)) }}
                           disabled={tablePage === totalTablePages}
-                          className="h-6 px-2 text-[11px] font-medium rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                          className="h-6 px-2 text-[12px] font-medium rounded border border-gray-200 text-gray-600 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                         >
                           Next
                         </button>
@@ -1510,10 +2837,15 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
   )
 }
 
-function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onToggle, selectedIds, onSelect, activeSevs, expandedTabs, onExpandedTabChange, pageSearches, onPageSearchChange, showAllPages, onToggleShowAll, fixedPages, onFixPage, onFixAll }) {
-  const findings = activeSevs.length === 0 || activeSevs.length === 3
+function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onToggle, selectedIds, onSelect, activeSevs, activeFixTypes, expandedTabs, onExpandedTabChange, pageSearches, onPageSearchChange, showAllPages, onToggleShowAll, fixedPages, onFixPage, onFixAll }) {
+  const sevAll = activeSevs.length === 0 || activeSevs.length === 3
+  const fixAll = !activeFixTypes || activeFixTypes.length === 0 || activeFixTypes.length === 3
+  const findings = sevAll && fixAll
     ? category.findings
-    : category.findings.filter(f => activeSevs.includes(f.severity))
+    : category.findings.filter(f =>
+        (sevAll || activeSevs.includes(f.severity)) &&
+        (fixAll || activeFixTypes.includes(f.fixType))
+      )
 
   if (findings.length === 0) return null
 
@@ -1555,10 +2887,23 @@ function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onT
           {totalPagesAffected > 0 && (
             <span className="text-[12px] text-gray-400 hidden sm:inline whitespace-nowrap">{totalPagesAffected.toLocaleString()} pages</span>
           )}
-          {autoCount > 0 && (
-            <button className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-700 text-white text-[12px] font-semibold transition-colors whitespace-nowrap">
-              <Zap size={11} /> Apply {selectedInCat > 0 ? selectedInCat : autoCount} auto-fix{(selectedInCat > 0 ? selectedInCat : autoCount) !== 1 ? 'es' : ''}
-            </button>
+          {autoCount > 0 && !isOpen && (
+            <div className="relative group/applycat">
+              <button
+                onClick={e => {
+                  e.stopPropagation()
+                  findings.filter(f => f.fixType === 'auto').forEach(f => onFixAll && onFixAll(f, f.totalAffected || 1, category.label))
+                }}
+                className="inline-flex items-center justify-center w-7 h-7 rounded-lg border border-purple-600 bg-white text-purple-600 hover:bg-purple-50 transition-all shrink-0"
+              >
+                <Zap size={13} />
+              </button>
+              <div className="absolute right-0 top-full mt-1.5 z-50 hidden group-hover/applycat:block pointer-events-none">
+                <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
+                  Apply {autoCount} automatic fix{autoCount !== 1 ? 'es' : ''}
+                </div>
+              </div>
+            </div>
           )}
         </div>
       </button>
@@ -1680,7 +3025,7 @@ function CategoryNavBar({ activeCategoryId, openCategoryId, activeSevs, onJump }
                 }`}
               >
                 {CATEGORY_SHORTS[cat.id] || cat.label}
-                <span className={`text-[11px] font-bold ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
+                <span className={`text-[12px] font-bold ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
                   {visibleCount}
                 </span>
               </button>
@@ -1693,9 +3038,13 @@ function CategoryNavBar({ activeCategoryId, openCategoryId, activeSevs, onJump }
 }
 
 function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
-  const [sevFilter,        setSevFilter]        = useState('all')
+  const [sevFilter,        setSevFilter]        = useState(new Set(['error', 'warning', 'notice']))
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+  const [typeSearch,       setTypeSearch]       = useState('')
   const typeDropdownRef = useRef(null)
+  const [fixFilter,        setFixFilter]        = useState(new Set(['auto', 'assisted', 'manual']))
+  const [showFixDropdown,  setShowFixDropdown]  = useState(false)
+  const fixDropdownRef = useRef(null)
   const [openCategoryId,   setOpenCategoryId]   = useState(SCAN_DATA[0].id)
   const [expandedFindings, setExpandedFindings] = useState(new Set())
   const [selectedIds,      setSelectedIds]      = useState(new Set())
@@ -1825,6 +3174,7 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
     function handleOutside(e) {
       if (typeDropdownRef.current && !typeDropdownRef.current.contains(e.target)) {
         setShowTypeDropdown(false)
+        setTypeSearch('')
       }
     }
     document.addEventListener('mousedown', handleOutside)
@@ -1852,14 +3202,54 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
   const warnCount      = allFindings.filter(f => f.severity === 'warning').length
   const noticeCount    = allFindings.filter(f => f.severity === 'notice').length
 
-  const activeSevs = sevFilter === 'all' ? ['error', 'warning', 'notice'] : [sevFilter]
+  const activeSevs = [...sevFilter]
 
-  const TYPE_OPTIONS_SCAN = [
-    { id: 'all',     label: 'All'      },
+  const SEV_OPTIONS = [
     { id: 'error',   label: 'Errors'   },
     { id: 'warning', label: 'Warnings' },
     { id: 'notice',  label: 'Notices'  },
   ]
+  const SEV_ORDER  = ['error', 'warning', 'notice']
+  const SEV_LABELS = { error: 'Errors', warning: 'Warnings', notice: 'Notices' }
+  const sevSelected = SEV_ORDER.filter(s => sevFilter.has(s))
+  const sevLabel    = sevFilter.size >= 3 ? 'All' : sevSelected.length === 1 ? SEV_LABELS[sevSelected[0]] : `${SEV_LABELS[sevSelected[0]]} +${sevSelected.length - 1}`
+
+  const toggleSev = id => {
+    setSevFilter(prev => {
+      const n = new Set(prev)
+      if (n.has(id)) {
+        if (n.size === 1) return prev
+        n.delete(id)
+      } else {
+        n.add(id)
+      }
+      return n
+    })
+  }
+
+  const FIX_OPTIONS  = [
+    { id: 'auto',     label: 'Auto fix'     },
+    { id: 'assisted', label: 'Assisted fix' },
+    { id: 'manual',   label: 'Manual fix'   },
+  ]
+  const FIX_LABELS   = { auto: 'Auto fix', assisted: 'Assisted fix', manual: 'Manual fix' }
+  const fixSelected  = FIX_OPTIONS.map(o => o.id).filter(id => fixFilter.has(id))
+  const fixLabel     = fixFilter.size >= 3 ? 'All' : fixSelected.length === 1 ? FIX_LABELS[fixSelected[0]] : `${FIX_LABELS[fixSelected[0]]} +${fixSelected.length - 1}`
+
+  const activeFixTypes = [...fixFilter]
+
+  const toggleFix = id => {
+    setFixFilter(prev => {
+      const n = new Set(prev)
+      if (n.has(id)) {
+        if (n.size === 1) return prev
+        n.delete(id)
+      } else {
+        n.add(id)
+      }
+      return n
+    })
+  }
 
   return (
     <div ref={tabRef} className="flex flex-col gap-4 min-w-0 pb-10">
@@ -1884,17 +3274,17 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
       {/* ── Summary bar ── */}
       <div className="border border-gray-200 rounded-lg bg-white px-4 py-3 flex items-center gap-5 flex-wrap min-w-0">
         <div className="flex items-center gap-2">
-          <span className="text-[22px] font-bold text-gray-900 leading-none">{totalOpen}</span>
+          <span className="text-[24px] font-bold text-gray-900 leading-none">{totalOpen}</span>
           <span className="text-[13px] font-medium text-gray-600">open issues</span>
         </div>
         <div className="w-px h-6 bg-gray-100 shrink-0" />
         <div className="flex items-center gap-2">
-          <span className="text-[22px] font-bold text-success-600 leading-none">{totalResolved}</span>
+          <span className="text-[24px] font-bold text-success-600 leading-none">{totalResolved}</span>
           <span className="text-[13px] font-medium text-gray-600">resolved</span>
         </div>
         <div className="w-px h-6 bg-gray-100 shrink-0" />
         <div className="flex items-center gap-2">
-          <span className="text-[22px] font-bold text-warning-600 leading-none">{totalSuggested}</span>
+          <span className="text-[24px] font-bold text-warning-600 leading-none">{totalSuggested}</span>
           <span className="text-[13px] font-medium text-gray-600">suggested fixes</span>
         </div>
         <div className="ml-auto flex items-center gap-3 flex-wrap min-w-0">
@@ -1910,43 +3300,30 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
         </div>
       </div>
 
-      {/* ── Type filter chip ── */}
+      {/* ── Filter chips ── */}
       <div className="flex items-center gap-2">
-        <div className="relative" ref={typeDropdownRef}>
-          <button
-            onClick={() => setShowTypeDropdown(v => !v)}
-            className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
-          >
-            Type
-            <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600">
-              {TYPE_OPTIONS_SCAN.find(o => o.id === sevFilter)?.label || 'All'}
-            </span>
-            <span
-              onClick={e => { e.stopPropagation(); setSevFilter('all'); setShowTypeDropdown(false) }}
-              className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              <X size={11} />
-            </span>
-          </button>
-          {showTypeDropdown && (
-            <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden py-1">
-              {TYPE_OPTIONS_SCAN.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => { setSevFilter(opt.id); setShowTypeDropdown(false) }}
-                  className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${
-                    sevFilter === opt.id
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {opt.label}
-                  {sevFilter === opt.id && <Check size={13} className="text-primary-600 shrink-0" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <FilterChipDropdown
+          label="Issue type"
+          options={SEV_OPTIONS}
+          selected={sevFilter}
+          onToggle={toggleSev}
+          onSelectAll={() => setSevFilter(new Set(SEV_OPTIONS.map(o => o.id)))}
+          dropdownRef={typeDropdownRef}
+          open={showTypeDropdown}
+          onOpen={() => setShowTypeDropdown(v => !v)}
+          onClose={() => setShowTypeDropdown(false)}
+        />
+        <FilterChipDropdown
+          label="Fix type"
+          options={FIX_OPTIONS}
+          selected={fixFilter}
+          onToggle={toggleFix}
+          onSelectAll={() => setFixFilter(new Set(FIX_OPTIONS.map(o => o.id)))}
+          dropdownRef={fixDropdownRef}
+          open={showFixDropdown}
+          onOpen={() => setShowFixDropdown(v => !v)}
+          onClose={() => setShowFixDropdown(false)}
+        />
       </div>
 
       {/* ── Category sections (accordion) ── */}
@@ -1961,6 +3338,7 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
           selectedIds={selectedIds}
           onSelect={toggleSelect}
           activeSevs={activeSevs}
+          activeFixTypes={activeFixTypes}
           expandedTabs={expandedTabs}
           onExpandedTabChange={setExpandedTab}
           pageSearches={pageSearches}
@@ -2020,6 +3398,17 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
 const CRAWLED_PAGE_DATA = [
   {
     url: 'https://www.gohighlevel.com/', results: { cur: 2, isNew: 0, fix: 1 }, traffic: 104706, httpCode: 302, indexable: false, indexStatus: 'Non-200 Status Code', referring: 357, depth: 1, keywords: 34000,
+    urlProtocol: 'HTTPS', robots: false, title: 'GoHighLevel | All-in-one CRM, Automation & AI Platform', titleLen: 56, descLen: 117,
+    canonical: 'https://www.gohighlevel.com/', h1: 'Grow your agency with one operating system', h1Len: 41, singleH1: 'Single', dupH1: false,
+    h2: 'Why agencies switch to GoHighLevel', h2Len: 37, singleH2: 'Multiple', ttfb: 410, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'GoHighLevel helps agencies and modern teams unify CRM, messaging, automation, and AI-driven workflows.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 6, h4: 1, h5: 0, h6: 0,
+    textHtmlRatio: 3, htmlSize: '442KB', wordCount: 2068, pageSize: '1.8MB',
+    refreshRedirect: '0.21s', nofollowDofollow: 'DF', inlinks: 345, inlinksDofollow: '340 (98.5%)', inlinksNofollow: '5 (1.5%)',
+    redirectInlinks: 3, numRedirects: 1, redirectTarget: 'https://www.gohighlevel.com/home', internalOutlinks: 24, externalOutlinks: 9,
+    lastModified: '2026-05-14 13:58', mixedContent: false, metaRefresh: false, contentHash: '4d0d3f9248d35d1a84aa20bb1ec7a921',
+    cssSize: '7KB', jsSize: '126KB', imageSize: '551KB', images: 46, loadingTime: '0.96s', isAmp: false,
+    errorsCol: 0, warningsCol: 1, noticesCol: 1, urlLength: 27, inSitemap: true,
     findings: [
       { id: 'f1', description: '3XX HTTP status code', detail: 'The homepage is still returning a temporary redirect instead of the canonical 200 response that search engines expect for the primary URL.', currentValue: '302 temporary redirect to https://www.gohighlevel.com/home', aiValue: 'Return 200 OK on the preferred homepage URL and keep the canonical target aligned.', severity: 'Warnings', status: 'Current', fixType: 'Auto Fix' },
       { id: 'f2', description: 'Meta refresh redirect', detail: 'A legacy meta refresh tag was removed from the homepage shell and the redirect behavior is now handled cleanly upstream.', currentValue: 'Meta refresh removed', aiValue: 'Legacy meta refresh removed from the homepage shell', severity: 'Notices', status: 'Fixed', fixType: 'Assisted Fix' },
@@ -2027,6 +3416,17 @@ const CRAWLED_PAGE_DATA = [
   },
   {
     url: 'https://www.gohighlevel.com/pricing', results: { cur: 4, isNew: 2, fix: 1 }, traffic: 7747, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 6, depth: 1, keywords: 5782,
+    urlProtocol: 'HTTPS', robots: false, title: 'HighLevel Pricing', titleLen: 17, descLen: 87,
+    canonical: 'https://www.gohighlevel.com/pricing', h1: 'Learn more about our plans', h1Len: 27, singleH1: 'Single', dupH1: false,
+    h2: '$97 / Month', h2Len: 11, singleH2: 'Multiple', ttfb: 390, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'Flexible CRM and automation pricing for agencies scaling client acquisition, nurture, and retention.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 10, h4: 0, h5: 0, h6: 0,
+    textHtmlRatio: 1, htmlSize: '876KB', wordCount: 884, pageSize: '1.5MB',
+    refreshRedirect: '—', nofollowDofollow: 'DF', inlinks: 7, inlinksDofollow: '4 (57.1%)', inlinksNofollow: '3 (42.9%)',
+    redirectInlinks: 0, numRedirects: 0, redirectTarget: '—', internalOutlinks: 24, externalOutlinks: 9,
+    lastModified: '2026-05-15 08:12', mixedContent: false, metaRefresh: false, contentHash: 'f7dda4600c6c2f9a8986164b075f6b9e',
+    cssSize: '7KB', jsSize: '126.6KB', imageSize: '551.2KB', images: 46, loadingTime: '0.96s', isAmp: false,
+    errorsCol: 1, warningsCol: 2, noticesCol: 1, urlLength: 36, inSitemap: true,
     findings: [
       { id: 'f3', description: 'Missing meta description', detail: 'The pricing page has no meta description tag, reducing click-through rates from search results.', currentValue: 'No meta description found', aiValue: 'Add a 150–160 character meta description highlighting pricing plans and value.', severity: 'Errors', status: 'Current', fixType: 'Auto Fix' },
       { id: 'f4', description: 'Title tag too long', detail: 'The page title exceeds the recommended 60-character limit and may be truncated in SERPs.', currentValue: '73 characters', aiValue: 'Shorten to under 60 characters', severity: 'Warnings', status: 'Current', fixType: 'Assisted Fix' },
@@ -2036,6 +3436,17 @@ const CRAWLED_PAGE_DATA = [
   },
   {
     url: 'https://www.gohighlevel.com/home', results: { cur: 2, isNew: 0, fix: 1 }, traffic: 3960, httpCode: 301, indexable: false, indexStatus: 'Non-200 Status Code', referring: 2, depth: 2, keywords: 7144,
+    urlProtocol: 'HTTPS', robots: false, title: 'GoHighLevel Home', titleLen: 16, descLen: 68,
+    canonical: 'https://www.gohighlevel.com/', h1: 'GoHighLevel Home', h1Len: 16, singleH1: 'Single', dupH1: false,
+    h2: 'Agency growth starts here', h2Len: 25, singleH2: 'Multiple', ttfb: 520, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'Legacy home URL used in older marketing assets and internal navigation.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 2, h4: 0, h5: 0, h6: 0,
+    textHtmlRatio: 1, htmlSize: '0.1KB', wordCount: 0, pageSize: '0.1KB',
+    refreshRedirect: '0.18s', nofollowDofollow: 'DF', inlinks: 2, inlinksDofollow: '2 (100%)', inlinksNofollow: '0 (0%)',
+    redirectInlinks: 2, numRedirects: 1, redirectTarget: 'https://www.gohighlevel.com/', internalOutlinks: 0, externalOutlinks: 0,
+    lastModified: '2026-05-10 09:12', mixedContent: false, metaRefresh: false, contentHash: '—',
+    cssSize: '<0.1KB', jsSize: '<0.1KB', imageSize: '<0.1KB', images: 0, loadingTime: '0.21s', isAmp: false,
+    errorsCol: 0, warningsCol: 1, noticesCol: 1, urlLength: 34, inSitemap: false,
     findings: [
       { id: 'f7', description: '3XX HTTP status code', detail: 'This URL returns a 301 permanent redirect, which causes crawl budget waste and link equity dilution.', currentValue: '301 permanent redirect', aiValue: 'Consolidate to the canonical homepage URL', severity: 'Warnings', status: 'Current', fixType: 'Auto Fix' },
       { id: 'f8', description: 'Canonical URL mismatch', detail: 'The canonical tag points to a different URL than the actual redirect destination.', currentValue: 'https://www.gohighlevel.com/', aiValue: 'Align canonical with redirect target', severity: 'Notices', status: 'Fixed', fixType: 'Assisted Fix' },
@@ -2043,6 +3454,17 @@ const CRAWLED_PAGE_DATA = [
   },
   {
     url: 'https://www.gohighlevel.com/careers', results: { cur: 3, isNew: 1, fix: 1 }, traffic: 602, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 96, depth: 3, keywords: 266,
+    urlProtocol: 'HTTPS', robots: false, title: 'Career at HighLevel: Explore Exciting Opportunities', titleLen: 52, descLen: 134,
+    canonical: 'https://www.gohighlevel.com/careers', h1: 'We Are HighLevel', h1Len: 16, singleH1: 'Single', dupH1: false,
+    h2: 'Dream Developers. SaaS Operators. Builders.', h2Len: 42, singleH2: 'Multiple', ttfb: 431, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'Join HighLevel and help shape the operating system agencies use to scale, automate, and serve clients.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 5, h4: 0, h5: 0, h6: 0,
+    textHtmlRatio: 1, htmlSize: '637KB', wordCount: 1234, pageSize: '1.1MB',
+    refreshRedirect: '—', nofollowDofollow: 'DF', inlinks: 96, inlinksDofollow: '96 (100%)', inlinksNofollow: '0 (0%)',
+    redirectInlinks: 0, numRedirects: 0, redirectTarget: '—', internalOutlinks: 23, externalOutlinks: 10,
+    lastModified: '2026-05-11 11:43', mixedContent: false, metaRefresh: false, contentHash: '36f4ee53641935480eacce239db0add5',
+    cssSize: '8KB', jsSize: '182.2KB', imageSize: '46.1MB', images: 43, loadingTime: '0.54s', isAmp: false,
+    errorsCol: 0, warningsCol: 1, noticesCol: 2, urlLength: 38, inSitemap: true,
     findings: [
       { id: 'f9',  description: 'Low word count', detail: 'The careers page has fewer than 300 words of visible content, which may limit topical authority.', currentValue: '187 words', aiValue: 'Expand to at least 500 words of relevant content', severity: 'Notices', status: 'Current', fixType: 'Manual Fix' },
       { id: 'f10', description: 'Missing structured data', detail: 'No JobPosting schema markup was found, which would improve visibility in job-specific SERP features.', currentValue: 'No schema markup', aiValue: 'Add JobPosting schema for each open role', severity: 'Warnings', status: 'Current', fixType: 'Assisted Fix' },
@@ -2051,12 +3473,34 @@ const CRAWLED_PAGE_DATA = [
   },
   {
     url: 'https://www.gohighlevel.com/crm', results: { cur: 1, isNew: 0, fix: 0 }, traffic: 545, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 63, depth: 1, keywords: 309,
+    urlProtocol: 'HTTPS', robots: false, title: 'CRM for Agencies | Centralize & Scale with HighLevel', titleLen: 52, descLen: 94,
+    canonical: 'https://www.gohighlevel.com/crm', h1: 'Best CRM Software & Tools for Agencies', h1Len: 37, singleH1: 'Single', dupH1: false,
+    h2: 'Simplify Your CRM System', h2Len: 24, singleH2: 'Multiple', ttfb: 356, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'HighLevel gives agencies one CRM to capture, nurture, convert, and retain leads across channels.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 24, h4: 11, h5: 0, h6: 0,
+    textHtmlRatio: 1, htmlSize: '719KB', wordCount: 1632, pageSize: '1.4MB',
+    refreshRedirect: '—', nofollowDofollow: 'DF', inlinks: 81, inlinksDofollow: '76 (93.8%)', inlinksNofollow: '5 (6.2%)',
+    redirectInlinks: 0, numRedirects: 0, redirectTarget: '—', internalOutlinks: 33, externalOutlinks: 15,
+    lastModified: '2026-05-12 16:18', mixedContent: false, metaRefresh: false, contentHash: 'd1add6d53e7706e222989c0203983907',
+    cssSize: '7KB', jsSize: '116.2KB', imageSize: '336.2KB', images: 25, loadingTime: '0.73s', isAmp: false,
+    errorsCol: 0, warningsCol: 1, noticesCol: 0, urlLength: 32, inSitemap: true,
     findings: [
       { id: 'f12', description: 'Duplicate title with /features', detail: 'The page title matches another page in this crawl, causing keyword cannibalization risk.', currentValue: '"GoHighLevel CRM Software"', aiValue: 'Differentiate with a unique CRM-specific title', severity: 'Warnings', status: 'Current', fixType: 'Manual Fix' },
     ],
   },
   {
     url: 'https://www.gohighlevel.com/features', results: { cur: 6, isNew: 1, fix: 2 }, traffic: 289, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 18, depth: 2, keywords: 1204,
+    urlProtocol: 'HTTPS', robots: false, title: 'HighLevel AI | Features in One Platform', titleLen: 39, descLen: 166,
+    canonical: 'https://www.gohighlevel.com/features', h1: 'The AI Business Operating System', h1Len: 32, singleH1: 'Single', dupH1: false,
+    h2: 'New to HighLevel?', h2Len: 17, singleH2: 'Multiple', ttfb: 288, robotsMeta: 'index,follow', xRobotsTag: '—',
+    dupTitle: false, description: 'Discover how HighLevel AI powers agents, prompts, lead capture, and automation inside one platform.', dupDesc: false,
+    hreflangTags: 0, hreflang: '—', h3: 19, h4: 14, h5: 0, h6: 0,
+    textHtmlRatio: 3, htmlSize: '478KB', wordCount: 1963, pageSize: '1.2MB',
+    refreshRedirect: '—', nofollowDofollow: 'DF', inlinks: 71, inlinksDofollow: '65 (91.5%)', inlinksNofollow: '6 (8.5%)',
+    redirectInlinks: 0, numRedirects: 0, redirectTarget: '—', internalOutlinks: 24, externalOutlinks: 9,
+    lastModified: '2026-05-13 15:05', mixedContent: false, metaRefresh: false, contentHash: '29d3de8c875025c655d0af99659fb58d',
+    cssSize: '8.1KB', jsSize: '157.9KB', imageSize: '1.4MB', images: 20, loadingTime: '2.84s', isAmp: false,
+    errorsCol: 1, warningsCol: 2, noticesCol: 3, urlLength: 37, inSitemap: true,
     findings: [
       { id: 'f13', description: 'Missing meta description', detail: 'The features page is missing a meta description, which affects CTR in organic search.', currentValue: 'No meta description', aiValue: 'Write a compelling 150-character description', severity: 'Errors', status: 'Current', fixType: 'Auto Fix' },
       { id: 'f14', description: 'Large image file size', detail: 'Hero images total over 2MB and are not optimized for web delivery.', currentValue: '2.3 MB total image weight', aiValue: 'Convert to WebP and compress under 200KB', severity: 'Warnings', status: 'Current', fixType: 'Auto Fix' },
@@ -2072,7 +3516,7 @@ function httpCodeStyle(code) {
   if (code === 200)              return { color: '#16A34A' }
   if (code >= 300 && code < 400) return { color: '#D97706' }
   if (code >= 400 && code < 500) return { color: '#DC2626' }
-  return                                { color: '#7C3AED' }
+  return                                { color: 'var(--purple-600)' }
 }
 
 function httpCodeTag(code) {
@@ -2101,16 +3545,16 @@ const FOUND_LINKS_DATA = [
 ]
 
 const RESOURCE_KPIS_TAB = [
-  { label: 'Total resources',    value: '10',       color: '#7C3AED', bg: '#F5F3FF' },
-  { label: 'Images',             value: '4',        color: '#2563EB', bg: '#EFF6FF' },
-  { label: 'CSS size',           value: '183.9 KB', color: '#60A5FA', bg: '#EFF6FF' },
-  { label: 'JS size',            value: '1.4 MB',   color: '#F59E0B', bg: '#FFFBEB' },
+  { label: 'Total resources',    value: '10',       color: 'var(--purple-600)', bg: 'var(--purple-50)' },
+  { label: 'Images',             value: '4',        color: 'var(--primary-600)', bg: 'var(--primary-50)' },
+  { label: 'CSS size',           value: '183.9 KB', color: '#60A5FA', bg: 'var(--primary-50)' },
+  { label: 'JS size',            value: '1.4 MB',   color: 'var(--warning-400)', bg: 'var(--warning-100)' },
   { label: 'Total resource size',value: '3.6 MB',   color: '#0D9488', bg: '#F0FDFA' },
 ]
 
 const RESOURCE_BREAKDOWN_TAB = [
-  { label: 'Images',     size: '4.6 MB',    pct: 75, color: '#7C3AED' },
-  { label: 'JavaScript', size: '1.4 MB',    pct: 22, color: '#F59E0B' },
+  { label: 'Images',     size: '4.6 MB',    pct: 75, color: 'var(--purple-600)' },
+  { label: 'JavaScript', size: '1.4 MB',    pct: 22, color: 'var(--warning-400)' },
   { label: 'CSS',        size: '183.9 KB',  pct: 3,  color: '#60A5FA' },
 ]
 
@@ -2229,8 +3673,8 @@ const COMPARISON_ISSUE_SECTIONS = [
 
 function ReportControls({ rightSlot }) {
   return (
-    <div className="border border-gray-200 rounded-lg bg-white px-4 py-3 flex items-center gap-3 flex-wrap min-w-0">
-      <span className="text-[11px] font-semibold text-gray-400 shrink-0">Current report</span>
+    <div className="flex items-center gap-3 flex-wrap min-w-0">
+      <span className="text-[12px] font-semibold text-gray-400 shrink-0">Current report</span>
       <div className="relative">
         <select className="appearance-none h-8 text-[13px] font-semibold text-gray-800 border border-gray-200 rounded-lg pl-3 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-purple-600 transition-colors">
           <option>2026-06-17 06:52:27</option>
@@ -2257,7 +3701,7 @@ function FilterTabs({ filters, active, onChange }) {
           >
             {f.label}
             {f.count != null && (
-              <span className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${
+              <span className={`text-[12px] font-medium px-1.5 py-0.5 rounded-full min-w-[18px] text-center ${
                 isActive ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500'
               }`}>{f.count}</span>
             )}
@@ -2280,17 +3724,17 @@ const ALL_COLS = [
   { id: 'depth',            label: 'Depth',                  defaultOn: true  },
   { id: 'keywords',         label: 'Keywords',               defaultOn: true  },
   { id: 'urlProtocol',      label: 'URL protocol',           defaultOn: true  },
-  { id: 'robots',           label: 'Blocked by robots.txt',  defaultOn: true  },
-  { id: 'title',            label: 'Title',                  defaultOn: true  },
-  { id: 'titleLen',         label: 'Title length',           defaultOn: true  },
-  { id: 'descLen',          label: 'Description length',     defaultOn: true  },
-  { id: 'canonical',        label: 'Canonical URL',          defaultOn: true  },
-  { id: 'h1',               label: 'H1',                     defaultOn: true  },
-  { id: 'h1Len',            label: 'H1 length',              defaultOn: true  },
-  { id: 'singleH1',         label: 'Single H1',              defaultOn: true  },
-  { id: 'dupH1',            label: 'Duplicate H1',           defaultOn: true  },
-  { id: 'h2',               label: 'H2',                     defaultOn: true  },
-  { id: 'h2Len',            label: 'H2 length',              defaultOn: true  },
+  { id: 'robots',           label: 'Blocked by robots.txt',  defaultOn: false },
+  { id: 'title',            label: 'Title',                  defaultOn: false },
+  { id: 'titleLen',         label: 'Title length',           defaultOn: false },
+  { id: 'descLen',          label: 'Description length',     defaultOn: false },
+  { id: 'canonical',        label: 'Canonical URL',          defaultOn: false },
+  { id: 'h1',               label: 'H1',                     defaultOn: false },
+  { id: 'h1Len',            label: 'H1 length',              defaultOn: false },
+  { id: 'singleH1',         label: 'Single H1',              defaultOn: false },
+  { id: 'dupH1',            label: 'Duplicate H1',           defaultOn: false },
+  { id: 'h2',               label: 'H2',                     defaultOn: false },
+  { id: 'h2Len',            label: 'H2 length',              defaultOn: false },
   { id: 'singleH2',         label: 'Single H2',              defaultOn: true  },
   { id: 'errorsCol',        label: 'Errors',                 defaultOn: false },
   { id: 'warningsCol',      label: 'Warnings',               defaultOn: false },
@@ -2849,8 +4293,74 @@ function FilterEmptyState({ onClear, onModify }) {
   )
 }
 
+// ─── Shared multi-select filter chip ─────────────────────────────────────────
+
+function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, dropdownRef, open, onOpen, onClose }) {
+  const [search, setSearch] = useState('')
+  const orderedSelected = options.filter(o => selected.has(o.id))
+  const chipLabel = selected.size >= options.length
+    ? 'All'
+    : orderedSelected.length === 1
+      ? orderedSelected[0].label
+      : `${orderedSelected[0]?.label} +${orderedSelected.length - 1}`
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={onOpen}
+        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
+      >
+        {label}
+        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600 max-w-[120px] truncate">
+          {chipLabel}
+        </span>
+        <span
+          onClick={e => { e.stopPropagation(); onSelectAll(); onClose() }}
+          className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+        >
+          <X size={11} />
+        </span>
+      </button>
+
+      {open && (
+        <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl z-30 p-1" style={{ minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
+          {options.length > 10 && (
+            <div className="mb-1 pb-1 border-b border-gray-100">
+              <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
+                <Search size={12} className="text-gray-400 shrink-0" />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[12px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
+              </div>
+            </div>
+          )}
+          <div className="flex flex-col gap-1">
+            <button
+              onClick={onSelectAll}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              All
+            </button>
+            {options
+              .filter(o => options.length <= 10 || o.label.toLowerCase().includes(search.toLowerCase()))
+              .map(opt => {
+                const checked = selected.has(opt.id)
+                return (
+                  <button key={opt.id} onClick={() => onToggle(opt.id)}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                  >
+                    <span className={checked ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt.label}</span>
+                    {checked && <Check size={13} className="text-primary-600 shrink-0" />}
+                  </button>
+                )
+              })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function CrawledPagesTab() {
-  const [filter, setFilter]               = useState('all')
+  const [filter, setFilter]               = useState(new Set(['errors', 'warnings', 'notices']))
   const [selected, setSelected]           = useState([])
   const [showColumns, setShowColumns]     = useState(false)
   const [colSearch, setColSearch]         = useState('')
@@ -2866,6 +4376,26 @@ function CrawledPagesTab() {
   const [perPage, setPerPage]             = useState(10)
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
   const statusDropdownRef = useRef(null)
+  const tableScrollRef = useRef(null)
+  const [tableScrollWidth, setTableScrollWidth] = useState(0)
+  useEffect(() => {
+    const el = tableScrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(() => setTableScrollWidth(el.clientWidth))
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+
+  const STATUS_FILTER_OPTIONS = [
+    { id: 'errors',   label: 'Errors'   },
+    { id: 'warnings', label: 'Warnings' },
+    { id: 'notices',  label: 'Notices'  },
+  ]
+  const toggleStatusFilter = id => setFilter(prev => {
+    const n = new Set(prev)
+    if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id)
+    return n
+  })
 
   const totalSelectedFindings = Object.values(selectedFindings).flat().length
 
@@ -2877,20 +4407,13 @@ function CrawledPagesTab() {
     })
   }
 
-  const STATUS_OPTIONS = [
-    { id: 'all',      label: 'All'      },
-    { id: 'errors',   label: 'Errors'   },
-    { id: 'warnings', label: 'Warnings' },
-    { id: 'notices',  label: 'Notices'  },
-  ]
-
   const baseData = activeRules.length
     ? CRAWLED_PAGE_DATA.filter(row => activeRules.every(rule => applyFilterRule(row, rule)))
     : CRAWLED_PAGE_DATA
 
-  const filteredData = filter === 'all'
+  const filteredData = filter.size >= 3
     ? baseData
-    : baseData.filter(row => row.findings.some(f => f.severity.toLowerCase() === filter))
+    : baseData.filter(row => row.findings.some(f => filter.has(f.severity.toLowerCase())))
 
   const paginatedData = filteredData.slice((page - 1) * perPage, page * perPage)
 
@@ -2920,7 +4443,14 @@ function CrawledPagesTab() {
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [showStatusDropdown])
 
-  const toggleCol = id => setVisibleCols(v => ({ ...v, [id]: !v[id] }))
+  const MAX_VISIBLE_COLS  = 10
+  const selectedColCount  = Object.values(visibleCols).filter(Boolean).length + 1 // +1 for frozen URL col
+  const atColLimit        = selectedColCount >= MAX_VISIBLE_COLS
+
+  const toggleCol = id => setVisibleCols(v => {
+    if (!v[id] && atColLimit) return v // block adding when at limit
+    return { ...v, [id]: !v[id] }
+  })
   const toggleRow = url => setSelected(s => s.includes(url) ? s.filter(u => u !== url) : [...s, url])
   const allSel    = selected.length === CRAWLED_PAGE_DATA.length
   const toggleAll = () => setSelected(allSel ? [] : CRAWLED_PAGE_DATA.map(p => p.url))
@@ -2932,41 +4462,17 @@ function CrawledPagesTab() {
       {/* Filter + action bar */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Type filter chip */}
-        <div className="relative" ref={statusDropdownRef}>
-          <button
-            onClick={() => setShowStatusDropdown(v => !v)}
-            className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
-          >
-            Type
-            <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600">
-              {STATUS_OPTIONS.find(o => o.id === filter)?.label || 'All'}
-            </span>
-            <span
-              onClick={e => { e.stopPropagation(); setFilter('all'); setShowStatusDropdown(false) }}
-              className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              <X size={11} />
-            </span>
-          </button>
-          {showStatusDropdown && (
-            <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden py-1">
-              {STATUS_OPTIONS.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => { setFilter(opt.id); setShowStatusDropdown(false) }}
-                  className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${
-                    filter === opt.id
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {opt.label}
-                  {filter === opt.id && <Check size={13} className="text-primary-600 shrink-0" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <FilterChipDropdown
+          label="Type"
+          options={STATUS_FILTER_OPTIONS}
+          selected={filter}
+          onToggle={toggleStatusFilter}
+          onSelectAll={() => setFilter(new Set(STATUS_FILTER_OPTIONS.map(o => o.id)))}
+          dropdownRef={statusDropdownRef}
+          open={showStatusDropdown}
+          onOpen={() => setShowStatusDropdown(v => !v)}
+          onClose={() => setShowStatusDropdown(false)}
+        />
 
         {/* Advanced filter chip */}
         <button
@@ -2982,7 +4488,7 @@ function CrawledPagesTab() {
           </svg>
           Advanced filter
           {activeRules.length > 0 && (
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 text-white text-[10px] font-bold">
+            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 text-white text-[12px] font-medium">
               {activeRules.length}
             </span>
           )}
@@ -2999,10 +4505,10 @@ function CrawledPagesTab() {
             {/* Column count trigger */}
             <button
               onClick={() => { setShowColumns(c => !c); setColSearch('') }}
-              className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+              className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
               <LayoutDashboard size={13} />
-              {Object.values(visibleCols).filter(Boolean).length + 1}/{ALL_COLS.length + 1} Columns
+              {selectedColCount}/{ALL_COLS.length} Columns
             </button>
 
             {showColumns && (
@@ -3020,15 +4526,31 @@ function CrawledPagesTab() {
                   </div>
                 </div>
 
+                {/* Warning when at limit */}
+                {atColLimit && (
+                  <div className="flex items-center gap-1.5 px-3 py-2 border-b" style={{ background: 'var(--warning-50)', borderColor: 'var(--warning-200)' }}>
+                    <AlertTriangle size={11} style={{ color: 'var(--warning-600)', flexShrink: 0 }} />
+                    <span className="text-[12px] font-medium" style={{ color: 'var(--warning-600)' }}>
+                      Max {MAX_VISIBLE_COLS} columns selected. Deselect one to add another.
+                    </span>
+                  </div>
+                )}
+
                 {/* Count + select all */}
                 <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-                  <span className="text-[12px] text-gray-500">{Object.values(visibleCols).filter(Boolean).length + 1} fields selected</span>
-                  <button
-                    onClick={() => setVisibleCols(Object.fromEntries(ALL_COLS.map(c => [c.id, true])))}
-                    className="text-[12px] font-semibold text-primary-600 hover:underline"
-                  >
-                    Select all ({ALL_COLS.length + 1})
-                  </button>
+                  <span className="text-[12px] text-gray-500">{selectedColCount} of {MAX_VISIBLE_COLS} columns selected</span>
+                  {!atColLimit && (
+                    <button
+                      onClick={() => {
+                        // Select URL + first (MAX_VISIBLE_COLS - 1) other columns
+                        const firstN = ALL_COLS.slice(0, MAX_VISIBLE_COLS - 1).map(c => c.id)
+                        setVisibleCols(Object.fromEntries(ALL_COLS.map(c => [c.id, firstN.includes(c.id)])))
+                      }}
+                      className="text-[12px] font-semibold text-primary-600 hover:underline"
+                    >
+                      Select first {MAX_VISIBLE_COLS}
+                    </button>
+                  )}
                 </div>
 
                 {/* Column list — 12 rows visible, scrolls for the rest */}
@@ -3043,19 +4565,29 @@ function CrawledPagesTab() {
                   {/* All columns — flat list */}
                   {ALL_COLS
                     .filter(c => !colSearch || c.label.toLowerCase().includes(colSearch.toLowerCase()))
-                    .map(col => (
-                      <div key={col.id} className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors cursor-pointer" style={{ height: 34 }} onClick={() => toggleCol(col.id)}>
-                        <span className="text-gray-300 select-none text-[14px] shrink-0">⠿</span>
-                        <input
-                          type="checkbox"
-                          checked={!!visibleCols[col.id]}
-                          onChange={() => toggleCol(col.id)}
-                          onClick={e => e.stopPropagation()}
-                          style={{ accentColor: '#155EEF', width: 14, height: 14, flexShrink: 0 }}
-                        />
-                        <span className="text-[13px] text-gray-700 flex-1">{col.label}</span>
-                      </div>
-                    ))
+                    .map(col => {
+                      const isChecked   = !!visibleCols[col.id]
+                      const isDisabled  = !isChecked && atColLimit
+                      return (
+                        <div
+                          key={col.id}
+                          className={`flex items-center gap-2 px-3 py-2 transition-colors ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}`}
+                          style={{ height: 34 }}
+                          onClick={() => !isDisabled && toggleCol(col.id)}
+                        >
+                          <span className="text-gray-300 select-none text-[14px] shrink-0">⠿</span>
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            disabled={isDisabled}
+                            onChange={() => !isDisabled && toggleCol(col.id)}
+                            onClick={e => e.stopPropagation()}
+                            style={{ accentColor: '#155EEF', width: 14, height: 14, flexShrink: 0 }}
+                          />
+                          <span className="text-[13px] text-gray-700 flex-1">{col.label}</span>
+                        </div>
+                      )
+                    })
                   }
                 </div>
               </div>
@@ -3075,7 +4607,8 @@ function CrawledPagesTab() {
         </div>
       </div>
 
-      <SectionCard className="overflow-x-auto">
+      <SectionCard className="overflow-hidden">
+        <div ref={tableScrollRef} className="overflow-x-auto">
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
@@ -3084,14 +4617,68 @@ function CrawledPagesTab() {
                 <input type="checkbox" checked={allSel} onChange={toggleAll} style={{ accentColor: '#155EEF', width: 15, height: 15 }} />
               </th>
               <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[300px]">Page URL</th>
-              {visibleCols.results     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Results</th>}
-              {visibleCols.traffic     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Total traffic</th>}
-              {visibleCols.httpCode    && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">HTTP status</th>}
-              {visibleCols.indexable   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Indexable</th>}
-              {visibleCols.indexStatus && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[160px]">Indexability status</th>}
-              {visibleCols.referring   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Referring pages</th>}
-              {visibleCols.depth       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Depth</th>}
-              {visibleCols.keywords    && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Keywords</th>}
+              {visibleCols.results          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Results</th>}
+              {visibleCols.traffic          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Total traffic</th>}
+              {visibleCols.httpCode         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">HTTP status</th>}
+              {visibleCols.indexable        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Indexable</th>}
+              {visibleCols.indexStatus      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[160px]">Indexability status</th>}
+              {visibleCols.referring        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Referring pages</th>}
+              {visibleCols.depth            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Depth</th>}
+              {visibleCols.keywords         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Keywords</th>}
+              {visibleCols.urlProtocol      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">URL protocol</th>}
+              {visibleCols.robots           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Blocked by robots.txt</th>}
+              {visibleCols.title            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[220px]">Title</th>}
+              {visibleCols.titleLen         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Title length</th>}
+              {visibleCols.descLen          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Description length</th>}
+              {visibleCols.canonical        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[200px]">Canonical URL</th>}
+              {visibleCols.h1               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[180px]">H1</th>}
+              {visibleCols.h1Len            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H1 length</th>}
+              {visibleCols.singleH1         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Single H1</th>}
+              {visibleCols.dupH1            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Duplicate H1</th>}
+              {visibleCols.h2               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[180px]">H2</th>}
+              {visibleCols.h2Len            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H2 length</th>}
+              {visibleCols.singleH2         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Single H2</th>}
+              {visibleCols.errorsCol        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Errors</th>}
+              {visibleCols.warningsCol      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Warnings</th>}
+              {visibleCols.noticesCol       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Notices</th>}
+              {visibleCols.urlLength        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">URL length</th>}
+              {visibleCols.inSitemap        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Is in sitemap</th>}
+              {visibleCols.ttfb             && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">TTFB</th>}
+              {visibleCols.robotsMeta       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Robots meta tag</th>}
+              {visibleCols.xRobotsTag       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">X-Robots-Tag</th>}
+              {visibleCols.dupTitle         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Duplicate title</th>}
+              {visibleCols.description      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[220px]">Description</th>}
+              {visibleCols.dupDesc          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Duplicate description</th>}
+              {visibleCols.hreflangTags     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Hreflang tags</th>}
+              {visibleCols.hreflang         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Hreflang</th>}
+              {visibleCols.h3               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H3</th>}
+              {visibleCols.h4               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H4</th>}
+              {visibleCols.h5               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H5</th>}
+              {visibleCols.h6               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">H6</th>}
+              {visibleCols.textHtmlRatio    && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Text to HTML ratio</th>}
+              {visibleCols.htmlSize         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">HTML size</th>}
+              {visibleCols.wordCount        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Word count</th>}
+              {visibleCols.pageSize         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Page size</th>}
+              {visibleCols.refreshRedirect  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Refresh redirect time</th>}
+              {visibleCols.nofollowDofollow && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Follow type</th>}
+              {visibleCols.inlinks          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Inlinks</th>}
+              {visibleCols.inlinksDofollow  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Inlinks dofollow</th>}
+              {visibleCols.inlinksNofollow  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Inlinks nofollow</th>}
+              {visibleCols.redirectInlinks  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Redirect inlinks</th>}
+              {visibleCols.numRedirects     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Number of redirects</th>}
+              {visibleCols.redirectTarget   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap min-w-[200px]">Redirect target URL</th>}
+              {visibleCols.internalOutlinks && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Internal outlinks</th>}
+              {visibleCols.externalOutlinks && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">External outlinks</th>}
+              {visibleCols.lastModified     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Last modified</th>}
+              {visibleCols.mixedContent     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Mixed content</th>}
+              {visibleCols.metaRefresh      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Meta refresh redirects</th>}
+              {visibleCols.contentHash      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Content hash</th>}
+              {visibleCols.cssSize          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">CSS size</th>}
+              {visibleCols.jsSize           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">JS size</th>}
+              {visibleCols.imageSize        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Image size</th>}
+              {visibleCols.images           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Images</th>}
+              {visibleCols.loadingTime      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Loading time</th>}
+              {visibleCols.isAmp            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Is AMP</th>}
             </tr>
           </thead>
           <tbody>
@@ -3103,48 +4690,50 @@ function CrawledPagesTab() {
 
               function severityStyle(sev) {
                 if (sev === 'Errors')   return { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', Icon: AlertTriangle }
-                if (sev === 'Warnings') return { bg: '#FFFBEB', border: '#FDE68A', color: '#D97706', Icon: AlertTriangle }
-                return                         { bg: '#EFF6FF', border: '#BFDBFE', color: '#2563EB', Icon: CircleCheck  }
+                if (sev === 'Warnings') return { bg: 'var(--warning-100)', border: '#FDE68A', color: '#D97706', Icon: AlertTriangle }
+                return                         { bg: 'var(--primary-50)', border: '#BFDBFE', color: 'var(--primary-600)', Icon: CircleCheck  }
               }
 
               return (
                 <>
                   <tr key={page.url} className={`border-b border-gray-50 transition-colors hover:bg-gray-50/40 ${isSel ? 'bg-primary-50/30' : ''} ${isExpanded ? 'border-b-0' : ''}`}>
-                    <td className="w-10 px-3 py-3">
+                    <td className="w-10 px-3 py-3" style={{ verticalAlign: 'top' }}>
                       <button
                         onClick={() => setExpandedRow(isExpanded ? null : page.url)}
-                        className="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+                        className="flex items-center justify-center w-6 h-6 rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600 mt-0.5"
                       >
                         <ChevronDown size={14} className={`transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
                       </button>
                     </td>
-                    <td className="px-4 py-3">
-                      <input type="checkbox" checked={isSel} onChange={() => toggleRow(page.url)} style={{ accentColor: '#155EEF', width: 15, height: 15 }} />
+                    <td className="px-4 py-3" style={{ verticalAlign: 'top' }}>
+                      <div className="flex items-center pt-0.5">
+                        <input type="checkbox" checked={isSel} onChange={() => toggleRow(page.url)} style={{ accentColor: '#155EEF', width: 15, height: 15, cursor: 'pointer' }} />
+                      </div>
                     </td>
                     <td className="px-4 py-3">
                       <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[360px]">{page.url}</a>
                     </td>
                     {visibleCols.results && (
                       <td className="px-4 py-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-[13px] font-semibold text-gray-900 tabular-nums">{page.results.cur}</span>
-                          {(page.results.isNew > 0 || page.results.fix > 0) && (
-                            <div className="flex items-center gap-1">
-                              {page.results.isNew > 0 && (
-                                <span className="px-1.5 py-px rounded-full bg-warning-100 text-[10px] font-semibold text-warning-600 whitespace-nowrap">+{page.results.isNew} new</span>
-                              )}
-                              {page.results.fix > 0 && (
-                                <span className="px-1.5 py-px rounded-full bg-success-50 text-[10px] font-semibold text-success-700 whitespace-nowrap">{page.results.fix} fix</span>
-                              )}
+                        <div className="relative group inline-block">
+                          <span className="text-[13px] font-semibold text-gray-900 tabular-nums cursor-default">{page.results.cur}</span>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 hidden group-hover:block pointer-events-none">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-900" style={{ top: -8 }} />
+                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
+                              <div className="flex flex-col gap-0.5">
+                                <span>Current: {page.results.cur}</span>
+                                <span>New: {page.results.isNew}</span>
+                                <span>Fixed: {page.results.fix}</span>
+                              </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </td>
                     )}
                     {visibleCols.traffic     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.traffic.toLocaleString()}</td>}
                     {visibleCols.httpCode    && (
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
                       </td>
                     )}
                     {visibleCols.indexable   && (
@@ -3166,22 +4755,223 @@ function CrawledPagesTab() {
                     {visibleCols.referring   && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.referring}</td>}
                     {visibleCols.depth       && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.depth}</td>}
                     {visibleCols.keywords    && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.keywords.toLocaleString()}</td>}
+                    {visibleCols.urlProtocol      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlProtocol}</td>}
+                    {visibleCols.robots           && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.robots
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.title            && (
+                      <td className="px-4 py-3 max-w-[220px]">
+                        <div className="relative group">
+                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.title}</span>
+                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
+                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.title}</div>
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                    {visibleCols.titleLen         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.titleLen}</td>}
+                    {visibleCols.descLen          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.descLen}</td>}
+                    {visibleCols.canonical        && (
+                      <td className="px-4 py-3 max-w-[200px]">
+                        <a href="#" className="text-[13px] text-primary-600 hover:underline truncate block">{page.canonical}</a>
+                      </td>
+                    )}
+                    {visibleCols.h1               && (
+                      <td className="px-4 py-3 max-w-[180px]">
+                        <div className="relative group">
+                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.h1}</span>
+                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
+                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.h1}</div>
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                    {visibleCols.h1Len            && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h1Len}</td>}
+                    {visibleCols.singleH1         && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.singleH1 === 'Single'
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.dupH1            && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.dupH1
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.h2               && (
+                      <td className="px-4 py-3 max-w-[180px]">
+                        <div className="relative group">
+                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.h2}</span>
+                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
+                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.h2}</div>
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                    {visibleCols.h2Len            && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h2Len}</td>}
+                    {visibleCols.singleH2         && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.singleH2 === 'Single'
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.errorsCol        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.errorsCol}</td>}
+                    {visibleCols.warningsCol      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.warningsCol}</td>}
+                    {visibleCols.noticesCol       && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.noticesCol}</td>}
+                    {visibleCols.urlLength        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlLength}</td>}
+                    {visibleCols.inSitemap        && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.inSitemap
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.ttfb             && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.ttfb} ms</td>}
+                    {visibleCols.robotsMeta       && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.robotsMeta}</td>}
+                    {visibleCols.xRobotsTag       && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.xRobotsTag}</td>}
+                    {visibleCols.dupTitle         && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.dupTitle
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.description      && (
+                      <td className="px-4 py-3 max-w-[220px]">
+                        <div className="relative group">
+                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.description}</span>
+                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
+                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.description}</div>
+                          </div>
+                        </div>
+                      </td>
+                    )}
+                    {visibleCols.dupDesc          && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.dupDesc
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.hreflangTags     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.hreflangTags}</td>}
+                    {visibleCols.hreflang         && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.hreflang}</td>}
+                    {visibleCols.h3               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h3}</td>}
+                    {visibleCols.h4               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h4}</td>}
+                    {visibleCols.h5               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h5}</td>}
+                    {visibleCols.h6               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h6}</td>}
+                    {visibleCols.textHtmlRatio    && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.textHtmlRatio}%</td>}
+                    {visibleCols.htmlSize         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.htmlSize}</td>}
+                    {visibleCols.wordCount        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.wordCount.toLocaleString()}</td>}
+                    {visibleCols.pageSize         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.pageSize}</td>}
+                    {visibleCols.refreshRedirect  && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.refreshRedirect}</td>}
+                    {visibleCols.nofollowDofollow && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.nofollowDofollow === 'DF'
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">DF</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">NF</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.inlinks          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.inlinks}</td>}
+                    {visibleCols.inlinksDofollow  && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.inlinksDofollow}</td>}
+                    {visibleCols.inlinksNofollow  && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.inlinksNofollow}</td>}
+                    {visibleCols.redirectInlinks  && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.redirectInlinks}</td>}
+                    {visibleCols.numRedirects     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.numRedirects}</td>}
+                    {visibleCols.redirectTarget   && (
+                      <td className="px-4 py-3 max-w-[200px]">
+                        {page.redirectTarget && page.redirectTarget !== '—'
+                          ? <a href="#" className="text-[13px] text-primary-600 hover:underline truncate block">{page.redirectTarget}</a>
+                          : <span className="text-[13px] text-gray-400">—</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.internalOutlinks && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.internalOutlinks}</td>}
+                    {visibleCols.externalOutlinks && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.externalOutlinks}</td>}
+                    {visibleCols.lastModified     && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.lastModified}</td>}
+                    {visibleCols.mixedContent     && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.mixedContent
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.metaRefresh      && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.metaRefresh
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
+                    {visibleCols.contentHash      && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.contentHash && page.contentHash !== '—' ? (
+                          <div className="relative group inline-block">
+                            <span className="font-mono text-[12px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
+                            <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
+                              <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg font-mono">{page.contentHash}</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-[13px] text-gray-400">—</span>
+                        )}
+                      </td>
+                    )}
+                    {visibleCols.cssSize          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.cssSize}</td>}
+                    {visibleCols.jsSize           && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.jsSize}</td>}
+                    {visibleCols.imageSize        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.imageSize}</td>}
+                    {visibleCols.images           && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.images}</td>}
+                    {visibleCols.loadingTime      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.loadingTime}</td>}
+                    {visibleCols.isAmp            && (
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        {page.isAmp
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                        }
+                      </td>
+                    )}
                   </tr>
 
                   {isExpanded && (
                     <tr key={`${page.url}-exp`} className="border-b border-gray-100">
-                      <td colSpan={colSpanCount} className="px-0 py-0">
-                        <div className="border-t border-gray-100 bg-gray-50/40 overflow-x-auto">
-                          <table className="w-full border-collapse text-left" style={{ minWidth: 960 }}>
+                      <td colSpan={colSpanCount} className="px-0 py-0" style={{ overflow: 'hidden' }}>
+                        <div style={{ position: 'sticky', left: 0, width: tableScrollWidth || '100%', overflow: 'hidden' }}>
+                          <div className="border-t border-gray-100 bg-gray-50/40 overflow-x-auto">
+                          <table className="border-collapse text-left" style={{ minWidth: 960, width: '100%', tableLayout: 'fixed' }}>
+                            <colgroup>
+                              <col style={{ width: 56 }} />
+                              <col style={{ width: 120 }} />
+                              <col style={{ width: 80 }} />
+                              <col style={{ minWidth: 240, width: 260, maxWidth: 280 }} />
+                              <col style={{ minWidth: 220, width: 240, maxWidth: 280 }} />
+                              <col style={{ width: 180 }} />
+                              <col style={{ width: 200 }} />
+                            </colgroup>
                             <thead>
                               <tr className="border-b border-gray-200 bg-gray-100/60">
-                                <th className="pl-10 pr-2 py-2.5 w-10" />
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap" style={{ width: 120 }}>Severity</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap" style={{ width: 80 }}>Status</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400" style={{ width: 200 }}>Description</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400">Details</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400" style={{ width: 190 }}>Current value</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400" style={{ width: 210 }}>AI recommended value</th>
+                                <th className="pr-2 py-2.5" style={{ paddingLeft: 56 }} />
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Severity</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Status</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400">Description</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400">Details</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400">Current value</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400">Recommendation</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -3192,30 +4982,32 @@ function CrawledPagesTab() {
                                 const isFindingSel = pageSel.includes(finding.id)
                                 return (
                                   <tr key={finding.id} className="border-b border-gray-100 last:border-0 hover:bg-white/70 transition-colors">
-                                    <td className="pl-10 pr-2 py-3 w-10">
-                                      <input
-                                        type="checkbox"
-                                        checked={isFindingSel}
-                                        onChange={() => toggleFinding(page.url, finding.id)}
-                                        style={{ accentColor: '#155EEF', width: 14, height: 14 }}
-                                      />
+                                    <td className="pr-2 py-3" style={{ verticalAlign: 'top', paddingLeft: 56 }}>
+                                      <div className="flex items-start pt-0.5">
+                                        <input
+                                          type="checkbox"
+                                          checked={isFindingSel}
+                                          onChange={() => toggleFinding(page.url, finding.id)}
+                                          style={{ accentColor: '#155EEF', width: 14, height: 14, cursor: 'pointer' }}
+                                        />
+                                      </div>
                                     </td>
-                                    <td className="px-4 py-3">
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[11px] font-medium whitespace-nowrap" style={{ background: sev.bg, borderColor: sev.border, color: sev.color }}>
+                                    <td className="px-4 py-3" style={{ verticalAlign: 'top' }}>
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium whitespace-nowrap" style={{ background: sev.bg, borderColor: sev.border, color: sev.color }}>
                                         <sev.Icon size={9} />
                                         {finding.severity}
                                       </span>
                                     </td>
-                                    <td className="px-4 py-3 whitespace-nowrap">
+                                    <td className="px-4 py-3 whitespace-nowrap" style={{ verticalAlign: 'top' }}>
                                       <span className={`text-[12px] font-medium ${
                                         isFixed ? 'text-success-600' :
                                         isNew   ? 'text-primary-600' :
                                                   'text-warning-600'
                                       }`}>{finding.status}</span>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                                       <p className="text-[13px] text-gray-800 leading-snug">{finding.description}</p>
-                                      <span className={`inline-flex items-center mt-1.5 px-2 py-px rounded-full border text-[10px] font-medium ${
+                                      <span className={`inline-flex items-center mt-1.5 px-2 py-px rounded-full border text-[12px] font-medium ${
                                         finding.fixType === 'Auto Fix'
                                           ? 'bg-success-50 border-success-200 text-success-700'
                                           : finding.fixType === 'Assisted Fix'
@@ -3223,14 +5015,17 @@ function CrawledPagesTab() {
                                           : 'bg-white border-gray-400 text-gray-400'
                                       }`}>{finding.fixType}</span>
                                     </td>
-                                    <td className="px-4 py-3 text-[13px] text-gray-500 leading-snug" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.detail}</td>
-                                    <td className="px-4 py-3 text-[13px] text-gray-600 leading-snug" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.currentValue}</td>
-                                    <td className="px-4 py-3" style={{ overflowWrap: 'break-word', wordBreak: 'break-word' }}>
+                                    <td className="px-4 py-3 text-[13px] text-gray-500 leading-snug" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.detail}</td>
+                                    <td className="px-4 py-3 text-[13px] text-gray-600 leading-snug" style={{ verticalAlign: 'top', width: 180, maxWidth: 180, overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.currentValue}</td>
+                                    <td className="px-4 py-3" style={{ verticalAlign: 'top', width: 200, maxWidth: 200, overflowWrap: 'break-word', wordBreak: 'break-word' }}>
                                       {finding.aiValue ? (
-                                        <div>
-                                          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide mb-0.5">
-                                            {isFixed ? 'Changes applied' : 'AI recommended'}
-                                          </p>
+                                        <div className="flex flex-col gap-1">
+                                          <div className="inline-flex items-center gap-1 w-fit">
+                                            {isFixed
+                                              ? <><CircleCheck size={11} className="text-success-600 shrink-0" /><span className="text-[12px] font-medium text-success-600">Applied</span></>
+                                              : <><Sparkles size={11} className="text-purple-600 shrink-0" /><span className="text-[12px] font-medium text-purple-600">Ai suggestion</span></>
+                                            }
+                                          </div>
                                           <p className="text-[13px] text-gray-700 leading-snug">{finding.aiValue}</p>
                                         </div>
                                       ) : (
@@ -3242,6 +5037,7 @@ function CrawledPagesTab() {
                               })}
                             </tbody>
                           </table>
+                          </div>
                         </div>
                       </td>
                     </tr>
@@ -3261,6 +5057,7 @@ function CrawledPagesTab() {
             )}
           </tbody>
         </table>
+        </div>
         <HLPagination
           page={page}
           perPage={perPage}
@@ -3302,7 +5099,7 @@ function CrawledPagesTab() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-gray-900 mb-1">1. Download plugin</p>
-                  <p className="text-[12px] text-gray-500 leading-relaxed">Download the Visibility AI SEO plugin package for your WordPress site.</p>
+                  <p className="text-[14px] text-gray-500 leading-[20px]">Download the Visibility AI SEO plugin package for your WordPress site.</p>
                 </div>
                 <button
                   onClick={() => setPluginDownloaded(true)}
@@ -3319,7 +5116,7 @@ function CrawledPagesTab() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-gray-900 mb-1">2. Install in WordPress</p>
-                  <p className="text-[12px] text-gray-500 leading-relaxed">Open WordPress admin, go to Plugins, Add New, Upload Plugin, then activate it.</p>
+                  <p className="text-[14px] text-gray-500 leading-[20px]">Open WordPress admin, go to Plugins, Add New, Upload Plugin, then activate it.</p>
                 </div>
                 <div
                   className={`mt-auto inline-flex items-center justify-center px-3 py-2 rounded-lg text-[12px] font-semibold border transition-colors ${
@@ -3340,7 +5137,7 @@ function CrawledPagesTab() {
                 </div>
                 <div>
                   <p className="text-[13px] font-semibold text-gray-900 mb-1">3. Copy API token</p>
-                  <p className="text-[12px] text-gray-500 leading-relaxed">Open the plugin settings page in WordPress and copy the API token shown there.</p>
+                  <p className="text-[14px] text-gray-500 leading-[20px]">Open the plugin settings page in WordPress and copy the API token shown there.</p>
                 </div>
                 <button className="mt-auto inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg border border-gray-200 bg-white text-[12px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors">
                   <ExternalLink size={12} /> Open token settings
@@ -3395,8 +5192,18 @@ const FOUND_LINKS_COLS = [
 ]
 
 function FoundLinksTab() {
-  const [filter, setFilter]                     = useState('All')
+  const [filter, setFilter]                     = useState(new Set(['Internal', 'External']))
   const [showLinkDropdown, setShowLinkDropdown] = useState(false)
+
+  const LINK_FILTER_OPTIONS = [
+    { id: 'Internal', label: 'Internal' },
+    { id: 'External', label: 'External' },
+  ]
+  const toggleLinkFilter = id => setFilter(prev => {
+    const n = new Set(prev)
+    if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id)
+    return n
+  })
   const [showColumns, setShowColumns]           = useState(false)
   const [colSearch, setColSearch]               = useState('')
   const [linkCols, setLinkCols]                 = useState(
@@ -3406,15 +5213,9 @@ function FoundLinksTab() {
   const internalCount = FOUND_LINKS_DATA.filter(l => l.type === 'Internal').length
   const externalCount = FOUND_LINKS_DATA.filter(l => l.type === 'External').length
 
-  const LINK_OPTIONS = [
-    { label: 'All',      count: FOUND_LINKS_DATA.length },
-    { label: 'Internal', count: internalCount           },
-    { label: 'External', count: externalCount           },
-  ]
-
-  const filtered = filter === 'All'      ? FOUND_LINKS_DATA
-    : filter === 'Internal' ? FOUND_LINKS_DATA.filter(l => l.type === 'Internal')
-    : FOUND_LINKS_DATA.filter(l => l.type === 'External')
+  const filtered = filter.size >= 2
+    ? FOUND_LINKS_DATA
+    : FOUND_LINKS_DATA.filter(l => filter.has(l.type))
 
   const linkTypeChipRef = useRef(null)
   const linkColPickerRef = useRef(null)
@@ -3445,23 +5246,15 @@ function FoundLinksTab() {
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls
-        rightSlot={
-          <div className="flex items-center gap-3 text-[12px] text-gray-500">
-            <span>Found links <span className="font-semibold text-gray-700">{FOUND_LINKS_DATA.length.toLocaleString()}</span></span>
-            <span className="text-gray-200">·</span>
-            <span>Unique URLs <span className="font-semibold text-gray-700">{FOUND_LINKS_DATA.length}</span></span>
-          </div>
-        }
-      />
+      <ReportControls />
 
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-3">
         {[
-          { label: 'Total links',    value: '2,847', color: '#7C3AED', bg: '#F5F3FF', Icon: Link2       },
-          { label: 'Internal links', value: '1,870', color: '#2563EB', bg: '#EFF6FF', Icon: Link2       },
+          { label: 'Total links',    value: '2,847', color: 'var(--purple-600)', bg: 'var(--purple-50)', Icon: Link2       },
+          { label: 'Internal links', value: '1,870', color: 'var(--primary-600)', bg: 'var(--primary-50)', Icon: Link2       },
           { label: 'External links', value: '977',   color: '#16A34A', bg: '#F0FDF4', Icon: ExternalLink },
-          { label: 'Nofollow links', value: '179',   color: '#D97706', bg: '#FFFBEB', Icon: AlertTriangle},
+          { label: 'Nofollow links', value: '179',   color: '#D97706', bg: 'var(--warning-100)', Icon: AlertTriangle},
         ].map(k => (
           <div key={k.label} className="border border-gray-200 rounded-lg bg-white p-4 flex items-start justify-between gap-3">
             <div>
@@ -3479,53 +5272,25 @@ function FoundLinksTab() {
       <div className="flex items-center gap-3 flex-wrap">
 
         {/* Link type filter chip */}
-        <div className="relative" ref={linkTypeChipRef}>
-          <button
-            onClick={() => setShowLinkDropdown(v => !v)}
-            className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
-          >
-            Link type
-            <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600">
-              {filter}
-            </span>
-            <span
-              onClick={e => { e.stopPropagation(); setFilter('All'); setShowLinkDropdown(false) }}
-              className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              <X size={11} />
-            </span>
-          </button>
-          {showLinkDropdown && (
-            <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden py-1">
-              {LINK_OPTIONS.map(opt => (
-                <button
-                  key={opt.label}
-                  onClick={() => { setFilter(opt.label); setShowLinkDropdown(false) }}
-                  className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between gap-2 transition-colors ${
-                    filter === opt.label
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  <span>{opt.label}</span>
-                  {filter === opt.label && <Check size={13} className="text-primary-600 shrink-0" />}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        <FilterChipDropdown
+          label="Link type"
+          options={LINK_FILTER_OPTIONS}
+          selected={filter}
+          onToggle={toggleLinkFilter}
+          onSelectAll={() => setFilter(new Set(LINK_FILTER_OPTIONS.map(o => o.id)))}
+          dropdownRef={linkTypeChipRef}
+          open={showLinkDropdown}
+          onOpen={() => setShowLinkDropdown(v => !v)}
+          onClose={() => setShowLinkDropdown(false)}
+        />
 
-        <div className="ml-auto flex items-center gap-2 text-[12px] text-gray-400">
-          <span>{filtered.length} links in view</span>
-          <span>·</span>
-          <span>{internalCount} internal · {externalCount} external</span>
-        </div>
+        <div className="ml-auto" />
         <div className="relative" ref={linkColPickerRef}>
           <button
             onClick={() => { setShowColumns(c => !c); setColSearch('') }}
-            className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
+            className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
-            <LayoutDashboard size={13} /> Columns
+            <LayoutDashboard size={13} /> {Object.values(linkCols).filter(Boolean).length}/{Object.keys(linkCols).length} Columns
           </button>
           {showColumns && (
             <div className="absolute right-0 top-10 z-50 bg-white border border-gray-200 rounded-lg overflow-hidden w-64" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
@@ -3581,7 +5346,7 @@ function FoundLinksTab() {
                 )}
                 {linkCols.linkType && (
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-semibold ${link.type === 'Internal' ? 'bg-primary-50 text-primary-700 border-blue-200' : 'bg-success-50 text-success-700 border-success-200'}`}>{link.type}</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${link.type === 'Internal' ? 'bg-primary-50 text-primary-700 border-blue-200' : 'bg-success-50 text-success-700 border-success-200'}`}>{link.type}</span>
                   </td>
                 )}
                 {linkCols.sourceUrl && (
@@ -3693,9 +5458,27 @@ function FoundResourcesTab() {
   const [expandedRow, setExpandedRow]   = useState(null)
   const [page, setPage]                 = useState(1)
   const [perPage, setPerPage]           = useState(10)
-  const [typeFilter, setTypeFilter]     = useState('All')
+  const [typeFilter, setTypeFilter]     = useState(new Set(['IMG', 'CSS', 'JS']))
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+
+  const RES_FILTER_OPTIONS = [
+    { id: 'IMG', label: 'Image'      },
+    { id: 'CSS', label: 'CSS'        },
+    { id: 'JS',  label: 'JavaScript' },
+  ]
+  const toggleResFilter = id => setTypeFilter(prev => {
+    const n = new Set(prev)
+    if (n.has(id)) { if (n.size === 1) return prev; n.delete(id) } else n.add(id)
+    return n
+  })
   const typeDropdownRef = useRef(null)
+  const frColsRef = useRef(null)
+  const [showFrCols, setShowFrCols] = useState(false)
+  const [frCols, setFrCols] = useState({ url: true, sourceUrls: true, type: true, statusCode: true, size: true, loadTime: true })
+  const [showAdvFilter, setShowAdvFilter] = useState(false)
+  const [advFilters, setAdvFilters] = useState({ statusCode: 'all', minSize: '', maxSize: '' })
+  const [appliedAdvFilters, setAppliedAdvFilters] = useState({ statusCode: 'all', minSize: '', maxSize: '' })
+  const advFilterRef = useRef(null)
 
   useEffect(() => {
     if (!showTypeDropdown) return
@@ -3708,40 +5491,73 @@ function FoundResourcesTab() {
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [showTypeDropdown])
 
-  const TYPE_OPTIONS = [
-    { label: 'All',        count: RESOURCE_DATA.length,                                    type: null  },
-    { label: 'Image',      count: RESOURCE_DATA.filter(r => r.type === 'IMG').length,      type: 'IMG' },
-    { label: 'CSS',        count: RESOURCE_DATA.filter(r => r.type === 'CSS').length,      type: 'CSS' },
-    { label: 'JavaScript', count: RESOURCE_DATA.filter(r => r.type === 'JS').length,       type: 'JS'  },
+  useEffect(() => {
+    if (!showAdvFilter) return
+    function handleAdvFilterOutside(e) {
+      if (advFilterRef.current && !advFilterRef.current.contains(e.target)) {
+        setShowAdvFilter(false)
+      }
+    }
+    document.addEventListener('mousedown', handleAdvFilterOutside)
+    return () => document.removeEventListener('mousedown', handleAdvFilterOutside)
+  }, [showAdvFilter])
+
+  const FR_COL_DEFS = [
+    { id: 'url',        label: 'URL' },
+    { id: 'sourceUrls', label: 'Source URLs' },
+    { id: 'type',       label: 'Type' },
+    { id: 'statusCode', label: 'Status code' },
+    { id: 'size',       label: 'Size' },
+    { id: 'loadTime',   label: 'Loading time' },
   ]
 
+  useEffect(() => {
+    if (!showFrCols) return
+    function handleFrColsOutside(e) {
+      if (frColsRef.current && !frColsRef.current.contains(e.target)) {
+        setShowFrCols(false)
+      }
+    }
+    document.addEventListener('mousedown', handleFrColsOutside)
+    return () => document.removeEventListener('mousedown', handleFrColsOutside)
+  }, [showFrCols])
+
+  const hasActiveAdvFilter = appliedAdvFilters.statusCode !== 'all' || appliedAdvFilters.minSize !== '' || appliedAdvFilters.maxSize !== ''
+
   const filtered = RESOURCE_DATA.filter(r => {
-    if (typeFilter === 'All') return true
-    const opt = TYPE_OPTIONS.find(o => o.label === typeFilter)
-    return opt ? r.type === opt.type : true
+    // Type filter
+    if (typeFilter.size < 3 && !typeFilter.has(r.type)) return false
+    // Advanced status code filter
+    if (appliedAdvFilters.statusCode !== 'all') {
+      const code = r.status
+      if (appliedAdvFilters.statusCode === '200' && code !== 200) return false
+      if (appliedAdvFilters.statusCode === '3xx' && (code < 300 || code >= 400)) return false
+      if (appliedAdvFilters.statusCode === '4xx' && (code < 400 || code >= 500)) return false
+      if (appliedAdvFilters.statusCode === '5xx' && (code < 500 || code >= 600)) return false
+    }
+    // Advanced size filter — parse KB value from size string like "385.0 KB"
+    if (appliedAdvFilters.minSize !== '' || appliedAdvFilters.maxSize !== '') {
+      const sizeKb = parseFloat(r.size)
+      if (!isNaN(sizeKb)) {
+        if (appliedAdvFilters.minSize !== '' && sizeKb < parseFloat(appliedAdvFilters.minSize)) return false
+        if (appliedAdvFilters.maxSize !== '' && sizeKb > parseFloat(appliedAdvFilters.maxSize)) return false
+      }
+    }
+    return true
   })
   const paginated = filtered.slice((page - 1) * perPage, page * perPage)
 
-  // Reset to page 1 whenever filter changes
   useEffect(() => { setPage(1) }, [typeFilter])
 
   const TYPE_STYLE = {
-    IMG: { bg: '#EFF6FF', color: '#2563EB' },
-    JS:  { bg: '#FFFBEB', color: '#D97706' },
-    CSS: { bg: '#EFF6FF', color: '#60A5FA' },
+    IMG: { bg: 'var(--primary-50)', color: 'var(--primary-600)' },
+    JS:  { bg: 'var(--warning-100)', color: '#D97706' },
+    CSS: { bg: 'var(--primary-50)', color: '#60A5FA' },
   }
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls
-        rightSlot={
-          <div className="flex items-center gap-3 text-[12px] text-gray-500">
-            <span><span className="font-semibold text-gray-700">10</span> grouped resources</span>
-            <span className="text-gray-200">·</span>
-            <span><span className="font-semibold text-gray-700">14</span> source occurrences</span>
-          </div>
-        }
-      />
+      <ReportControls />
 
       {/* KPI cards */}
       <div className="grid grid-cols-5 gap-3">
@@ -3779,48 +5595,127 @@ function FoundResourcesTab() {
       <div className="flex items-center gap-3 flex-wrap">
 
         {/* Type filter chip */}
-        <div className="relative" ref={typeDropdownRef}>
-          <button
-            onClick={() => setShowTypeDropdown(v => !v)}
-            className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
-          >
-            Type
-            <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600">
-              {typeFilter}
-            </span>
-            <span
-              onClick={e => { e.stopPropagation(); setTypeFilter('All'); setShowTypeDropdown(false) }}
-              className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
-            >
-              <X size={11} />
-            </span>
-          </button>
+        <FilterChipDropdown
+          label="Type"
+          options={RES_FILTER_OPTIONS}
+          selected={typeFilter}
+          onToggle={toggleResFilter}
+          onSelectAll={() => setTypeFilter(new Set(RES_FILTER_OPTIONS.map(o => o.id)))}
+          dropdownRef={typeDropdownRef}
+          open={showTypeDropdown}
+          onOpen={() => setShowTypeDropdown(v => !v)}
+          onClose={() => setShowTypeDropdown(false)}
+        />
 
-          {/* Dropdown */}
-          {showTypeDropdown && (
-            <div className="absolute top-full left-0 mt-1.5 w-40 bg-white border border-gray-200 rounded-xl shadow-lg z-30 overflow-hidden py-1">
-              {TYPE_OPTIONS.map(opt => (
+        {/* Advanced filter button */}
+        <div className="relative" ref={advFilterRef}>
+          <button
+            onClick={() => setShowAdvFilter(v => !v)}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+            </svg>
+            Advanced filter
+            {hasActiveAdvFilter && <span className="w-2 h-2 rounded-full bg-primary-600" />}
+          </button>
+          {showAdvFilter && (
+            <div className="absolute top-full left-0 mt-1.5 z-30 bg-white border border-gray-200 rounded-xl shadow-lg w-72 p-4">
+              <p className="text-[12px] font-semibold text-gray-700 mb-3">Advanced filter</p>
+
+              {/* Status code */}
+              <div className="mb-4">
+                <p className="text-[12px] font-medium text-gray-500 mb-2">Status code</p>
+                <div className="flex flex-col gap-1.5">
+                  {[{ label: 'All', value: 'all' }, { label: '200 OK', value: '200' }, { label: '3xx Redirect', value: '3xx' }, { label: '4xx Client error', value: '4xx' }, { label: '5xx Server error', value: '5xx' }].map(opt => (
+                    <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="frStatusCode"
+                        value={opt.value}
+                        checked={advFilters.statusCode === opt.value}
+                        onChange={() => setAdvFilters(v => ({ ...v, statusCode: opt.value }))}
+                        style={{ accentColor: '#155EEF' }}
+                      />
+                      <span className="text-[13px] text-gray-700">{opt.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Size */}
+              <div className="mb-4">
+                <p className="text-[12px] font-medium text-gray-500 mb-2">Size (KB)</p>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={advFilters.minSize}
+                    onChange={e => setAdvFilters(v => ({ ...v, minSize: e.target.value }))}
+                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
+                  />
+                  <span className="text-[12px] text-gray-400 shrink-0">to</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={advFilters.maxSize}
+                    onChange={e => setAdvFilters(v => ({ ...v, maxSize: e.target.value }))}
+                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
+                  />
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
                 <button
-                  key={opt.label}
-                  onClick={() => { setTypeFilter(opt.label); setShowTypeDropdown(false) }}
-                  className={`w-full text-left px-3 py-2 text-[13px] flex items-center justify-between transition-colors ${
-                    typeFilter === opt.label
-                      ? 'bg-primary-50 text-primary-700 font-semibold'
-                      : 'text-gray-700 hover:bg-gray-50'
-                  }`}
+                  onClick={() => { const reset = { statusCode: 'all', minSize: '', maxSize: '' }; setAdvFilters(reset); setAppliedAdvFilters(reset) }}
+                  className="px-3 py-1.5 text-[13px] font-medium text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  {opt.label}
-                  {typeFilter === opt.label && <Check size={13} className="text-primary-600 shrink-0" />}
+                  Reset
                 </button>
-              ))}
+                <button
+                  onClick={() => { setAppliedAdvFilters({ ...advFilters }); setShowAdvFilter(false) }}
+                  className="px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+                >
+                  Apply
+                </button>
+              </div>
             </div>
           )}
         </div>
 
         <div className="ml-auto flex items-center gap-2">
-          <button className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors">
-            <LayoutDashboard size={13} /> Columns
-          </button>
+          <div className="relative" ref={frColsRef}>
+            <button
+              onClick={() => setShowFrCols(v => !v)}
+              className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+              <LayoutDashboard size={13} />
+              {Object.values(frCols).filter(Boolean).length}/{Object.keys(frCols).length} Columns
+            </button>
+            {showFrCols && (
+              <div className="absolute right-0 top-10 z-30 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden w-52 py-1">
+                {FR_COL_DEFS.map(col => (
+                  <div
+                    key={col.id}
+                    className="flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors cursor-pointer"
+                    onClick={() => col.id !== 'url' && setFrCols(v => ({ ...v, [col.id]: !v[col.id] }))}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={!!frCols[col.id]}
+                      onChange={() => col.id !== 'url' && setFrCols(v => ({ ...v, [col.id]: !v[col.id] }))}
+                      onClick={e => e.stopPropagation()}
+                      disabled={col.id === 'url'}
+                      style={{ accentColor: '#155EEF', width: 14, height: 14, flexShrink: 0 }}
+                    />
+                    <span className="text-[13px] text-gray-700">{col.label}</span>
+                    {col.id === 'url' && <span className="text-[12px] text-gray-400 ml-auto">Always on</span>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -3830,11 +5725,11 @@ function FoundResourcesTab() {
             <tr className="border-b border-gray-100 bg-gray-50/60">
               <th className="w-10 px-3 py-3" />
               <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 min-w-[380px]">URL</th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Source URLs</th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Type</th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Status code</th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Size</th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Loading time</th>
+              {frCols.sourceUrls && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Source URLs</th>}
+              {frCols.type       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Type</th>}
+              {frCols.statusCode && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Status code</th>}
+              {frCols.size       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Size</th>}
+              {frCols.loadTime   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-500 whitespace-nowrap">Loading time</th>}
             </tr>
           </thead>
           <tbody>
@@ -3856,30 +5751,34 @@ function FoundResourcesTab() {
                     <td className="px-4 py-3">
                       <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[460px]">{r.url}</a>
                     </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.sources}</td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded border text-[11px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
-                        {r.type}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="text-[13px] font-semibold" style={{ color: httpCodeStyle(r.status).color }}>{r.status}</span>
-                    </td>
-                    <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.size}</td>
-                    <td className="px-4 py-3 text-[13px] text-gray-500">{r.loadTime}</td>
+                    {frCols.sourceUrls && <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.sources}</td>}
+                    {frCols.type && (
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
+                          {r.type}
+                        </span>
+                      </td>
+                    )}
+                    {frCols.statusCode && (
+                      <td className="px-4 py-3">
+                        <span className="text-[13px] font-semibold" style={{ color: httpCodeStyle(r.status).color }}>{r.status}</span>
+                      </td>
+                    )}
+                    {frCols.size && <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.size}</td>}
+                    {frCols.loadTime && <td className="px-4 py-3 text-[13px] text-gray-500">{r.loadTime}</td>}
                   </tr>
                   {isExpanded && r.sourceDetails && (
                     <tr className="border-b border-gray-100 bg-gray-50/40">
-                      <td colSpan={7} className="px-4 pb-3 pt-0 pl-10">
+                      <td colSpan={1 + 1 + Object.values(frCols).filter(Boolean).length} className="px-4 pb-3 pt-0 pl-10">
                         <div className="rounded-lg border border-gray-100 bg-white overflow-hidden">
                           <table className="w-full border-collapse text-left">
                             <thead>
                               <tr className="bg-gray-50/80 border-b border-gray-100">
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 min-w-[260px]">From URL</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap">Follow type</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap">Alt attribute</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap">Title</th>
-                                <th className="px-4 py-2.5 text-[11px] font-semibold text-gray-400 whitespace-nowrap">Unique title</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 min-w-[260px]">From URL</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Follow type</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Alt attribute</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Title</th>
+                                <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-400 whitespace-nowrap">Unique title</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -3958,9 +5857,9 @@ function CrawlComparisonTab() {
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
       {/* Date selectors + toggle */}
-      <div className="border border-gray-200 rounded-lg bg-white px-5 py-4 flex items-end gap-4 flex-wrap">
+      <div className="flex items-end gap-4 flex-wrap">
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold text-gray-400">First audit date</p>
+          <p className="text-[12px] font-semibold text-gray-400">First audit date</p>
           <div className="relative w-[232px]">
             <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <select className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors">
@@ -3971,7 +5870,7 @@ function CrawlComparisonTab() {
           </div>
         </div>
         <div className="flex flex-col gap-1.5">
-          <p className="text-[11px] font-semibold text-gray-400">Second audit date</p>
+          <p className="text-[12px] font-semibold text-gray-400">Second audit date</p>
           <div className="relative w-[232px]">
             <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             <select className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors">
@@ -3981,17 +5880,22 @@ function CrawlComparisonTab() {
             <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
         </div>
+
+        {/* Separator */}
+        <div className="self-stretch w-px bg-gray-200 shrink-0 mb-0.5" />
+
+        {/* Toggle + label */}
         <div className="flex items-center gap-3 self-end">
-          <div>
-            <p className="text-[13px] font-medium text-gray-800">Show only differences</p>
-            <p className="text-[11px] text-gray-400">Hide unchanged rows across the comparison matrix.</p>
-          </div>
           <button
             onClick={() => setShowOnlyDiffs(d => !d)}
             className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${showOnlyDiffs ? 'bg-primary-600' : 'bg-gray-200'}`}
           >
             <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${showOnlyDiffs ? 'translate-x-4' : 'translate-x-0.5'}`} />
           </button>
+          <div>
+            <p className="text-[13px] font-medium text-gray-800">Show only differences</p>
+            <p className="text-[12px] text-gray-400">Hide unchanged rows across the comparison matrix.</p>
+          </div>
         </div>
       </div>
 
@@ -4121,8 +6025,8 @@ const TABS = [
 // ─── Initial / pre-scan state ────────────────────────────────────────────────
 
 const WORKFLOW_STEPS = [
-  { n: '01', Icon: Search,        color: '#2563EB', bg: '#EFF6FF', label: 'Discover',  desc: 'We crawl your site structure and collect URLs, links, and resources.' },
-  { n: '02', Icon: AlertTriangle, color: '#D97706', bg: '#FFFBEB', label: 'Diagnose',  desc: 'Issues are grouped by severity so your team knows what to fix first.' },
+  { n: '01', Icon: Search,        color: 'var(--primary-600)', bg: 'var(--primary-50)', label: 'Discover',  desc: 'We crawl your site structure and collect URLs, links, and resources.' },
+  { n: '02', Icon: AlertTriangle, color: '#D97706', bg: 'var(--warning-100)', label: 'Diagnose',  desc: 'Issues are grouped by severity so your team knows what to fix first.' },
   { n: '03', Icon: TrendingUp,    color: '#0D9488', bg: '#F0FDFA', label: 'Improve',   desc: 'Future crawls show what improved, what regressed, and where to focus next.' },
 ]
 
@@ -4139,13 +6043,13 @@ function Toggle({ on, onChange }) {
 
 const TRUST_SIGNALS = [
   { Icon: CircleCheck, color: '#16A34A', bg: '#F0FDF4', label: 'Safe & respectful crawl',  sub: 'We follow robots.txt and your settings' },
-  { Icon: Award,       color: '#7C3AED', bg: '#F5F3FF', label: 'Your data is private',      sub: 'Only you can see your audit data'       },
-  { Icon: Clock,       color: '#2563EB', bg: '#EFF6FF', label: 'Crawl history',             sub: 'Compare and track over time'            },
+  { Icon: Award,       color: 'var(--purple-600)', bg: 'var(--purple-50)', label: 'Your data is private',      sub: 'Only you can see your audit data'       },
+  { Icon: Clock,       color: 'var(--primary-600)', bg: 'var(--primary-50)', label: 'Crawl history',             sub: 'Compare and track over time'            },
 ]
 
 function InitialCardPreviewHealth() {
   return (
-    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center gap-3">
+    <div className="h-full rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center gap-3">
       <div className="shrink-0 flex flex-col items-center gap-0.5">
         <div className="w-11 h-11 rounded-full border-[3px] flex items-center justify-center bg-white" style={{ borderColor: '#16A34A' }}>
           <span className="text-[13px] font-bold text-gray-900">82</span>
@@ -4156,14 +6060,14 @@ function InitialCardPreviewHealth() {
         {[
           { Icon: CircleX,      c: '#DC2626', label: 'Errors',   v: 124 },
           { Icon: AlertTriangle, c: '#D97706', label: 'Warnings', v: 243 },
-          { Icon: Info,          c: '#2563EB', label: 'Notices',  v: 532 },
+          { Icon: Info,          c: 'var(--primary-600)', label: 'Notices',  v: 532 },
         ].map(({ Icon, c, label, v }) => (
           <div key={label} className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Icon size={9} style={{ color: c }} />
-              <span className="text-[10px] text-gray-500">{label}</span>
+              <span className="text-[12px] text-gray-500">{label}</span>
             </div>
-            <span className="text-[10px] font-bold" style={{ color: c }}>{v}</span>
+            <span className="text-[12px] font-bold" style={{ color: c }}>{v}</span>
           </div>
         ))}
       </div>
@@ -4177,8 +6081,8 @@ function InitialCardPreviewLinks() {
     { s: 'err' }, { s: 'ok' }, { s: 'warn' },
   ]
   return (
-    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3">
-      <div className="grid grid-cols-3 gap-1.5">
+    <div className="h-full rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center">
+      <div className="grid grid-cols-3 gap-1.5 w-full">
         {items.map(({ s }, i) => (
           <div key={i} className={`h-6 rounded-md flex items-center justify-center border text-[9px] font-semibold ${
             s === 'ok'   ? 'bg-white border-gray-200 text-gray-300' :
@@ -4195,12 +6099,12 @@ function InitialCardPreviewLinks() {
 
 function InitialCardPreviewTrends() {
   return (
-    <div className="mt-3 rounded-lg bg-gray-50 border border-gray-100 p-3">
+    <div className="h-full rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center">
       <svg viewBox="0 0 120 36" className="w-full" style={{ height: 36, display: 'block' }}>
-        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4 L120,36 L0,36Z" fill="#EFF6FF" />
-        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4 L120,36 L0,36Z" fill="var(--primary-50)" />
+        <path d="M0,30 L20,24 L40,26 L60,14 L80,16 L100,6 L120,4" fill="none" stroke="var(--primary-600)" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
         {[[0,30],[40,26],[80,16],[120,4]].map(([x,y], i) => (
-          <circle key={i} cx={x} cy={y} r="2.5" fill="#2563EB" />
+          <circle key={i} cx={x} cy={y} r="2.5" fill="var(--primary-600)" />
         ))}
       </svg>
     </div>
@@ -4209,7 +6113,7 @@ function InitialCardPreviewTrends() {
 
 const DETAIL_CARDS_V2 = [
   {
-    Icon: LayoutDashboard, color: '#2563EB', bg: '#EFF6FF',
+    Icon: LayoutDashboard, color: 'var(--primary-600)', bg: 'var(--primary-50)',
     chip: 'Score + top issues',
     title: 'Health snapshot',
     desc: 'Get your overall health score and the issues impacting SEO the most.',
@@ -4225,7 +6129,7 @@ const DETAIL_CARDS_V2 = [
     Preview: InitialCardPreviewLinks,
   },
   {
-    Icon: TrendingUp, color: '#7C3AED', bg: '#F5F3FF',
+    Icon: TrendingUp, color: 'var(--purple-600)', bg: 'var(--purple-50)',
     chip: 'Resources + change tracking',
     title: 'Assets & trends',
     desc: 'Catch heavy resources, rendering friction, and track improvements over time.',
@@ -4243,18 +6147,10 @@ function SiteHealthInitialState({ onLaunch }) {
   const [robotsOn, setRobotsOn] = useState(true)
   const [advanced, setAdvanced] = useState(false)
 
-  const chips = [
-    { label: agent, active: true },
-    { label: `${maxPages} pages` },
-    { label: `${speed} req/s` },
-    { label: jsOn ? 'JS on' : 'JS off' },
-    { label: robotsOn ? 'robots.txt on' : 'robots.txt off' },
-  ]
-
   const FEATURES_V2 = [
     { Icon: Globe,         color: '#0D9488', bg: '#F0FDFA', label: 'Crawl the entire site', sub: 'Pages, links, assets & more'  },
-    { Icon: AlertTriangle, color: '#D97706', bg: '#FFFBEB', label: 'Spot what matters',     sub: 'Errors first, save time'       },
-    { Icon: BarChart3,     color: '#7C3AED', bg: '#F5F3FF', label: 'Track & improve',       sub: 'Compare every crawl'           },
+    { Icon: AlertTriangle, color: '#D97706', bg: 'var(--warning-100)', label: 'Spot what matters',     sub: 'Errors first, save time'       },
+    { Icon: BarChart3,     color: 'var(--purple-600)', bg: 'var(--purple-50)', label: 'Track & improve',       sub: 'Compare every crawl'           },
   ]
 
   return (
@@ -4265,59 +6161,57 @@ function SiteHealthInitialState({ onLaunch }) {
       >
 
         {/* ── Left: scrolls when squished ── */}
-        <div className="overflow-y-auto min-w-0 border-r border-gray-100 p-6 flex flex-col gap-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
+        <div className="overflow-y-auto min-w-0 border-r border-gray-100 p-6 flex flex-col gap-8" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
 
-          {/* Hero */}
-          <div>
-            <h1 className="text-[26px] font-bold text-gray-900 leading-tight mb-2">
-              Uncover what's holding back your{' '}
-              <span className="text-primary-600">organic growth</span>{' '}
-              <TrendingUp size={22} className="inline text-primary-600 -mt-1" />
-            </h1>
-            <p className="text-[13px] text-gray-500 leading-relaxed">
-              Run a complete crawl to get a clear snapshot of your site's health and fix what matters most for better SEO performance.
-            </p>
-          </div>
+          {/* Group 1: Hero + feature strip + preview cards */}
+          <div className="flex flex-col gap-8">
+            <div>
+              <h1 className="text-[24px] font-bold text-gray-900 leading-tight mb-2">
+                Uncover what's holding back your{' '}
+                <span className="text-primary-600">organic growth</span>{' '}
+                <TrendingUp size={22} className="inline text-primary-600 -mt-1" />
+              </h1>
+              <p className="text-[13px] text-gray-500 leading-relaxed">
+                Run a complete crawl to get a clear snapshot of your site's health and fix what matters most for better SEO performance.
+              </p>
+            </div>
 
-          {/* Feature strip */}
-          <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-            {FEATURES_V2.map(({ Icon, color, bg, label, sub }) => (
-              <div key={label} className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
-                  <Icon size={16} style={{ color }} />
-                </div>
-                <div>
-                  <p className="text-[13px] font-semibold text-gray-900">{label}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Preview cards */}
-          <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
-            {DETAIL_CARDS_V2.map(({ Icon, color, bg, chip, title, desc, tabs, Preview }) => (
-              <div key={title} className="border border-gray-200 rounded-xl p-4 flex flex-col hover:border-gray-300 hover:shadow-sm transition-all">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
-                    <Icon size={13} style={{ color }} />
+            <div className="flex flex-col gap-4">
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+              {FEATURES_V2.map(({ Icon, color, bg, label, sub }) => (
+                <div key={label} className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                    <Icon size={16} style={{ color }} />
                   </div>
-                  <span className="text-[10px] font-semibold text-gray-500 bg-gray-50 border border-gray-100 rounded-md px-2 py-0.5 truncate">{chip}</span>
+                  <div>
+                    <p className="text-[13px] font-semibold text-gray-900">{label}</p>
+                    <p className="text-[12px] text-gray-400 mt-0.5">{sub}</p>
+                  </div>
                 </div>
-                <p className="text-[13px] font-bold text-gray-900">{title}</p>
-                <p className="text-[11px] text-gray-400 leading-relaxed mt-1">{desc}</p>
-                <Preview />
-                <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
-                  {tabs.map(t => (
-                    <span key={t} className="text-[10px] font-medium text-gray-600 bg-white border border-gray-200 rounded-full px-2.5 py-0.5">{t}</span>
-                  ))}
+              ))}
+            </div>
+
+            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+              {DETAIL_CARDS_V2.map(({ title, desc, tabs, Preview }) => (
+                <div key={title} className="border border-gray-200 rounded-xl p-4 flex flex-col hover:border-gray-300 hover:shadow-sm transition-all">
+                  <p className="text-[13px] font-bold text-gray-900">{title}</p>
+                  <p className="text-[12px] text-gray-400 leading-relaxed mt-1" style={{ minHeight: '2.5rem' }}>{desc}</p>
+                  <div className="h-[82px]">
+                    <Preview />
+                  </div>
+                  <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
+                    {tabs.map(t => (
+                      <span key={t} className="text-[12px] font-medium text-gray-600 bg-white border border-gray-200 rounded-full px-2.5 py-0.5">{t}</span>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+            </div>
           </div>
 
-          {/* What happens next */}
-          <div>
+          {/* Group 2: What happens next */}
+          <div className="border-t border-gray-100 pt-8">
             <p className="text-[13px] font-semibold text-gray-700 mb-3">What happens next</p>
             <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
               {WORKFLOW_STEPS.map(({ n, Icon, color, bg, label, desc }) => (
@@ -4327,29 +6221,31 @@ function SiteHealthInitialState({ onLaunch }) {
                       <Icon size={14} style={{ color }} />
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-400 leading-none">{n}</p>
+                      <p className="text-[12px] text-gray-400 leading-none">{n}</p>
                       <p className="text-[13px] font-bold text-gray-900 leading-tight">{label}</p>
                     </div>
                   </div>
-                  <p className="text-[11px] text-gray-400 leading-snug">{desc}</p>
+                  <p className="text-[12px] text-gray-400 leading-snug">{desc}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Trust signals */}
-          <div className="grid gap-4 pt-5 border-t border-gray-100" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
-            {TRUST_SIGNALS.map(({ Icon, color, bg, label, sub }) => (
-              <div key={label} className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
-                  <Icon size={14} style={{ color }} />
+          {/* Group 3: Trust signals */}
+          <div className="border-t border-gray-100 pt-8">
+            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+              {TRUST_SIGNALS.map(({ Icon, color, bg, label, sub }) => (
+                <div key={label} className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
+                    <Icon size={14} style={{ color }} />
+                  </div>
+                  <div>
+                    <p className="text-[12px] font-semibold text-gray-700">{label}</p>
+                    <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[12px] font-semibold text-gray-700">{label}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
-                </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
 
         </div>
@@ -4369,13 +6265,6 @@ function SiteHealthInitialState({ onLaunch }) {
                 <p className="text-[15px] font-bold text-gray-900 leading-none">Start your audit</p>
                 <p className="text-[12px] text-gray-400 mt-0.5">Enter your website and launch the crawl</p>
               </div>
-            </div>
-
-            {/* Config chips */}
-            <div className="flex flex-wrap gap-1.5">
-              {chips.map(({ label, active }) => (
-                <span key={label} className={`text-[11px] font-medium rounded-full px-2.5 py-1 border transition-colors ${active ? 'bg-primary-50 border-primary-200 text-primary-700' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>{label}</span>
-              ))}
             </div>
 
             {/* URL input */}
@@ -4418,21 +6307,11 @@ function SiteHealthInitialState({ onLaunch }) {
                         <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       </div>
                     </div>
-                    {/* Max pages + speed */}
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Max pages</p>
-                        <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)}
-                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600" />
-                      </div>
-                      <div>
-                        <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Crawl speed</p>
-                        <div className="flex items-center border border-gray-200 rounded-lg bg-white focus-within:border-primary-600 overflow-hidden">
-                          <input type="number" value={speed} onChange={e => setSpeed(e.target.value)}
-                            className="flex-1 min-w-0 px-3 py-2 text-[13px] text-gray-800 bg-transparent outline-none" />
-                          <span className="px-2 text-[11px] text-gray-400 shrink-0 border-l border-gray-100">req/s</span>
-                        </div>
-                      </div>
+                    {/* Max pages */}
+                    <div>
+                      <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Max pages</p>
+                      <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)}
+                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600" />
                     </div>
                     {/* JS rendering toggle */}
                     <div className="flex items-center justify-between">
@@ -4441,7 +6320,7 @@ function SiteHealthInitialState({ onLaunch }) {
                           <p className="text-[13px] font-semibold text-gray-700">JS rendering</p>
                           <span title="Enables JavaScript execution during crawl. Slower but more accurate for SPA or React sites." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
                         </div>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Enable for JavaScript-heavy sites</p>
+                        <p className="text-[12px] text-gray-400 mt-0.5">Enable for JavaScript-heavy sites</p>
                       </div>
                       <Toggle on={jsOn} onChange={setJsOn} />
                     </div>
@@ -4452,21 +6331,12 @@ function SiteHealthInitialState({ onLaunch }) {
                           <p className="text-[13px] font-semibold text-gray-700">Respect robots.txt</p>
                           <span title="When enabled, the crawler follows your site's robots.txt rules — matching how Googlebot and other crawlers behave." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
                         </div>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Follow crawl directives</p>
+                        <p className="text-[12px] text-gray-400 mt-0.5">Follow crawl directives</p>
                       </div>
                       <Toggle on={robotsOn} onChange={setRobotsOn} />
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Smart defaults card */}
-            <div className="flex items-start gap-2.5 border border-primary-200 bg-primary-50 rounded-lg px-3 py-3">
-              <Sparkles size={15} className="text-primary-600 shrink-0 mt-0.5" />
-              <div>
-                <p className="text-[12px] font-semibold text-primary-700">Smart defaults on</p>
-                <p className="text-[11px] text-primary-600/70 mt-0.5 leading-snug">We've pre-selected the most reliable settings for accurate results.</p>
               </div>
             </div>
 
@@ -4481,7 +6351,7 @@ function SiteHealthInitialState({ onLaunch }) {
               <Zap size={15} />
               Crawl and run audit
             </button>
-            <p className="text-center text-[11px] text-gray-400 mt-3 flex items-center justify-center gap-1.5">
+            <p className="text-center text-[12px] text-gray-400 mt-3 flex items-center justify-center gap-1.5">
               <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ flexShrink: 0, opacity: 0.5 }}>
                 <rect x="1" y="5.5" width="8" height="6" rx="1.2" stroke="#98A2B3" strokeWidth="1.3" />
                 <path d="M3 5.5V3.5a2 2 0 014 0v2" stroke="#98A2B3" strokeWidth="1.3" strokeLinecap="round" />
@@ -4541,14 +6411,6 @@ function SiteHealthCrawlingState({ config, onComplete }) {
     }
   }, [displayPct])
 
-  const CONFIG_ROWS = [
-    { label: 'User agent',            value: config.agent },
-    { label: 'Maximum pages',         value: config.maxPages },
-    { label: 'Crawl speed',           value: `${config.speed} req/s` },
-    { label: 'JavaScript rendering',  value: config.jsOn ? 'Enabled' : 'Disabled' },
-    { label: 'robots.txt',            value: config.robotsOn ? 'Respected' : 'Ignored' },
-  ]
-
   return (
     <div className="flex-1 min-w-0 min-h-0 bg-gray-50 flex flex-col">
 
@@ -4569,74 +6431,34 @@ function SiteHealthCrawlingState({ config, onComplete }) {
             Running audit
           </button>
         </div>
-        {/* Full-width progress bar pinned to bottom of header */}
-        <div className="h-0.5 bg-gray-100 -mx-6">
-          <div
-            className="h-full bg-primary-600 transition-all duration-300 ease-out"
-            style={{ width: `${displayPct}%` }}
-          />
-        </div>
-        {/* Status row */}
-        <div className="flex items-center justify-between py-2">
-          <p className="text-[12px] text-gray-500">{activeStage.msg}</p>
-          <p className="text-[12px] font-semibold text-gray-600">{displayPct}%</p>
-        </div>
       </div>
 
       {/* Main content — vertically centred */}
       <div className="flex-1 overflow-y-auto flex items-center justify-center p-8">
         <div
-          className="w-full bg-white border border-gray-200 rounded-xl overflow-hidden"
-          style={{ maxWidth: 860, boxShadow: '0 4px 32px rgba(0,0,0,0.06)' }}
+          className="bg-white border border-gray-200 rounded-xl px-8 py-7"
+          style={{ maxWidth: 440, width: '100%', boxShadow: '0 4px 32px rgba(0,0,0,0.06)' }}
         >
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 260px' }}>
-
-            {/* Left: heading + progress */}
-            <div className="p-8 border-r border-gray-100 flex flex-col gap-6">
-              {/* Badge */}
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary-200 bg-primary-50 w-fit">
-                <RefreshCw size={10} className="text-primary-600 animate-spin" style={{ animationDuration: '1.4s' }} />
-                <span className="text-[10px] font-bold text-primary-700">Website audit in progress</span>
-              </span>
-
-              {/* Heading */}
-              <div>
-                <h2 className="text-[22px] font-bold text-gray-900 leading-snug mb-2">
-                  Crawling <span className="text-primary-600">{domain}</span> and building the audit workspace
-                </h2>
-                <p className="text-[13px] text-gray-500 leading-relaxed">
-                  We are checking crawlability, technical SEO, page health, link structure, resources, and change history so the dashboard can open with prioritized findings.
-                </p>
-              </div>
-
-              {/* Progress card */}
-              <div className="border border-gray-200 rounded-lg p-4 bg-gray-50/50">
-                <div className="flex items-center justify-between mb-2.5">
-                  <p className="text-[12px] text-gray-600 leading-snug max-w-[360px]">{activeStage.msg}</p>
-                  <p className="text-[14px] font-bold text-gray-800 shrink-0 pl-3">{displayPct}%</p>
+          <div className="flex flex-col">
+            {CRAWL_STAGES.map((stage, i) => {
+              const nextAt = CRAWL_STAGES[i + 1]?.at ?? 101
+              const isDone = progress >= nextAt
+              const isActive = !isDone && progress >= stage.at
+              return (
+                <div key={stage.label} className="flex items-center gap-3 py-2">
+                  {isDone ? (
+                    <CircleCheck size={18} className="text-success-600 shrink-0" />
+                  ) : isActive ? (
+                    <Sparkles size={18} className="text-primary-600 shrink-0" />
+                  ) : (
+                    <div className="w-[18px] h-[18px] rounded-full border border-gray-200 shrink-0" />
+                  )}
+                  <span className={`text-[14px] leading-snug ${isDone ? 'text-gray-400' : isActive ? 'font-semibold text-gray-900' : 'text-gray-300'}`}>
+                    {stage.label}
+                  </span>
                 </div>
-                <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-primary-600 rounded-full transition-all duration-300 ease-out"
-                    style={{ width: `${displayPct}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Right: config summary */}
-            <div className="p-6 bg-gray-50/30">
-              <p className="text-[10px] font-bold text-gray-400 mb-5">Selected crawl setup</p>
-              <div className="flex flex-col gap-4">
-                {CONFIG_ROWS.map(({ label, value }) => (
-                  <div key={label} className="flex items-start justify-between gap-4">
-                    <span className="text-[12px] text-gray-500">{label}</span>
-                    <span className="text-[13px] font-semibold text-gray-900 text-right">{String(value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
+              )
+            })}
           </div>
         </div>
       </div>
@@ -4648,7 +6470,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
 
 function InfoTooltip({ text }) {
   const icon = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 10, fontWeight: 600, color: '#98A2B3', cursor: 'help' }}>i</span>
+    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 12, fontWeight: 600, color: '#98A2B3', cursor: 'help' }}>i</span>
   )
   if (!text) return <span style={{ flexShrink: 0 }}>{icon}</span>
   return (
@@ -4668,8 +6490,8 @@ function SettingsToggle({ value, onChange, label, description, tooltip }) {
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         {label && (
           <div className="flex items-center gap-1.5">
-            <span className="text-[14px] font-semibold text-gray-900">{label}</span>
-            <InfoTooltip text={tooltip} />
+            <span className="text-[14px] font-medium text-gray-900">{label}</span>
+            {tooltip !== undefined && <InfoTooltip text={tooltip} />}
           </div>
         )}
         {description && <p className="text-[13px] text-gray-500 leading-relaxed">{description}</p>}
@@ -4686,10 +6508,10 @@ function SettingsToggle({ value, onChange, label, description, tooltip }) {
 
 function SettingsField({ label, description, tooltip, children }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1">
       <div className="flex items-center gap-1.5">
-        <p className="text-[14px] font-semibold text-gray-900">{label}</p>
-        <InfoTooltip text={tooltip} />
+        <p className="text-[14px] font-medium text-gray-900">{label}</p>
+        {tooltip !== undefined && <InfoTooltip text={tooltip} />}
       </div>
       {description && <p className="text-[13px] text-gray-500 leading-relaxed">{description}</p>}
       {children}
@@ -4699,8 +6521,8 @@ function SettingsField({ label, description, tooltip, children }) {
 
 const AUDIT_SETTINGS_NAV = [
   { id: 'schedule', label: 'Schedule' },
-  { id: 'source',   label: 'Source of pages' },
-  { id: 'rules',    label: 'Rules for scanning pages' },
+  { id: 'source',   label: 'Page sources' },
+  { id: 'rules',    label: 'Page scan rules' },
   { id: 'parser',   label: 'Parser settings' },
   { id: 'limits',   label: 'Limits and restrictions' },
   { id: 'report',   label: 'Report setup' },
@@ -4708,7 +6530,7 @@ const AUDIT_SETTINGS_NAV = [
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-function WebsiteAuditSettingsModal({ onClose }) {
+function WebsiteAuditSettingsModal({ onClose, onApply }) {
   const [activeSection, setActiveSection] = useState('schedule')
 
   // Schedule state
@@ -4723,20 +6545,20 @@ function WebsiteAuditSettingsModal({ onClose }) {
 
   // Source of pages state
   const [sitePages, setSitePages]         = useState(true)
-  const [subdomains, setSubdomains]       = useState(false)
   const [xmlSitemap, setXmlSitemap]       = useState(true)
   const [sitemaps, setSitemaps]           = useState([{ url: 'https://www.gohighlevel.com/sitemap.xml', urlCount: 775 }])
   const [sitemapInput, setSitemapInput]   = useState('')
+  const [addingSitemap, setAddingSitemap] = useState(false)
 
   // Rules state
   const [respectRobots, setRespectRobots]                   = useState(true)
   const [ignoreNoindex, setIgnoreNoindex]                   = useState(false)
   const [ignoreNofollow, setIgnoreNofollow]                 = useState(false)
-  const [onlyCrawlUrls, setOnlyCrawlUrls]                   = useState('/blog/\n/compare/')
-  const [skipUrls, setSkipUrls]                             = useState('/staging/\n/admin/')
-  const [hideUrls, setHideUrls]                             = useState('/cdn-cgi/\n/wp-json/')
+  const [onlyCrawlChips, setOnlyCrawlChips]                 = useState(['/blog/', '/compare/'])
+  const [skipUrlChips, setSkipUrlChips]                     = useState(['/staging/', '/admin/'])
+  const [hideUrlChips, setHideUrlChips]                     = useState(['/cdn-cgi/', '/wp-json/'])
   const [ignoreUrlParams, setIgnoreUrlParams]               = useState('disabled')
-  const [customParams, setCustomParams]                     = useState('utm_source, utm_medium, gclid, fbclid')
+  const [customParams, setCustomParams]                     = useState('')
   const [ignoreExternalDomains, setIgnoreExternalDomains]   = useState('')
 
   // Parser settings state
@@ -4767,7 +6589,7 @@ function WebsiteAuditSettingsModal({ onClose }) {
 
   function addSitemap() {
     const t = sitemapInput.trim()
-    if (t && !sitemaps.find(s => s.url === t)) { setSitemaps(p => [...p, { url: t, urlCount: 0 }]); setSitemapInput('') }
+    if (t && !sitemaps.find(s => s.url === t)) { setSitemaps(p => [...p, { url: t, urlCount: 0 }]); setSitemapInput(''); setAddingSitemap(false) }
   }
 
   const TA = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors resize-none'
@@ -4778,7 +6600,7 @@ function WebsiteAuditSettingsModal({ onClose }) {
       if (t && !list.includes(t)) { setList(p => [...p, t]); setInputVal('') }
     }
     return (
-      <div className="flex flex-col gap-2 mt-1">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <input value={inputVal} onChange={e => setInputVal(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && add()}
@@ -4801,14 +6623,40 @@ function WebsiteAuditSettingsModal({ onClose }) {
     )
   }
 
+  function ChipInput({ list, setList, placeholder }) {
+    const [input, setInput] = useState('')
+    function add() {
+      const t = input.trim()
+      if (t && !list.includes(t)) { setList(p => [...p, t]); setInput('') }
+    }
+    return (
+      <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] border border-gray-200 rounded-lg px-3 py-2 focus-within:border-primary-600 transition-colors cursor-text">
+        {list.map(item => (
+          <span key={item} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 rounded-md bg-gray-100 text-[12px] font-medium text-gray-700 font-mono whitespace-nowrap shrink-0">
+            {item}
+            <button onClick={() => setList(p => p.filter(x => x !== item))} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={10} /></button>
+          </span>
+        ))}
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
+          placeholder={list.length === 0 ? placeholder : ''}
+          className="flex-1 min-w-[100px] text-[13px] text-gray-900 placeholder:text-gray-400 outline-none bg-transparent font-mono"
+        />
+      </div>
+    )
+  }
+
   function renderSchedule() {
     return (
       <div className="flex flex-col gap-5 pb-4">
         <p className="text-[18px] font-bold text-gray-900">Schedule</p>
         <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
 
-          {/* Scanning frequency — radio buttons */}
-          <SettingsField label="Scanning frequency" description="Choose whether audits run on a recurring cadence or only when started manually." tooltip="Weekly and monthly schedules automatically queue future crawls. Manual keeps audits on-demand only.">
+          {/* Scanning frequency */}
+          <div className="flex flex-col gap-2">
+            <p className="text-[14px] font-medium text-gray-900">Scanning frequency</p>
             <div className="flex items-center gap-5 mt-1">
               {['Weekly', 'Monthly', 'Manual'].map(f => {
                 const checked = frequency === f.toLowerCase()
@@ -4817,40 +6665,63 @@ function WebsiteAuditSettingsModal({ onClose }) {
                     <span className={`flex items-center justify-center w-4 h-4 rounded-full border-2 transition-colors shrink-0 ${checked ? 'border-primary-600' : 'border-gray-300'}`}>
                       {checked && <span className="w-2 h-2 rounded-full bg-primary-600" />}
                     </span>
-                    <input type="radio" className="sr-only" checked={checked} onChange={() => setFrequency(f.toLowerCase())} />
+                    <input type="radio" className="sr-only" checked={checked} readOnly onChange={() => setFrequency(f.toLowerCase())} />
                     <span className="text-[14px] text-gray-700 font-medium">{f}</span>
                   </label>
                 )
               })}
             </div>
-          </SettingsField>
+          </div>
 
-          {/* Repeat every toggle (hidden for Manual) */}
-          {frequency !== 'manual' && (
-            <SettingsToggle
-              label="Repeat every"
-              description="Turn this on when you want the selected weekly or monthly cadence to repeat on a longer interval."
-              value={repeatEvery}
-              onChange={setRepeatEvery}
-            />
+          {/* Manual: informational message, hide all scheduling controls */}
+          {frequency === 'manual' && (
+            <div className="px-4 py-3 rounded-lg border border-gray-200" style={{ background: '#F2F4F7' }}>
+              <p className="text-[13px] text-gray-600 leading-relaxed">Audits will only run when started manually. No schedule will be created.</p>
+            </div>
           )}
 
-          {/* Interval — below repeat every */}
+          {/* Repeat interval — weekly & monthly only */}
           {frequency !== 'manual' && (
-            <SettingsField label="Interval" description="Set how many weekly or monthly cycles to skip between recurring runs.">
-              <div className="flex items-center gap-2 mt-1">
-                <input type="number" min={1} value={intervalVal} onChange={e => setIntervalVal(Number(e.target.value))}
-                  className="w-20 h-9 border border-gray-200 rounded-lg px-3 text-[14px] font-medium text-gray-900 outline-none focus:border-primary-600 transition-colors"
-                />
-                <span className="text-[13px] text-gray-500">{frequency === 'weekly' ? 'week' : 'month'}</span>
-              </div>
-            </SettingsField>
+            <div className="flex flex-col gap-3">
+              <SettingsToggle
+                label="Repeat interval"
+                description={
+                  frequency === 'weekly'
+                    ? (repeatEvery ? 'Runs every 2+ weeks.' : 'Runs every week by default. Enable to run every 2+ weeks.')
+                    : (repeatEvery ? 'Runs every 2+ months.' : 'Runs every month by default. Enable to run every 2+ months.')
+                }
+                value={repeatEvery}
+                onChange={setRepeatEvery}
+              />
+              {repeatEvery && (
+                <div className="flex items-center gap-2">
+                  <span className="text-[14px] font-medium text-gray-700">Run every</span>
+                  <div className="flex items-center h-9 border border-gray-200 rounded-lg overflow-hidden focus-within:border-primary-600 transition-colors">
+                    <input
+                      type="text"
+                      value={intervalVal}
+                      onChange={e => { const n = parseInt(e.target.value, 10); if (!isNaN(n) && n >= 1) setIntervalVal(n) }}
+                      className="w-12 h-full px-3 text-[14px] text-gray-900 outline-none bg-transparent text-center"
+                    />
+                    <div className="flex items-center h-full shrink-0">
+                      <button onClick={() => setIntervalVal(v => Math.max(1, v - 1))} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Minus size={11} />
+                      </button>
+                      <button onClick={() => setIntervalVal(v => v + 1)} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Plus size={11} />
+                      </button>
+                    </div>
+                  </div>
+                  <span className="text-[14px] font-medium text-gray-700">{frequency === 'weekly' ? 'weeks' : 'months'}</span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Days — weekly only */}
           {frequency === 'weekly' && (
-            <SettingsField label="Days" description="Select one or more weekdays for recurring weekly audits.">
-              <div className="flex items-center gap-2 flex-wrap mt-1">
+            <SettingsField label="Days">
+              <div className="flex items-center gap-2 flex-wrap">
                 {WEEKDAYS.map(d => {
                   const active = selectedDays.includes(d.toLowerCase())
                   return (
@@ -4865,24 +6736,35 @@ function WebsiteAuditSettingsModal({ onClose }) {
             </SettingsField>
           )}
 
-          {/* Day of month — monthly only */}
+          {/* Day of month + Time — side by side for monthly; Time full-width for weekly */}
           {frequency === 'monthly' && (
-            <SettingsField label="Day of month" description="Choose which calendar day should be used for monthly audits.">
-              <div className="relative mt-1">
-                <select value={dayOfMonth} onChange={e => setDayOfMonth(Number(e.target.value))}
-                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
-                >
-                  {Array.from({ length: 31 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
-                </select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
-            </SettingsField>
+            <div className="grid grid-cols-2 gap-5">
+              <SettingsField label="Day of month">
+                <div className="relative">
+                  <select value={dayOfMonth} onChange={e => setDayOfMonth(Number(e.target.value))}
+                    className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                  >
+                    {Array.from({ length: 31 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
+              </SettingsField>
+              <SettingsField label="Time (Asia/Calcutta)">
+                <div className="relative">
+                  <select value={auditTime} onChange={e => setAuditTime(e.target.value)}
+                    className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                  <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                </div>
+              </SettingsField>
+            </div>
           )}
 
-          {/* Time */}
-          {frequency !== 'manual' && (
-            <SettingsField label="Time (Asia/Calcutta)" description="Audit runs are scheduled against the workspace time zone shown beside this control.">
-              <div className="relative mt-1">
+          {frequency === 'weekly' && (
+            <SettingsField label="Time (Asia/Calcutta)">
+              <div className="relative">
                 <select value={auditTime} onChange={e => setAuditTime(e.target.value)}
                   className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
                 >
@@ -4893,8 +6775,8 @@ function WebsiteAuditSettingsModal({ onClose }) {
             </SettingsField>
           )}
 
-          {/* Notification emails — input always at top, chips below */}
-          <SettingsField label="Notification emails" description="Add one or more recipients who should receive the audit report after a scheduled run completes." tooltip="Everyone listed here receives the audit email after a scheduled run finishes.">
+          {/* Notification emails — always visible */}
+          <SettingsField label="Notification emails">
             <EmailChips list={emails} setList={setEmails} inputVal={emailInput} setInputVal={setEmailInput} />
           </SettingsField>
         </div>
@@ -4905,42 +6787,59 @@ function WebsiteAuditSettingsModal({ onClose }) {
   function renderSource() {
     return (
       <div className="flex flex-col gap-5 pb-4">
-        <p className="text-[18px] font-bold text-gray-900">Source of pages</p>
+        <p className="text-[18px] font-bold text-gray-900">Page sources</p>
         <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
-          <SettingsToggle label="Site pages"    description="Scan pages discovered by starting at the site and following internal links."    value={sitePages}  onChange={setSitePages} />
-          <SettingsToggle label="Subdomains"    description="Include pages found on connected subdomains in the same audit scope."          value={subdomains} onChange={setSubdomains} />
-          <SettingsToggle label="XML sitemap"   description="Use one or more XML sitemaps as crawl seeds for the audit."                    value={xmlSitemap} onChange={setXmlSitemap} />
-          <SettingsField label="Sitemaps" description="Add multiple sitemap files and review the number of URLs surfaced from each one.">
-            <div className="border border-gray-200 rounded-lg overflow-hidden mt-1">
-              <table className="w-full border-collapse text-left">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Sitemap</th>
-                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Number of URLs</th>
-                    <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sitemaps.map(s => (
-                    <tr key={s.url} className="border-b border-gray-100 last:border-0">
-                      <td className="px-4 py-3 text-[13px] text-gray-800">{s.url}</td>
-                      <td className="px-4 py-3 text-[13px] text-gray-700">{s.urlCount}</td>
-                      <td className="px-4 py-3">
-                        <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="text-[13px] font-medium text-primary-600 hover:underline">Remove</button>
-                      </td>
+          <SettingsToggle label="Site pages" description="Scan pages discovered by starting at the site and following internal links." value={sitePages} onChange={setSitePages} />
+
+          <div className="flex flex-col gap-3">
+            <SettingsToggle label="XML sitemap" description="Use one or more XML sitemaps as crawl seeds for the audit." value={xmlSitemap} onChange={setXmlSitemap} />
+
+            <div style={{ opacity: xmlSitemap ? 1 : 0.4, pointerEvents: xmlSitemap ? 'auto' : 'none', transition: 'opacity 0.2s' }}>
+              <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <table className="w-full border-collapse text-left">
+                  <thead>
+                    <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
+                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500">Sitemap</th>
+                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500 whitespace-nowrap">URLs</th>
+                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-500 w-10"></th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex items-center gap-2 p-3 border-t border-gray-100">
-                <input value={sitemapInput} onChange={e => setSitemapInput(e.target.value)}
-                  placeholder="https://www.gohighlevel.com/sitemap-pages.xml"
-                  className="flex-1 h-9 border border-gray-200 rounded-lg px-3 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors"
-                />
-                <button onClick={addSitemap} className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">Add sitemap</button>
+                  </thead>
+                  <tbody>
+                    {sitemaps.map(s => (
+                      <tr key={s.url} className="border-b border-gray-100 last:border-0" style={{ background: '#fff' }}>
+                        <td className="px-4 py-3 text-[13px] text-gray-800 break-all">{s.url}</td>
+                        <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{s.urlCount}</td>
+                        <td className="px-4 py-3">
+                          <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="p-1 text-gray-400 hover:text-error-600 transition-colors rounded">
+                            <Trash2 size={13} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {addingSitemap && (
+                      <tr className="border-t border-gray-100" style={{ background: '#fff' }}>
+                        <td className="px-3 py-2.5" colSpan={2}>
+                          <input autoFocus value={sitemapInput} onChange={e => setSitemapInput(e.target.value)}
+                            onKeyDown={e => { if (e.key === 'Enter') addSitemap() }}
+                            placeholder="https://example.com/sitemap.xml"
+                            className="w-full h-8 border border-gray-200 rounded-md px-3 text-[13px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors"
+                          />
+                        </td>
+                        <td className="px-3 py-2.5">
+                          <button onClick={addSitemap} className="h-8 px-3 rounded-md bg-primary-600 text-white text-[12px] font-semibold hover:bg-primary-700 transition-colors whitespace-nowrap">Add</button>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
               </div>
+              {!addingSitemap && (
+                <button onClick={() => setAddingSitemap(true)} className="mt-2 text-[13px] font-medium text-primary-600 hover:text-primary-700 transition-colors">
+                  + Add sitemap
+                </button>
+              )}
             </div>
-          </SettingsField>
+          </div>
         </div>
       </div>
     )
@@ -4949,35 +6848,61 @@ function WebsiteAuditSettingsModal({ onClose }) {
   function renderRules() {
     return (
       <div className="flex flex-col gap-5 pb-4">
-        <p className="text-[18px] font-bold text-gray-900">Rules for scanning pages</p>
+        <p className="text-[18px] font-bold text-gray-900">Page scan rules</p>
         <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
-          <SettingsToggle label="Respect robots.txt" description="Honor the site rules defined in robots.txt during the crawl."                   tooltip="Keeping this enabled matches how external crawlers see the site. Disable it only when you intentionally want an internal diagnostic crawl." value={respectRobots}   onChange={setRespectRobots} />
-          <SettingsToggle label="Ignore noindex"     description="Allow the audit to keep crawling pages even if they are marked noindex."        value={ignoreNoindex}   onChange={setIgnoreNoindex} />
-          <SettingsToggle label="Ignore nofollow"    description="Follow page links even when nofollow is present."                               value={ignoreNofollow}  onChange={setIgnoreNofollow} />
-          <SettingsField label="Only crawl URLs starting with" description="Limit the crawl to specific path prefixes."        tooltip="Add one path prefix per line to keep the crawl focused on a subset of the site.">
-            <textarea rows={3} value={onlyCrawlUrls} onChange={e => setOnlyCrawlUrls(e.target.value)} className={TA + ' font-mono'} />
+          <SettingsToggle label="Respect robots.txt" description="Honor the site rules defined in robots.txt during the crawl." tooltip="Keeping this enabled matches how external crawlers see the site. Disable it only when you intentionally want an internal diagnostic crawl." value={respectRobots} onChange={setRespectRobots} />
+          <SettingsToggle label="Ignore noindex"     description="Allow the audit to keep crawling pages even if they are marked noindex." value={ignoreNoindex}  onChange={setIgnoreNoindex} />
+          <SettingsToggle label="Ignore nofollow"    description="Follow page links even when nofollow is present."                       value={ignoreNofollow} onChange={setIgnoreNofollow} />
+
+          <div className="border-t border-gray-100" />
+
+          <SettingsField label="Only crawl URLs starting with" tooltip="Limit the crawl to specific path prefixes.">
+            <ChipInput list={onlyCrawlChips} setList={setOnlyCrawlChips} placeholder="/blog/, /docs/, ..." />
           </SettingsField>
-          <SettingsField label="Skip URLs starting with"        description="Exclude entire path groups from the crawl."       tooltip="Add one path prefix per line to keep internal, staging, or low-value areas out of the audit.">
-            <textarea rows={3} value={skipUrls} onChange={e => setSkipUrls(e.target.value)} className={TA + ' font-mono'} />
+
+          <SettingsField label="Skip URLs starting with" tooltip="Exclude entire path groups from the crawl.">
+            <ChipInput list={skipUrlChips} setList={setSkipUrlChips} placeholder="/staging/, /admin/, ..." />
           </SettingsField>
-          <SettingsField label="Hide URLs and resources starting with" description="Hide noisy resource paths from the report output." tooltip="Use this when technical resources are useful for crawling but should not clutter the findings view.">
-            <textarea rows={3} value={hideUrls} onChange={e => setHideUrls(e.target.value)} className={TA + ' font-mono'} />
+
+          <SettingsField label="Hide URLs and resources starting with" tooltip="Hide noisy resource paths from the report output.">
+            <ChipInput list={hideUrlChips} setList={setHideUrlChips} placeholder="/cdn-cgi/, /wp-json/, ..." />
           </SettingsField>
-          <SettingsField label="Ignore URL parameters" description="Control whether query-string variations should be treated as unique URLs." tooltip="This prevents tracking parameters and similar variations from inflating the page count.">
-            <div className="relative mt-1">
-              <select value={ignoreUrlParams} onChange={e => setIgnoreUrlParams(e.target.value)}
-                className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
-              >
-                <option value="disabled">Disabled</option>
-                <option value="all">Ignore all parameters</option>
-                <option value="custom">Ignore custom parameters</option>
-              </select>
-              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+
+          <div className="border-t border-gray-100" />
+
+          <div className="flex flex-col gap-2">
+            <p className="text-[14px] font-medium text-gray-900">Ignore URL parameters</p>
+            <div className="flex items-center gap-6 mt-0.5">
+              {[
+                { value: 'disabled', label: 'Disabled' },
+                { value: 'all',      label: 'Ignore all parameters' },
+                { value: 'custom',   label: 'Ignore custom parameters' },
+              ].map(opt => {
+                const checked = ignoreUrlParams === opt.value
+                return (
+                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer select-none">
+                    <span className={`flex items-center justify-center w-4 h-4 rounded-full border-2 transition-colors shrink-0 ${checked ? 'border-primary-600' : 'border-gray-300'}`}>
+                      {checked && <span className="w-2 h-2 rounded-full bg-primary-600" />}
+                    </span>
+                    <input type="radio" className="sr-only" checked={checked} readOnly onChange={() => setIgnoreUrlParams(opt.value)} />
+                    <span className="text-[14px] text-gray-700 font-medium">{opt.label}</span>
+                  </label>
+                )
+              })}
             </div>
-          </SettingsField>
-          <SettingsField label="Custom parameters" description="List custom parameters to ignore when the custom option is selected.">
-            <textarea rows={3} value={customParams} onChange={e => setCustomParams(e.target.value)} className={TA} />
-          </SettingsField>
+          </div>
+
+          {ignoreUrlParams === 'custom' && (
+            <div className="flex flex-col gap-1">
+              <p className="text-[14px] font-medium text-gray-900">Custom parameters</p>
+              <textarea rows={3} value={customParams} onChange={e => setCustomParams(e.target.value)}
+                placeholder="e.g. utm_source, utm_medium, gclid, fbclid"
+                className={TA} />
+            </div>
+          )}
+
+          {ignoreUrlParams === 'custom' && <div className="border-t border-gray-100" />}
+
           <SettingsField label="Ignore external domains and links" description="Exclude external domains or links from validation when they are not relevant to your audit scope." tooltip="List domains or full URLs that should be skipped during external link validation.">
             <textarea rows={3} value={ignoreExternalDomains} onChange={e => setIgnoreExternalDomains(e.target.value)} className={TA} />
           </SettingsField>
@@ -4999,7 +6924,7 @@ function WebsiteAuditSettingsModal({ onClose }) {
         <p className="text-[18px] font-bold text-gray-900">Parser settings</p>
         <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
           <SettingsField label="User agent" description="Select which crawler identity should be used when the site is fetched.">
-            <div className="relative mt-1">
+            <div className="relative">
               <select value={userAgent} onChange={e => setUserAgent(e.target.value)}
                 className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
               >
@@ -5015,24 +6940,45 @@ function WebsiteAuditSettingsModal({ onClose }) {
   }
 
   function renderLimits() {
-    function NumInput({ label, description, tooltip, value, onChange, min = 1 }) {
+    function NumInput({ label, tooltip, value, onChange, min = 1 }) {
       return (
-        <SettingsField label={label} description={description} tooltip={tooltip}>
-          <input type="number" min={min} value={value} onChange={e => onChange(Number(e.target.value))}
-            className="w-full h-10 border border-gray-200 rounded-lg px-3 text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors mt-1"
-          />
+        <SettingsField label={label} tooltip={tooltip}>
+          <div className="flex items-center h-10 border border-gray-200 rounded-lg overflow-hidden focus-within:border-primary-600 transition-colors">
+            <input
+              type="text"
+              value={value}
+              onChange={e => { const n = parseInt(e.target.value, 10); if (!isNaN(n)) onChange(Math.max(min, n)) }}
+              className="flex-1 min-w-0 h-full px-3 text-[14px] text-gray-900 outline-none bg-transparent"
+            />
+            <div className="flex items-center h-full shrink-0">
+              <button
+                onClick={() => onChange(Math.max(min, value - 1))}
+                className="h-full w-9 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <Minus size={13} />
+              </button>
+              <button
+                onClick={() => onChange(value + 1)}
+                className="h-full w-9 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+          </div>
         </SettingsField>
       )
     }
     return (
       <div className="flex flex-col gap-5 pb-4">
         <p className="text-[18px] font-bold text-gray-900">Limits and restrictions</p>
-        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
-          <NumInput label="Maximum pages to scan"       description="Set the upper limit for how many pages can be crawled in one audit pass."                         tooltip="This cap controls the size of each audit run and helps you manage crawl scope and time."                                                          value={maxPages}      onChange={setMaxPages} />
-          <NumInput label="Maximum crawl depth"         description="Limit how far the crawler should continue following internal links from the starting pages."       tooltip="Lower values keep the audit focused near top-level pages. Higher values allow deeper template and content discovery."                              value={maxCrawlDepth} onChange={setMaxCrawlDepth} />
-          <NumInput label="Maximum requests per second" description="Throttle crawl speed to control load on the website during the audit."                            tooltip="Reduce this limit if you want a lighter crawl footprint on the site during the audit."                                                             value={maxReqPerSec}  onChange={setMaxReqPerSec} />
-          <NumInput label="Maximum redirects"           description="Define how many redirects can be followed before the crawler stops tracking a URL chain."          tooltip="This helps the audit stop long redirect loops and report redirect chain issues more clearly."                                                       value={maxRedirects}  onChange={setMaxRedirects} />
-          <NumInput label="Maximum page size (KB)"      description="Ignore oversized responses once they exceed this download limit."                                  tooltip="Large files can slow the crawl down. Use this limit to skip oversized pages and resources."                                                        value={maxPageSize}   onChange={setMaxPageSize} />
+        <div className="border border-gray-200 rounded-lg p-5">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5">
+            <NumInput label="Maximum pages to scan"       tooltip="Set the upper limit for how many pages can be crawled in one audit pass."                   value={maxPages}      onChange={setMaxPages} />
+            <NumInput label="Maximum crawl depth"         tooltip="Limit how far the crawler should continue following internal links from the starting pages." value={maxCrawlDepth} onChange={setMaxCrawlDepth} />
+            <NumInput label="Maximum requests per second" tooltip="Throttle crawl speed to control load on the website during the audit."                      value={maxReqPerSec}  onChange={setMaxReqPerSec} />
+            <NumInput label="Maximum redirects"           tooltip="Define how many redirects can be followed before the crawler stops tracking a URL chain."   value={maxRedirects}  onChange={setMaxRedirects} />
+            <NumInput label="Maximum page size (KB)"      tooltip="Ignore oversized responses once they exceed this download limit."                           value={maxPageSize}   onChange={setMaxPageSize} />
+          </div>
         </div>
       </div>
     )
@@ -5050,6 +6996,38 @@ function WebsiteAuditSettingsModal({ onClose }) {
         </div>
       </div>
     )
+  }
+
+  const DEF_SITEMAPS     = [{ url: 'https://www.gohighlevel.com/sitemap.xml', urlCount: 775 }]
+  const DEF_CRAWL_CHIPS  = ['/blog/', '/compare/']
+  const DEF_SKIP_CHIPS   = ['/staging/', '/admin/']
+  const DEF_HIDE_CHIPS   = ['/cdn-cgi/', '/wp-json/']
+
+  const hasChanges =
+    frequency !== 'weekly' || repeatEvery !== false || intervalVal !== 2 ||
+    JSON.stringify(selectedDays) !== JSON.stringify(['mon']) || dayOfMonth !== 1 || auditTime !== '0:00' ||
+    sitePages !== true || xmlSitemap !== true ||
+    JSON.stringify(sitemaps) !== JSON.stringify(DEF_SITEMAPS) ||
+    respectRobots !== true || ignoreNoindex !== false || ignoreNofollow !== false ||
+    JSON.stringify(onlyCrawlChips) !== JSON.stringify(DEF_CRAWL_CHIPS) ||
+    JSON.stringify(skipUrlChips) !== JSON.stringify(DEF_SKIP_CHIPS) ||
+    JSON.stringify(hideUrlChips) !== JSON.stringify(DEF_HIDE_CHIPS) ||
+    ignoreUrlParams !== 'disabled' || customParams !== '' ||
+    maxPages !== 50 || maxCrawlDepth !== 10 || maxReqPerSec !== 500 || maxRedirects !== 5 || maxPageSize !== 3000 ||
+    sendReport !== true
+
+  function resetToDefaults() {
+    setFrequency('weekly'); setRepeatEvery(false); setIntervalVal(2)
+    setSelectedDays(['mon']); setDayOfMonth(1); setAuditTime('0:00')
+    setSitePages(true); setXmlSitemap(true)
+    setSitemaps(DEF_SITEMAPS); setSitemapInput(''); setAddingSitemap(false)
+    setRespectRobots(true); setIgnoreNoindex(false); setIgnoreNofollow(false)
+    setOnlyCrawlChips(DEF_CRAWL_CHIPS)
+    setSkipUrlChips(DEF_SKIP_CHIPS)
+    setHideUrlChips(DEF_HIDE_CHIPS)
+    setIgnoreUrlParams('disabled'); setCustomParams('')
+    setMaxPages(50); setMaxCrawlDepth(10); setMaxReqPerSec(500); setMaxRedirects(5); setMaxPageSize(3000)
+    setSendReport(true)
   }
 
   function renderContent() {
@@ -5099,13 +7077,22 @@ function WebsiteAuditSettingsModal({ onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 shrink-0 bg-white">
-          <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-            Cancel
+        <div className="flex items-center px-6 py-4 border-t border-gray-100 shrink-0 bg-white">
+          <button onClick={resetToDefaults} className="text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors">
+            Reset to default
           </button>
-          <button onClick={onClose} className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors">
-            Apply changes
-          </button>
+          <div className="flex items-center gap-3 ml-auto">
+            <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              Cancel
+            </button>
+            <button
+              onClick={hasChanges ? () => { onApply?.(); onClose() } : undefined}
+              disabled={!hasChanges}
+              className={`px-4 py-2 rounded-lg text-white text-[14px] font-semibold transition-colors ${hasChanges ? 'bg-primary-600 hover:bg-primary-700 cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+            >
+              Apply changes
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -5115,66 +7102,117 @@ function WebsiteAuditSettingsModal({ onClose }) {
 // ─── Crawling progress view ───────────────────────────────────────────────────
 
 function CrawlingProgressView({ progress, message, config }) {
-  return (
-    <div className="flex-1 overflow-auto bg-gray-50 p-5 min-h-0">
+  const domain = (config?.url || 'your website')
+    .replace(/^https?:\/\//, '').replace(/\/$/, '') || 'your website'
 
-      {/* Centered progress card — not full width */}
-      <div className="max-w-md mx-auto mb-6">
-        <div className="bg-white rounded-xl border border-gray-200 p-6 text-center" style={{ boxShadow: '0 1px 8px rgba(0,0,0,.06)' }}>
-          <div className="w-11 h-11 rounded-full bg-primary-50 flex items-center justify-center mx-auto mb-4">
-            <RefreshCw size={18} className="text-primary-600 animate-spin" style={{ animationDuration: '1.2s' }} />
-          </div>
-          <p className="text-[15px] font-semibold text-gray-900 mb-0.5">Crawling your website</p>
-          {config?.url && (
-            <p className="text-[12px] text-gray-400 mb-5 truncate px-4">{config.url}</p>
-          )}
-          {/* Contained progress bar */}
-          <div className="bg-gray-100 rounded-full h-1.5 mb-2 overflow-hidden">
+  const urlsFound    = Math.round(progress * 9.6)
+  const pagesAudited = Math.round(progress * 6.8)
+  const issuesFound  = Math.round(progress * 3.9)
+
+  const secondsLeft = Math.max(0, Math.round((100 - progress) / 100 * 26))
+  const etaText     = secondsLeft === 0 ? 'Almost done…' : secondsLeft < 60 ? `~${secondsLeft}s remaining` : `~${Math.ceil(secondsLeft / 60)}m remaining`
+
+  const stageStatus = (i) => {
+    const next = CRAWL_STAGES[i + 1]
+    if (next && progress >= next.at) return 'done'
+    if (progress >= CRAWL_STAGES[i].at) return 'active'
+    return 'pending'
+  }
+  const doneCount = CRAWL_STAGES.filter((_, i) => stageStatus(i) === 'done').length
+
+  const LIVE_URLS = [
+    '/', '/pricing', '/features', '/blog', '/about', '/contact',
+    '/blog/seo-tips', '/blog/content-marketing', '/pricing/enterprise',
+    '/features/automation', '/features/crm', '/blog/agency-growth',
+    '/careers', '/legal/privacy', '/legal/terms', '/support',
+    '/blog/lead-generation', '/api/docs', '/integrations', '/case-studies',
+  ]
+  const showCount = Math.min(LIVE_URLS.length, Math.max(1, Math.floor(progress / 5)))
+  const liveUrls  = [...LIVE_URLS.slice(0, showCount)].reverse()
+
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50 flex justify-center p-6" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
+      <div className="w-full flex flex-col gap-4" style={{ maxWidth: 740 }}>
+
+        {/* ── Main card ── */}
+        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden" style={{ boxShadow: '0 2px 16px rgba(0,0,0,.06)' }}>
+
+          {/* Top progress bar */}
+          <div className="h-[3px] bg-gray-100">
             <div
-              className="bg-primary-600 h-full rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progress}%` }}
+              className="h-full transition-all duration-500 ease-out"
+              style={{ width: `${progress}%`, background: 'linear-gradient(to right, #93C5FD, #155EEF)' }}
             />
           </div>
-          <div className="flex items-center justify-between mt-1.5">
-            <p className="text-[11px] text-gray-400 text-left truncate pr-4">{message}</p>
-            <p className="text-[12px] font-bold text-gray-700 shrink-0">{progress}%</p>
-          </div>
-        </div>
-      </div>
 
-      {/* Skeleton placeholders — where the dashboard data will appear */}
-      <div className="grid grid-cols-3 gap-4 mb-4">
-        {[40, 60, 50].map((w, i) => (
-          <div key={i} className="bg-white rounded-lg border border-gray-100 p-4">
-            <div className="h-2.5 bg-gray-100 rounded-full animate-pulse mb-3" style={{ width: `${w}%` }} />
-            <div className="h-7 bg-gray-100 rounded-lg animate-pulse w-1/3 mb-3" />
-            <div className="h-2 bg-gray-100 rounded-full animate-pulse w-full mb-1.5" />
-            <div className="h-2 bg-gray-100 rounded-full animate-pulse" style={{ width: '70%' }} />
-          </div>
-        ))}
-      </div>
-      <div className="grid grid-cols-5 gap-4">
-        <div className="col-span-3 bg-white rounded-lg border border-gray-100 p-4 h-44">
-          <div className="h-2.5 bg-gray-100 rounded-full animate-pulse w-1/3 mb-4" />
-          <div className="space-y-2.5">
-            {[100, 80, 90, 65].map((w, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="h-2 bg-gray-100 rounded-full animate-pulse flex-1" style={{ maxWidth: `${w}%` }} />
-                <div className="h-2 bg-gray-100 rounded-full animate-pulse w-8 shrink-0" />
+          {/* Two-panel row */}
+          <div className="flex" style={{ borderBottom: '1px solid #F2F4F7' }}>
+
+            {/* Left: percentage */}
+            <div className="flex flex-col items-center justify-center gap-2 p-8 shrink-0" style={{ minWidth: 210 }}>
+              <span className="text-[48px] font-semibold text-gray-900 tabular-nums leading-none">{progress}%</span>
+              <span className="text-[12px] text-gray-400">complete</span>
+            </div>
+
+            {/* Divider */}
+            <div className="w-px bg-gray-100 self-stretch shrink-0" />
+
+            {/* Right: audit stages */}
+            <div className="flex-1 min-w-0 p-5 flex flex-col">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[12px] font-semibold text-gray-700">Audit stages</p>
+                <span className="text-[12px] text-gray-400">{doneCount} of {CRAWL_STAGES.length} complete</span>
               </div>
-            ))}
+              <div className="flex flex-col gap-0.5">
+                {CRAWL_STAGES.map((stage, i) => {
+                  const status = stageStatus(i)
+                  return (
+                    <div key={i} className={`flex items-start gap-2.5 px-3 py-2 rounded-lg transition-colors ${status === 'active' ? 'bg-primary-50' : ''}`}>
+                      <div className="w-4 h-4 shrink-0 flex items-center justify-center mt-px">
+                        {status === 'done' ? (
+                          <CircleCheck size={16} className="text-success-600" />
+                        ) : status === 'active' ? (
+                          <Sparkles size={16} className="text-primary-600" />
+                        ) : (
+                          <span className="w-1.5 h-1.5 rounded-full bg-gray-300 block" />
+                        )}
+                      </div>
+                      <p className={`text-[12px] flex-1 leading-snug ${
+                        status === 'active' ? 'font-semibold text-primary-700' :
+                        status === 'done'   ? 'text-gray-400' :
+                                             'text-gray-300'
+                      }`}>{stage.msg}</p>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="col-span-2 bg-white rounded-lg border border-gray-100 p-4 h-44">
-          <div className="h-2.5 bg-gray-100 rounded-full animate-pulse w-2/5 mb-4" />
-          <div className="space-y-3">
-            {[70, 90, 55, 80].map((w, i) => (
-              <div key={i} className="h-2 bg-gray-100 rounded-full animate-pulse" style={{ width: `${w}%` }} />
-            ))}
-          </div>
-        </div>
-      </div>
 
+          {/* Bottom: domain + counters */}
+          <div className="px-6 py-5">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe size={13} className="text-gray-400 shrink-0" />
+              <p className="text-[13px] font-semibold text-gray-900 truncate">{domain}</p>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'URLs found',    value: urlsFound,    color: '#155EEF' },
+                { label: 'Pages audited', value: pagesAudited, color: '#0D9488' },
+                { label: 'Issues found',  value: issuesFound,  color: '#D97706' },
+              ].map(({ label, value, color }) => (
+                <div key={label} className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-3 text-center">
+                  <p className="text-[24px] font-bold tabular-nums leading-none" style={{ color }}>{value.toLocaleString()}</p>
+                  <p className="text-[12px] text-gray-400 mt-1.5">{label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+
+
+      </div>
     </div>
   )
 }
@@ -5264,7 +7302,7 @@ export default function SiteHealthDashboard() {
             ) : (
               <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
                 <RefreshCw size={13} />
-                Run again
+                Re-scan site
               </button>
             )}
             <button onClick={() => setShowSettings(true)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
@@ -5309,7 +7347,16 @@ export default function SiteHealthDashboard() {
         </div>
       )}
 
-      {showSettings && <WebsiteAuditSettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <WebsiteAuditSettingsModal
+          onClose={() => setShowSettings(false)}
+          onApply={() => {
+            if (alertTimer.current) clearTimeout(alertTimer.current)
+            setSuccessAlert('Selected website audit settings were successfully applied')
+            alertTimer.current = setTimeout(() => setSuccessAlert(null), 5000)
+          }}
+        />
+      )}
     </div>
   )
 }
