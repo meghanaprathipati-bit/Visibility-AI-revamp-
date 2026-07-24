@@ -33,8 +33,8 @@ const ONBOARDING_CUSTOM_INPUT_CLASS = 'onboarding-custom-input'
 /** Competitor table — shared flex columns so header and rows stay aligned */
 const COMPETITOR_ROW_LAYOUT = 'flex items-center gap-x-3 w-full min-w-0'
 const COMPETITOR_USE_SLOT = 'w-[28px] shrink-0 flex items-center justify-start'
-const COMPETITOR_BRAND_SLOT = 'flex-[1.15] min-w-0 basis-0 text-left'
-const COMPETITOR_DOMAIN_SLOT = 'flex-1 min-w-0 basis-0 text-left'
+const COMPETITOR_BRAND_SLOT = 'flex-1 min-w-0 basis-0 text-left'
+const COMPETITOR_DOMAIN_SLOT = 'flex-[1.15] min-w-0 basis-0 text-left'
 const COMPETITOR_NOTES_SLOT = 'w-[160px] shrink-0 min-w-0 text-left'
 
 const COMPETITOR_ROW_CLASS =
@@ -665,48 +665,36 @@ export default function InChatOnboardingCard({
         )}
       </div>
 
-      {/* Fixed footer — bordered strip with subtle light bg (separate from purple card body) */}
-      <div className="shrink-0 border-t border-purple-100 bg-gradient-to-b from-white to-purple-50">
-        <div className="flex items-center justify-end gap-4 px-4 py-3">
-          {!isLastStep && (
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="text-[14px] font-medium text-purple-600 hover:text-purple-700 transition-colors"
-            >
-              Skip
-            </button>
-          )}
+      {/* Footer — no divider line; actions sit on the same lavender surface as the form. */}
+      <div className="shrink-0 flex items-center justify-end gap-4 px-4 pb-3">
+        {!isLastStep && (
           <button
             type="button"
-            onClick={handleContinue}
-            disabled={stepIdx === 0 && !stepOneContinueEnabled}
-            className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-lg transition-colors shadow-xs"
+            onClick={handleSkip}
+            className="text-[14px] font-medium text-purple-600 hover:text-purple-700 transition-colors"
           >
-            {isLastStep ? 'Finish and run scan' : 'Continue'}
-            <span className="text-[13px] leading-none">↵</span>
+            Skip
           </button>
-        </div>
+        )}
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={stepIdx === 0 && !stepOneContinueEnabled}
+          className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-[14px] font-semibold rounded-lg transition-colors shadow-xs"
+        >
+          {isLastStep ? 'Finish and run scan' : 'Continue'}
+          <span className="text-[13px] leading-none">↵</span>
+        </button>
       </div>
     </div>
   )
 
   return (
     <div
-      className="relative w-full bg-purple-50 shrink-0 rounded-t-2xl rounded-b-none border border-solid border-b-0 pb-2 overflow-visible"
+      className="relative w-full bg-purple-50 shrink-0 rounded-t-2xl rounded-b-none border-t border-l border-r border-solid border-b-0 overflow-hidden"
       style={{ borderColor: '#6938EF66' }}
     >
       {inner}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute left-[-1px] w-px"
-        style={{ height: '8px', bottom: '-8px', backgroundColor: '#6938EF66' }}
-      />
-      <span
-        aria-hidden
-        className="pointer-events-none absolute right-[-1px] w-px"
-        style={{ height: '8px', bottom: '-8px', backgroundColor: '#6938EF66' }}
-      />
     </div>
   )
 }

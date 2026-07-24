@@ -2374,7 +2374,9 @@ function MainContent({
 
 
   const chatFooter = (
-    <div className="shrink-0 border-t border-gray-200 bg-white">
+    <div
+      className={`shrink-0 bg-white ${aiVisibilityAttachedComposer ? '' : 'border-t border-gray-200'}`}
+    >
       <div className={`mx-auto pb-2 pt-2 px-6 ${detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'}`}>
         {pendingQuestions && (
           <div className="mb-2">
@@ -2407,6 +2409,7 @@ function MainContent({
                 focusKey={composerFocusKey}
                 scanning={isScanning}
                 onStop={handleStopScan}
+                attachedMode
                 placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
               />
             </div>
@@ -2683,6 +2686,7 @@ function MainContent({
                   <AiVisibilitySetupCard
                     onContinue={handleAiVisibilitySetupContinue}
                     actionsDisabled={Boolean(msg.setupStarted || onboardingPending)}
+                    hideFooter={Boolean(onboardingPending)}
                   />
                   <AiFeedbackRow ts={msg.ts} />
                 </div>
