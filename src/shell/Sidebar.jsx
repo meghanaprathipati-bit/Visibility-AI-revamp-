@@ -193,7 +193,7 @@ export default function Sidebar({
           )}
 
           {/* Nav items */}
-          <div className="flex flex-col gap-1 flex-1 overflow-y-auto">
+          <div className="flex flex-col gap-1 flex-1 overflow-y-auto no-scrollbar">
             {isSettings ? (
               sections.map((section, i) => (
                 <div key={i} className="flex flex-col gap-1">

@@ -2,7 +2,12 @@ import HLButton from './HLButton.jsx'
 import { AI_VISIBILITY_SETUP_GREETING } from '../data/onboardingData.js'
 
 /** AI visibility onboarding — greeting + CTA before the 3-step question component */
-export default function AiVisibilitySetupCard({ onContinue, actionsDisabled = false }) {
+export default function AiVisibilitySetupCard({
+  onContinue,
+  actionsDisabled = false,
+  /** When true, hide outro + Continue — wizard is shown below instead */
+  hideFooter = false,
+}) {
   const copy = AI_VISIBILITY_SETUP_GREETING
 
   return (
@@ -19,20 +24,24 @@ export default function AiVisibilitySetupCard({ onContinue, actionsDisabled = fa
             </li>
           ))}
         </ul>
-        <p className="text-[14px] text-gray-700 leading-relaxed m-0">{copy.outro}</p>
+        {!hideFooter && (
+          <p className="text-[14px] text-gray-700 leading-relaxed m-0">{copy.outro}</p>
+        )}
       </div>
-      <div className="flex flex-wrap items-center justify-start gap-2">
-        <HLButton
-          variant="primary"
-          color="blue"
-          size="sm"
-          disabled={actionsDisabled}
-          className="w-fit"
-          onClick={onContinue}
-        >
-          {copy.ctaLabel}
-        </HLButton>
-      </div>
+      {!hideFooter && (
+        <div className="flex flex-wrap items-center justify-start gap-2">
+          <HLButton
+            variant="primary"
+            color="blue"
+            size="sm"
+            disabled={actionsDisabled}
+            className="w-fit"
+            onClick={onContinue}
+          >
+            {copy.ctaLabel}
+          </HLButton>
+        </div>
+      )}
     </div>
   )
 }
