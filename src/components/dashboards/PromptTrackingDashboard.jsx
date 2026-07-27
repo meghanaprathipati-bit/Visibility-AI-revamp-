@@ -9,7 +9,12 @@ import {
 } from '../../icons/index.js'
 import SourceInventoryContent from './SourceInventoryContent'
 import CountCard from '../CountCard.jsx'
-import HLInput, { HL_INPUT_CLASS } from '../HLInput.jsx'
+import HLInput from '../HLInput.jsx'
+
+// Matches the canonical HLInput sm styling for raw <select>/<input> elements
+// that can't use the HLInput component directly.
+const HL_INPUT_CLASS =
+  'w-full h-8 rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 placeholder:text-gray-400 outline-none transition-colors focus:border-primary-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed px-3'
 import VisibilityMeter, { visibilityColor } from '../VisibilityMeter.jsx'
 import CompanyLogo from '../CompanyLogo.jsx'
 import DateRangePicker, { formatRange } from '../DateRangePicker.jsx'
@@ -2516,7 +2521,7 @@ function AddCompetitorModal({ onClose, onSave }) {
           <div>
             <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Website</p>
             <HLInput
-              icon={Globe}
+              prefixIcon={Globe}
               value={website}
               onChange={e => setWebsite(e.target.value)}
               placeholder="e.g. hubspot.com"
