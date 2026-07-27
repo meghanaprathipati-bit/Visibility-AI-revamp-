@@ -1,0 +1,94 @@
+---
+description: Modal conventions — 16px semibold title, 14px regular subtext, text-only primary CTA
+alwaysApply: true
+---
+
+# Modal title & subtext
+
+Every modal / dialog in the app (confirm dialogs, `Add prompt`, `Add
+competitor`, `Track prompt`, `Connect fixes`, subscription, setup wizard,
+`Website audit settings`, `New project`, etc.) must use one consistent header
+typography. Consistency across modals matters more than per-modal creativity.
+
+## Fixed typography — never change
+
+- **Title** — `text-[16px] font-semibold text-gray-900` (16px, semibold, never
+  18px / bold, never 15px).
+- **Subtext** (the descriptive line under the title) —
+  `text-[14px] font-normal text-gray-500` (14px, regular weight, never
+  13px, never `font-medium` / `font-semibold`).
+
+These are exported from the shared modal component so they can be reused
+verbatim:
+
+```
+src/components/HLModal.jsx  →  export const modalTitle, modalSubtext
+```
+
+```jsx
+import { modalTitle, modalSubtext } from '../HLModal.jsx' // adjust relative depth
+
+<h2 className={modalTitle}>Add prompt</h2>
+<p className={modalSubtext}>Use your own prompt or start from an AI-suggested prompt.</p>
+```
+
+Inline usage must match exactly:
+
+```jsx
+<h2 className="text-[16px] font-semibold text-gray-900">Add competitor</h2>
+<p className="text-[14px] font-normal text-gray-500">Add a brand to track alongside yours.</p>
+```
+
+## Rules
+
+- The modal **title** is the single top heading of the dialog — style it
+  `text-[16px] font-semibold text-gray-900`. Do not use `text-[18px]`,
+  `font-bold`, or `text-[15px]` for a modal title.
+- The **subtext** directly under the title is `text-[14px] font-normal
+  text-gray-500`. Do not make it 13px or give it `font-medium`.
+- Sentence case for both (see the sentence-casing rule).
+- This applies whether the modal is built on `HLModal` or as a bespoke
+  `createPortal` / `role="dialog"` dialog.
+
+## Primary CTA — text only, no icon
+
+The primary action button in a modal footer is **text only** — never add a
+leading or trailing icon (no `Check`, `ChevronRight`, `CreditCard`, `RefreshCw`,
+`ArrowRight`, etc.).
+
+```jsx
+// Good
+<button className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold">
+  Add competitor
+</button>
+
+// Bad — icon in the primary CTA
+<button className="... inline-flex items-center gap-1.5 ...">
+  <Check size={14} /> Add competitor
+</button>
+```
+
+- Remove `inline-flex items-center gap-1.5` icon wrappers from the primary CTA
+  when there is no longer an icon (keep `inline-flex items-center justify-center`
+  only if needed for alignment).
+- This applies to the primary CTA specifically. Secondary/tertiary buttons
+  (e.g. a `← Previous step` back button) may keep an icon if it aids meaning,
+  but prefer text-only for consistency.
+
+## Scope
+
+- Applies to the modal's own header only. Section headings, card titles, and
+  step labels **inside** the modal body keep their own styling — do not force
+  them to 16px/14px.
+- The macOS-style file picker (`DesktopAccessModal`) is an OS-chrome mimic, not
+  a product modal, and is exempt from this rule.
+
+## Before finishing modal work
+
+- [ ] Title is `text-[16px] font-semibold text-gray-900`.
+- [ ] Subtext is `text-[14px] font-normal text-gray-500`.
+- [ ] No `text-[18px]` / `font-bold` / `text-[15px]` / 13px title-or-subtext left
+      on the modal header.
+- [ ] Reused `modalTitle` / `modalSubtext` (or the exact classes) instead of a
+      bespoke size.
+- [ ] Primary CTA is text only — no leading/trailing icon.

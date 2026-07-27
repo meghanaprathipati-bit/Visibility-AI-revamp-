@@ -1,0 +1,57 @@
+---
+description: Use the shared HLInput (sm, 8px radius) for every input field
+alwaysApply: true
+---
+
+# Input fields
+
+Every text-style input in the app (text, number, email, url, password, search)
+must use the shared component:
+
+```
+src/components/HLInput.jsx
+```
+
+This is the React adapter for the HighRise `HLInput`. Do not hand-roll `<input>`
+markup with bespoke sizing, and do not fork these styles into a page.
+
+## Fixed design — never change
+
+- **Size**: `sm` → 32px tall (`h-8`).
+- **Corners**: 8px (`rounded-lg`).
+- **Border**: `border-gray-300`; focus → `focus:border-primary-600`.
+- **Text**: `text-[14px] text-gray-900`, `placeholder:text-gray-400`.
+- **Padding**: `px-3` (or `pl-9 pr-3` when there is a leading icon).
+- **Disabled**: `disabled:bg-gray-50 disabled:text-gray-400`.
+
+Do not use `h-9`/`h-10`, `rounded-md`, `border-gray-200` on inputs, `py-2.5`
+free-form padding, or `focus:border-primary-400`. If a design shows a different
+height or radius, still use the `HLInput` sizing.
+
+## Usage
+
+```jsx
+import HLInput, { HL_INPUT_CLASS } from '../HLInput.jsx' // adjust relative depth
+
+// Plain input
+<HLInput value={v} onChange={e => setV(e.target.value)} placeholder="Input text" />
+
+// With a leading icon (from src/icons)
+<HLInput icon={Globe} value={site} onChange={e => setSite(e.target.value)} placeholder="e.g. hubspot.com" />
+
+// Non-input elements that must match (e.g. a <select>): reuse the class
+<select className={`${HL_INPUT_CLASS} appearance-none pr-10 cursor-pointer`}>…</select>
+```
+
+- Label pattern above the field: `text-[12px] font-medium text-gray-500 mb-2`.
+- `HLInput` forwards all native props (`value`, `onChange`, `placeholder`,
+  `type`, `disabled`, `autoFocus`, `maxLength`, …).
+- For a leading icon use the `icon` prop (renders it at `left-3`, adds `pl-9`).
+- `<textarea>` and `<select>` are not inputs, but should match the input's
+  radius/border/focus — reuse `HL_INPUT_CLASS` (drop `h-8` for multiline).
+
+## Do not
+
+- Do not build an input with raw `<input className="…custom…">` when `HLInput` fits.
+- Do not change the height, radius, border color, or focus color per usage.
+- Do not reintroduce `h-9`/`rounded-md` search or form inputs.

@@ -2,494 +2,518 @@ import { useState } from 'react'
 import {
   Globe, MapPin, Search, BarChart3, Link2,
   AlertTriangle, CircleCheck, ChevronRight, ChevronDown, Zap, Bot, FileText,
-  Sparkles, ArrowUp, Check,
+  Sparkles, ArrowUp, Check, X, ArrowLeft, RefreshCw, Plus,
 } from '../../icons/index.js'
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
-function HoverCard({ children, style = {}, className = '' }) {
-  const [hov, setHov] = useState(false)
-  return (
-    <div
-      className={className}
-      style={{
-        transition: 'transform 200ms ease, box-shadow 200ms ease',
-        transform: hov ? 'translateY(-2px)' : 'translateY(0)',
-        boxShadow: hov
-          ? '0 8px 28px rgba(0,0,0,0.10), 0 2px 8px rgba(0,0,0,0.06)'
-          : '0 1px 4px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-        ...style,
-      }}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-    >
-      {children}
-    </div>
-  )
-}
-
-function CircularProgress({ pct = 0, size = 152, strokeW = 13, color = '#155EEF' }) {
-  const r = (size - strokeW) / 2
-  const circ = 2 * Math.PI * r
-  const filled = (Math.min(100, Math.max(0, pct)) / 100) * circ
-  return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ transform: 'rotate(-90deg)' }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#F2F4F7" strokeWidth={strokeW} />
-      <circle
-        cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color}
-        strokeWidth={strokeW} strokeLinecap="round"
-        strokeDasharray={`${filled.toFixed(2)} ${(circ - filled).toFixed(2)}`}
-      />
-    </svg>
-  )
-}
-
-function Sparkline({ data, color = '#6938EF' }) {
-  const w = 64, h = 26
-  const min = Math.min(...data), max = Math.max(...data), rng = max - min || 1
-  const pts = data.map((v, i) =>
-    `${((i / (data.length - 1)) * w).toFixed(1)},${(h - ((v - min) / rng) * (h - 6) - 3).toFixed(1)}`
-  ).join(' ')
-  return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ flexShrink: 0 }}>
-      <polyline points={pts} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  )
-}
-
-function TrendChip({ value }) {
-  if (!value) return null
+function TrendBadge({ value }) {
+  if (value == null || value === 0) return null
   const up = value > 0
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 2,
-      fontSize: 11, fontWeight: 600, borderRadius: 5,
-      padding: '2px 6px',
-      background: up ? '#F0FDF4' : '#FEF2F2',
-      color: up ? '#16A34A' : '#DC2626',
-    }}>
-      <ArrowUp size={9} style={{ transform: up ? 'none' : 'rotate(180deg)' }} />
-      {Math.abs(value)}%
+    <span className={`inline-flex items-center gap-0.5 text-[12px] font-medium ${up ? 'text-success-600' : 'text-error-600'}`}>
+      <ArrowUp size={10} className={up ? '' : 'rotate-180'} />
+      {up ? '+' : ''}{value}%
     </span>
   )
 }
 
-function ProgressBar({ pct, color }) {
+function ReadyBadge({ ready, total }) {
+  const allReady = ready === total
   return (
-    <div style={{ height: 5, background: '#F2F4F7', borderRadius: 3, overflow: 'hidden', marginTop: 6 }}>
-      <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: 3, transition: 'width 700ms ease' }} />
-    </div>
-  )
-}
-
-function Stars({ value }) {
-  return (
-    <div style={{ display: 'flex', gap: 2, marginTop: 4 }}>
-      {[1, 2, 3, 4, 5].map(i => (
-        <span key={i} style={{ fontSize: 14, color: i <= Math.round(value) ? '#F59E0B' : '#E5E7EB' }}>★</span>
-      ))}
-    </div>
-  )
-}
-
-function StatusPill({ status }) {
-  const isReady = status === 'ready' || status === 'connected'
-  const label = status === 'connected' ? 'Connected' : isReady ? 'Ready' : 'Needs setup'
-  return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 4,
-      fontSize: 11, fontWeight: 600, borderRadius: 999,
-      padding: '2px 8px', flexShrink: 0,
-      background: isReady ? '#F0FDF4' : '#FFFBEB',
-      border: `1px solid ${isReady ? '#BBF7D0' : '#FDE68A'}`,
-      color: isReady ? '#15803D' : '#B45309',
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: isReady ? '#16A34A' : '#D97706', flexShrink: 0 }} />
-      {label}
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border ${
+      allReady
+        ? 'bg-success-50 text-success-700 border-success-200'
+        : 'bg-warning-100 text-warning-700 border-warning-100'
+    }`}>
+      {ready}/{total} ready
     </span>
   )
 }
 
-// ─── Data ─────────────────────────────────────────────────────────────────────
+function ProgressBar({ pct, colorClass }) {
+  return (
+    <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+      <div
+        className={`h-full rounded-full transition-all duration-700 ${colorClass}`}
+        style={{ width: `${Math.min(100, Math.max(0, pct))}%` }}
+      />
+    </div>
+  )
+}
 
-const SETUP_ITEMS = [
-  { Icon: Globe,     status: 'connected',  title: 'Website',          desc: 'ramada.9hf9h.com',  cta: 'Open Site Health', iconBg: '#F0FDF4', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
-  { Icon: MapPin,    status: 'needsSetup', title: 'Business Profile', desc: 'Unlocks 2 modules', cta: 'Connect GBP',      iconBg: '#DCFCE7', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
-  { Icon: Search,    status: 'needsSetup', title: 'Search Console',   desc: 'Unlocks 2 modules', cta: 'Connect GSC',      iconBg: '#EEF4FF', iconColor: '#155EEF', iconBorder: '#C7D7FD' },
-  { Icon: BarChart3, status: 'needsSetup', title: 'Google Analytics', desc: 'Unlocks 1 module',  cta: 'Connect GA4',      iconBg: '#FFFBEB', iconColor: '#D97706', iconBorder: '#FDE68A' },
-  { Icon: Link2,     status: 'needsSetup', title: 'Listings',         desc: 'Unlocks 1 module',  cta: 'Set up listings',  iconBg: '#F0FDF4', iconColor: '#16A34A', iconBorder: '#BBF7D0' },
-]
+// ─── Data (hardcoded for prototyping) ─────────────────────────────────────────
 
-const QUICK_STATS = [
-  { label: 'Setup ready',       value: '1 / 5', Icon: CircleCheck,   accent: '#16A34A', bg: '#F0FDF4' },
-  { label: 'Integrations',      value: '0',     Icon: Zap,           accent: '#155EEF', bg: '#EEF4FF' },
-  { label: 'Keywords tracked',  value: '0',     Icon: Search,        accent: '#6938EF', bg: '#F4F3FF' },
-  { label: 'Actions remaining', value: '4',     Icon: AlertTriangle, accent: '#D97706', bg: '#FFFBEB' },
+// HARDCODED: workspace setup flow — mirrors HLProgressSteps statuses
+// complete = green, current = primary blue, default = pending gray
+const SETUP_CONNECTIONS = [
+  {
+    id: 'website',
+    Icon: Globe,
+    title: 'Website',
+    status: 'complete',
+    meta: 'ramada.9hf9h.com',
+    unlocks: 'Site health and technical SEO scans are live',
+    cta: 'Open site health',
+  },
+  {
+    id: 'gbp',
+    Icon: MapPin,
+    title: 'Google Business Profile',
+    status: 'current',
+    meta: 'Est. 2 min',
+    unlocks: 'Unlocks Profile health and Map rankings for local visibility',
+    cta: 'Connect',
+  },
+  {
+    id: 'gsc',
+    Icon: Search,
+    title: 'Search Console',
+    status: 'default',
+    meta: 'Google',
+    unlocks: 'Unlocks Search performance and Keyword rankings',
+    cta: 'Connect',
+  },
+  {
+    id: 'ga',
+    Icon: BarChart3,
+    title: 'Google Analytics',
+    status: 'default',
+    meta: 'GA4',
+    unlocks: 'Unlocks Traffic & engagement across channels',
+    cta: 'Connect',
+  },
+  {
+    id: 'listings',
+    Icon: Link2,
+    title: 'Listings',
+    status: 'default',
+    meta: 'Directories',
+    unlocks: 'Unlocks Review health and directory accuracy checks',
+    cta: 'Connect',
+  },
 ]
 
 const MODULE_SECTIONS = [
   {
-    id: 'ai-search', Icon: Sparkles, accent: '#6938EF', accentBg: '#F4F3FF',
-    title: 'AI search',
-    desc: 'Monitor your brand visibility across AI-powered search engines and assistants.',
+    id: 'ai-search', Icon: Sparkles, title: 'AI search',
+    desc: 'Monitor brand visibility across AI-powered search engines and assistants.',
+    // Theme: success green
+    accent: 'text-success-600', accentBg: 'bg-success-50', bar: 'bg-success-600',
     cards: [
       {
-        title: 'AI Search Performance', status: 'ready', cta: 'Open dashboard',
+        title: 'AI search performance', status: 'ready', cta: 'Open dashboard',
         metrics: [
-          { label: 'Brand presence',        value: '38%',    trend: 12,  sparkData: [20,22,25,28,30,34,38], sparkColor: '#6938EF' },
-          { label: 'Engines with mentions', value: '3 of 5', trend: 0,   sparkData: [1,2,2,3,3,3,3],       sparkColor: '#6938EF' },
+          { label: 'Brand presence',        value: '38%',    trend: 12 },
+          { label: 'Engines with mentions', value: '3 of 5', trend: 0 },
         ],
       },
       {
-        title: 'Prompt Tracking', status: 'ready', cta: 'Open dashboard',
+        title: 'Prompt tracking', status: 'ready', cta: 'Open dashboard',
         metrics: [
-          { label: 'Tracked prompts', value: '18', trend: 8,  sparkData: [8,10,12,13,15,16,18], sparkColor: '#155EEF' },
-          { label: 'Winning prompts', value: '7',  trend: 17, sparkData: [2,3,4,4,5,6,7],       sparkColor: '#155EEF' },
+          { label: 'Tracked prompts', value: '18', trend: 8 },
+          { label: 'Winning prompts', value: '7',  trend: 17 },
         ],
       },
       {
-        title: 'AI Health', status: 'ready', cta: 'Open dashboard',
+        title: 'AI health', status: 'ready', cta: 'Open dashboard',
         metrics: [
-          { label: 'Health score',      value: '72', trend: 4,   sparkData: [58,62,65,67,69,71,72], sparkColor: '#16A34A' },
-          { label: 'Priority blockers', value: '5',  trend: -37, sparkData: [9,8,7,7,6,6,5],       sparkColor: '#DC2626' },
+          { label: 'Health score',      value: '72', trend: 4 },
+          { label: 'Priority blockers', value: '5',  trend: -37 },
         ],
       },
     ],
   },
   {
-    id: 'search-engines', Icon: Search, accent: '#155EEF', accentBg: '#EEF4FF',
-    title: 'Search engines',
+    id: 'search-engines', Icon: Search, title: 'Search engines',
     desc: 'Track rankings, keyword performance, and technical site health across Google.',
+    // Theme: warning orange
+    accent: 'text-warning-600', accentBg: 'bg-warning-100', bar: 'bg-warning-600',
     cards: [
       {
-        title: 'Search Performance', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Search performance', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Tracked keywords',   value: '52', trend: 4,  sparkData: [48,49,50,51,51,52,52], sparkColor: '#6938EF' },
-          { label: 'Keywords in top 10', value: '11', trend: 10, sparkData: [7,8,9,9,10,10,11],     sparkColor: '#6938EF' },
+          { label: 'Tracked keywords',   value: '52', trend: 4 },
+          { label: 'Keywords in top 10', value: '11', trend: 10 },
         ],
       },
       {
-        title: 'Keyword Rankings', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Keyword rankings', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Keywords in top 10', value: '11', trend: 10, sparkData: [7,8,9,9,10,10,11], sparkColor: '#6938EF' },
-          { label: 'Fast movers',        value: '6',  trend: 20, sparkData: [2,3,3,4,5,5,6],   sparkColor: '#6938EF' },
+          { label: 'Keywords in top 10', value: '11', trend: 10 },
+          { label: 'Fast movers',        value: '6',  trend: 20 },
         ],
       },
       {
-        title: 'Site Health', status: 'ready', cta: 'Open dashboard',
+        title: 'Site health', status: 'ready', cta: 'Open dashboard',
         metrics: [
-          { label: 'Health score', value: '74', trend: 6,   sparkData: [63,66,69,71,72,73,74], sparkColor: '#16A34A' },
-          { label: 'Errors',       value: '17', trend: -23, sparkData: [22,21,20,19,18,18,17], sparkColor: '#DC2626' },
+          { label: 'Health score', value: '74', trend: 6 },
+          { label: 'Errors',       value: '17', trend: -23 },
         ],
       },
     ],
   },
   {
-    id: 'gbp', Icon: MapPin, accent: '#16A34A', accentBg: '#F0FDF4',
-    title: 'GBP & listings',
+    id: 'gbp', Icon: MapPin, title: 'GBP & listings',
     desc: 'Local presence, directory accuracy, and review performance at a glance.',
+    // Theme: success green
+    accent: 'text-success-600', accentBg: 'bg-success-50', bar: 'bg-success-600',
     cards: [
       {
-        title: 'Profile Health', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Profile health', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Profile completeness', value: '86%', progressPct: 86, progressColor: '#16A34A' },
+          { label: 'Profile completeness', value: '86%' },
           { label: 'Suggested fixes',      value: '4' },
         ],
       },
       {
-        title: 'Map Rankings', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Map rankings', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Map-pack coverage', value: '71%',            progressPct: 71, progressColor: '#16A34A' },
-          { label: 'Tracked zones',     value: '49 grid points' },
+          { label: 'Map-pack coverage', value: '71%' },
+          { label: 'Tracked zones',     value: '49' },
         ],
       },
       {
-        title: 'Review Health', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Review health', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Average rating',   value: '4.6 / 5', starValue: 4.6 },
+          { label: 'Average rating',   value: '4.6' },
           { label: 'Responses needed', value: '8' },
         ],
       },
     ],
   },
   {
-    id: 'content', Icon: FileText, accent: '#D97706', accentBg: '#FFFBEB',
-    title: 'Content & analytics',
+    id: 'content', Icon: FileText, title: 'Content & analytics',
     desc: 'Content gaps, competitor insights, and cross-channel traffic signals.',
+    // Theme: fuchsia / pink
+    accent: 'text-fuchsia-500', accentBg: 'bg-purple-50', bar: 'bg-fuchsia-500',
     cards: [
       {
-        title: 'Content Studio', status: 'ready', cta: 'Open dashboard',
+        title: 'Content studio', status: 'ready', cta: 'Open dashboard',
         metrics: [
-          { label: 'Briefs ready',   value: '4', trend: 33, sparkData: [1,2,2,3,3,4,4], sparkColor: '#D97706' },
+          { label: 'Briefs ready',   value: '4', trend: 33 },
           { label: 'Priority pages', value: '2' },
         ],
       },
       {
-        title: 'Search Presence', status: 'ready', cta: 'Open dashboard',
+        title: 'Search presence', status: 'ready', cta: 'Open dashboard',
         metrics: [
           { label: 'Tracked competitors', value: '6' },
-          { label: 'Visibility gaps',     value: '2', trend: -33, sparkData: [5,5,4,4,3,2,2], sparkColor: '#16A34A' },
+          { label: 'Visibility gaps',     value: '2', trend: -33 },
         ],
       },
       {
-        title: 'Traffic & Engagement', status: 'needsSetup', cta: 'Finish setup',
+        title: 'Traffic & engagement', status: 'needsSetup', cta: 'Finish setup',
         metrics: [
-          { label: 'Sessions',         value: '84.6K', trend: 9, sparkData: [70,74,78,80,82,83,85], sparkColor: '#D97706' },
-          { label: 'Engaged sessions', value: '49.8K', trend: 7, sparkData: [40,43,45,47,48,49,50], sparkColor: '#D97706' },
+          { label: 'Sessions',         value: '84.6K', trend: 9 },
+          { label: 'Engaged sessions', value: '49.8K', trend: 7 },
         ],
       },
     ],
   },
 ]
 
-// ─── Hero Section (with embedded KPI cards + inline CTA) ─────────────────────
+// ─── Setup workspace (unified with connections) ───────────────────────────────
+// Visual pattern aligned with HighRise HLProgressSteps:
+// https://highrise.gohighlevel.com/components/navigation/progress-steps
+// complete = success green · current = primary blue · default = gray
 
-function HeroSection({ showAction = false }) {
+function SetupProgressSteps({ steps, setupComplete }) {
+  // Circle 32px. Line starts/ends 32px from each circle edge.
+  // Equal columns keep first/last steps inset — Listings won't sit flush on the card edge.
+  const CIRCLE = 32
+  const GAP = 32
+
   return (
-    <div style={{
-      background: '#fff',
-      border: '1px solid #EAECF0',
-      borderRadius: 8,
-      padding: '20px 24px',
-    }}>
-      {/* Identity row */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, marginBottom: 20 }}>
-        <div style={{ width: 40, height: 40, borderRadius: 8, background: '#EEF4FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
-          <Globe size={18} style={{ color: '#155EEF' }} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
-            <h1 style={{ fontSize: 15, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1.3 }}>Ramada International</h1>
-            <span style={{ fontSize: 12, color: '#98A2B3' }}>ramada.9hf9h.com · Hotel &amp; Hospitality</span>
+    <div
+      className="grid w-full"
+      style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }}
+      role="list"
+      aria-label="Workspace setup progress"
+    >
+      {steps.map((step, i) => {
+        const status = setupComplete ? 'complete' : step.status
+        const complete = status === 'complete'
+        const current = status === 'current'
+        const isLast = i === steps.length - 1
+
+        return (
+          <div key={step.id} className="relative flex flex-col items-center min-w-0" role="listitem">
+            {/* Connector to next step: 32px gap from each circle */}
+            {!isLast && (
+              <div
+                className={`absolute top-4 h-0.5 rounded-full z-0 ${complete ? 'bg-success-600' : 'bg-gray-200'}`}
+                style={{
+                  left: `calc(50% + ${CIRCLE / 2 + GAP}px)`,
+                  width: `calc(100% - ${CIRCLE + GAP * 2}px)`,
+                }}
+                aria-hidden="true"
+              />
+            )}
+
+            <div
+              className={`relative z-10 rounded-full flex items-center justify-center shrink-0 border transition-colors ${
+                complete
+                  ? 'bg-success-600 border-success-600 text-white'
+                  : current
+                    ? 'bg-primary-600 border-primary-600 text-white'
+                    : 'bg-white border-gray-300 text-gray-400'
+              }`}
+              style={{ width: CIRCLE, height: CIRCLE }}
+              aria-current={current ? 'step' : undefined}
+            >
+              {complete
+                ? <Check size={14} strokeWidth={2.5} />
+                : <span className="text-[12px] font-semibold">{i + 1}</span>}
+            </div>
+
+            <p
+              className={`mt-2 text-[12px] font-medium text-center m-0 leading-snug w-full px-1 ${
+                complete ? 'text-success-700' : current ? 'text-primary-600' : 'text-gray-400'
+              }`}
+            >
+              {step.title}
+            </p>
           </div>
-          <p style={{ fontSize: 13, color: '#475467', margin: '0 0 12px', lineHeight: 1.6, maxWidth: 680 }}>
-            Ramada International: Your Premier Hotel Destination still has 4 setup items before every dashboard can show live data. Start with the cards below, then use the module summaries to jump straight into the right workflow.
+        )
+      })}
+    </div>
+  )
+}
+
+function SetupWorkspaceCard({ onConnect, setupComplete }) {
+  const completedCount = setupComplete
+    ? SETUP_CONNECTIONS.length
+    : SETUP_CONNECTIONS.filter(s => s.status === 'complete').length
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-6">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 flex-wrap mb-6">
+        <div className="min-w-0">
+          <h1 className="text-[16px] font-semibold text-gray-900 m-0 leading-snug">Setup your workspace</h1>
+          <p className="text-[14px] font-normal text-gray-500 mt-1 mb-0 leading-relaxed">
+            Ramada International · ramada.9hf9h.com · Hotel &amp; Hospitality
           </p>
         </div>
+        <p className="text-[13px] font-medium text-gray-400 m-0 shrink-0">
+          {setupComplete
+            ? 'All steps completed'
+            : `Step ${completedCount + 1} of ${SETUP_CONNECTIONS.length}`}
+        </p>
       </div>
 
-      {/* KPI cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12, marginBottom: showAction ? 16 : 0 }}>
-        {QUICK_STATS.map(({ label, value, Icon, accent, bg }) => (
-          <div
-            key={label}
-            style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: 16, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}
-          >
+      {/* HLProgressSteps-style horizontal stepper */}
+      <SetupProgressSteps steps={SETUP_CONNECTIONS} setupComplete={setupComplete} />
+
+      {/* Connections list — same card, subtle rows with clear unlock copy */}
+      <div className="mt-6 border-t border-gray-100">
+        {setupComplete ? (
+          <div className="flex items-start gap-3 py-4">
+            <CircleCheck size={16} className="text-success-600 shrink-0 mt-0.5" />
             <div>
-              <p style={{ fontSize: 12, color: '#98A2B3', margin: '0 0 4px', fontWeight: 500 }}>{label}</p>
-              <p style={{ fontSize: 24, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1 }}>{value}</p>
+              <p className="text-[14px] font-semibold text-success-700 m-0">You&apos;re ready to start digging in</p>
+              <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">
+                Every dashboard can now show live data for AI search, local, and analytics.
+              </p>
             </div>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Icon size={15} style={{ color: accent }} />
+          </div>
+        ) : (
+          SETUP_CONNECTIONS.map(item => {
+            const complete = item.status === 'complete'
+            const current = item.status === 'current'
+            return (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 py-4 border-b border-gray-100 last:border-b-0 bg-white"
+              >
+                <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+                  complete ? 'bg-success-50' : current ? 'bg-primary-50' : 'bg-gray-50'
+                }`}>
+                  {complete
+                    ? <CircleCheck size={16} className="text-success-600" />
+                    : <item.Icon size={16} className={current ? 'text-primary-600' : 'text-gray-400'} />
+                  }
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-[14px] font-semibold text-gray-900 m-0">{item.title}</p>
+                    {complete && (
+                      <span className="text-[12px] font-medium text-success-700">Connected</span>
+                    )}
+                    {current && (
+                      <span className="inline-flex px-2 py-0.5 rounded-full text-primary-600 text-[11px] font-medium border border-primary-200 bg-white">
+                        Next step
+                      </span>
+                    )}
+                    {!complete && !current && (
+                      <span className="text-[12px] font-normal text-gray-400">{item.meta}</span>
+                    )}
+                  </div>
+                  <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">
+                    {item.unlocks}
+                  </p>
+                </div>
+
+                {complete && (
+                  <button
+                    type="button"
+                    className="text-[13px] font-medium text-primary-600 hover:text-primary-700 transition-colors whitespace-nowrap shrink-0 inline-flex items-center gap-0.5"
+                  >
+                    {item.cta} <ChevronRight size={13} />
+                  </button>
+                )}
+                {current && (
+                  <button
+                    type="button"
+                    onClick={onConnect}
+                    className="inline-flex items-center gap-1 h-8 px-3 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shrink-0"
+                  >
+                    {item.cta} <ChevronRight size={13} />
+                  </button>
+                )}
+              </div>
+            )
+          })
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ─── Module readiness strip ───────────────────────────────────────────────────
+
+function ModuleReadinessStrip() {
+  const sections = MODULE_SECTIONS.map(s => {
+    const ready = s.cards.filter(c => c.status === 'ready').length
+    const total = s.cards.length
+    return { ...s, ready, total, pct: Math.round((ready / total) * 100) }
+  })
+  const totalNeeds = sections.reduce((a, s) => a + (s.total - s.ready), 0)
+  const totalMods = sections.reduce((a, s) => a + s.total, 0)
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl p-6">
+      <div className="mb-6">
+        <p className="text-[16px] font-semibold text-gray-900 m-0">Module readiness</p>
+        <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
+          {totalNeeds} of {totalMods} modules still need setup
+        </p>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {sections.map(s => (
+          <div key={s.id} className="rounded-xl border border-gray-200 bg-white p-4">
+            <div className="flex items-center gap-2.5 mb-2.5">
+              <div className={`w-8 h-8 rounded-lg ${s.accentBg} flex items-center justify-center shrink-0`}>
+                <s.Icon size={14} className={s.accent} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{s.title}</p>
+                <p className="text-[12px] font-normal text-gray-400 m-0 tabular-nums">{s.ready}/{s.total}</p>
+              </div>
             </div>
+            <ProgressBar pct={s.pct} colorClass={s.bar} />
           </div>
         ))}
       </div>
-
-      {/* Inline CTA: Connect Google Business Profile */}
-      {showAction && (
-        <div style={{ background: '#EEF4FF', border: '1px solid #C7D7FD', borderRadius: 8, padding: '14px 20px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 32, height: 32, borderRadius: 8, background: '#C7D7FD', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <MapPin size={14} style={{ color: '#155EEF' }} />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-                <span style={{ fontSize: 14, fontWeight: 500, color: '#101828' }}>Connect Google Business Profile</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: '#155EEF', background: '#D1E0FF', borderRadius: 999, padding: '2px 8px', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  Next step
-                </span>
-                <span style={{ fontSize: 12, color: '#667085' }}>· Est. 2 min</span>
-              </div>
-              <span style={{ fontSize: 13, color: '#475467' }}>
-                Unlock local SEO audits, map-pack visibility, and AI-powered local recommendations.
-              </span>
-            </div>
-            <button style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, background: '#155EEF', color: '#fff', border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}>
-              Connect now <ChevronRight size={13} />
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
+// ─── Module section table ─────────────────────────────────────────────────────
 
-// ─── Setup Timeline ───────────────────────────────────────────────────────────
-
-function SetupTimeline() {
-  const pendingCount = SETUP_ITEMS.filter(i => i.status !== 'connected').length
-  const nextIdx = SETUP_ITEMS.findIndex(i => i.status !== 'connected')
-
-  return (
-    <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '20px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-        <div>
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: '0 0 2px' }}>Needs your attention</h2>
-          <p style={{ fontSize: 12, color: '#98A2B3', margin: 0 }}>Complete each integration to unlock full dashboard coverage.</p>
-        </div>
-        {pendingCount > 0 && (
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#D97706' }}>{pendingCount} connections pending</span>
-        )}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        {SETUP_ITEMS.flatMap((item, i) => {
-          const done = item.status === 'connected'
-          const isNext = i === nextIdx
-          const isPending = !done && !isNext
-
-          const card = (
-            <div
-              key={`card-${item.title}`}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                background: isPending ? '#F2F4F7' : '#fff',
-                border: isNext ? '2px solid #155EEF' : '1px solid #EAECF0',
-                borderRadius: 10,
-                padding: '16px 10px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                textAlign: 'center',
-                gap: 5,
-                boxShadow: isNext ? '0 0 0 4px rgba(21,94,239,0.06)' : 'none',
-                transition: 'box-shadow 150ms ease',
-              }}
-            >
-              {/* Icon circle */}
-              <div style={{
-                width: 34, height: 34, borderRadius: '50%',
-                background: done ? '#16A34A' : item.iconBg,
-                border: done ? 'none' : `1.5px solid ${item.iconBorder}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                marginBottom: 4,
-                opacity: isPending ? 0.65 : 1,
-                flexShrink: 0,
-              }}>
-                {done
-                  ? <Check size={14} style={{ color: '#fff', strokeWidth: 3 }} />
-                  : <item.Icon size={13} style={{ color: item.iconColor }} />
-                }
-              </div>
-
-              <p style={{ fontSize: 13, fontWeight: 700, color: isPending ? '#667085' : '#101828', margin: 0, lineHeight: 1.3 }}>
-                {item.title}
-              </p>
-
-              <p style={{ fontSize: 11, color: '#98A2B3', margin: 0, lineHeight: 1.4, whiteSpace: 'nowrap' }}>
-                {item.desc}
-              </p>
-
-              {done ? (
-                <span style={{ fontSize: 12, fontWeight: 600, color: '#16A34A', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-                  <Check size={10} strokeWidth={3} /> Connected
-                </span>
-              ) : (
-                <button style={{ fontSize: 12, fontWeight: 700, color: '#155EEF', background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'inline-flex', alignItems: 'center', gap: 2, whiteSpace: 'nowrap' }}>
-                  {isNext ? 'Connect now' : 'Connect'} →
-                </button>
-              )}
-            </div>
-          )
-
-          if (i === SETUP_ITEMS.length - 1) return [card]
-
-          const connector = (
-            <div key={`conn-${i}`} style={{ width: 14, height: 2, background: done ? '#16A34A' : '#E5E7EB', flexShrink: 0 }} />
-          )
-
-          return [card, connector]
-        })}
-      </div>
-    </div>
-  )
-}
-
-// ─── Module Card ──────────────────────────────────────────────────────────────
-
-function MetricItem({ label, value, trend, progressPct, progressColor, starValue }) {
+function MetricCell({ metric }) {
+  if (!metric) return null
   return (
     <div>
-      <p style={{ fontSize: 11, color: '#98A2B3', margin: '0 0 5px', fontWeight: 500, lineHeight: 1.2 }}>{label}</p>
-      <p style={{ fontSize: 20, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1 }}>{value}</p>
-      {progressPct != null && <ProgressBar pct={progressPct} color={progressColor} />}
-      {starValue != null && <Stars value={starValue} />}
-      {trend != null && trend !== 0 && <div style={{ marginTop: 5 }}><TrendChip value={trend} /></div>}
+      <div className="flex items-baseline gap-1.5 flex-wrap">
+        <span className="text-[16px] font-semibold text-gray-900 tabular-nums leading-none">{metric.value}</span>
+        <TrendBadge value={metric.trend} />
+      </div>
+      <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{metric.label}</p>
     </div>
   )
 }
 
-function ModuleCard({ title, status, metrics, cta }) {
-  const [hov, setHov] = useState(false)
+function ModuleSectionCard({ section }) {
+  const ready = section.cards.filter(c => c.status === 'ready').length
+  const total = section.cards.length
+  const { Icon, title, desc, accent, accentBg, cards } = section
+
   return (
-    <div
-      style={{
-        background: '#fff',
-        border: hov ? '1px solid #D0D5DD' : '1px solid #EAECF0',
-        borderRadius: 8,
-        padding: 20,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 18,
-        transition: 'border-color 200ms ease',
-      }}
-      onMouseEnter={() => setHov(true)}
-      onMouseLeave={() => setHov(false)}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}>
-        <p style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1.3 }}>{title}</p>
-        <StatusPill status={status} />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-        {metrics.map(m => <MetricItem key={m.label} {...m} />)}
-      </div>
-
-      <button style={{
-        display: 'inline-flex', alignItems: 'center', gap: 4,
-        fontSize: 13, fontWeight: 600, color: '#155EEF',
-        background: 'none', border: 'none', cursor: 'pointer', padding: 0,
-        marginTop: 'auto',
-      }}>
-        {cta} <ChevronRight size={13} />
-      </button>
-    </div>
-  )
-}
-
-// ─── Module Section ───────────────────────────────────────────────────────────
-
-function ModuleSection({ Icon, accent, accentBg, title, desc, cards }) {
-  return (
-    <section>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 12 }}>
-        <div style={{ width: 32, height: 32, borderRadius: 8, background: accentBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon size={14} style={{ color: accent }} />
+    <section className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+      {/* Section header — 16px semibold title, 14px regular subtext; 24px card padding */}
+      <div className="px-6 pt-6 pb-4 flex items-start gap-3">
+        <div className={`w-10 h-10 rounded-xl ${accentBg} flex items-center justify-center shrink-0`}>
+          <Icon size={18} className={accent} />
         </div>
-        <div>
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: '#101828', margin: '0 0 2px' }}>{title}</h2>
-          <p style={{ fontSize: 12, color: '#98A2B3', margin: 0 }}>{desc}</p>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-[16px] font-semibold text-gray-900 m-0">{title}</h2>
+            <ReadyBadge ready={ready} total={total} />
+          </div>
+          <p className="text-[14px] font-normal text-gray-500 m-0 mt-1 leading-relaxed">{desc}</p>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 20 }}>
-        {cards.map(card => <ModuleCard key={card.title} {...card} />)}
+      {/* Table — grey header row matches Site Health / AI Search table th pattern */}
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse min-w-[640px]">
+          <thead>
+            <tr className="border-t border-gray-200 bg-gray-50">
+              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Module</th>
+              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Primary metric</th>
+              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Secondary metric</th>
+              <th className="px-6 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '16%' }} />
+            </tr>
+          </thead>
+          <tbody>
+            {cards.map(card => {
+              const isReady = card.status === 'ready'
+              const primary = card.metrics[0]
+              const secondary = card.metrics[1]
+              return (
+                <tr key={card.title} className="border-t border-gray-100 hover:bg-gray-50/60 transition-colors">
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${isReady ? 'bg-success-600' : 'bg-gray-300'}`} />
+                      <span className="text-[14px] font-medium text-gray-900">{card.title}</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <MetricCell metric={primary} />
+                  </td>
+                  <td className="px-6 py-4">
+                    <MetricCell metric={secondary} />
+                  </td>
+                  <td className="px-6 py-4 text-right">
+                    <button
+                      type="button"
+                      className="inline-flex items-center gap-1 text-[14px] font-medium text-primary-600 hover:text-primary-700 transition-colors whitespace-nowrap"
+                    >
+                      {isReady ? 'Open dashboard' : 'Finish setup'} <ChevronRight size={13} />
+                    </button>
+                  </td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
       </div>
     </section>
   )
 }
 
-// ─── Setup Modal ─────────────────────────────────────────────────────────────
+// ─── Setup Modal (preserved flow) ─────────────────────────────────────────────
 
+// Canonical input spec (sm / 32px, 8px radius, gray-300 border) — mirrors HLInput.
 const INPUT_STYLE = {
-  width: '100%', padding: '9px 13px', borderRadius: 8,
-  border: '1px solid #EAECF0', fontSize: 13, color: '#101828',
+  width: '100%', height: 32, padding: '0 12px', borderRadius: 8,
+  border: '1px solid #D0D5DD', fontSize: 14, color: '#101828',
   outline: 'none', background: '#fff', boxSizing: 'border-box', fontFamily: 'inherit',
 }
-const LABEL_STYLE = { fontSize: 13, fontWeight: 600, color: '#344054', display: 'block', marginBottom: 6 }
+const LABEL_STYLE = { fontSize: 13, fontWeight: 500, color: '#344054', display: 'block', marginBottom: 6 }
 
 function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName, setBrandName, country, setCountry, region, setRegion }) {
   return (
@@ -512,7 +536,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
         <label style={{ ...LABEL_STYLE, marginBottom: 12 }}>Target location</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6 }}>Country</label>
+            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>Country</label>
             <div style={{ position: 'relative' }}>
               <select value={country} onChange={e => setCountry(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option>United States</option>
@@ -524,7 +548,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6 }}>State / region <span style={{ color: '#98A2B3' }}>(optional)</span></label>
+            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>State / region <span style={{ color: '#98A2B3' }}>(optional)</span></label>
             <div style={{ position: 'relative' }}>
               <select value={region} onChange={e => setRegion(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option value="">Select state or region</option>
@@ -542,7 +566,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
   )
 }
 
-const TABLE_TH = { padding: '8px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#667085', letterSpacing: '0.05em', textTransform: 'uppercase' }
+const TABLE_TH = { padding: '8px 16px', textAlign: 'left', fontSize: 12, fontWeight: 600, color: '#101828' }
 const TABLE_TD = { padding: '10px 16px' }
 
 function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts, setPrompts, newPrompt, setNewPrompt }) {
@@ -567,7 +591,6 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         Confirm the keywords and prompts that matter most for search, AI, and local business opportunities.
       </p>
 
-      {/* Keywords */}
       <div style={cardStyle}>
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={14} style={{ color: '#6938EF' }} />
@@ -575,7 +598,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <thead>
-            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Keyword</th>
               <th style={TABLE_TH}>Monthly searches</th>
@@ -597,7 +620,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
                 <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)} onKeyDown={e => e.key === 'Enter' && addKeyword()} placeholder="Add a keyword manually" style={{ width: '100%', border: 'none', outline: 'none', fontSize: 13, color: '#667085', background: 'transparent', fontFamily: 'inherit' }} />
               </td>
               <td style={TABLE_TD}>
-                <button onClick={addKeyword} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <button type="button" onClick={addKeyword} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <Plus size={11} style={{ color: '#667085' }} />
                 </button>
               </td>
@@ -606,7 +629,6 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         </table>
       </div>
 
-      {/* Prompts */}
       <div style={cardStyle}>
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={14} style={{ color: '#6938EF' }} />
@@ -615,7 +637,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
         <p style={{ fontSize: 12, color: '#667085', padding: '0 16px 12px', margin: 0 }}>No prompt suggestions are ready yet. You can still add your own prompts below.</p>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <thead>
-            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Prompt</th>
             </tr>
@@ -629,10 +651,10 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
             ))}
             <tr>
               <td style={TABLE_TD}><Plus size={12} style={{ color: '#9CA3AF' }} /></td>
-              <td style={{ padding: '8px 16px 8px 16px' }}>
+              <td style={{ padding: '8px 16px' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
                   <textarea value={newPrompt} onChange={e => setNewPrompt(e.target.value)} placeholder="Add a strategic AI search prompt" rows={2} style={{ flex: 1, border: '1px solid #EAECF0', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: '#667085', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }} />
-                  <button onClick={addPrompt} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: 4 }}>
+                  <button type="button" onClick={addPrompt} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: 4 }}>
                     <Plus size={11} style={{ color: '#667085' }} />
                   </button>
                 </div>
@@ -672,7 +694,7 @@ function SetupStep3({ competitors, setCompetitors, newBrand, setNewBrand, newDom
             <col />
           </colgroup>
           <thead>
-            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
+            <tr style={{ background: '#F9FAFB', borderBottom: '1px solid #EAECF0' }}>
               <th style={{ ...TABLE_TH, width: 48 }}>Use</th>
               <th style={TABLE_TH}>Brand name</th>
               <th style={TABLE_TH}>Competitor domain</th>
@@ -697,7 +719,7 @@ function SetupStep3({ competitors, setCompetitors, newBrand, setNewBrand, newDom
                 <input value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="Add competitor domain" style={{ width: '100%', border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 13, color: '#667085', outline: 'none', fontFamily: 'inherit' }} />
               </td>
               <td style={TABLE_TD}>
-                <button onClick={addCompetitor} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <button type="button" onClick={addCompetitor} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
                   <Plus size={11} style={{ color: '#667085' }} />
                 </button>
               </td>
@@ -716,6 +738,7 @@ function SetupModal({ onClose, onComplete }) {
   const [brandName, setBrandName] = useState('Ramada International: Your Premier Hotel Destination')
   const [country, setCountry] = useState('United States')
   const [region, setRegion] = useState('')
+  // HARDCODED: seed setup wizard rows for prototyping
   const [keywords, setKeywords] = useState([{ id: 1, use: true, keyword: 'jbubub', searches: 'No data', difficulty: 'No data' }])
   const [newKeyword, setNewKeyword] = useState('')
   const [prompts, setPrompts] = useState([{ id: 1, use: true, prompt: 'erfrgrgrtgtghtgh' }])
@@ -725,41 +748,46 @@ function SetupModal({ onClose, onComplete }) {
   const [newDomain, setNewDomain] = useState('')
 
   const STEPS = [
-    { label: 'STEP 1', title: 'GBP & Website', Icon: Globe },
-    { label: 'STEP 2', title: 'Keywords & prompts', Icon: Search },
-    { label: 'STEP 3', title: 'Competitors', Icon: BarChart3 },
+    { label: 'Step 1', title: 'GBP & website', Icon: Globe },
+    { label: 'Step 2', title: 'Keywords & prompts', Icon: Search },
+    { label: 'Step 3', title: 'Competitors', Icon: BarChart3 },
   ]
 
   return (
     <div
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
-      style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(16,24,40,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}
+      className="fixed inset-0 z-[9999] bg-gray-900/45 flex items-center justify-center p-6"
     >
-      <div style={{ background: '#fff', borderRadius: 12, width: '100%', maxWidth: 720, maxHeight: 'calc(100vh - 48px)', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 48px rgba(16,24,40,0.18)' }}>
-
-        {/* Header */}
-        <div style={{ padding: '24px 24px 20px', borderBottom: '1px solid #EAECF0', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, marginBottom: 16 }}>
+      <div className="bg-white rounded-xl w-full max-w-[720px] max-h-[calc(100vh-48px)] flex flex-col shadow-2xl">
+        <div className="px-6 pt-6 pb-5 border-b border-gray-200 shrink-0">
+          <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <h2 style={{ fontSize: 18, fontWeight: 700, color: '#101828', margin: '0 0 4px' }}>Complete your Visibility AI setup</h2>
-              <p style={{ fontSize: 13, color: '#667085', margin: 0 }}>Add business details, search priorities, and competitors to sharpen audits, recommendations, and insights.</p>
+              <h2 className="text-[16px] font-semibold text-gray-900 m-0">Complete your Visibility AI setup</h2>
+              <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">Add business details, search priorities, and competitors to sharpen audits and insights.</p>
             </div>
-            <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: 8, border: '1px solid #EAECF0', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
-              <X size={14} style={{ color: '#667085' }} />
+            <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition-colors shrink-0">
+              <X size={14} className="text-gray-500" />
             </button>
           </div>
-          {/* Step indicators */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+          <div className="grid grid-cols-3 gap-2">
             {STEPS.map(({ label, title, Icon: SIcon }, i) => {
-              const done = i < step, active = i === step
+              const done = i < step
+              const active = i === step
               return (
-                <div key={i} style={{ padding: '10px 14px', borderRadius: 10, border: `1.5px solid ${done ? '#16A34A' : active ? '#155EEF' : '#EAECF0'}`, background: done ? '#F0FDF4' : active ? '#EEF4FF' : '#FAFAFA', display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: '50%', background: done ? '#16A34A' : active ? '#EEF4FF' : '#F2F4F7', border: `1.5px solid ${done ? '#16A34A' : active ? '#155EEF' : '#D0D5DD'}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    {done ? <Check size={12} style={{ color: '#fff', strokeWidth: 3 }} /> : <SIcon size={12} style={{ color: active ? '#155EEF' : '#9CA3AF' }} />}
+                <div
+                  key={label}
+                  className={`px-3.5 py-2.5 rounded-xl border flex items-center gap-2.5 ${
+                    done ? 'border-success-600 bg-success-50' : active ? 'border-primary-600 bg-primary-50' : 'border-gray-200 bg-gray-25'
+                  }`}
+                >
+                  <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 border ${
+                    done ? 'bg-success-600 border-success-600' : active ? 'bg-primary-50 border-primary-600' : 'bg-gray-100 border-gray-300'
+                  }`}>
+                    {done ? <Check size={12} className="text-white" strokeWidth={3} /> : <SIcon size={12} className={active ? 'text-primary-600' : 'text-gray-400'} />}
                   </div>
                   <div>
-                    <p style={{ fontSize: 10, fontWeight: 600, color: done ? '#15803D' : active ? '#155EEF' : '#9CA3AF', margin: 0, letterSpacing: '0.05em' }}>{label}</p>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: done ? '#15803D' : active ? '#101828' : '#667085', margin: 0 }}>{title}</p>
+                    <p className={`text-[10px] font-medium tracking-wide m-0 ${done ? 'text-success-700' : active ? 'text-primary-600' : 'text-gray-400'}`}>{label}</p>
+                    <p className={`text-[13px] font-semibold m-0 ${done ? 'text-success-700' : active ? 'text-gray-900' : 'text-gray-500'}`}>{title}</p>
                   </div>
                 </div>
               )
@@ -767,208 +795,31 @@ function SetupModal({ onClose, onComplete }) {
           </div>
         </div>
 
-        {/* Content — scrollable */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: 24, minHeight: 0 }}>
+        <div className="flex-1 overflow-y-auto p-6 min-h-0">
           {step === 0 && <SetupStep1 gbpLink={gbpLink} setGbpLink={setGbpLink} websiteUrl={websiteUrl} setWebsiteUrl={setWebsiteUrl} brandName={brandName} setBrandName={setBrandName} country={country} setCountry={setCountry} region={region} setRegion={setRegion} />}
           {step === 1 && <SetupStep2 keywords={keywords} setKeywords={setKeywords} newKeyword={newKeyword} setNewKeyword={setNewKeyword} prompts={prompts} setPrompts={setPrompts} newPrompt={newPrompt} setNewPrompt={setNewPrompt} />}
           {step === 2 && <SetupStep3 competitors={competitors} setCompetitors={setCompetitors} newBrand={newBrand} setNewBrand={setNewBrand} newDomain={newDomain} setNewDomain={setNewDomain} />}
         </div>
 
-        {/* Footer */}
-        <div style={{ padding: '16px 24px', borderTop: '1px solid #EAECF0', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, flexShrink: 0 }}>
-          <button onClick={onClose} style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #D0D5DD', background: '#fff', fontSize: 13, fontWeight: 600, color: '#344054', cursor: 'pointer' }}>Close</button>
+        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-2 shrink-0">
+          <button type="button" onClick={onClose} className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
           {step > 0 && (
-            <button onClick={() => setStep(s => s - 1)} style={{ padding: '8px 14px', borderRadius: 8, border: '1px solid #D0D5DD', background: '#fff', fontSize: 13, fontWeight: 600, color: '#344054', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <button type="button" onClick={() => setStep(s => s - 1)} className="h-9 px-3.5 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors inline-flex items-center gap-1.5">
               <ArrowLeft size={13} /> Previous step
             </button>
           )}
           {step < 2 ? (
-            <button onClick={() => setStep(s => s + 1)} style={{ padding: '8px 16px', borderRadius: 8, background: '#155EEF', fontSize: 13, fontWeight: 700, color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              Save and continue to {step === 0 ? 'keywords' : 'competitors'} <ChevronRight size={13} />
+            <button type="button" onClick={() => setStep(s => s + 1)} className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
+              Save and continue to {step === 0 ? 'keywords' : 'competitors'}
             </button>
           ) : (
-            <button onClick={onComplete} style={{ padding: '8px 16px', borderRadius: 8, background: '#155EEF', fontSize: 13, fontWeight: 700, color: '#fff', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-              <RefreshCw size={13} /> Save and complete setup
+            <button type="button" onClick={onComplete} className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
+              Save and complete setup
             </button>
           )}
         </div>
       </div>
     </div>
-  )
-}
-
-function SetupSuccessBanner() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '14px 18px', borderRadius: 8, background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-      <div style={{ width: 28, height: 28, borderRadius: '50%', background: '#DCFCE7', border: '1px solid #86EFAC', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-        <CircleCheck size={14} style={{ color: '#16A34A' }} />
-      </div>
-      <div>
-        <p style={{ fontSize: 13, fontWeight: 700, color: '#15803D', margin: '0 0 3px' }}>You're ready to start digging in.</p>
-        <p style={{ fontSize: 12, color: '#15803D', margin: 0, lineHeight: 1.5 }}>
-          Your setup is ready for Search AI, local search, and complete insights to fix account issues, compare competitors, and improve rankings.
-        </p>
-      </div>
-    </div>
-  )
-}
-
-// ─── Module Summary Card ─────────────────────────────────────────────────────
-
-function ModuleSummaryCard() {
-  const sections = MODULE_SECTIONS.map(s => ({
-    ...s,
-    ready: s.cards.filter(c => c.status === 'ready').length,
-    needs: s.cards.filter(c => c.status === 'needsSetup').length,
-  }))
-  const totalNeeds = sections.reduce((a, s) => a + s.needs, 0)
-  const total = sections.reduce((a, s) => a + s.ready + s.needs, 0)
-
-  return (
-    <div style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-
-        {/* Left: total */}
-        <div style={{ flexShrink: 0, minWidth: 96 }}>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, lineHeight: 1 }}>
-            <span style={{ fontSize: 30, fontWeight: 700, color: '#101828', letterSpacing: '-1px' }}>{totalNeeds}</span>
-            <span style={{ fontSize: 18, color: '#D0D5DD', fontWeight: 300, margin: '0 2px' }}>/</span>
-            <span style={{ fontSize: 18, fontWeight: 600, color: '#98A2B3' }}>{total}</span>
-          </div>
-          <p style={{ fontSize: 12, color: '#98A2B3', margin: '5px 0 0', fontWeight: 500 }}>modules need setup</p>
-        </div>
-
-        {/* Divider */}
-        <div style={{ width: 1, height: 44, background: '#EAECF0', flexShrink: 0 }} />
-
-        {/* Section count cards */}
-        <div style={{ flex: 1, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
-          {sections.map(s => {
-            const allReady = s.needs === 0
-            const iconColor = allReady ? '#16A34A' : '#D97706'
-            const iconBg    = allReady ? '#F0FDF4'  : '#FFFBEB'
-            return (
-              <div
-                key={s.id}
-                style={{ background: '#fff', border: '1px solid #EAECF0', borderRadius: 8, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8 }}
-              >
-                <div>
-                  <p style={{ fontSize: 11, color: '#98A2B3', margin: '0 0 5px', fontWeight: 500 }}>
-                    {s.title.charAt(0).toUpperCase() + s.title.slice(1)}
-                  </p>
-                  <p style={{ fontSize: 22, fontWeight: 700, color: '#101828', margin: 0, lineHeight: 1 }}>
-                    {s.ready}<span style={{ fontSize: 14, color: '#D0D5DD', margin: '0 3px' }}>/</span>{s.ready + s.needs}
-                  </p>
-                  <p style={{ fontSize: 11, fontWeight: 600, margin: '5px 0 0', color: iconColor }}>
-                    {allReady ? 'All ready' : `${s.needs} need setup`}
-                  </p>
-                </div>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <s.Icon size={13} style={{ color: iconColor }} />
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-      </div>
-    </div>
-  )
-}
-
-// ─── Module Section Table ─────────────────────────────────────────────────────
-
-function ModuleSectionTable({ Icon, accent, accentBg, title, desc, cards }) {
-  return (
-    <section>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-        <div style={{ width: 28, height: 28, borderRadius: 7, background: accentBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-          <Icon size={13} style={{ color: accent }} />
-        </div>
-        <span style={{ fontSize: 15, fontWeight: 700, color: '#101828' }}>{title.charAt(0).toUpperCase() + title.slice(1)}</span>
-        <span style={{ fontSize: 12, color: '#98A2B3' }}>· {desc}</span>
-      </div>
-
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
-              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '26%' }}>Module</th>
-              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '34%' }}>Primary metric</th>
-              <th className="px-4 py-3 text-left text-[13px] font-semibold text-gray-700" style={{ width: '32%' }}>Secondary metric</th>
-              <th className="px-4 py-3 text-right text-[13px] font-semibold text-gray-700" style={{ width: '8%' }}></th>
-            </tr>
-          </thead>
-          <tbody>
-            {cards.map(card => {
-              const ready = card.status === 'ready'
-              const primary = card.metrics[0]
-              const secondary = card.metrics[1]
-              return (
-                <tr key={card.title} className="border-b border-gray-100 last:border-b-0 transition-colors" style={{ background: '#fff' }} onMouseEnter={e => e.currentTarget.style.background = '#F2F4F7'} onMouseLeave={e => e.currentTarget.style.background = '#fff'}>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2.5">
-                      <span className="inline-block rounded-full shrink-0" style={{ width: 8, height: 8, background: ready ? '#16A34A' : '#D97706' }} />
-                      <span className="text-[13px] font-semibold text-gray-900">{card.title}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    {primary && (
-                      <>
-                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                          <span className="text-[14px] font-bold text-gray-900">{primary.value}</span>
-                          {primary.starValue != null && (
-                            <span style={{ color: '#F59E0B', fontSize: 12, letterSpacing: '-1px' }}>
-                              {[1,2,3,4,5].map(i => i <= Math.round(primary.starValue) ? '★' : '☆').join('')}
-                            </span>
-                          )}
-                          {primary.trend != null && primary.trend !== 0 && (
-                            <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${primary.trend > 0 ? 'text-success-600' : 'text-error-600'}`}>
-                              <ArrowUp size={9} style={{ transform: primary.trend > 0 ? 'none' : 'rotate(180deg)', flexShrink: 0 }} />
-                              {Math.abs(primary.trend)}%
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-gray-400 m-0">{primary.label}</p>
-                      </>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    {secondary && (
-                      <>
-                        <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                          <span className="text-[14px] font-bold text-gray-900">{secondary.value}</span>
-                          {secondary.starValue != null && (
-                            <span style={{ color: '#F59E0B', fontSize: 12, letterSpacing: '-1px' }}>
-                              {[1,2,3,4,5].map(i => i <= Math.round(secondary.starValue) ? '★' : '☆').join('')}
-                            </span>
-                          )}
-                          {secondary.trend != null && secondary.trend !== 0 && (
-                            <span className={`inline-flex items-center gap-0.5 text-[11px] font-semibold ${secondary.trend > 0 ? 'text-success-600' : 'text-error-600'}`}>
-                              <ArrowUp size={9} style={{ transform: secondary.trend > 0 ? 'none' : 'rotate(180deg)', flexShrink: 0 }} />
-                              {Math.abs(secondary.trend)}%
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[11px] text-gray-400 m-0">{secondary.label}</p>
-                      </>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      className={`text-[12px] font-semibold inline-flex items-center gap-1 whitespace-nowrap ${ready ? 'text-primary-600' : 'text-warning-600'}`}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-                    >
-                      {card.cta} <ChevronRight size={11} />
-                    </button>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
-    </section>
   )
 }
 
@@ -976,7 +827,7 @@ function ModuleSectionTable({ Icon, accent, accentBg, title, desc, cards }) {
 
 export default function OverviewDashboard() {
   const [showSetupModal, setShowSetupModal] = useState(false)
-  const [setupComplete, setSetupComplete]   = useState(false)
+  const [setupComplete, setSetupComplete] = useState(false)
 
   function handleSetupComplete() {
     setSetupComplete(true)
@@ -984,7 +835,7 @@ export default function OverviewDashboard() {
   }
 
   return (
-    <div className="flex-1 min-w-0 min-h-0 flex flex-col" style={{ background: '#F2F4F7' }}>
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
       {showSetupModal && (
         <SetupModal
           onClose={() => setShowSetupModal(false)}
@@ -992,28 +843,15 @@ export default function OverviewDashboard() {
         />
       )}
       <div className="flex-1 overflow-y-auto min-h-0" style={{ scrollbarGutter: 'stable' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px 48px', display: 'flex', flexDirection: 'column', gap: 16 }}>
-
-          <HeroSection showAction={!setupComplete} />
-
-          {setupComplete && <SetupSuccessBanner />}
-
-          <SetupTimeline />
-
-          <ModuleSummaryCard />
-
-          {MODULE_SECTIONS.map(s => (
-            <ModuleSectionTable
-              key={s.id}
-              Icon={s.Icon}
-              accent={s.accent}
-              accentBg={s.accentBg}
-              title={s.title}
-              desc={s.desc}
-              cards={s.cards}
-            />
+        <div className="max-w-[1200px] mx-auto px-6 pt-6 pb-12 flex flex-col gap-5">
+          <SetupWorkspaceCard
+            setupComplete={setupComplete}
+            onConnect={() => setShowSetupModal(true)}
+          />
+          <ModuleReadinessStrip />
+          {MODULE_SECTIONS.map(section => (
+            <ModuleSectionCard key={section.id} section={section} />
           ))}
-
         </div>
       </div>
     </div>

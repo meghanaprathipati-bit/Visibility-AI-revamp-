@@ -59,6 +59,10 @@ export default function HLModal({
   )
 }
 
+// Canonical modal header typography — 16px semibold title, 14px regular subtext.
+export const modalTitle = 'text-[16px] font-semibold text-gray-900'
+export const modalSubtext = 'text-[14px] font-normal text-gray-500'
+
 export const modalBtnSecondary =
   'h-8 px-2.5 rounded border border-gray-300 bg-white text-[14px] font-semibold text-gray-600 hover:bg-gray-50 shadow-xs transition-colors'
 export const modalBtnPrimary =
