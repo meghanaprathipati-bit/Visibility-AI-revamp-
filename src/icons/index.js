@@ -37,6 +37,7 @@ export { Crown } from './Crown.jsx';
 export { Globe } from './Globe.jsx';
 export { Image } from './Image.jsx';
 export { RefreshCw } from './RefreshCw.jsx';
+export { RefreshCw02 } from './RefreshCw02.jsx';
 export { Star } from './Star.jsx';
 export { TrendingUp } from './TrendingUp.jsx';
 export { Grid3x3 } from './Grid3x3.jsx';

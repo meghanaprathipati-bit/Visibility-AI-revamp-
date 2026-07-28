@@ -1,0 +1,90 @@
+---
+description: Follow the HighRise table component and standard toolbar element placement
+alwaysApply: true
+---
+
+# HighRise tables — layout & toolbar placement
+
+Every data table (crawled pages, found resources, source inventory, competitor
+leaderboards, prompt inventory, etc.) must follow the shared HighRise
+`HLDataTable` layout and the same toolbar element placement. Consistency across
+tables matters more than per-screen creativity.
+
+## Toolbar element placement (non-negotiable)
+
+The table toolbar is a single row: **filters on the left, search + actions on the right.**
+
+```
+[ filter pills ] [ Advanced/Add filter ] ............ [ Search ] [ Columns ] [ primary action ]
+        └── left group ──┘                              └────────── right group (ml-auto) ──────────┘
+```
+
+- Put every filter control on the **left**: filter pills / segmented filters
+  (e.g. `All sources | Mentioned | Not mentioned`), status filter chips, and the
+  `Add filter` / `Advanced filter` trigger.
+- Put **search on the right**, followed by `Columns` and any primary CTA
+  (`Apply fixes`, etc.). Right-align the group with `ml-auto`.
+- Never put search on the left / filters on the right. Never split filters across
+  both sides.
+- The row is one flex line: `flex items-center gap-2 flex-wrap`, with the right
+  group started by `ml-auto`.
+
+## Control sizing
+
+- Toolbar controls are **sm / 32px tall** (`h-8`) with **8px corners** (`rounded-lg`).
+- Search input follows the canonical input (see the input-field rule): `h-8`,
+  `rounded-lg`, `border-gray-300`, `text-[14px]`, `focus:border-primary-600`, with
+  a leading `Search` icon (`pl-9`). Give it a fixed width (~240–280px), not `flex-1`.
+- `Columns` / filter buttons: `h-8 px-3 rounded-lg`, `text-[13px]`/`text-[12px]`.
+
+## Reference implementation
+
+`CrawledPagesTab` in `src/components/dashboards/SiteHealthDashboard.jsx` is the
+canonical toolbar: filters on the left, then `<div className="ml-auto flex items-center gap-2">`
+holding search + `Columns`. Match it when building or fixing any table toolbar.
+
+## Header hierarchy (non-negotiable)
+
+Two header styles only, based on nesting depth. Always sentence case, never
+`uppercase` / `tracking-wide` (see the sentence-casing rule).
+
+- **Top-level (parent) table headers** — `text-[12px] font-semibold text-gray-900`
+  (`#101828`). This is every standalone / parent `<th>` across all dashboards.
+- **Nested-in-row table headers** — `text-[12px] font-medium text-gray-900`
+  (`#101828`). Used for any data table rendered inside an expandable row.
+  Same size as parent headers, differentiated by weight (medium vs semibold).
+
+## Nested data tables (inside expandable rows) — single design
+
+Any data table shown when a row is expanded MUST use this one design — the Found
+resources source-details table in `src/components/dashboards/SiteHealthDashboard.jsx`
+is the canonical reference. No other nested-table design is allowed.
+
+- Layout: inset via `flex pb-3 pr-4` with a leading spacer matching the expand
+  column (`TABLE_EXPAND_COL`), then a card
+  `flex-1 min-w-0 rounded-lg border border-gray-100 bg-white overflow-x-auto`.
+- Table: `w-full border-collapse text-left`.
+- Header row: `bg-gray-50/80 border-b border-gray-100`; header cells
+  `px-4 py-2.5 text-[12px] font-medium text-gray-900` (+ `whitespace-nowrap` /
+  `min-w` as needed).
+- Body rows: `border-b border-gray-50 last:border-0 hover:bg-gray-50/40`; body
+  cells `px-4 py-2.5 text-[12px] text-gray-600`; link cells
+  `text-[12px] font-medium text-primary-600 hover:underline truncate`.
+- Interactive nested tables (selection checkboxes, editable value / Fix CTAs) keep
+  their controls but must adopt the same wrapper / header / row chrome.
+
+## Table body conventions
+
+- Expandable rows keep the expand chevron + checkbox in one fixed vertical line
+  across parent and nested content (`TABLE_EXPAND_COL` / `TABLE_CHECK_COL`).
+- Select-all headers use the indeterminate `TableCheckbox` pattern.
+- Count / metric cards above a table use the shared `CountCard` (see count-card rule).
+
+## Before finishing table work
+
+- [ ] Filters on the left, search + actions on the right (`ml-auto`).
+- [ ] Controls are `h-8` + `rounded-lg`; search uses the canonical input.
+- [ ] Parent headers are sentence-case, `text-[12px] font-semibold text-gray-900`.
+- [ ] Nested-row tables use the single reference design with
+      `text-[12px] font-medium text-gray-900` headers.
+- [ ] Reused shared table patterns instead of a bespoke layout.

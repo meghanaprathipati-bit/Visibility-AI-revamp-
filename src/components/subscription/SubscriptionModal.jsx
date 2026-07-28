@@ -92,9 +92,8 @@ function SubscriptionStep({ onContinue }) {
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-0.5">Selected plan</p>
           <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name} · Monthly · ${plan.monthlyPrice} due today</p>
         </div>
-        <button type="button" onClick={onContinue} className={`inline-flex items-center gap-1.5 h-9 px-4 rounded-lg ${modalBtnPrimary}`}>
+        <button type="button" onClick={onContinue} className={`inline-flex items-center justify-center h-9 px-4 rounded-lg ${modalBtnPrimary}`}>
           Continue
-          <ChevronRight size={16} />
         </button>
       </div>
     </div>
@@ -162,8 +161,7 @@ function PaymentStep({ onBack, onSubscribe }) {
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <button type="button" onClick={onBack} className={modalBtnSecondary}>Cancel</button>
-          <button type="button" onClick={onSubscribe} className={`inline-flex items-center gap-1.5 ${modalBtnPrimary}`}>
-            <CreditCard size={14} />
+          <button type="button" onClick={onSubscribe} className={`inline-flex items-center justify-center ${modalBtnPrimary}`}>
             Pay $ {plan.monthlyPrice} and subscribe
           </button>
         </div>
@@ -206,7 +204,7 @@ export default function SubscriptionModal({ open, onClose, onComplete }) {
           <VaLogo />
           <div className="flex-1 min-w-0">
             <h2 id="subscription-modal-title" className="text-[16px] font-semibold text-gray-900 leading-snug m-0">{header.title}</h2>
-            <p className="text-[13px] text-gray-500 mt-0.5 m-0">{header.subtitle}</p>
+            <p className="text-[14px] font-normal text-gray-500 mt-0.5 m-0">{header.subtitle}</p>
           </div>
         </div>
       }

@@ -2,6 +2,7 @@ import { HERO_KPIS } from '../../data/aiRankDashboard.js'
 import CitationsTrendChart from './CitationsTrendChart.jsx'
 import EngineCoverageChart from './EngineCoverageChart.jsx'
 import AiSentimentChart from './AiSentimentChart.jsx'
+import CountCard from '../CountCard.jsx'
 
 /** AI rank tracking dashboard — overview with KPI cards and 3 charts */
 export default function AiRankTrackingDashboard() {
@@ -17,13 +18,7 @@ export default function AiRankTrackingDashboard() {
       {/* Hero KPI row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
         {HERO_KPIS.map(kpi => (
-          <div key={kpi.id} className="border border-gray-200 rounded-lg bg-white px-5 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-wide text-gray-500 truncate">{kpi.label}</p>
-            <p className="text-[24px] font-bold text-gray-900 mt-1">{kpi.value}</p>
-            {kpi.subtitle && (
-              <p className="text-[11px] text-gray-400 mt-0.5 truncate">{kpi.subtitle}</p>
-            )}
-          </div>
+          <CountCard key={kpi.id} label={kpi.label} value={kpi.value} description={kpi.subtitle} />
         ))}
       </div>
 

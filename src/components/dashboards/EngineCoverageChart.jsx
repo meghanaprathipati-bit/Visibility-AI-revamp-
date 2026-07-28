@@ -27,12 +27,12 @@ export default function EngineCoverageChart() {
         <table className="w-full min-w-[520px] text-[13px]">
           <thead>
             <tr className="border-b border-gray-200 text-left">
-              <th className="pb-2 pr-3 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Engine</th>
-              <th className="pb-2 pr-3 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Visibility</th>
-              <th className="pb-2 pr-3 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Presence</th>
-              <th className="pb-2 pr-3 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Avg position</th>
-              <th className="pb-2 pr-3 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Citation rate</th>
-              <th className="pb-2 font-medium text-gray-500 text-[11px] uppercase tracking-wide">Insight</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Engine</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Visibility</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Presence</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Avg position</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Citation rate</th>
+              <th className="pb-2 font-semibold text-gray-900 text-[12px]">Insight</th>
             </tr>
           </thead>
           <tbody>

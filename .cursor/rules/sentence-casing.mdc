@@ -1,0 +1,36 @@
+---
+description: Enforce sentence casing for all UI copy in the product
+alwaysApply: true
+---
+
+# Sentence casing
+
+Use **sentence case** for all user-facing UI text across every dashboard and page (Overview, AI Search Performance, Prompt Tracking, Site Health, etc.).
+
+## Rules
+
+- Labels, headings, table headers, column headers, buttons, chips, tabs, nav items, KPI titles, and metric labels use sentence case.
+- Example: `Primary metric`, not `PRIMARY METRIC` or `Primary Metric`.
+- Example: `Finish setup`, not `Finish Setup`.
+- Example: `Trend score`, not `TREND SCORE` or `Trend Score`.
+- Example: `Recommended`, not `RECOMMENDED`.
+
+## Exceptions
+
+Keep established acronyms and product names in their conventional form:
+
+- AI, SEO, GBP, URL, CTA, GA4, GSC, XML, SoV, AIO
+- Brand / product names (e.g. Google Business Profile, Search Console, Go High Level)
+
+## Do not
+
+- Do not use Tailwind `uppercase`, `tracking-wide`, or CSS `text-transform: uppercase` on labels, table headers, or section titles.
+- Prefer `font-medium text-gray-500` (or the shared table `th` pattern) for column headers — never all-caps styling.
+- Do not title-case every word in UI chrome (`Open Dashboard` → `Open dashboard`).
+- Do not leave decorative symbols in column headers unless they are part of the metric name (e.g. remove `Δ` from `Trend score`).
+
+## When adding or editing copy
+
+1. Default to sentence case.
+2. If Figma shows all-caps for a label, still implement sentence case.
+3. When editing dashboard cards (Prompt Tracking, AI Search Performance, Overview), scan the whole section for remaining `uppercase` classes and ALL-CAPS string literals before finishing.

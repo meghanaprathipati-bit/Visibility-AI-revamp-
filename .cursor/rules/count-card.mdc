@@ -1,0 +1,58 @@
+---
+description: Use the shared CountCard for every count / metric card
+alwaysApply: true
+---
+
+# Count cards
+
+Every count card (a card that surfaces a single metric: a label + a big number, optionally with a delta, icon, description, or sparkline) must use the shared component:
+
+```
+src/components/CountCard.jsx
+```
+
+This is the canonical design, taken from the Site Health overview count strip. Do not hand-roll a new count-card layout, and do not fork these styles into a page.
+
+## Fixed typography — never change
+
+The point of `CountCard` is consistency. These are locked and must not be overridden per usage:
+
+- **Label** — `text-[14px] font-medium text-gray-500` (medium weight, never semibold/bold, never uppercase/tracking-wide).
+- **Value** — `text-[24px] font-bold text-gray-900`.
+- **Delta pill** — 12px reference pill: green (`--success-100` bg / `#15803D` text) for up, red (`#FEE2E2` bg / `#DC2626` text) for down, with an `ArrowUp` that rotates 180° when down.
+
+Do not introduce 20px / 30px values, 12px labels, or semibold labels. If a design shows a different size, still use the CountCard sizes.
+
+## Usage
+
+```jsx
+import CountCard from '../CountCard.jsx' // adjust relative depth
+
+// Plain (reference)
+<CountCard label="Pages crawled" value="1,000" delta={1.6} deltaUp />
+
+// With an icon (top-right tinted box)
+<CountCard label="Images" value="4" Icon={FileText} iconColor="var(--primary-600)" />
+
+// With a help tooltip, description, or a footer sparkline
+<CountCard label="Brand presence" value="418" delta="8.2%" description="vs previous period"
+  Icon={Award} iconColor="#6938EF" footer={<Sparkline data={data} color="#6938EF" width="100%" height={56} filled />} />
+```
+
+### Props
+- `label`, `value` — required.
+- `delta` + `deltaUp` — short delta rendered as the reference pill (e.g. `"1.6%"`, `8.2`).
+- `changeText` + `changeUp` — descriptive change line (arrow + coloured text) when the copy is longer than a pill (e.g. `"+6 vs prior period"`).
+- `description` — muted sub-line under the value.
+- `Icon` + `iconColor` — optional icon in a top-right tinted box (`iconColor` is a CSS colour, e.g. `var(--primary-600)` or `#6938EF`).
+- `help` — show a `HelpCircle` beside the label.
+- `footer` — optional node pinned below (e.g. a sparkline).
+
+## Keep vs strip
+- Keep existing extras (icon, description, change text, sparkline) by passing them as props — do not delete them.
+- But route them through `CountCard` so the label weight, value size, and delta pill stay identical everywhere.
+
+## Do not
+- Do not build a count card with raw `<div>` + inline label/value markup.
+- Do not change the font sizes or make the label semibold/bold.
+- Do not use `uppercase` / `tracking-wide` on the label.

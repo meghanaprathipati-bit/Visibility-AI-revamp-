@@ -3180,7 +3180,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
             <h2 id="new-project-modal-title" className="text-[16px] font-semibold text-gray-900 leading-snug">
               New project
             </h2>
-            <p className="text-[13px] text-gray-500 mt-0.5">
+            <p className="text-[14px] font-normal text-gray-500 mt-0.5">
               Organize your visibility and growth analysis
             </p>
           </div>
