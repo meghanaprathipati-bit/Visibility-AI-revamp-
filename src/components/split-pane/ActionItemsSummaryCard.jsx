@@ -1,4 +1,4 @@
-import { AlertTriangle, ChevronRight, CheckSquare, HelpCircle, X } from '../../icons/index.js'
+import { AlertTriangle, ChevronRight, CheckSquare, Info, X } from '../../icons/index.js'
 import { countByPriority } from '../../data/scanSummary.js'
 
 /**
@@ -56,7 +56,7 @@ export default function ActionItemsSummaryCard({ items, onFixIssues }) {
               text="text-warning-600"
             />
             <SeverityPill
-              Icon={HelpCircle}
+              Icon={Info}
               count={counts.notice}
               label="Notices"
               bg="bg-gray-100"

@@ -17,11 +17,14 @@ This is the canonical design, taken from the Site Health overview count strip. D
 
 The point of `CountCard` is consistency. These are locked and must not be overridden per usage:
 
-- **Label** — `text-[14px] font-medium text-gray-500` (medium weight, never semibold/bold, never uppercase/tracking-wide).
-- **Value** — `text-[24px] font-bold text-gray-900`.
+- **Label** — `text-[13px] font-medium text-gray-500` (medium weight, never semibold/bold, never uppercase/tracking-wide).
+- **Value** — `text-[16px] font-semibold text-gray-900`.
 - **Delta pill** — 12px reference pill: green (`--success-100` bg / `#15803D` text) for up, red (`#FEE2E2` bg / `#DC2626` text) for down, with an `ArrowUp` that rotates 180° when down.
+- **Padding** — `px-3 py-2.5` (compact; do not reintroduce taller padding / large bold values).
 
-Do not introduce 20px / 30px values, 12px labels, or semibold labels. If a design shows a different size, still use the CountCard sizes.
+Prefer `help` + `helpContent` for explanatory copy (info icon next to the title) instead of a visible `description` line under the value.
+
+Do not introduce 18px+ / bold values, or bold labels. If a design shows a different size, still use the CountCard sizes.
 
 ## Usage
 

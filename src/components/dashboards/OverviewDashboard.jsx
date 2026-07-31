@@ -465,7 +465,7 @@ function ModuleSectionCard({ section }) {
               <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Module</th>
               <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Primary metric</th>
               <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Secondary metric</th>
-              <th className="px-6 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '16%' }} />
+              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '16%' }} />
             </tr>
           </thead>
           <tbody>

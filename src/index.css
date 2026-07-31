@@ -740,3 +740,160 @@ body {
 .hr-v-4-7-2 .hr-tab-pane {
   padding: var(--n-pane-padding-top) var(--n-pane-padding-right) var(--n-pane-padding-bottom) var(--n-pane-padding-left);
 }
+
+/* ── Prompt tracking setup wizard motion ── */
+@keyframes pt-setup-fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pt-setup-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pt-setup-scale-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes pt-setup-check-pop {
+  0%   { transform: scale(0.6); }
+  55%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pt-setup-soft-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+
+@keyframes pt-setup-shimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pt-setup-pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(21, 94, 239, 0.35); }
+  70%  { box-shadow: 0 0 0 10px rgba(21, 94, 239, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(21, 94, 239, 0); }
+}
+
+/* Manage prompts / competitors — selection row enter + exit */
+@keyframes pt-selection-added-flash {
+  0% {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+    transform: translateY(-4px);
+    opacity: 0.85;
+  }
+  12% {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+    transform: translateY(0);
+    opacity: 1;
+  }
+  35% {
+    background-color: var(--primary-50);
+    border-color: var(--primary-300);
+  }
+  100% {
+    background-color: #ffffff;
+    border-color: var(--gray-200);
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes pt-selection-removing {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    max-height: 72px;
+    margin-bottom: 0;
+  }
+  55% {
+    opacity: 0;
+    transform: translateX(10px) scale(0.98);
+    max-height: 72px;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(14px) scale(0.96);
+    max-height: 0;
+    margin-bottom: -6px;
+    padding-top: 0;
+    padding-bottom: 0;
+    border-color: transparent;
+  }
+}
+
+.pt-selection-added-flash {
+  animation: pt-selection-added-flash 1.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pt-selection-removing {
+  animation: pt-selection-removing 0.28s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pt-setup-fade-up {
+  animation: pt-setup-fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pt-setup-fade-in {
+  animation: pt-setup-fade-in 0.4s ease both;
+}
+
+.pt-setup-scale-in {
+  animation: pt-setup-scale-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.pt-setup-check-pop {
+  animation: pt-setup-check-pop 0.45s cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+.pt-setup-float {
+  animation: pt-setup-soft-float 5s ease-in-out infinite;
+}
+
+.pt-setup-hero-shine {
+  background-size: 200% 200%;
+  animation: pt-setup-shimmer 8s ease infinite;
+}
+
+.pt-setup-step-current {
+  animation: pt-setup-pulse-ring 2.4s ease-out infinite;
+}
+
+.pt-setup-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pt-setup-expand.is-open {
+  grid-template-rows: 1fr;
+}
+
+.pt-setup-expand > .pt-setup-expand-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-setup-fade-up,
+  .pt-setup-fade-in,
+  .pt-setup-scale-in,
+  .pt-setup-check-pop,
+  .pt-setup-float,
+  .pt-setup-hero-shine,
+  .pt-setup-step-current {
+    animation: none !important;
+  }
+  .pt-setup-expand {
+    transition: none;
+  }
+}

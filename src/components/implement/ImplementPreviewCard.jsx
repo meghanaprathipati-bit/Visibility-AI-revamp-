@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Check, Globe, HelpCircle, LayoutList, MapPin, Sparkles } from '../../icons/index.js'
+import { Check, Globe, Info, LayoutList, MapPin, Sparkles } from '../../icons/index.js'
 import HLButton from '../HLButton.jsx'
 
 const PRIORITY_DOT = {
@@ -105,7 +105,7 @@ export default function ImplementPreviewCard({
 
         <div className="px-4 pb-3">
           <div className="flex items-start gap-2 rounded-lg border border-primary-200 bg-primary-50 px-3 py-2.5">
-            <HelpCircle size={16} className="text-primary-600 shrink-0 mt-0.5" />
+            <Info size={16} className="text-primary-600 shrink-0 mt-0.5" />
             <p className="text-[13px] text-primary-700 leading-relaxed m-0">{deploySummary}</p>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { X, Sparkles, Copy, HelpCircle, BookOpen, Users, Megaphone, Calendar, Phone, ChevronRight, ExternalLink } from '../icons/index.js'
+import { X, Sparkles, Copy, Info, BookOpen, Users, Megaphone, Calendar, Phone, ChevronRight, ExternalLink } from '../icons/index.js'
 
 const ENTER_MS = 280
 const EXIT_MS = 220
@@ -8,7 +8,7 @@ const EASE = 'cubic-bezier(0.32, 0.72, 0, 1)'
 const HELP_LINKS = [
   {
     id: 'help-center',
-    icon: HelpCircle,
+    icon: Info,
     iconBg: 'bg-warning-100',
     iconColor: 'text-warning-600',
     title: 'Visit our Help Center',
@@ -117,7 +117,7 @@ export default function HelpDrawer({ onClose }) {
         {/* Relationship Number */}
         <div className="flex items-center gap-2 px-5 pb-4">
           <span className="text-[13px] font-semibold text-gray-900">Relationship Number</span>
-          <HelpCircle size={14} className="text-gray-400" />
+          <Info size={14} className="text-gray-400" />
           <span className="text-[13px] text-gray-500">0-034-522</span>
           <button onClick={copyRelNumber} className="text-gray-400 hover:text-gray-600 transition-colors">
             <Copy size={13} />

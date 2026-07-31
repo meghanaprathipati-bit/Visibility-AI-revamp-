@@ -1,19 +1,19 @@
-import { ArrowUp, HelpCircle } from '../icons/index.js'
+import { ArrowUp, Info } from '../icons/index.js'
+import HLTooltip from './HLTooltip.jsx'
 
 /**
  * CountCard — the canonical metric / count card.
  *
  * This is the single source of truth for every count card across the app
  * (Site Health, Prompt Tracking, AI Search Performance, AI Rank Tracking,
- * Source Inventory). It mirrors the Site Health overview count card.
- *
- * DO NOT override the fixed typography — keep it consistent everywhere:
- *   - label:      14px, font-medium, gray-500
- *   - value:      24px, font-bold, gray-900
+ * Source Inventory). Keep typography locked so every usage stays consistent:
+ *   - label:      13px, font-medium, gray-500
+ *   - value:      16px, font-semibold, gray-900
  *   - delta pill: reference green / red pill (12px)
  *
  * Optional extras (icon, description, change text, footer/sparkline) let
  * richer cards reuse the same base without losing their content.
+ * Prefer help + helpContent over description for explanatory copy.
  *
  * Props:
  *   label        string                 — metric label (required)
@@ -22,10 +22,11 @@ import { ArrowUp, HelpCircle } from '../icons/index.js'
  *   deltaUp      boolean (default true)  — pill direction (green up / red down)
  *   changeText   string                  — descriptive change line (e.g. "+6 vs prior period")
  *   changeUp     boolean                 — direction/colour for changeText
- *   description  node                    — muted sub-line under the value
+ *   description  node                    — muted sub-line under the value (prefer helpContent)
  *   Icon         component               — optional icon → top-right tinted box
  *   iconColor    string (css colour)     — icon colour (default primary-600)
- *   help         boolean                 — show a HelpCircle beside the label
+ *   help         boolean                 — show an Info icon beside the label
+ *   helpContent  string                  — tooltip text (also implies help when set)
  *   footer       node                    — optional node (e.g. sparkline) pinned below
  *   className    string                  — extra classes on the card wrapper
  */
@@ -40,32 +41,44 @@ export default function CountCard({
   Icon,
   iconColor = 'var(--primary-600)',
   help = false,
+  helpContent,
   footer,
   className = '',
 }) {
+  const showHelp = help || Boolean(helpContent)
+  const helpIcon = showHelp && (
+    helpContent ? (
+      <HLTooltip content={helpContent} variant="dark" placement="top" wrap>
+        <Info size={12} className="text-gray-400 shrink-0 cursor-help" aria-label="More information" />
+      </HLTooltip>
+    ) : (
+      <Info size={12} className="text-gray-400 shrink-0" aria-hidden="true" />
+    )
+  )
+
   return (
     <div
-      className={`border border-gray-200 rounded-lg bg-white p-4 flex flex-col gap-2 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
+      className={`border border-gray-200 rounded-lg bg-white px-3 py-2.5 flex flex-col gap-1 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
     >
       {/* Header: label (+ optional help) and optional icon */}
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-1.5 min-w-0">
-          <p className="text-[14px] font-medium text-gray-500 leading-tight m-0 truncate">{label}</p>
-          {help && <HelpCircle size={13} className="text-gray-300 shrink-0" />}
+        <div className="flex items-center gap-1 min-w-0">
+          <p className="text-[13px] font-medium text-gray-500 leading-tight m-0 truncate">{label}</p>
+          {helpIcon}
         </div>
         {Icon && (
           <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            className="w-6 h-6 rounded-md flex items-center justify-center shrink-0"
             style={{ background: `color-mix(in srgb, ${iconColor} 12%, transparent)` }}
           >
-            <Icon size={16} style={{ color: iconColor }} />
+            <Icon size={12} style={{ color: iconColor }} />
           </div>
         )}
       </div>
 
       {/* Value + optional delta pill */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[24px] font-bold text-gray-900 leading-none">{value}</span>
+        <span className="text-[16px] font-semibold text-gray-900 leading-none">{value}</span>
         {delta != null && delta !== '' && (
           <span
             className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[12px] font-medium leading-none"
@@ -96,7 +109,7 @@ export default function CountCard({
       {description && <p className="text-[12px] text-gray-400 leading-snug m-0">{description}</p>}
 
       {/* Footer (e.g. sparkline) */}
-      {footer && <div className="mt-1 w-full">{footer}</div>}
+      {footer && <div className="mt-0.5 w-full">{footer}</div>}
     </div>
   )
 }

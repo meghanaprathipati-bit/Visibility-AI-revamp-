@@ -1,22 +1,56 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useLayoutEffect, Fragment } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  TrendingUp, Globe, Link2, HelpCircle, ChevronDown, ChevronRight,
-  Award, ArrowUp, Users, Bot, Clock,
+  TrendingUp, Globe, Link2, ChevronDown, ChevronRight, LayoutDashboard,
+  Award, ArrowUp, Users, Bot, Clock, MapPin,
   MessageCircle, Check, BarChart3, Search, Plus,
   ArrowLeft, ExternalLink, Calendar, AlertTriangle,
-  X, CircleCheck,
+  X, CircleCheck, Sparkles, RefreshCw02, Trash2, Building2, FileText,
 } from '../../icons/index.js'
 import SourceInventoryContent from './SourceInventoryContent'
 import CountCard from '../CountCard.jsx'
 import HLInput from '../HLInput.jsx'
+import HLButton from '../HLButton.jsx'
+import HLModal, { modalTitle, modalSubtext, MODAL_MANAGE_HEIGHT } from '../HLModal.jsx'
+import SectionInfoTip from '../SectionInfoTip.jsx'
+import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
+import EngineLogo, {
+  AiModeLogo,
+  AiOverviewLogo,
+  ChatGptLogo,
+  ClaudeLogo,
+  GeminiLogo,
+  PerplexityLogo,
+} from '../EngineLogo.jsx'
+import FullResponseModal from '../FullResponseModal.jsx'
+const MODAL_TABLE_TD = 'px-4 py-2.5 text-left text-[12px]'
+const MODAL_TABLE_TD_MUTED = `${MODAL_TABLE_TD} text-gray-600 tabular-nums whitespace-nowrap`
+const MODAL_TABLE_TD_STRONG = `${MODAL_TABLE_TD} font-medium text-gray-900 tabular-nums whitespace-nowrap`
+const MODAL_TABLE_COL_VOLUME = 'w-[92px]'
+const MODAL_TABLE_COL_VISIBILITY = 'w-[92px]'
+const MODAL_TABLE_COL_SOV = 'w-[132px]'
+const MODAL_TABLE_COL_ACTION = 'w-[80px]'
 
-// Matches the canonical HLInput sm styling for raw <select>/<input> elements
-// that can't use the HLInput component directly.
-const HL_INPUT_CLASS =
-  'w-full h-8 rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 placeholder:text-gray-400 outline-none transition-colors focus:border-primary-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed px-3'
+function ModalTableRemoveButton({ label, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      className="inline-flex items-center justify-center w-7 h-7 rounded-md text-error-600 hover:text-error-700 hover:bg-error-50 transition-colors"
+    >
+      <Trash2 size={14} />
+    </button>
+  )
+}
+
+// Shared form field chrome — matches HLForm + HLInput patterns used in VisibilityAI modals.
+const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-700 mb-1.5'
+const FORM_SELECT_CLASS =
+  'w-full h-9 px-2 pr-8 bg-white border border-gray-300 rounded-md text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 focus:shadow-focus-primary-sm transition-all cursor-pointer'
+const FORM_TEXTAREA_CLASS =
+  'w-full border border-gray-300 rounded-md px-3 py-2 text-[14px] text-gray-900 placeholder:text-gray-500 outline-none focus:border-primary-600 resize-y min-h-[72px] transition-colors bg-white'
 import VisibilityMeter, { visibilityColor } from '../VisibilityMeter.jsx'
-import CompanyLogo from '../CompanyLogo.jsx'
 import DateRangePicker, { formatRange } from '../DateRangePicker.jsx'
 
 // ── MultiLineChart ─────────────────────────────────────────────────────────
@@ -281,6 +315,18 @@ function MultiLineChart({ lines, xLabels, height = 180, metricLabel = 'Visibilit
 
 // ── DarkDropdown ───────────────────────────────────────────────────────────
 
+/** Widest label used to reserve chip width and prevent layout shift on selection change. */
+const CUSTOM_RANGE_WIDTH_LABEL = 'Sep 30 – Oct 30, 2026'
+
+function dropdownWidthLabel(options, value, dateRangeOption) {
+  const candidates = [...options.filter(Boolean)]
+  if (value) candidates.push(value)
+  if (dateRangeOption) {
+    candidates.push(dateRangeOption, CUSTOM_RANGE_WIDTH_LABEL)
+  }
+  return candidates.reduce((longest, label) => (label.length > longest.length ? label : longest), '')
+}
+
 // `dateRangeOption` — when that option is chosen the popover swaps to a calendar
 // range picker instead of closing (mirrors HLDatePicker type="daterange").
 function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default', dateRangeOption }) {
@@ -300,6 +346,7 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
   const presets = options.filter(Boolean)
   // A custom range is active when the current value isn't one of the presets.
   const customActive = dateRangeOption && !presets.includes(value)
+  const widthLabel = dropdownWidthLabel(options, value, dateRangeOption)
 
   function handleSelect(opt) {
     if (opt === dateRangeOption) { setMode('calendar'); return }
@@ -311,11 +358,14 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
       {/* Matches the canonical table filter chip (h-8, rounded-full, border-gray-300). */}
       <button
         onClick={() => { setOpen(o => !o); setMode('list') }}
-        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 text-left hover:border-gray-400 hover:bg-gray-50 transition-colors"
       >
-        {Icon && <Icon size={14} className="text-gray-400" />}
-        <span>{value}</span>
-        <ChevronDown size={14} className="text-gray-400" />
+        {Icon && <Icon size={14} className="text-gray-400 shrink-0" />}
+        <span className="relative inline-block text-left">
+          <span className="invisible whitespace-nowrap select-none" aria-hidden="true">{widthLabel}</span>
+          <span className="absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap">{value}</span>
+        </span>
+        <ChevronDown size={14} className="text-gray-400 shrink-0" />
       </button>
 
       {open && mode === 'list' && (
@@ -326,9 +376,9 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
               <button
                 key={opt}
                 onClick={() => handleSelect(opt)}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
               >
-                <span className={isSelected ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt}</span>
+                <span className={`text-left ${isSelected ? 'text-primary-700 font-semibold' : 'text-gray-700'}`}>{opt}</span>
                 {isSelected && <Check size={13} className="text-primary-600 shrink-0" />}
               </button>
             )
@@ -358,20 +408,79 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
 const ENGINE_OPTIONS  = ['All AI engines', 'Perplexity', 'Claude', 'Gemini', 'AI Mode', 'AI Overview']
 const PERIOD_OPTIONS  = ['Last 3 days', 'Last 7 days', 'Last 15 days', 'Last 30 days', 'Custom date range']
 
+// HARDCODED: overview KPI ratings for prototyping (Good / Average / Poor)
+const KPI_RATING_CLASS = {
+  Good: 'text-success-600',
+  Average: 'text-warning-600',
+  Poor: 'text-error-600',
+}
+
 const OVERVIEW_KPI_CARDS = [
-  { label: 'Visibility score',  value: '76/100', change: '+6 vs prior period', up: true,  sub: null,                   Icon: Award,      color: '#6938EF' },
-  { label: 'Competitive rank',  value: '#3 / 7', change: null,                 up: null,  sub: '— Latest period rank', Icon: Users,      color: 'var(--primary-600)' },
-  { label: 'Avg position',      value: '#2.3',   change: '0.6 pts better',     up: true,  sub: null,                   Icon: TrendingUp, color: '#16A34A' },
-  { label: 'Citation rate',     value: '58%',    change: '+5.7 pp',            up: true,  sub: null,                   Icon: Link2,      color: '#D97706' },
+  {
+    label: 'Visibility score',
+    value: '76/100',
+    rating: 'Good',
+    Icon: Award,
+    color: '#6938EF',
+    help: 'Shows your overall AI visibility across all tracked platforms by combining your mentions, citations, rankings, and AI Overview presence into a single score. It’s the quickest way to understand how visible your brand is in AI search overall. Higher is better.',
+  },
+  {
+    label: 'Competitive rank',
+    value: '#3 / 7',
+    rating: 'Average',
+    Icon: Users,
+    color: 'var(--primary-600)',
+    help: 'Shows where your brand ranks compared to the competitors you’re tracking. It helps you understand your position in the market and whether you’re gaining or losing ground against other brands. A lower rank is better (#1 is best).',
+  },
+  {
+    label: 'Avg position',
+    value: '#2.3',
+    rating: 'Good',
+    Icon: TrendingUp,
+    color: '#16A34A',
+    help: 'Shows where your brand typically appears within AI-generated answers. Brands mentioned earlier are more noticeable and are more likely to influence users. A lower position is better.',
+  },
+  {
+    label: 'Citation rate',
+    value: '58%',
+    rating: 'Average',
+    Icon: Link2,
+    color: '#D97706',
+    help: 'Shows how often AI answers include a link back to your website. Linked citations are more valuable than plain mentions because they drive users directly to your content and strengthen your authority. Higher is better.',
+  },
 ]
 
 const OVERVIEW_METRICS = [
-  { label: 'Presence rate',               value: '61%',      desc: 'Brand appears within answered prompt blocks.' },
-  { label: 'Share of voice',              value: '15%',      desc: 'Share of detected brand mentions across answers.' },
-  { label: 'Net sentiment',               value: '+11',      desc: 'Positive vs negative brand framing.' },
-  { label: 'Google AI overview coverage', value: '62%',      desc: 'How often Google shows an AI Overview for the tracked prompts.' },
-  { label: 'Answer density',              value: '6.8 URLs', desc: '2.4 brand mentions per answer.' },
-  { label: 'SoV gap to leader',           value: '9 pts',    desc: 'Share-of-voice distance from the leading brand.' },
+  {
+    label: 'Presence rate',
+    value: '61%',
+    help: 'Shows how often your brand is mentioned in AI-generated answers, whether or not a link is included. It measures your overall visibility across AI responses, while Citation Rate focuses only on linked mentions. Higher is better.',
+  },
+  {
+    label: 'Share of voice',
+    value: '15%',
+    help: 'Shows what percentage of all brand mentions across tracked AI answers belong to your brand. It helps you understand how much of the conversation you’re owning compared to your competitors. Higher means stronger competitive visibility.',
+  },
+  {
+    label: 'Net sentiment',
+    value: '+11',
+    help: 'Shows whether AI describes your brand in a positive, neutral, or negative way. It helps you understand how your brand is being perceived, not just how often it’s being mentioned. A more positive score is better.',
+  },
+  {
+    label: 'Google AI overview coverage',
+    value: '62%',
+    help: 'Shows how often Google displays an AI Overview for your tracked prompts. Higher coverage means there are more opportunities for your brand to appear within Google’s AI-generated search results. Higher means more visibility opportunities.',
+  },
+  {
+    label: 'Answer density',
+    value: '6.8 URLs',
+    help: 'Shows how many brands and citations typically appear within each AI answer. A higher density means more brands are competing for attention, making it harder to stand out. Lower usually means less competition.',
+  },
+  {
+    label: 'SoV gap to leader',
+    value: '9 pts',
+    help: 'Shows how far your brand is behind the leading competitor in Share of Voice. It helps you understand the size of the gap you need to close to become the most visible brand in your category. A smaller gap is better.',
+  },
 ]
 
 const COMPETITOR_RANKING_DATA = [
@@ -401,8 +510,8 @@ const COMPETITOR_VIEWS = ['Leaderboard', 'Mentions vs sources', 'By topic']
 
 const COMPETITOR_TOPICS = ['AI visibility', 'Rank tracking', 'Citations', 'Local SEO', 'Integrations']
 
-// Dummy per-brand, per-topic visibility (0–100) derived from the brand's base
-// visibility so the heatmap reads realistically. Swap for real per-topic data later.
+/** Dummy per-brand, per-topic visibility (0–100) derived from the brand's base
+ * visibility. Swap for real per-topic data later. */
 function competitorTopicScore(base, ti) {
   const spread = [6, -8, 3, -5, 10][ti] ?? 0
   return Math.max(4, Math.min(99, base + spread))
@@ -436,12 +545,13 @@ const SENTIMENT_DATA = [
   { label: 'Dismissed',   value: 8,  color: '#FDA4AF' },
 ]
 
+// HARDCODED: organic ↔ AI overlap prompt rows (prototyping)
 const ORGANIC_OVERLAP_PROMPTS = [
-  { prompt: 'What are the best AI visibility platforms for multi-location brands?', aioPos: '#1.8', overlap: '50%', status: 'Watch drift' },
-  { prompt: 'How do AI rank tracking tools compare for SEO agencies?',              aioPos: '#2.4', overlap: '42%', status: 'Watch drift' },
-  { prompt: 'Best tools to monitor citations in ChatGPT and Google AI Overview',    aioPos: '#3.7', overlap: '31%', status: 'Stable'      },
-  { prompt: 'How can agencies improve AI citation rate for client brands?',          aioPos: '#6.8', overlap: '16%', status: 'Stable'      },
-  { prompt: 'What makes a brand appear in AI answers more often?',                  aioPos: '#7.4', overlap: '12%', status: 'Stable'      },
+  { prompt: 'What are the best AI visibility platforms for multi-location brands?', aioPos: '#1.8', overlap: 50, status: 'Watch' },
+  { prompt: 'How do AI rank tracking tools compare for SEO agencies?',              aioPos: '#2.4', overlap: 42, status: 'Watch' },
+  { prompt: 'Best tools to monitor citations in ChatGPT and Google AI Overview',    aioPos: '#3.7', overlap: 31, status: 'Stable' },
+  { prompt: 'How can agencies improve AI citation rate for client brands?',          aioPos: '#6.8', overlap: 16, status: 'Stable' },
+  { prompt: 'What makes a brand appear in AI answers more often?',                  aioPos: '#7.4', overlap: 12, status: 'Stable' },
 ]
 
 const TOP_PROMPTS_DATA = [
@@ -478,18 +588,43 @@ const TREND_LINES_MAP = {
 // ── Prompts tab data ───────────────────────────────────────────────────────
 
 const PROMPTS_KPIS = [
-  { label: 'Tracked prompts',   value: '5',      Icon: Search,     color: 'var(--primary-600)' },
-  { label: 'Avg visibility',    value: '52/100', Icon: TrendingUp, color: '#6938EF' },
-  { label: 'Avg search volume', value: '1.1K',   Icon: BarChart3,  color: '#0D9488' },
-  { label: 'Engine coverage',   value: '48%',    Icon: Globe,      color: '#D97706' },
+  {
+    label: 'Tracked prompts',
+    value: '5',
+    Icon: Search,
+    color: 'var(--primary-600)',
+    help: 'Shows the total number of prompts included in your current view. This helps you understand how much data your insights are based on and whether you’re looking at a broad dataset or a filtered subset. More prompts provide broader coverage.',
+  },
+  {
+    label: 'Avg visibility',
+    value: '52/100',
+    Icon: TrendingUp,
+    color: '#6938EF',
+    help: 'Shows your average visibility score across all tracked prompts. It gives you a reliable view of overall performance instead of letting a few high- or low-performing prompts skew the results. Higher is better.',
+  },
+  {
+    label: 'Avg search volume',
+    value: '1.1K',
+    Icon: BarChart3,
+    color: '#0D9488',
+    help: 'Shows the average monthly search demand for your tracked prompts. Higher search volume means greater potential reach, but these prompts are often more competitive. Higher means greater opportunity.',
+  },
+  {
+    label: 'Engine coverage',
+    value: '48%',
+    Icon: Globe,
+    color: '#D97706',
+    help: 'Shows how many AI engines mention your brand for the tracked prompts. Higher coverage means your brand is consistently visible across more AI platforms instead of relying on a single engine. Higher means broader AI visibility.',
+  },
 ]
 
 const TOPIC_VIS_DATA = [
-  { topic: 'AI Visibility',  sub: '1 prompt · avg position 1.8', pct: 82, color: 'var(--primary-800)' },
-  { topic: 'Comparisons',    sub: '1 prompt · avg position 2.4', pct: 71, color: '#1D4ED8' },
-  { topic: 'Sources',        sub: '1 prompt · avg position 3.7', pct: 54, color: 'var(--primary-600)' },
-  { topic: 'Citations',      sub: '1 prompt · avg position 6.8', pct: 29, color: '#3B82F6' },
-  { topic: 'Brand Presence', sub: '1 prompt · avg position 7.4', pct: 24, color: '#60A5FA' },
+  // HARDCODED: topic-level visibility rollups for the Prompts sidebar (prototyping)
+  { topic: 'AI Visibility',  sub: '2 prompts · avg #1.9', pct: 82 },
+  { topic: 'Comparisons',    sub: '3 prompts · avg #4.2', pct: 71 },
+  { topic: 'Sources',        sub: '2 prompts · avg #3.9', pct: 54 },
+  { topic: 'Citations',      sub: '3 prompts · avg #6.0', pct: 29 },
+  { topic: 'Brand Presence', sub: '2 prompts · avg #6.5', pct: 24 },
 ]
 
 const TOPIC_TAG_STYLES = {
@@ -500,52 +635,39 @@ const TOPIC_TAG_STYLES = {
   'Brand Presence': { bg: '#FEF3C7', text: '#D97706', border: '#FDE68A' },
 }
 
-const PROMPT_ROLLUP_GROUPS = [
-  {
-    label: 'Winning', desc: 'High visibility and majority-engine presence.', countColor: '#16A34A', countBg: '#F0FDF4',
-    prompts: [
-      { id: 'w1', prompt: 'What are the best AI visibility platforms for multi-location brands?', topic: 'AI Visibility', volume: '1.9K', visibility: 82 },
-      { id: 'w2', prompt: 'How do AI rank tracking tools compare for SEO agencies?',              topic: 'Comparisons',  volume: '1.3K', visibility: 71 },
-    ],
-  },
-  {
-    label: 'Opportunity', desc: 'High-value prompts with low current visibility.', countColor: '#D97706', countBg: '#FEF3C7',
-    prompts: [],
-  },
-  {
-    label: 'Losing', desc: 'Prompts showing the sharpest negative trend.', countColor: '#DC2626', countBg: '#FEF2F2',
-    prompts: [
-      { id: 'l1', prompt: 'What makes a brand appear in AI answers more often?',          topic: 'Brand Presence', volume: '540', visibility: 24 },
-      { id: 'l2', prompt: 'How can agencies improve AI citation rate for client brands?', topic: 'Citations',      volume: '720', visibility: 29 },
-    ],
-  },
-]
-
-const PROMPT_INVENTORY_DATA = [
-  { prompt: 'What are the best AI visibility platforms for multi-location brands?', topic: 'AI Visibility',  intent: 'C', volume: '1.9K', engFilled: 4, visibility: 82, avgPos: '#1.8', mentions: '4 / 5', status: 'Winning', trend: '+7'  },
-  { prompt: 'How do AI rank tracking tools compare for SEO agencies?',              topic: 'Comparisons',    intent: 'C', volume: '1.3K', engFilled: 3, visibility: 71, avgPos: '#2.4', mentions: '3 / 5', status: 'Winning', trend: '+4'  },
-  { prompt: 'Best tools to monitor citations in ChatGPT and Google AI Overview',    topic: 'Sources',        intent: 'I', volume: '880',  engFilled: 3, visibility: 54, avgPos: '#3.7', mentions: '3 / 5', status: 'Neutral', trend: '+1'  },
-  { prompt: 'How can agencies improve AI citation rate for client brands?',          topic: 'Citations',      intent: 'I', volume: '720',  engFilled: 1, visibility: 29, avgPos: '#6.8', mentions: '1 / 5', status: 'Losing',  trend: '-8'  },
-  { prompt: 'What makes a brand appear in AI answers more often?',                  topic: 'Brand Presence', intent: 'I', volume: '540',  engFilled: 1, visibility: 24, avgPos: '#7.4', mentions: '1 / 5', status: 'Losing',  trend: '-11' },
-]
-
-// Unified prompt dataset — rollups, inventory, KPIs and segments are all derived from this.
+// Unified prompt dataset — KPIs, status tabs, and accordion lists are all derived from this.
+// HARDCODED: expand this list when wiring live prompt inventory (prototyping)
 const PROMPTS_DATA = [
-  { id: 'p1', prompt: 'What are the best AI visibility platforms for multi-location brands?', topic: 'AI Visibility',  intent: 'Commercial',    volume: '1.9K', volNum: 1900, engFilled: 4, visibility: 82, avgPos: '#1.8', mentions: '4 / 5', status: 'Winning', trend: '+4'  },
-  { id: 'p2', prompt: 'How do AI rank tracking tools compare for SEO agencies?',              topic: 'Comparisons',    intent: 'Commercial',    volume: '1.3K', volNum: 1300, engFilled: 3, visibility: 71, avgPos: '#2.4', mentions: '3 / 5', status: 'Winning', trend: '+3'  },
-  { id: 'p3', prompt: 'Best tools to monitor citations in ChatGPT and Google AI Overview',    topic: 'Sources',        intent: 'Informational', volume: '880',  volNum: 880,  engFilled: 3, visibility: 54, avgPos: '#3.7', mentions: '3 / 5', status: 'Neutral', trend: '+3'  },
-  { id: 'p4', prompt: 'How can agencies improve AI citation rate for client brands?',          topic: 'Citations',      intent: 'Informational', volume: '720',  volNum: 720,  engFilled: 1, visibility: 29, avgPos: '#6.8', mentions: '1 / 5', status: 'Losing',  trend: '-9'  },
-  { id: 'p5', prompt: 'What makes a brand appear in AI answers more often?',                  topic: 'Brand Presence', intent: 'Informational', volume: '540',  volNum: 540,  engFilled: 1, visibility: 24, avgPos: '#7.4', mentions: '1 / 5', status: 'Losing',  trend: '-11' },
+  { id: 'p1',  prompt: 'What are the best AI visibility platforms for multi-location brands?', topic: 'AI Visibility',  intent: 'Commercial',    volume: '1.9K', volNum: 1900, engFilled: 4, visibility: 82, avgPos: '#1.8', mentions: '4 / 5', status: 'Winning',     trend: '+4'  },
+  { id: 'p2',  prompt: 'How do AI rank tracking tools compare for SEO agencies?',              topic: 'Comparisons',    intent: 'Commercial',    volume: '1.3K', volNum: 1300, engFilled: 3, visibility: 71, avgPos: '#2.4', mentions: '3 / 5', status: 'Winning',     trend: '+3'  },
+  { id: 'p3',  prompt: 'Best CRM platforms that show up in ChatGPT recommendations',           topic: 'AI Visibility',  intent: 'Commercial',    volume: '2.1K', volNum: 2100, engFilled: 4, visibility: 78, avgPos: '#2.0', mentions: '4 / 5', status: 'Winning',     trend: '+5'  },
+  { id: 'p4',  prompt: 'Which marketing automation tools do AI engines recommend most?',       topic: 'Comparisons',    intent: 'Commercial',    volume: '1.6K', volNum: 1600, engFilled: 4, visibility: 74, avgPos: '#2.2', mentions: '4 / 5', status: 'Winning',     trend: '+2'  },
+  { id: 'p5',  prompt: 'Best tools to monitor citations in ChatGPT and Google AI Overview',    topic: 'Sources',        intent: 'Informational', volume: '880',  volNum: 880,  engFilled: 3, visibility: 54, avgPos: '#3.7', mentions: '3 / 5', status: 'Neutral',     trend: '+3'  },
+  { id: 'p6',  prompt: 'How to track brand mentions across Perplexity and Gemini',             topic: 'Sources',        intent: 'Informational', volume: '640',  volNum: 640,  engFilled: 2, visibility: 48, avgPos: '#4.1', mentions: '2 / 5', status: 'Neutral',     trend: '+1'  },
+  { id: 'p13', prompt: 'Do AI assistants recommend all-in-one agency platforms over point tools?', topic: 'Comparisons', intent: 'Commercial', volume: '590', volNum: 590, engFilled: 2, visibility: 51, avgPos: '#4.0', mentions: '2 / 5', status: 'Neutral', trend: '+2' },
+  { id: 'p14', prompt: 'How accurate are AI-generated CRM comparisons for agencies?',         topic: 'Comparisons',    intent: 'Informational', volume: '520',  volNum: 520,  engFilled: 2, visibility: 46, avgPos: '#4.5', mentions: '2 / 5', status: 'Neutral',     trend: '0'  },
+  { id: 'p7',  prompt: 'What content formats get cited most often in AI answers?',             topic: 'Citations',      intent: 'Informational', volume: '910',  volNum: 910,  engFilled: 2, visibility: 41, avgPos: '#5.2', mentions: '2 / 5', status: 'Opportunity', trend: '+6'  },
+  { id: 'p8',  prompt: 'How can local businesses improve visibility in AI Overviews?',         topic: 'Brand Presence', intent: 'Informational', volume: '1.1K', volNum: 1100, engFilled: 2, visibility: 38, avgPos: '#5.6', mentions: '2 / 5', status: 'Opportunity', trend: '+4'  },
+  { id: 'p9',  prompt: 'Best practices for structuring FAQ pages for AI citation',             topic: 'Citations',      intent: 'Informational', volume: '760',  volNum: 760,  engFilled: 2, visibility: 35, avgPos: '#5.9', mentions: '2 / 5', status: 'Opportunity', trend: '+2'  },
+  { id: 'p15', prompt: 'How do review sites influence AI recommendations for CRM tools?',      topic: 'Sources',        intent: 'Informational', volume: '680',  volNum: 680,  engFilled: 2, visibility: 33, avgPos: '#6.1', mentions: '2 / 5', status: 'Opportunity', trend: '+3'  },
+  { id: 'p16', prompt: 'What schema markup helps brands get cited in AI answers?',             topic: 'Citations',      intent: 'Informational', volume: '610',  volNum: 610,  engFilled: 1, visibility: 31, avgPos: '#6.4', mentions: '1 / 5', status: 'Opportunity', trend: '+1'  },
+  { id: 'p10', prompt: 'How can agencies improve AI citation rate for client brands?',          topic: 'Citations',      intent: 'Informational', volume: '720',  volNum: 720,  engFilled: 1, visibility: 29, avgPos: '#6.8', mentions: '1 / 5', status: 'Losing',      trend: '-9'  },
+  { id: 'p11', prompt: 'What makes a brand appear in AI answers more often?',                  topic: 'Brand Presence', intent: 'Informational', volume: '540',  volNum: 540,  engFilled: 1, visibility: 24, avgPos: '#7.4', mentions: '1 / 5', status: 'Losing',      trend: '-11' },
+  { id: 'p12', prompt: 'Why do competitors outrank us in ChatGPT product comparisons?',        topic: 'Comparisons',    intent: 'Commercial',    volume: '480',  volNum: 480,  engFilled: 1, visibility: 18, avgPos: '#8.1', mentions: '1 / 5', status: 'Losing',      trend: '-7'  },
+  { id: 'p17', prompt: 'Which agencies are losing mentions in Perplexity CRM roundups?',       topic: 'Brand Presence', intent: 'Commercial',    volume: '410',  volNum: 410,  engFilled: 1, visibility: 16, avgPos: '#8.4', mentions: '1 / 5', status: 'Losing',      trend: '-5'  },
+  { id: 'p18', prompt: 'Why is our brand missing from Gemini marketing automation lists?',     topic: 'AI Visibility',  intent: 'Informational', volume: '390',  volNum: 390,  engFilled: 0, visibility: 12, avgPos: '#9.0', mentions: '0 / 5', status: 'Losing',      trend: '-8'  },
 ]
 
-// Status colour + copy meta, shared by rollups / badges / visibility bars.
+// Status colour + copy meta, shared by tabs / accordion headers / badges.
 const STATUS_META = {
   Winning:     { color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0', desc: 'High visibility and majority-engine presence.' },
   Opportunity: { color: '#D97706', bg: '#FFFBEB', border: '#FDE68A', desc: 'High-value prompts with low current visibility.' },
   Neutral:     { color: '#155EEF', bg: '#EFF6FF', border: '#BFDBFE', desc: 'Stable prompts with moderate engine coverage.' },
   Losing:      { color: '#DC2626', bg: '#FEF2F2', border: '#FECACA', desc: 'Prompts showing the sharpest negative trend.' },
 }
+// Tab order (nav). Accordion priority order surfaces actionable statuses first.
 const ROLLUP_ORDER = ['Winning', 'Opportunity', 'Neutral', 'Losing']
+const PRIORITY_ORDER = ['Opportunity', 'Losing', 'Neutral', 'Winning']
 
 // Engine identity for the per-prompt coverage dots (first N mentioned, rest muted).
 // `name` keys into ENGINE_LOGO_MAP so the dots render the real brand logos.
@@ -575,14 +697,39 @@ const VOLUME_BARS = [
 // Avg visibility 5-week trend sparkline. (dummy data)
 const VIS_TREND_SPARK = [46, 48, 47, 50, 49, 52]
 
-const SEGMENTS = ROLLUP_ORDER.map(s => `${s} (${PROMPTS_DATA.filter(p => p.status === s).length})`)
-SEGMENTS.unshift(`All (${PROMPTS_DATA.length})`)
+const SEGMENTS = ['All', ...ROLLUP_ORDER]
 
 const STATUS_COUNTS = ROLLUP_ORDER.map(s => ({
   status: s,
   count: PROMPTS_DATA.filter(p => p.status === s).length,
   color: STATUS_META[s].color,
 }))
+
+// Resolve a lighter Overview card payload to the richest matching prompt record.
+function resolvePromptForDetail(item) {
+  const fromDataset = PROMPTS_DATA.find(p => p.prompt === item.prompt)
+  if (fromDataset) return fromDataset
+  return {
+    id: item.id || `overview-${item.rank || item.prompt}`,
+    prompt: item.prompt,
+    topic: item.topic || item.tag || 'AI Visibility',
+    visibility: item.visibility,
+    volume: String(item.volume || '').replace(' monthly volume', '') || item.volume,
+    avgPos: item.avgPos || item.aioPos,
+    status: item.status && STATUS_META[item.status] ? item.status : 'Winning',
+    trend: item.trend || item.trendScore || '+0',
+  }
+}
+
+function scrollContentToTop(ref) {
+  const el = ref?.current
+  if (!el) return
+  el.scrollTop = 0
+  requestAnimationFrame(() => {
+    el.scrollTop = 0
+    requestAnimationFrame(() => { el.scrollTop = 0 })
+  })
+}
 
 // ── Prompt detail data ─────────────────────────────────────────────────────
 
@@ -610,6 +757,8 @@ const ENGINE_PERF_DATA = [
   { engine: 'AI Mode',    abbr: 'AM', color: '#059669', mentionPct: '65%', citRate: '46%', urlsAnswer: '5.3', trend: '+7',  trendUp: true },
 ]
 
+const ENGINE_PERF_GRID = 'minmax(0, 1fr) 60px 76px 44px'
+
 const DETAIL_SOURCES = [
   { url: 'https://www.capterra.com/p/209198/GoHighLevel/', domain: 'capterra.com',    avgPos: '#1.5', coverage: '19%', seenInChats: 112, brandMentioned: true,  otherBrands: true,  lastSeen: 'Apr 28, 2026' },
   { url: 'https://gohighlevel.com/pricing',               domain: 'gohighlevel.com', avgPos: '#1.0', coverage: '25%', seenInChats: 56,  brandMentioned: true,  otherBrands: false, lastSeen: 'Jun 19, 2026' },
@@ -617,42 +766,22 @@ const DETAIL_SOURCES = [
 
 // ── Prompts tab helpers ────────────────────────────────────────────────────
 
-function TopicTag({ topic }) {
-  const s = TOPIC_TAG_STYLES[topic] || { bg: '#F9FAFB', text: '#344054', border: '#EAECF0' }
-  return (
-    <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap"
-      style={{ background: s.bg, color: s.text, border: `1px solid ${s.border}` }}
-    >
-      {topic}
-    </span>
-  )
-}
-
-function EngineDots({ filled }) {
-  return (
-    <div className="flex items-center gap-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <span key={i} className={`inline-block w-2.5 h-2.5 rounded-full ${i < filled ? 'bg-primary-600' : 'bg-gray-200'}`} />
-      ))}
-    </div>
-  )
-}
-
 // Real engine logos showing which engines mention the brand (full colour) vs not
 // (muted, greyscaled). Uses the shared EngineLogo so no letter-monogram placeholders.
-function EngineLetterDots({ filled }) {
+// `overlap` stacks icons with a slight negative margin (pitch-page avatar stack).
+function EngineLetterDots({ filled, overlap = false }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className={`flex items-center ${overlap ? '' : 'gap-1'}`}>
       {ENGINE_PALETTE.map((e, i) => {
         const mentioned = i < filled
         return (
           <span
             key={i}
             title={e.name}
-            className={`inline-flex items-center justify-center w-[20px] h-[20px] rounded-full bg-white border border-gray-200 shrink-0 transition-opacity ${
-              mentioned ? '' : 'opacity-35 grayscale'
-            }`}
+            className={`relative inline-flex items-center justify-center w-[20px] h-[20px] rounded-full bg-white border border-gray-200 shrink-0 transition-opacity ${
+              overlap ? `ring-2 ring-white ${i === 0 ? '' : '-ml-1.5'}` : ''
+            } ${mentioned ? '' : 'opacity-35 grayscale'}`}
+            style={overlap ? { zIndex: ENGINE_PALETTE.length - i } : undefined}
           >
             <EngineLogo name={e.name} size={12} chip={false} />
           </span>
@@ -662,62 +791,158 @@ function EngineLetterDots({ filled }) {
   )
 }
 
-// Compact circular % gauge (SVG donut) for the Topic visibility grid.
-function RingGauge({ pct, color, label, size = 64, stroke = 6 }) {
-  const radius = (size - stroke) / 2
-  const circumference = 2 * Math.PI * radius
-  const offset = circumference * (1 - Math.max(0, Math.min(100, pct)) / 100)
+function sortPromptsForStatus(prompts, status) {
+  const sorted = [...prompts]
+  if (status === 'Winning') {
+    sorted.sort((a, b) => b.visibility - a.visibility)
+  } else {
+    // Opportunity / Losing / Neutral — lower visibility = higher urgency
+    sorted.sort((a, b) => a.visibility - b.visibility)
+  }
+  return sorted
+}
+
+// Ranked topic visibility — compact horizontal score rails (replaces bulky ring grid).
+function TopicVisibilityPanel({ topics, className = '' }) {
+  const ranked = [...topics].sort((a, b) => b.pct - a.pct)
+  const avg = Math.round(ranked.reduce((sum, t) => sum + t.pct, 0) / (ranked.length || 1))
+
   return (
-    <div className="flex flex-col items-center gap-1.5 min-w-0">
-      <div className="relative shrink-0" style={{ width: size, height: size }}>
-        <svg width={size} height={size} className="-rotate-90">
-          <circle
-            cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="var(--gray-100)" strokeWidth={stroke}
+    <div className={`border border-gray-200 rounded-2xl bg-white shadow-xs p-4 flex flex-col min-h-0 ${className}`}>
+      <div className="flex items-start justify-between gap-3 mb-4 shrink-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <h3 className="text-[15px] font-semibold text-gray-900 m-0">Topic visibility</h3>
+          <SectionInfoTip
+            id="pt-topic-visibility-info"
+            content="Shows how your visibility compares across different topics. It helps you identify which topics your brand already owns and where you have the biggest opportunity to improve. Higher visibility means stronger topic authority."
           />
-          <circle
-            cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round"
-            strokeDasharray={circumference} strokeDashoffset={offset}
-            style={{ transition: 'stroke-dashoffset 500ms ease' }}
-          />
-        </svg>
-        <span className="absolute inset-0 flex items-center justify-center text-[14px] font-bold text-gray-900">{pct}%</span>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-[18px] font-bold text-gray-900 tabular-nums leading-none m-0">{avg}%</p>
+          <p className="text-[11px] text-gray-400 m-0 mt-0.5">Avg</p>
+        </div>
       </div>
-      <span className="text-[12px] text-gray-500 text-center leading-tight truncate max-w-full">{label}</span>
+
+      <div className="flex-1 min-h-0 overflow-y-auto flex flex-col gap-1" style={{ scrollbarGutter: 'stable' }}>
+        {ranked.map((t, i) => {
+          const color = visibilityColor(t.pct)
+          const isLead = i === 0
+          return (
+            <div
+              key={t.topic}
+              className={`rounded-lg px-2.5 py-2 transition-colors ${isLead ? 'bg-primary-50/70' : 'hover:bg-gray-50'}`}
+            >
+              <div className="flex items-center gap-2.5">
+                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md text-[11px] font-semibold tabular-nums shrink-0 ${
+                  isLead ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-500'
+                }`}>
+                  {i + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className={`text-[13px] font-medium truncate m-0 ${isLead ? 'text-primary-700' : 'text-gray-800'}`}>{t.topic}</p>
+                  <p className="text-[11px] text-gray-400 truncate m-0">{t.sub}</p>
+                </div>
+                <span className="text-[13px] font-semibold tabular-nums shrink-0" style={{ color }}>{t.pct}%</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }
 
-// Lightweight filled sparkline for KPI tiles.
-function MiniSparkline({ data, color = '#6938EF', height = 40 }) {
-  const W = 200
-  const min = Math.min(...data)
-  const max = Math.max(...data)
-  const range = max - min || 1
-  const pts = data.map((v, i) => ({
-    x: (i / (data.length - 1)) * W,
-    y: height - ((v - min) / range) * (height - 6) - 3,
-  }))
-  const line = pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')
-  const area = `${line} L${W},${height} L0,${height} Z`
-  const gradId = `mspk-${String(color).replace(/[^a-zA-Z0-9]/g, '')}`
+// Nested compact row — lighter than status cards (list tile, not a nav card).
+function PromptDenseRow({ prompt, onClick }) {
+  const color = visibilityColor(prompt.visibility)
+  const topicColor = TOPIC_TAG_STYLES[prompt.topic]?.text
   return (
-    <svg width="100%" height={height} viewBox={`0 0 ${W} ${height}`} preserveAspectRatio="none" className="block overflow-visible">
-      <defs>
-        <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill={`url(#${gradId})`} />
-      <polyline points={pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')} fill="none" stroke={color} strokeWidth="2" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
+    <button
+      type="button"
+      onClick={onClick}
+      className="group w-full flex items-center gap-2.5 text-left min-h-[56px] px-3 py-2.5 rounded-lg bg-white border border-gray-200 hover:bg-primary-50 hover:border-primary-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-200 transition-colors"
+    >
+      <div className="min-w-0 flex-1">
+        <p className="text-[14px] font-semibold text-gray-900 leading-snug m-0 line-clamp-1">{prompt.prompt}</p>
+        <p className="text-[13px] text-gray-400 m-0 mt-1 truncate leading-snug">
+          <span className="font-medium" style={topicColor ? { color: topicColor } : undefined}>{prompt.topic}</span>
+          <span className="text-gray-300"> · </span>
+          <span className="tabular-nums">{prompt.volume}</span>
+          <span className="text-gray-300"> · </span>
+          <span>{prompt.intent}</span>
+          <span className="text-gray-300"> · </span>
+          <span className="tabular-nums">{prompt.avgPos}</span>
+        </p>
+      </div>
+      <EngineLetterDots filled={prompt.engFilled} overlap />
+      <span className="text-[13px] font-semibold tabular-nums shrink-0 w-7 text-right leading-none" style={{ color }}>
+        {prompt.visibility}
+      </span>
+      <ChevronRight size={12} className="text-gray-300 group-hover:text-primary-500 transition-colors shrink-0" />
+    </button>
   )
 }
 
-function StatusBadge({ status }) {
-  const s = STATUS_META[status] || STATUS_META.Neutral
+function PromptStatusTabs({ segment, onChange }) {
+  return (
+    <div
+      className="relative z-10 flex items-stretch gap-0 px-2 border-b border-gray-200 bg-white overflow-x-auto shrink-0 shadow-[0_1px_0_0_rgba(16,24,40,0.06)]"
+      role="tablist"
+      aria-label="Prompt status"
+    >
+      {SEGMENTS.map(seg => {
+        const isActive = segment === seg
+        const count = seg === 'All'
+          ? PROMPTS_DATA.length
+          : (STATUS_COUNTS.find(s => s.status === seg)?.count ?? 0)
+        return (
+          <button
+            key={seg}
+            type="button"
+            role="tab"
+            aria-selected={isActive}
+            onClick={() => onChange(seg)}
+            className={`relative px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors ${
+              isActive ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            <span className="inline-flex items-center gap-1.5">
+              {seg}
+              <span className={`tabular-nums text-[11px] font-semibold ${
+                isActive ? 'text-primary-500' : 'text-gray-400'
+              }`}>
+                {count}
+              </span>
+            </span>
+            {isActive && (
+              <span className="absolute left-2 right-2 bottom-0 h-0.5 rounded-full bg-primary-600" aria-hidden="true" />
+            )}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// Non-interactive section label for All-view priority groups (static — sticky
+// caused prompt rows to clip under the tabs while the next label sat below).
+function PromptStatusLabel({ status, count }) {
+  return (
+    <div className="flex items-center gap-1.5 px-0.5 pt-1 pb-0.5">
+      <span className="text-[12px] font-semibold text-gray-900">{status}</span>
+      <span className="text-[11px] font-medium text-gray-400 tabular-nums">{count}</span>
+    </div>
+  )
+}
+
+// Overlap row status chip — same chrome as former StatusBadge (px-2, bordered pill).
+const OVERLAP_STATUS_META = {
+  Watch:  { color: '#D97706', bg: '#FEF3C7', border: '#FDE68A' },
+  Stable: { color: '#16A34A', bg: '#F0FDF4', border: '#BBF7D0' },
+}
+
+function OverlapStatusChip({ status }) {
+  const s = OVERLAP_STATUS_META[status] || OVERLAP_STATUS_META.Stable
   return (
     <span
       className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap"
@@ -728,41 +953,46 @@ function StatusBadge({ status }) {
   )
 }
 
-// Brand/competitor avatar — real company logo (by domain) with a graceful
-// fallback to the brand's colored initials.
-function CompetitorAvatar({ c, size = 32 }) {
-  const cls = size <= 24 ? 'w-6 h-6' : size <= 28 ? 'w-7 h-7' : 'w-8 h-8'
+// Brand/competitor name cell — text only (no brand logos / initials).
+function CompetitorBrandCell({ c, showDomain = false }) {
   return (
-    <CompanyLogo
-      domain={c.domain}
-      size={size}
-      rounded="rounded-full"
-      fallback={
-        <span className={`inline-flex items-center justify-center ${cls} rounded-full text-white text-[11px] font-semibold shrink-0`} style={{ background: c.color }}>
-          {c.initials}
-        </span>
-      }
-    />
+    <div className="min-w-0">
+      <div className="flex items-center gap-2 min-w-0">
+        <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
+      </div>
+      {showDomain && <p className="text-[12px] text-gray-400 truncate m-0">{c.domain}</p>}
+    </div>
   )
 }
 
 // ── Prompts tab content ────────────────────────────────────────────────────
 
-function PromptsTabContent({ injectedPrompt = null, onInjectedBack }) {
-  const [segment, setSegment] = useState(SEGMENTS[0])
+function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrollRef }) {
+  const [segment, setSegment] = useState('All')
   const [selectedPrompt, setSelectedPrompt] = useState(null)
 
-  const activeStatus = segment.split(' (')[0]
-  const visiblePrompts = activeStatus === 'All' ? PROMPTS_DATA : PROMPTS_DATA.filter(p => p.status === activeStatus)
-  const groupsToShow = ROLLUP_ORDER.filter(s => activeStatus === 'All' || s === activeStatus)
+  useLayoutEffect(() => {
+    if (injectedPrompt || selectedPrompt) {
+      scrollContentToTop(contentScrollRef)
+    }
+  }, [injectedPrompt, selectedPrompt, contentScrollRef])
 
-  // Clicking any prompt (rollup card or inventory row) opens the dedicated detail
-  // page. A prompt injected from the Overview overlap cards takes precedence and
-  // keeps its "Back to overview" affordance.
+  const groups = (segment === 'All' ? PRIORITY_ORDER : [segment]).map(status => ({
+    status,
+    prompts: sortPromptsForStatus(
+      PROMPTS_DATA.filter(p => p.status === status),
+      status,
+    ),
+  }))
+  const totalVisible = groups.reduce((sum, g) => sum + g.prompts.length, 0)
+  const showSectionLabels = segment === 'All'
+
+  // Clicking any prompt opens the dedicated detail page. A prompt injected from
+  // Overview keeps its "Back to overview" affordance.
   const detailPrompt = injectedPrompt || selectedPrompt
   if (detailPrompt) {
     return (
-      <div className="px-5 py-5">
+      <div className="h-full min-h-0 overflow-y-auto px-5 py-5" style={{ scrollbarGutter: 'stable' }}>
         <PromptDetailView
           prompt={detailPrompt}
           backLabel={injectedPrompt ? 'Back to overview' : 'Back to prompts'}
@@ -773,131 +1003,69 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack }) {
   }
 
   return (
-    <div>
-
-      {/* ── KPI cards (scroll away) ─────────────────────────────────── */}
-      <div className="px-5 pt-5 pb-4">
+    <div className="h-full min-h-0 flex flex-col">
+      {/* KPI strip — fixed; main cards fill remaining viewport */}
+      <div className="shrink-0 px-5 pt-5 pb-4">
         <div className="grid grid-cols-4 gap-3">
           {PROMPTS_KPIS.map((kpi, i) => {
-            // Tracked prompts stays dynamic; other values are hardcoded for the prototype.
             const value = i === 0 ? PROMPTS_DATA.length : kpi.value
             return (
-              <CountCard key={kpi.label} label={kpi.label} value={value} Icon={kpi.Icon} iconColor={kpi.color} help />
+              <CountCard key={kpi.label} label={kpi.label} value={value} Icon={kpi.Icon} iconColor={kpi.color} helpContent={kpi.help} />
             )
           })}
         </div>
       </div>
 
-      {/* ── Sticky segment bar (pins under the header toolbar) ──────── */}
-      <div className="sticky top-0 z-20 bg-gray-50/95 backdrop-blur-sm border-y border-gray-200 px-5 py-2.5">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2 flex-wrap">
-            {SEGMENTS.map(seg => {
-              const isActive = segment === seg
-              return (
-                <button
-                  key={seg}
-                  onClick={() => setSegment(seg)}
-                  className={`px-3 py-1.5 rounded-full text-[13px] font-medium transition-colors border ${
-                    isActive
-                      ? 'bg-primary-50 text-primary-600 border-primary-200'
-                      : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  {seg}
-                </button>
-              )
-            })}
-          </div>
-          <span className="text-[13px] font-medium text-primary-600 whitespace-nowrap">{visiblePrompts.length} prompts in view</span>
-        </div>
-      </div>
+      <div className="flex-1 min-h-0 px-5 pb-5">
+        <div className="h-full min-h-0 grid gap-4" style={{ gridTemplateColumns: 'minmax(0, 64fr) minmax(0, 36fr)' }}>
 
-      {/* ── Main content (scrolls under the sticky bar) ─────────────── */}
-      <div className="px-5 pt-5 pb-6">
-        <div className="grid gap-4 items-start" style={{ gridTemplateColumns: 'minmax(0, 64fr) minmax(0, 36fr)' }}>
-
-          {/* Left — prompt rollups grouped by status */}
-          <div className="flex flex-col gap-5 min-w-0">
-            {groupsToShow.map(status => {
-              const meta = STATUS_META[status]
-              const groupPrompts = visiblePrompts.filter(p => p.status === status)
-              return (
-                <div key={status}>
-                  <div className="flex items-center justify-between mb-2.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: meta.color }} />
-                      <span className="text-[14px] font-semibold text-gray-900">{status}</span>
-                      <span className="text-[13px] text-gray-400 truncate">— {meta.desc}</span>
-                    </div>
-                    <span className="text-[14px] font-semibold shrink-0" style={{ color: meta.color }}>{groupPrompts.length}</span>
-                  </div>
-
-                  {groupPrompts.length === 0 ? (
-                    <div className="border border-dashed border-gray-300 rounded-xl px-6 py-8 text-center bg-white">
-                      <p className="text-[13px] text-gray-400">No prompts match this bucket in the current range.</p>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col gap-3">
-                      {groupPrompts.map(p => {
-                        const up = p.trend.startsWith('+')
-                        return (
-                          <div
-                            key={p.id}
-                            onClick={() => setSelectedPrompt(p)}
-                            className="border border-gray-200 rounded-xl bg-white p-4 hover:border-primary-300 hover:shadow-sm transition-all cursor-pointer"
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <p className="text-[14px] font-semibold text-gray-900 leading-snug m-0">{p.prompt}</p>
-                              <span className={`flex items-center gap-0.5 text-[13px] font-medium shrink-0 ${up ? 'text-success-600' : 'text-error-600'}`}>
-                                <TrendingUp size={13} style={up ? undefined : { transform: 'rotate(180deg)' }} />
-                                {p.trend}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <TopicTag topic={p.topic} />
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-gray-50 text-gray-500 border border-gray-200">{p.volume} vol</span>
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-gray-50 text-gray-500 border border-gray-200">{p.intent}</span>
-                            </div>
-                            <div className="mt-3">
-                              <span className="text-[12px] text-gray-500">Visibility</span>
-                              <VisibilityMeter value={p.visibility} barWidth="100%" className="mt-1" />
-                            </div>
-                            <div className="flex items-center justify-between mt-3">
-                              <EngineLetterDots filled={p.engFilled} />
-                              <span className="text-[12px] text-gray-400">{p.avgPos} avg · {p.mentions} engines</span>
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-
-          {/* Right — topic visibility + engine coverage sidebar */}
-          <div className="flex flex-col gap-4 min-w-0">
-
-            {/* Topic Visibility */}
-            <div className="border border-gray-200 rounded-xl bg-white p-4">
-              <div className="flex items-start justify-between mb-0.5">
-                <h3 className="text-[15px] font-semibold text-gray-900 m-0">Topic visibility</h3>
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 text-[12px] font-medium border border-primary-200">{TOPIC_VIS_DATA.length} topics</span>
-              </div>
-              <p className="text-[12px] text-gray-500 m-0 mb-3">Sorted by avg visibility · supported by prompt count</p>
-              <div className="grid grid-cols-2 gap-3">
-                {TOPIC_VIS_DATA.map(t => (
-                  <RingGauge key={t.topic} pct={t.pct} color={t.color} label={t.topic} />
-                ))}
+          {/* Tracked prompts — fills left column */}
+          <div className="min-w-0 min-h-0 h-full border border-gray-200 rounded-2xl bg-white shadow-xs flex flex-col overflow-hidden">
+            <div className="shrink-0 px-4 pt-4 pb-3">
+              <div className="flex items-center gap-1.5">
+                <h3 className="text-[15px] font-semibold text-gray-900 m-0">Tracked prompts</h3>
+                <SectionInfoTip
+                  id="pt-prompt-rollups-info"
+                  content="Filter by status with the tabs, then scroll the list. Under All, prompts are ordered Opportunity → Losing → Neutral → Winning so actionable items stay on top."
+                />
               </div>
             </div>
 
-            {/* AI Engine Coverage */}
-            <div className="border border-gray-200 rounded-xl bg-white p-4">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">AI engine coverage</h3>
-              <p className="text-[12px] text-gray-500 m-0 mb-3">Engines where brand is mentioned</p>
+            <div className="shrink-0">
+              <PromptStatusTabs segment={segment} onChange={setSegment} />
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pt-3 pb-3 bg-white" style={{ scrollbarGutter: 'stable' }}>
+              {totalVisible === 0 ? (
+                <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center bg-gray-50">
+                  <p className="text-[12px] text-gray-400 m-0">No prompts match this filter in the current range.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-4">
+                  {groups.map(({ status, prompts }) => {
+                    if (prompts.length === 0) return null
+                    return (
+                      <div key={status} className="flex flex-col gap-1.5">
+                        {showSectionLabels && (
+                          <PromptStatusLabel status={status} count={prompts.length} />
+                        )}
+                        {prompts.map(p => (
+                          <PromptDenseRow key={p.id} prompt={p} onClick={() => setSelectedPrompt(p)} />
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right — Topic visibility grows; AI engine coverage hugs content */}
+          <div className="min-w-0 min-h-0 h-full flex flex-col gap-4">
+            <TopicVisibilityPanel topics={TOPIC_VIS_DATA} className="flex-1 min-h-0" />
+
+            <div className="shrink-0 border border-gray-200 rounded-2xl bg-white p-4 shadow-xs">
+              <h3 className="text-[15px] font-semibold text-gray-900 m-0 mb-3">AI engine coverage</h3>
               <div className="flex flex-col gap-3">
                 {ENGINE_COVERAGE_BARS.map(e => (
                   <div key={e.name} className="flex items-center gap-2.5">
@@ -925,80 +1093,6 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack }) {
                   </div>
                 ))}
               </div>
-            </div>
-
-          </div>
-        </div>
-
-        {/* Prompt inventory table — full width */}
-        <div className="border border-gray-200 rounded-xl bg-white mt-4 overflow-hidden">
-          <div className="p-5 flex items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-[15px] font-semibold text-gray-900 m-0">Prompt inventory</h3>
-                <HelpCircle size={14} className="text-gray-300" />
-              </div>
-              <p className="text-[13px] text-gray-500 mt-0.5 m-0">Prompt-level detail by range, intent, topic, and engine coverage</p>
-            </div>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 text-[12px] font-medium border border-primary-200 shrink-0">{visiblePrompts.length} rows</span>
-          </div>
-          <div className="px-5 pb-5">
-            <div className="border border-gray-200 rounded-lg overflow-x-auto w-full">
-              <table className="w-full border-collapse min-w-[860px]">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Prompt</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Topic</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Intent</th>
-                    <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Volume</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Engines</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Visibility</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Avg pos</th>
-                    <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Mentions</th>
-                    <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 normal-case">Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visiblePrompts.map((row, i) => {
-                    const up = row.trend.startsWith('+')
-                    return (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedPrompt(row)}
-                        className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors cursor-pointer"
-                      >
-                        <td className="px-3 py-3 border-r border-gray-100 align-top max-w-[320px]">
-                          <p className="text-[13px] font-medium text-gray-900 leading-snug m-0">{row.prompt}</p>
-                          <p className="text-[12px] text-gray-400 mt-1 m-0">
-                            Trend <span className={up ? 'text-success-600' : 'text-error-600'}>{row.trend}</span>
-                            {' · '}{row.engFilled} / 5 engines mentioning
-                          </p>
-                        </td>
-                        <td className="px-3 py-3 border-r border-gray-100 align-middle">
-                          <TopicTag topic={row.topic} />
-                        </td>
-                        <td className="px-3 py-3 border-r border-gray-100 align-middle">
-                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600">
-                            {row.intent[0]}
-                          </span>
-                        </td>
-                        <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100 align-middle text-right tabular-nums">{row.volume}</td>
-                        <td className="px-3 py-3 border-r border-gray-100 align-middle">
-                          <EngineLetterDots filled={row.engFilled} />
-                        </td>
-                        <td className="px-3 py-3 border-r border-gray-100 align-middle">
-                          <VisibilityMeter value={row.visibility} />
-                        </td>
-                        <td className="px-3 py-3 text-[13px] font-medium text-gray-700 border-r border-gray-100 align-middle">{row.avgPos}</td>
-                        <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100 align-middle text-right tabular-nums">{row.mentions}</td>
-                        <td className="px-3 py-3 align-middle">
-                          <StatusBadge status={row.status} />
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
             </div>
           </div>
         </div>
@@ -1061,10 +1155,10 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
   const heroStatusMeta = STATUS_META[heroStatus]
 
   const DETAIL_KPI = [
-    { label: 'Visibility score', value: prompt.visibility != null ? `${prompt.visibility}/100` : '82/100', desc: 'Current prompt-level visibility across tracked engines.', Icon: Award,      color: '#6938EF' },
-    { label: 'Avg position',     value: prompt.avgPos || prompt.aioPos || '#1.8', desc: 'Average cited position when the brand appears.',          Icon: TrendingUp,  color: '#16A34A' },
-    { label: 'AI responses',     value: '112',    desc: 'Latest prompt responses available for drill-down.',        Icon: Bot,         color: 'var(--primary-600)' },
-    { label: 'Search volume',    value: prompt.volume || '1.9K',   desc: 'Demand proxy carried through from the tracked prompt.',   Icon: BarChart3,   color: '#D97706' },
+    { label: 'Visibility',        value: prompt.visibility != null ? `${prompt.visibility}/100` : '82/100', desc: 'Current prompt-level visibility across tracked engines.', Icon: Award,      color: '#6938EF' },
+    { label: 'Average position',  value: prompt.avgPos || prompt.aioPos || '#1.8', desc: 'Average cited position when the brand appears.',          Icon: TrendingUp,  color: '#16A34A' },
+    { label: 'AI responses',      value: '112',    desc: 'Latest prompt responses available for drill-down.',        Icon: Bot,         color: 'var(--primary-600)' },
+    { label: 'Search volume',     value: prompt.volume || '1.9K',   desc: 'Demand proxy carried through from the tracked prompt.',   Icon: BarChart3,   color: '#D97706' },
   ]
 
   return (
@@ -1096,31 +1190,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
         <h2 className="text-[20px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
         <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
 
-        {/* Prompt snapshot */}
         <div className="mt-4 pt-4 border-t border-gray-100">
-          <p className="text-[12px] font-medium text-primary-600 mb-2.5">Prompt snapshot</p>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-            {[
-              { label: 'Brand',          value: 'GoHighLevel' },
-              { label: 'Top engine',     value: 'Perplexity'    },
-              { label: 'AI responses',   value: '112'           },
-              { label: 'Prompt sources', value: '2'             },
-            ].map(item => (
-              <div key={item.label} className="border border-gray-200 rounded-lg bg-gray-50 px-3 py-2.5">
-                <p className="text-[12px] text-gray-400 font-medium mb-1 normal-case">{item.label}</p>
-                <p className="text-[13px] font-semibold text-gray-900 m-0">{item.value}</p>
-              </div>
+          <div className="grid grid-cols-4 gap-3">
+            {DETAIL_KPI.map(kpi => (
+              <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
             ))}
           </div>
-          <p className="text-[12px] text-gray-400 mt-2.5 m-0">Topic: AI Visibility · 2 source domains · US</p>
         </div>
-      </div>
-
-      {/* 4 KPI mini-cards */}
-      <div className="grid grid-cols-4 gap-3">
-        {DETAIL_KPI.map(kpi => (
-          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} description={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
-        ))}
       </div>
 
       {/* Prompt Visibility Trend + Engine performance */}
@@ -1161,16 +1237,15 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
           <MultiLineChart lines={DETAIL_TREND_LINES} xLabels={DETAIL_X_LABELS} height={200} metricLabel={trendMetric} fill />
         </div>
 
-        <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0">
-          <div className="flex items-start gap-1.5 mb-0.5">
+        <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 h-full flex flex-col">
+          <div className="flex items-center gap-1.5 mb-4">
             <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine performance</h3>
-            <HelpCircle size={14} className="text-gray-300 mt-0.5" />
+            <SectionInfoTip id="pt-engine-performance-info" content="Prompt metrics by engine" />
           </div>
-          <p className="text-[12px] font-normal text-gray-500 m-0 mb-3">Prompt metrics by engine</p>
-          <div className="grid text-[12px] font-medium text-gray-500 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2.5 py-2" style={{ gridTemplateColumns: '1fr 52px 48px 40px' }}>
+          <div className="grid text-[12px] font-semibold text-gray-900 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2.5 py-2" style={{ gridTemplateColumns: ENGINE_PERF_GRID }}>
             <span>Engine</span>
             <span className="text-right">Mention</span>
-            <span className="text-right">Cit.</span>
+            <span className="text-right whitespace-nowrap">Citation</span>
             <span className="text-right">Trend</span>
           </div>
           <div className="flex flex-col border-x border-b border-gray-200 rounded-b-lg overflow-hidden">
@@ -1178,7 +1253,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
               <div
                 key={i}
                 className="grid items-center py-2.5 px-2.5 bg-white hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0"
-                style={{ gridTemplateColumns: '1fr 52px 48px 40px' }}
+                style={{ gridTemplateColumns: ENGINE_PERF_GRID }}
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <EngineLogo name={eng.engine} size={14} className="w-6 h-6" />
@@ -1196,22 +1271,24 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
       {/* AI Responses */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
-          <div className="flex items-center gap-1.5 mb-0.5">
+          <div className="flex items-center gap-1.5 mb-3">
             <h3 className="text-[15px] font-semibold text-gray-900">AI Responses</h3>
-            <HelpCircle size={14} className="text-gray-300" />
+            <SectionInfoTip
+              id="pt-ai-responses-info"
+              content="Latest prompt responses from tracked engines with drill-in answer analysis"
+            />
           </div>
-          <p className="text-[13px] text-gray-500">Latest prompt responses from tracked engines with drill-in answer analysis</p>
         </div>
         <div className="px-5 pb-5">
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[130px]">AI</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200">Chat</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[180px]">Brands</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[72px]">Sources</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[110px]">Created</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[130px]">AI</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[180px]">Brands</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Sources</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -1222,17 +1299,17 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                         <EngineLogo name={row.engine} size={16} className="w-7 h-7" />
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{row.engine}</p>
-                          <p className="text-[12px] text-success-600 font-medium">{row.status}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <p className="text-[13px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
                       <button
+                        type="button"
                         onClick={() => setFullResponse(row)}
-                        className="text-[12px] text-primary-600 hover:underline flex items-center gap-1"
+                        className="text-[12px] text-primary-600 hover:underline"
                       >
-                        Open full response <ExternalLink size={11} />
+                        Open full response
                       </button>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
@@ -1254,11 +1331,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5 flex items-start justify-between">
           <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
+            <div className="flex items-center gap-1.5">
               <h3 className="text-[15px] font-semibold text-gray-900">Prompt sources</h3>
-              <HelpCircle size={14} className="text-gray-300" />
+              <SectionInfoTip
+                id="pt-prompt-sources-info"
+                content="All detected sources for this prompt with a compact matrix of position, coverage, and mention signals"
+              />
             </div>
-            <p className="text-[13px] text-gray-500">All detected sources for this prompt with a compact matrix of position, coverage, and mention signals</p>
           </div>
           <div className="flex items-center border border-gray-200 rounded-md overflow-hidden shrink-0">
             {['Domain', 'URL'].map(v => (
@@ -1274,13 +1353,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 min-w-[200px]">{sourcesView === 'URL' ? 'URL' : 'Domain'}</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[88px]">Coverage</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px]">Seen in chats</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[120px]">Brand mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[160px]">Other brands mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[110px]">Last seen</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[200px]">{sourcesView === 'URL' ? 'URL' : 'Domain'}</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Other brands mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
                 </tr>
               </thead>
               <tbody>
@@ -1333,14 +1412,30 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
 
 // ── Overview tab content ───────────────────────────────────────────────────
 
-function OverviewContent({ onOpenInPromptsTab }) {
+const OVERVIEW_PROMPT_VIEWS = [
+  { id: 'seo-ai', label: 'SEO → AI support' },
+  { id: 'top-performing', label: 'Top performing' },
+]
+
+function OverviewContent({ contentScrollRef }) {
   const [trendMetric, setTrendMetric] = useState('Visibility')
   const [trendPeriod, setTrendPeriod] = useState('28D')
   const [selectedPrompt, setSelectedPrompt] = useState(null)
+  const [promptView, setPromptView] = useState('seo-ai')
   const trendLines = TREND_LINES_MAP[trendMetric] || TREND_LINES_MAP.Visibility
 
+  useLayoutEffect(() => {
+    if (selectedPrompt) scrollContentToTop(contentScrollRef)
+  }, [selectedPrompt, contentScrollRef])
+
   if (selectedPrompt) {
-    return <PromptDetailView prompt={selectedPrompt} onBack={() => setSelectedPrompt(null)} />
+    return (
+      <PromptDetailView
+        prompt={selectedPrompt}
+        backLabel="Back to overview"
+        onBack={() => setSelectedPrompt(null)}
+      />
+    )
   }
 
   return (
@@ -1353,11 +1448,14 @@ function OverviewContent({ onOpenInPromptsTab }) {
             key={kpi.label}
             label={kpi.label}
             value={kpi.value}
-            changeText={kpi.change}
-            changeUp={kpi.up}
-            description={kpi.sub}
+            description={
+              <span className={`font-medium ${KPI_RATING_CLASS[kpi.rating] || 'text-gray-500'}`}>
+                {kpi.rating}
+              </span>
+            }
             Icon={kpi.Icon}
             iconColor={kpi.color}
+            helpContent={kpi.help}
           />
         ))}
       </div>
@@ -1367,9 +1465,11 @@ function OverviewContent({ onOpenInPromptsTab }) {
         <div className="grid grid-cols-3">
           {OVERVIEW_METRICS.map((m, i) => (
             <div key={m.label} className={`px-4 py-3 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}>
-              <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0 normal-case">{m.label}</p>
-              <p className="text-[20px] font-semibold text-gray-900 leading-none mb-1.5 m-0">{m.value}</p>
-              <p className="text-[12px] font-normal text-gray-500 leading-snug m-0">{m.desc}</p>
+              <div className="flex items-center gap-1 mb-1.5">
+                <p className="text-[12px] font-medium text-gray-500 m-0 normal-case">{m.label}</p>
+                <SectionInfoTip id={`pt-overview-metric-${i}`} content={m.help} />
+              </div>
+              <p className="text-[18px] font-semibold text-gray-900 leading-none m-0">{m.value}</p>
             </div>
           ))}
         </div>
@@ -1380,12 +1480,12 @@ function OverviewContent({ onOpenInPromptsTab }) {
         {/* Visibility trend */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h3 className="text-[15px] font-semibold text-gray-900">Visibility trend</h3>
-                <HelpCircle size={14} className="text-gray-300" />
-              </div>
-              <p className="text-[13px] text-gray-500 mt-0.5">Visibility score movement across the current reporting window</p>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Visibility trend</h3>
+              <SectionInfoTip
+                id="pt-visibility-trend-info"
+                content="Track how your brand's visibility, mentions, or citations change over time and compare performance against competitors."
+              />
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
@@ -1417,65 +1517,35 @@ function OverviewContent({ onOpenInPromptsTab }) {
           <MultiLineChart lines={trendLines} xLabels={TREND_X_LABELS} height={200} metricLabel={trendMetric} fill />
         </div>
 
-        {/* Competitor ranking */}
-        <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0">
-          <div className="flex items-start gap-1.5 mb-1">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Competitor ranking</h3>
-            <HelpCircle size={14} className="text-gray-300 mt-0.5" />
-          </div>
-          <p className="text-[12px] font-normal text-gray-500 m-0 mb-3">Visibility score analysis across your tracked brands</p>
-          <div className="grid text-[12px] font-medium text-gray-500 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2 py-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
-            <span>Rank</span>
-            <span className="pl-8">Brand</span>
-            <span className="text-right">Pos.</span>
-            <span className="text-right">Visibility</span>
-            <span className="text-right">Sent.</span>
-            <span className="text-right">SoV</span>
-          </div>
-          <div className="flex flex-col border-x border-b border-gray-200 rounded-b-lg overflow-hidden">
-            {COMPETITOR_RANKING_DATA.map(c => (
-              <div key={c.rank}
-                className={`grid items-center py-2 px-2 ${c.isMe ? 'bg-purple-50' : 'bg-white hover:bg-gray-50'} transition-colors`}
-                style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}
-              >
-                <span className="text-[12px] font-medium text-gray-500">#{c.rank}</span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <CompetitorAvatar c={c} size={24} />
-                  <div className="min-w-0">
-                    <p className={`text-[12px] font-medium truncate m-0 ${c.isMe ? 'text-purple-700' : 'text-gray-900'}`}>{c.name}</p>
-                    <p className="text-[11px] text-gray-400 truncate m-0">{c.domain}</p>
-                  </div>
-                </div>
-                <span className="text-[12px] font-medium text-gray-600 text-right">{c.pos}</span>
-                <span className="text-[12px] font-medium text-gray-900 text-right">{c.visibility}</span>
-                <span className={`text-[12px] font-medium text-right ${c.sentUp ? 'text-success-600' : 'text-error-600'}`}>{c.sent}</span>
-                <span className="text-[12px] font-medium text-gray-600 text-right">{c.sov}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CompetitorRankingMiniTable
+          infoId="pt-competitor-ranking-info"
+          infoContent="Compare your brand's visibility, average position, sentiment, and share of voice against tracked competitors."
+          rows={COMPETITOR_RANKING_DATA}
+        />
       </div>
 
       {/* Row 4: Engine coverage */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900">Engine coverage</h3>
-            <HelpCircle size={14} className="text-gray-300" />
+            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine coverage</h3>
+            <SectionInfoTip
+              id="pt-engine-coverage-info"
+              content="See how your brand performs across different AI search engines."
+            />
           </div>
-          <p className="text-[13px] text-gray-500 mt-0.5">Per-engine visibility, presence, citation rate, and positioning context</p>
         </div>
         <div className="px-5 pb-5">
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[180px] normal-case">Engine</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[160px] normal-case">Visibility</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[88px] normal-case">Presence</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[140px] normal-case">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px] normal-case">Citation rate</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 normal-case">Insight</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px] normal-case">Engine</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px] normal-case">Visibility</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px] normal-case">Presence</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px] normal-case">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px] normal-case">Citation rate</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap normal-case">Insight</th>
                 </tr>
               </thead>
               <tbody>
@@ -1486,7 +1556,6 @@ function OverviewContent({ onOpenInPromptsTab }) {
                         <EngineLogo name={eng.name} size={16} className="w-8 h-8" />
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
-                          <p className="text-[12px] text-gray-400">{eng.sub}</p>
                         </div>
                       </div>
                     </td>
@@ -1510,11 +1579,13 @@ function OverviewContent({ onOpenInPromptsTab }) {
 
       {/* Row 5: How AI is describing GoHighLevel */}
       <div className="border border-gray-200 rounded-lg bg-white p-4">
-        <div className="flex items-start gap-1.5 mb-1">
+        <div className="flex items-center gap-1.5 mb-3">
           <h3 className="text-[15px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
-          <HelpCircle size={14} className="text-gray-300 mt-0.5 shrink-0" />
+          <SectionInfoTip
+            id="pt-ai-describing-info"
+            content="See how AI platforms describe your brand across detected mentions, from strong recommendations to negative or dismissive responses."
+          />
         </div>
-        <p className="text-[13px] font-normal text-gray-500 m-0 mb-3">Recommendation strength, neutral framing, and negative dismissal across detected mentions</p>
         <div className="flex rounded-full overflow-hidden h-3 mb-3">
           {SENTIMENT_DATA.map(s => (
             <div key={s.label} title={s.label} style={{ width: `${s.value}%`, background: s.color }} />
@@ -1530,120 +1601,200 @@ function OverviewContent({ onOpenInPromptsTab }) {
                 <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: s.color }} aria-hidden="true" />
                 <p className="text-[12px] font-medium text-gray-500 m-0 normal-case">{s.label}</p>
               </div>
-              <p className="text-[22px] font-semibold text-gray-900 leading-none m-0">{s.value}%</p>
+              <p className="text-[18px] font-semibold text-gray-900 leading-none m-0">{s.value}%</p>
             </div>
           ))}
         </div>
         <p className="text-[13px] font-normal text-gray-500 m-0">AI answers show mixed momentum. Stronger source coverage and clearer category proof can improve how GoHighLevel is framed.</p>
       </div>
 
-      {/* Row 6: Organic-AI overlap */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-start justify-between mb-1">
-          <div className="flex items-start gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Organic-AI overlap</h3>
-            <HelpCircle size={14} className="text-gray-300 mt-0.5 shrink-0" />
-          </div>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 text-[12px] font-medium border border-primary-200 whitespace-nowrap">
-            5 shared URLs
-          </span>
-        </div>
-        <p className="text-[13px] font-normal text-gray-500 m-0 mb-4">Where Google AI Overview is borrowing from your organic footprint</p>
-
-        {/* Summary strip — overlap % + drift watch side by side on one line */}
-        <div className="grid gap-3 mb-5" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
-          <div className="flex items-start gap-3 border border-gray-200 rounded-xl px-4 py-3.5 bg-gray-50">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-gray-200 shrink-0">
-              <Link2 size={16} className="text-primary-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[24px] font-semibold text-gray-900 leading-none">34%</span>
-                <span className="text-[12px] font-medium text-gray-500">Overlap</span>
-              </div>
-              <p className="text-[12px] font-normal text-gray-500 leading-snug m-0 mt-1.5">High overlap means traditional SEO is feeding your AIO visibility.</p>
-            </div>
-          </div>
-          <div className="flex items-start gap-3 border border-gray-200 rounded-xl px-4 py-3.5 bg-gray-50">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-white border border-gray-200 shrink-0">
-              <AlertTriangle size={16} className="text-warning-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[24px] font-semibold text-gray-900 leading-none">2</span>
-                <span className="text-[12px] font-medium text-gray-500">Prompts flagged · drift watch</span>
-              </div>
-              <p className="text-[12px] font-normal text-gray-500 leading-snug m-0 mt-1.5">Watch prompts where overlap is slipping while AIO position is weakening.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Prompt list — each prompt on its own full-width row */}
-        <div className="flex flex-col gap-2">
-          {ORGANIC_OVERLAP_PROMPTS.map((item, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => onOpenInPromptsTab(item)}
-              className="group w-full flex items-center justify-between gap-4 text-left border border-gray-200 rounded-xl px-4 py-3 hover:border-primary-300 hover:bg-primary-50/40 transition-all"
-            >
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-medium text-gray-900 leading-snug m-0">{item.prompt}</p>
-                <p className="text-[12px] font-normal text-gray-400 m-0 mt-1">AIO position {item.aioPos}</p>
-              </div>
-              <div className="flex items-center gap-3 shrink-0">
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap ${item.status === 'Watch drift' ? 'bg-warning-100 text-warning-600' : 'bg-success-50 text-success-600'}`}>
-                  {item.status}
-                </span>
-                <span className="text-[18px] font-semibold text-gray-900 leading-none w-[46px] text-right tabular-nums">{item.overlap}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Row 7: Top performing prompts — HighRise-style data table */}
+      {/* Row 6: Prompt insights — both views stacked in one grid cell so height never snaps */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
-        <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
-          <div>
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Top performing prompts</h3>
-            <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">Highest-visibility prompts in the current date range</p>
+        <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Prompt insights</h3>
+              <SectionInfoTip
+                id="pt-prompt-insights-info"
+                content={
+                  promptView === 'seo-ai'
+                    ? 'See how much of your Google AI Overview visibility comes from pages that already rank in organic search.'
+                    : 'See the prompts where your brand achieved the highest AI visibility during the selected date range.'
+                }
+              />
+            </div>
           </div>
-          <span className="text-[13px] font-medium text-success-600 shrink-0">Top 5</span>
+          <div className="inline-flex items-center gap-1 bg-gray-100 rounded-lg p-1 shrink-0" role="tablist" aria-label="Prompt insights view">
+            {OVERVIEW_PROMPT_VIEWS.map(v => (
+              <button
+                key={v.id}
+                type="button"
+                role="tab"
+                aria-selected={promptView === v.id}
+                onClick={() => setPromptView(v.id)}
+                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+                  promptView === v.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="px-4 pb-4 flex flex-col gap-2">
-          {TOP_PROMPTS_DATA.map(item => (
-            <button
-              key={item.rank}
-              type="button"
-              onClick={() => setSelectedPrompt(item)}
-              className="group w-full flex items-center gap-4 text-left border border-gray-200 rounded-xl px-4 py-3 hover:border-primary-300 hover:bg-primary-50/40 transition-all"
-            >
-              <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[13px] font-semibold text-gray-600 shrink-0">
-                {item.rank}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="text-[14px] font-medium text-gray-900 leading-snug m-0 mb-1">{item.prompt}</p>
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
-                    {item.tag}
-                  </span>
-                  <span className="text-[12px] text-gray-400">{item.volume}</span>
-                  <span className="text-[12px] text-gray-400">{item.engines}</span>
+
+        {/* Body: both panels in one grid cell → container height = max(seo, top) */}
+        <div className="grid px-5 pb-5">
+          <div
+            className={`col-start-1 row-start-1 ${promptView === 'seo-ai' ? '' : 'invisible pointer-events-none'}`}
+            aria-hidden={promptView !== 'seo-ai'}
+          >
+            <div className="grid gap-3 mb-4" style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}>
+              <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-3.5 py-3 bg-gray-50 min-h-0">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-gray-200 shrink-0">
+                  <TrendingUp size={14} className="text-gray-500" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-[20px] font-semibold text-gray-900 leading-none tabular-nums">34%</span>
+                    <span className="text-[13px] font-medium text-gray-700 leading-snug">of AI citations come from your organic pages</span>
+                  </div>
+                  <p className="text-[12px] font-normal text-gray-500 leading-snug m-0 mt-1">
+                    These are pages that rank in Google and are also cited in AI answers.
+                  </p>
                 </div>
               </div>
-              <div className="flex items-center gap-4 shrink-0">
-                <div className="text-right">
-                  <p className="text-[16px] font-semibold text-gray-900 tabular-nums m-0 leading-none">{item.visibility}</p>
-                  <p className="text-[12px] text-gray-400 m-0 mt-1">Visibility</p>
+
+              <div className="flex items-center gap-3 border border-gray-200 rounded-xl px-3.5 py-3 bg-gray-50 min-h-0">
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-white border border-gray-200 shrink-0">
+                  <AlertTriangle size={14} className="text-gray-500" />
                 </div>
-                <span className={`text-[14px] font-medium tabular-nums w-[42px] text-right ${item.up ? 'text-success-600' : 'text-error-600'}`}>
-                  {item.trendScore}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-baseline gap-1.5 flex-wrap">
+                    <span className="text-[20px] font-semibold text-gray-900 leading-none tabular-nums">2</span>
+                    <span className="text-[13px] font-medium text-gray-700 leading-snug">prompts need attention</span>
+                  </div>
+                  <p className="text-[12px] font-normal text-gray-500 leading-snug m-0 mt-1">
+                    AI visibility is dropping because fewer ranking pages are being cited.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-2.5">
+              <h4 className="text-[14px] font-semibold text-gray-900 m-0">Top prompts where AI visibility is measured</h4>
+              <p className="text-[12px] font-normal text-gray-500 m-0 mt-0.5">Based on your tracked AI prompts</p>
+            </div>
+
+            <div className="border border-gray-200 rounded-xl overflow-hidden">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100">
+                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900">Prompt</th>
+                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">AI rank</th>
+                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">SEO → AI support</th>
+                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-2 w-8"><span className="sr-only">Open</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {ORGANIC_OVERLAP_PROMPTS.map((item, i) => {
+                    const isWatch = item.status === 'Watch'
+                    return (
+                      <tr
+                        key={i}
+                        role="button"
+                        tabIndex={promptView === 'seo-ai' ? 0 : -1}
+                        onClick={() => setSelectedPrompt(resolvePromptForDetail(item))}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            setSelectedPrompt(resolvePromptForDetail(item))
+                          }
+                        }}
+                        className="group border-b border-gray-100 last:border-b-0 hover:bg-gray-50/80 transition-colors cursor-pointer"
+                      >
+                        <td className="px-4 py-2.5 align-middle">
+                          <div className="flex items-start gap-2.5 min-w-0">
+                            <span
+                              className={`mt-0.5 flex items-center justify-center w-6 h-6 rounded-full shrink-0 ${
+                                isWatch ? 'bg-primary-50 text-primary-600' : 'bg-success-50 text-success-600'
+                              }`}
+                              aria-hidden="true"
+                            >
+                              {isWatch ? <Search size={12} /> : <Check size={12} strokeWidth={2.5} />}
+                            </span>
+                            <div className="min-w-0">
+                              <p className="text-[13px] font-medium text-gray-900 leading-snug m-0 line-clamp-2">{item.prompt}</p>
+                              <p className="text-[11px] font-normal text-gray-400 m-0 mt-0.5">Tracked prompt</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 align-middle text-[13px] font-medium text-gray-900 tabular-nums whitespace-nowrap">
+                          {item.aioPos}
+                        </td>
+                        <td className="px-4 py-2.5 align-middle">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-[12px] font-medium text-gray-700 tabular-nums shrink-0">{item.overlap}%</span>
+                            <div className="w-14 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
+                              <div
+                                className={`h-full rounded-full ${isWatch ? 'bg-warning-400' : 'bg-success-500'}`}
+                                style={{ width: `${item.overlap}%` }}
+                              />
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2.5 align-middle">
+                          <OverlapStatusChip status={item.status} />
+                        </td>
+                        <td className="px-4 py-2.5 align-middle text-right">
+                          <ChevronRight size={16} className="inline-block text-gray-300 group-hover:text-primary-500 transition-colors" />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div
+            className={`col-start-1 row-start-1 flex flex-col gap-2 ${promptView === 'top-performing' ? '' : 'invisible pointer-events-none'}`}
+            aria-hidden={promptView !== 'top-performing'}
+          >
+            {TOP_PROMPTS_DATA.map(item => (
+              <button
+                key={item.rank}
+                type="button"
+                tabIndex={promptView === 'top-performing' ? 0 : -1}
+                onClick={() => setSelectedPrompt(resolvePromptForDetail(item))}
+                className="group w-full flex items-center gap-4 text-left border border-gray-200 rounded-xl px-4 py-3 hover:border-primary-300 hover:bg-primary-50/40 transition-all"
+              >
+                <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[13px] font-semibold text-gray-600 shrink-0">
+                  {item.rank}
                 </span>
-                <ChevronRight size={16} className="text-gray-300 group-hover:text-primary-500 transition-colors" />
-              </div>
-            </button>
-          ))}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[14px] font-medium text-gray-900 leading-snug m-0 mb-1">{item.prompt}</p>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
+                      {item.tag}
+                    </span>
+                    <span className="text-[12px] text-gray-400">{item.volume}</span>
+                    <span className="text-[12px] text-gray-400">{item.engines}</span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 shrink-0">
+                  <div className="text-right">
+                    <p className="text-[16px] font-semibold text-gray-900 tabular-nums m-0 leading-none">{item.visibility}</p>
+                    <p className="text-[12px] text-gray-400 m-0 mt-1">Visibility</p>
+                  </div>
+                  <span className={`text-[14px] font-medium tabular-nums w-[42px] text-right ${item.up ? 'text-success-600' : 'text-error-600'}`}>
+                    {item.trendScore}
+                  </span>
+                  <ChevronRight size={16} className="text-gray-300 group-hover:text-primary-500 transition-colors" />
+                </div>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -1651,127 +1802,6 @@ function OverviewContent({ onOpenInPromptsTab }) {
 }
 
 // ── Add prompt modal ───────────────────────────────────────────────────────
-
-function InfoTip({ text }) {
-  return (
-    <span className="relative group/tip inline-flex items-center">
-      <HelpCircle size={12} className="text-gray-400 cursor-help" />
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 z-50 hidden group-hover/tip:block pointer-events-none w-56">
-        <span className="block bg-gray-900 text-white text-[12px] font-normal rounded-lg px-2.5 py-1.5 shadow-md leading-snug">
-          {text}
-        </span>
-      </span>
-    </span>
-  )
-}
-
-// Lightweight brand marks for the Add prompt engine picker. Approximated in
-// brand colours; swap for official asset SVGs when wiring live data.
-
-function ChatGptLogo({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        fill="#10A37F"
-        d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7476-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"
-      />
-    </svg>
-  )
-}
-
-function PerplexityLogo({ size = 18 }) {
-  return (
-    <svg
-      width={size} height={size} viewBox="0 0 24 24" fill="none"
-      stroke="#20808D" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M12 4v16" />
-      <path d="M12 8.2C10.3 5.9 7.9 5 6 5.8 4 6.6 3.1 8.9 3.8 11.1c.5 1.9 2.3 3.1 4.3 3.1H12" />
-      <path d="M12 8.2C13.7 5.9 16.1 5 18 5.8c2 .8 2.9 3.1 2.2 5.3-.5 1.9-2.3 3.1-4.3 3.1H12" />
-      <path d="M7 14.2V18l5-3M17 14.2V18l-5-3" />
-    </svg>
-  )
-}
-
-function ClaudeLogo({ size = 18 }) {
-  const rays = Array.from({ length: 12 }, (_, i) => (i * 360) / 12)
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <g transform="translate(12 12)">
-        {rays.map(a => (
-          <rect key={a} x="-0.85" y="-10.5" width="1.7" height="7.2" rx="0.85" fill="#D97706" transform={`rotate(${a})`} />
-        ))}
-      </g>
-    </svg>
-  )
-}
-
-function GeminiLogo({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <defs>
-        <linearGradient id="gemini-grad" x1="2" y1="4" x2="22" y2="20" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#4285F4" />
-          <stop offset="0.5" stopColor="#9B72CB" />
-          <stop offset="1" stopColor="#D96570" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#gemini-grad)" d="M12 2c.4 5-2.9 8.9-10 10 7.1 1.1 10.4 5 10 10 .4-5 2.9-8.9 10-10-7.1-1.1-10.4-5-10-10Z" />
-    </svg>
-  )
-}
-
-function AiModeLogo({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <defs>
-        <linearGradient id="aimode-grad" x1="2" y1="4" x2="20" y2="21" gradientUnits="userSpaceOnUse">
-          <stop offset="0" stopColor="#4285F4" />
-          <stop offset="0.55" stopColor="#9B72CB" />
-          <stop offset="1" stopColor="#D96570" />
-        </linearGradient>
-      </defs>
-      <path fill="url(#aimode-grad)" d="M9.6 3c.3 3.9 2.4 6.7 6.4 8-4 1.3-6.1 4.1-6.4 8-.3-3.9-2.4-6.7-6.4-8 4-1.3 6.1-4.1 6.4-8Z" />
-      <path fill="url(#aimode-grad)" d="M18 3.4c.13 1.5 1 2.6 2.6 3.1-1.6.5-2.47 1.6-2.6 3.1-.13-1.5-1-2.6-2.6-3.1 1.6-.5 2.47-1.6 2.6-3.1Z" />
-    </svg>
-  )
-}
-
-function AiOverviewLogo({ size = 18 }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#4285F4" d="M23.04 12.26c0-.82-.07-1.6-.21-2.36H12v4.46h6.19c-.27 1.44-1.08 2.66-2.3 3.48v2.89h3.72c2.18-2.01 3.43-4.97 3.43-8.47Z" />
-      <path fill="#34A853" d="M12 24c3.11 0 5.72-1.03 7.62-2.79l-3.72-2.89c-1.03.69-2.35 1.1-3.9 1.1-3 0-5.54-2.03-6.45-4.75H1.71v2.98C3.6 21.42 7.51 24 12 24Z" />
-      <path fill="#FBBC05" d="M5.55 14.67c-.23-.69-.36-1.42-.36-2.17s.13-1.48.36-2.17V7.35H1.71C.62 9.5.16 11.18.16 12.5s.46 3 1.55 5.15l3.84-2.98Z" />
-      <path fill="#EA4335" d="M12 4.78c1.69 0 3.21.58 4.4 1.72l3.3-3.3C17.72 1.19 15.11 0 12 0 7.51 0 3.6 2.58 1.71 6.35l3.84 2.98C6.46 6.81 9 4.78 12 4.78Z" />
-    </svg>
-  )
-}
-
-// Single source of truth mapping an engine name to its real brand logo, so tables,
-// checkboxes and the response viewer never fall back to letter-monogram placeholders.
-const ENGINE_LOGO_MAP = {
-  'ChatGPT':     ChatGptLogo,
-  'Perplexity':  PerplexityLogo,
-  'Claude':      ClaudeLogo,
-  'Gemini':      GeminiLogo,
-  'AI Mode':     AiModeLogo,
-  'AI Overview': AiOverviewLogo,
-}
-
-// Renders the real engine logo inside a consistent white chip. Falls back to a
-// neutral bot glyph if an unknown engine name is passed.
-function EngineLogo({ name, size = 18, chip = true, className = '' }) {
-  const Logo = ENGINE_LOGO_MAP[name]
-  const glyph = Logo ? <Logo size={size} /> : <Bot size={size} className="text-gray-400" />
-  if (!chip) return glyph
-  return (
-    <span className={`inline-flex items-center justify-center rounded-lg bg-white border border-gray-200 shrink-0 ${className}`}>
-      {glyph}
-    </span>
-  )
-}
 
 // HARDCODED: AI engine options for the Add prompt multi-select (prototyping)
 const ADD_PROMPT_ENGINES = [
@@ -1786,34 +1816,31 @@ const ADD_PROMPT_ENGINES = [
 // HARDCODED: region options for the Add prompt modal (prototyping)
 const ADD_PROMPT_REGIONS = ['United States', 'United Kingdom', 'Canada', 'Australia', 'India', 'Germany']
 
-// Compact HighRise-style checkbox card — logo + label + selectable state.
+// Compact engine chip — logo + name + checkbox (no per-card info tip).
 function EngineCheckboxCard({ engine, checked, onToggle }) {
-  const { name, desc, Logo } = engine
+  const { name, Logo } = engine
   return (
     <button
       type="button"
       role="checkbox"
       aria-checked={checked}
       onClick={onToggle}
-      className={`relative flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-all ${
+      className={`relative flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all ${
         checked
-          ? 'border-primary-600 bg-primary-50/60 ring-1 ring-primary-600'
+          ? 'border-primary-600 bg-primary-50/60'
           : 'border-gray-200 bg-white hover:border-gray-300'
       }`}
     >
-      <span className="w-8 h-8 rounded-md bg-white border border-gray-200 flex items-center justify-center shrink-0">
-        <Logo size={18} />
+      <span className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center shrink-0">
+        <Logo size={14} />
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-[13px] font-medium text-gray-900 truncate">{name}</span>
-        <span className="block text-[11px] text-gray-500 truncate">{desc}</span>
-      </span>
+      <span className="min-w-0 flex-1 text-[12px] font-medium text-gray-900 truncate">{name}</span>
       <span
-        className={`w-[18px] h-[18px] rounded-[5px] border flex items-center justify-center shrink-0 transition-colors ${
+        className={`w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors ${
           checked ? 'bg-primary-600 border-primary-600' : 'bg-white border-gray-300'
         }`}
       >
-        {checked && <Check size={12} className="text-white" strokeWidth={3} />}
+        {checked && <Check size={10} className="text-white" strokeWidth={3} />}
       </span>
     </button>
   )
@@ -1826,296 +1853,105 @@ const ADD_PROMPT_SUGGESTIONS = PROMPTS_DATA.map(p => ({
   volume: `${p.volume} volume`,
 }))
 
-// ── Full response viewer ───────────────────────────────────────────────────
-// Engine-themed reading view. Every engine reuses one scannable layout but takes
-// on that product's chrome (accent, surface, avatar, wordmark) so the answer
-// reads like it came from ChatGPT / Perplexity / Claude / Gemini / AI Mode.
+const MAX_TRACKED_PROMPTS = 10
 
-// HARDCODED: per-engine visual theme for the response viewer (prototyping).
-const ENGINE_THEME = {
-  'ChatGPT':     { accent: '#10A37F', surface: '#FFFFFF', bubble: '#F4F4F5', vendor: 'OpenAI',        wordmark: 'ChatGPT' },
-  'Perplexity':  { accent: '#20808D', surface: '#FCFCFB', bubble: '#ECF3F3', vendor: 'Perplexity',    wordmark: 'Perplexity' },
-  'Claude':      { accent: '#C96442', surface: '#F6F2EC', bubble: '#EEE6D9', vendor: 'Anthropic',     wordmark: 'Claude' },
-  'Gemini':      { accent: '#4285F4', surface: '#FFFFFF', bubble: '#E8F0FE', vendor: 'Google',        wordmark: 'Gemini' },
-  'AI Mode':     { accent: '#9168C0', surface: '#FFFFFF', bubble: '#F1E9F9', vendor: 'Google Search', wordmark: 'AI Mode' },
-  'AI Overview': { accent: '#4285F4', surface: '#FFFFFF', bubble: '#E8F0FE', vendor: 'Google Search', wordmark: 'AI Overview' },
+// Shared enter/exit motion for Manage prompts & Manage competitors selection rows.
+function useSelectionRowMotion() {
+  const [flashIds, setFlashIds] = useState(() => new Set())
+  const [removingIds, setRemovingIds] = useState(() => new Set())
+  const listRef = useRef(null)
+  const timersRef = useRef(new Map())
+  const removingLockRef = useRef(new Set())
+
+  useEffect(() => () => {
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current.clear()
+    removingLockRef.current.clear()
+  }, [])
+
+  function clearTimer(key) {
+    const timer = timersRef.current.get(key)
+    if (timer) {
+      clearTimeout(timer)
+      timersRef.current.delete(key)
+    }
+  }
+
+  function markAdded(id) {
+    setFlashIds(prev => new Set(prev).add(id))
+    requestAnimationFrame(() => {
+      listRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+    clearTimer(`flash-${id}`)
+    const timer = window.setTimeout(() => {
+      setFlashIds(prev => {
+        if (!prev.has(id)) return prev
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+      timersRef.current.delete(`flash-${id}`)
+    }, 1400)
+    timersRef.current.set(`flash-${id}`, timer)
+  }
+
+  function animateRemove(id, onDone) {
+    if (removingLockRef.current.has(id)) return
+    removingLockRef.current.add(id)
+    setRemovingIds(prev => new Set(prev).add(id))
+    setFlashIds(prev => {
+      if (!prev.has(id)) return prev
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+    clearTimer(`flash-${id}`)
+    clearTimer(`remove-${id}`)
+    const timer = window.setTimeout(() => {
+      onDone()
+      removingLockRef.current.delete(id)
+      setRemovingIds(prev => {
+        if (!prev.has(id)) return prev
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
+      timersRef.current.delete(`remove-${id}`)
+    }, 280)
+    timersRef.current.set(`remove-${id}`, timer)
+  }
+
+  function rowMotionClass(id) {
+    if (removingIds.has(id)) return 'pt-selection-removing border-gray-200 bg-white'
+    if (flashIds.has(id)) return 'pt-selection-added-flash'
+    return 'border-gray-200 bg-white hover:border-gray-300 transition-colors'
+  }
+
+  return { listRef, markAdded, animateRemove, rowMotionClass }
 }
 
-// Builds a structured, scannable answer from the response's detected brands so
-// the viewer reads like a real drill-down rather than a single blob of text.
-function buildAnswerSections(response) {
-  const [primary = 'GoHighLevel', second = 'HubSpot', third = 'Calendly'] = response.brands
-  return [
-    { h: 'Direct answer', body: `${primary} is competitive for this prompt, but the answer frames the category through comparison rather than naming a single winner.` },
-    { h: 'What stands out', bullets: [
-      `${primary} is described with stronger workflow depth and broader execution coverage.`,
-      `${second} is positioned as the option that is easier to adopt quickly.`,
-      `${third} appears when the answer emphasises price or simplicity.`,
-    ] },
-    { h: 'How to improve this prompt', bullets: [
-      'Strengthen proof pages that compare implementation depth, AI visibility reporting, and citation quality.',
-      'Publish clearer comparison content so answer engines cite owned pages instead of third-party summaries.',
-    ] },
-  ]
-}
+// HARDCODED: extra AI-suggested prompts for the manage modal (prototyping)
+const MANAGE_EXTRA_SUGGESTIONS = [
+  { prompt: 'Best CRM for small businesses that need automation and texting', topic: 'CRM', volume: '3.2K' },
+  { prompt: 'What tool is best for landing pages, funnels, and automated lead capture?', topic: 'Funnels', volume: '1.8K' },
+]
 
-// HARDCODED: brand sentiment cadence for the viewer's Brands panel (prototyping).
-const BRAND_SENTIMENT = ['Positive', 'Neutral', 'Positive', 'Neutral']
-
-// Explicit brand→domain overrides; anything else falls back to the compacted
-// name (e.g. "GoHighLevel" → gohighlevel.com) so CompanyLogo can fetch a favicon.
-const BRAND_DOMAIN_MAP = {
-  'GoHighLevel':   'gohighlevel.com',
-  'HubSpot':       'hubspot.com',
-  'Calendly':      'calendly.com',
-  'Pipedrive':     'pipedrive.com',
-  'Salesforce':    'salesforce.com',
-  'ActiveCampaign': 'activecampaign.com',
-  'ClickFunnels':  'clickfunnels.com',
-  'Klaviyo':       'klaviyo.com',
-  'Keap':          'keap.com',
-}
-function brandDomain(name) {
-  return BRAND_DOMAIN_MAP[name] || `${name.replace(/[\s.]+/g, '').toLowerCase()}.com`
-}
-
-function FullResponseModal({ response, promptText, onClose }) {
-  useEffect(() => {
-    function onKey(e) { if (e.key === 'Escape') onClose() }
-    document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [onClose])
-
-  const theme = ENGINE_THEME[response.engine] || ENGINE_THEME['ChatGPT']
-  const sections = buildAnswerSections(response)
-  const sources = DETAIL_SOURCES.slice(0, Math.max(1, response.sources))
-  const isPerplexity = response.engine === 'Perplexity'
-  const isClaude = response.engine === 'Claude'
-  const isGoogle = ['Gemini', 'AI Mode', 'AI Overview'].includes(response.engine)
-  // Gemini renders its answer on its signature dark canvas.
-  const dark = response.engine === 'Gemini'
-  const headingCls = dark ? 'text-[#E8EAED]' : 'text-gray-900'
-  const bodyCls    = dark ? 'text-[#C4C7C5]' : 'text-gray-700'
-  const mutedCls   = dark ? 'text-[#9AA0A6]' : 'text-gray-400'
-
-  const kpis = [
-    { label: 'Avg position',   value: '#4.2',           desc: 'Brand URL position in the answer.' },
-    { label: 'URLs in answer', value: String(sources.length + 3), desc: 'Total cited source URLs in this response.' },
-    { label: 'Brand mentions', value: String(response.brands.length), desc: 'Detected brands in this response.' },
-    { label: 'Answer length',  value: '696 chars',      desc: 'Character count from the answer text.' },
-  ]
-
-  // Shared assistant answer body — sections render identically across engines,
-  // only the text palette flips for Gemini's dark canvas.
-  const AnswerBody = (
-    <div className="flex flex-col gap-4">
-      {sections.map(sec => (
-        <div key={sec.h}>
-          <p className={`text-[13px] font-semibold m-0 mb-1.5 ${headingCls}`}>{sec.h}</p>
-          {sec.body && <p className={`text-[14px] leading-relaxed m-0 ${bodyCls}`}>{sec.body}</p>}
-          {sec.bullets && (
-            <ul className="m-0 mt-0.5 pl-0 flex flex-col gap-1.5 list-none">
-              {sec.bullets.map((b, i) => (
-                <li key={i} className={`flex items-start gap-2 text-[14px] leading-relaxed ${bodyCls}`}>
-                  <span className="mt-[7px] w-1.5 h-1.5 rounded-full shrink-0" style={{ background: theme.accent }} />
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      ))}
-    </div>
+function ManagePromptsModal({ onClose, onSave }) {
+  // HARDCODED: seed under the track limit so add / suggestions stay usable (prototyping)
+  const [trackedPrompts, setTrackedPrompts] = useState(() =>
+    PROMPTS_DATA.slice(0, 6).map(p => ({ ...p })),
   )
-
-  return createPortal(
-    <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm" onClick={onClose}>
-      <div
-        className="w-[95vw] max-w-[1040px] max-h-[92vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-        style={{ background: theme.surface }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Engine chrome bar */}
-        <div className="shrink-0 flex items-center justify-between px-5 py-3 bg-white/70 backdrop-blur border-b" style={{ borderColor: `color-mix(in srgb, ${theme.accent} 18%, #EAECF0)` }}>
-          <div className="flex items-center gap-2.5 min-w-0">
-            <EngineLogo name={response.engine} size={18} className="w-8 h-8" />
-            <div className="min-w-0">
-              <p className="text-[14px] font-semibold text-gray-900 m-0 leading-tight">{theme.wordmark}</p>
-              <p className="text-[12px] text-gray-400 m-0 leading-tight">{theme.vendor}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-
-        {/* Prompt heading + badges */}
-        <div className="shrink-0 px-6 pt-4 pb-3 bg-white/40 border-b border-gray-100">
-          <div className="flex items-center gap-2 mb-2 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium" style={{ color: theme.accent, background: `color-mix(in srgb, ${theme.accent} 12%, transparent)` }}>
-              <EngineLogo name={response.engine} size={11} chip={false} />
-              {response.engine}
-            </span>
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[12px] font-medium bg-success-50 text-success-600">
-              <CircleCheck size={11} /> {response.status}
-            </span>
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium bg-gray-100 text-gray-600">Positive sentiment · 73%</span>
-            <span className="text-[12px] text-gray-400">{response.created}</span>
-          </div>
-          <h2 className="text-[18px] font-semibold text-gray-900 leading-snug m-0">{promptText}</h2>
-        </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto min-h-0">
-          <div className="grid gap-5 p-6" style={{ gridTemplateColumns: 'minmax(0, 1fr) 300px' }}>
-
-            {/* Chat column — wrapped in a bordered container (dark canvas for Gemini) */}
-            <div
-              className="min-w-0 flex flex-col gap-4 rounded-2xl border p-5"
-              style={{ background: dark ? '#1E1F20' : '#FFFFFF', borderColor: '#E5E7EB' }}
-            >
-              {/* User message — right aligned like a real chat */}
-              <div className="flex justify-end">
-                <div
-                  className={`max-w-[80%] rounded-2xl rounded-tr-sm px-4 py-2.5 text-[14px] leading-relaxed ${dark ? 'text-[#E3E3E3]' : 'text-gray-800'}`}
-                  style={{ background: dark ? '#333537' : theme.bubble }}
-                >
-                  {promptText}
-                </div>
-              </div>
-
-              {/* Assistant message */}
-              <div className="flex gap-3">
-                <EngineLogo name={response.engine} size={16} className="w-8 h-8 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <p className={`text-[13px] font-semibold m-0 mb-2 ${headingCls}`}>{theme.wordmark}</p>
-
-                  {/* Perplexity leads with cited source cards */}
-                  {isPerplexity && (
-                    <div className="mb-3">
-                      <p className="text-[12px] font-medium text-gray-500 m-0 mb-1.5 flex items-center gap-1.5">
-                        <Link2 size={12} /> Sources
-                      </p>
-                      <div className="grid grid-cols-2 gap-2">
-                        {sources.map((s, i) => (
-                          <a key={i} href={s.url} onClick={e => e.preventDefault()} className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 hover:border-gray-300 transition-colors">
-                            <p className="text-[12px] font-medium text-gray-900 truncate m-0">{s.domain}</p>
-                            <p className="text-[11px] text-gray-400 truncate m-0 mt-0.5">{i + 1} · {s.coverage} coverage</p>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Google engines show the product label chip above the answer */}
-                  {isGoogle && (
-                    <div
-                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full mb-2.5"
-                      style={{ background: dark ? 'color-mix(in srgb, #8AB4F8 20%, #1E1F20)' : `color-mix(in srgb, ${theme.accent} 10%, transparent)` }}
-                    >
-                      <EngineLogo name={response.engine} size={12} chip={false} />
-                      <span className="text-[12px] font-medium" style={{ color: dark ? '#8AB4F8' : theme.accent }}>{response.engine} response</span>
-                    </div>
-                  )}
-
-                  {/* Claude renders the answer inside a warm reading card */}
-                  {isClaude ? (
-                    <div className="rounded-xl border p-4" style={{ background: '#FBF9F4', borderColor: '#E7DECF' }}>
-                      {AnswerBody}
-                    </div>
-                  ) : AnswerBody}
-
-                  <p className={`text-[12px] mt-3 m-0 ${mutedCls}`}>Signals in this response lean on {sources[0]?.domain || 'cited sources'}.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Side panel — brands + sources */}
-            <div className="flex flex-col gap-4 min-w-0">
-              <div className="rounded-xl border border-gray-200 bg-white p-3.5">
-                <div className="flex items-center justify-between mb-2.5">
-                  <p className="text-[13px] font-semibold text-gray-900 m-0">Brands</p>
-                  <span className="text-[12px] font-medium text-primary-600">{response.brands.length}</span>
-                </div>
-                <div className="flex flex-col gap-1.5">
-                  {response.brands.map((b, i) => {
-                    const you = b === 'GoHighLevel'
-                    const sentiment = BRAND_SENTIMENT[i % BRAND_SENTIMENT.length]
-                    return (
-                      <div key={b} className="flex items-center gap-2.5 rounded-lg px-2 py-1.5 hover:bg-gray-50 transition-colors">
-                        <CompanyLogo
-                          domain={brandDomain(b)}
-                          size={28}
-                          rounded="rounded-full"
-                          fallback={
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-600 shrink-0">
-                              {b.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-                            </span>
-                          }
-                        />
-                        <div className="min-w-0 flex-1">
-                          <p className="text-[13px] font-medium text-gray-900 truncate m-0">{b}</p>
-                          <p className="text-[12px] text-gray-400 m-0">#{i + 1}.0 · {sentiment}</p>
-                        </div>
-                        {you && <span className="text-[11px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-gray-200 bg-white p-3.5">
-                <p className="text-[13px] font-semibold text-gray-900 m-0 mb-0.5">Sources</p>
-                <p className="text-[12px] text-gray-400 m-0 mb-2.5">Prompt-scoped cited URLs from this answer.</p>
-                <div className="flex flex-col gap-2">
-                  {sources.map((s, i) => (
-                    <div key={i} className="rounded-lg border border-gray-200 p-2.5">
-                      <div className="flex items-start justify-between gap-2">
-                        <p className="text-[13px] font-medium text-gray-900 leading-snug m-0">{s.domain}</p>
-                        <span className="text-[12px] font-medium text-primary-600 shrink-0">#{i + 1}</span>
-                      </div>
-                      <p className="text-[12px] text-gray-400 truncate m-0 mt-0.5">{s.url.replace(/^https?:\/\//, '')}</p>
-                      <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span className={`text-[11px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
-                          {s.brandMentioned ? 'Brand mentioned' : 'Brand not mentioned'}
-                        </span>
-                        {s.otherBrands && <span className="text-[11px] font-medium rounded-full px-2 py-0.5 bg-warning-100 text-warning-600">Competitor present</span>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Answer diagnostics */}
-          <div className="px-6 pb-6">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-              {kpis.map(k => (
-                <div key={k.label} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
-                  <p className="text-[12px] font-medium text-gray-500 m-0">{k.label}</p>
-                  <p className="text-[18px] font-bold text-gray-900 m-0 mt-0.5">{k.value}</p>
-                  <p className="text-[12px] text-gray-400 m-0 mt-0.5 leading-snug">{k.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>,
-    document.body,
-  )
-}
-
-function AddPromptModal({ onClose, onSave }) {
-  const [promptText, setPromptText] = useState('')
+  const [pendingAdds, setPendingAdds] = useState([])
   const [selectedEngines, setSelectedEngines] = useState(
-    () => new Set(['chatgpt', 'perplexity', 'claude', 'gemini']),
+    () => new Set(ADD_PROMPT_ENGINES.map(e => e.id)),
   )
-  const [region, setRegion] = useState('United States')
-  const [activeSuggestion, setActiveSuggestion] = useState(null)
+  const [customPrompt, setCustomPrompt] = useState('')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const { listRef: selectionListRef, markAdded, animateRemove, rowMotionClass } = useSelectionRowMotion()
 
-  const canSave = promptText.trim().length > 0 && selectedEngines.size > 0
+  const totalSelected = trackedPrompts.length + pendingAdds.length
+  const atCapacity = totalSelected >= MAX_TRACKED_PROMPTS
+  const overCapacity = totalSelected > MAX_TRACKED_PROMPTS
 
   function toggleEngine(id) {
     setSelectedEngines(prev => {
@@ -2125,161 +1961,264 @@ function AddPromptModal({ onClose, onSave }) {
     })
   }
 
-  function selectSuggestion(item) {
-    setActiveSuggestion(item.prompt)
-    setPromptText(item.prompt)
-  }
-
-  function handleSave() {
-    if (!canSave) return
-    const match = ADD_PROMPT_SUGGESTIONS.find(s => s.prompt === promptText.trim())
-    onSave({
-      prompt: promptText.trim(),
-      topic: match ? match.topic : 'Custom tracking',
-      engines: ADD_PROMPT_ENGINES.filter(e => selectedEngines.has(e.id)).map(e => e.name),
-      region,
+  function deleteTracked(id) {
+    animateRemove(id, () => {
+      setTrackedPrompts(prev => prev.filter(p => p.id !== id))
     })
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-6"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="absolute inset-0 bg-gray-900/40" aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[940px] max-h-[calc(100vh-48px)] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-gray-200 shrink-0">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="text-[16px] font-semibold text-gray-900 m-0">Add prompt</h2>
-                <InfoTip text="Track a customer-style question across AI answer engines and group it under a topic." />
-              </div>
-              <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">
-                Use your own prompt or start from an AI-suggested prompt grouped by topic.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shrink-0"
+  function stagePrompt(item) {
+    if (atCapacity) return
+    if (trackedPrompts.some(p => p.prompt === item.prompt)) return
+    if (pendingAdds.some(p => p.prompt === item.prompt)) return
+    const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    // Newest first — appears at top of Your selection
+    setPendingAdds(prev => [{ ...item, id }, ...prev])
+    markAdded(id)
+  }
+
+  function removePending(id) {
+    animateRemove(id, () => {
+      setPendingAdds(prev => prev.filter(p => p.id !== id))
+    })
+  }
+
+  function addCustomPrompt() {
+    const text = customPrompt.trim()
+    if (!text || atCapacity) return
+    stagePrompt({ prompt: text, topic: 'Custom tracking', volume: '—', source: 'Custom' })
+    setCustomPrompt('')
+    setShowAddForm(false)
+  }
+
+  function handleSave() {
+    if (selectedEngines.size === 0 || overCapacity) return
+    onSave({ tracked: trackedPrompts, pending: pendingAdds, engines: selectedEngines })
+  }
+
+  const excludedPromptTexts = new Set([
+    ...trackedPrompts.map(p => p.prompt),
+    ...pendingAdds.map(p => p.prompt),
+  ])
+
+  const selectableSuggestions = [
+    ...MANAGE_EXTRA_SUGGESTIONS
+      .filter(s => !excludedPromptTexts.has(s.prompt)),
+    ...ADD_PROMPT_SUGGESTIONS
+      .filter(s => !excludedPromptTexts.has(s.prompt))
+      .map(s => ({ prompt: s.prompt, topic: s.topic, volume: s.volume.replace(' volume', '') })),
+  ]
+
+  const canAddCustom = Boolean(customPrompt.trim()) && !atCapacity
+  const canSave = selectedEngines.size > 0 && !overCapacity
+
+  const selectionRows = [
+    ...pendingAdds.map(p => ({ ...p, _kind: 'pending' })),
+    ...trackedPrompts.map(p => ({ ...p, _kind: 'tracked' })),
+  ]
+
+  return (
+    <HLModal
+      id="manage-prompts"
+      width={880}
+      height={MODAL_MANAGE_HEIGHT}
+      headerDivider
+      onClose={onClose}
+      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
+      footerClassName="px-6 py-3.5"
+      header={(
+        <div className="px-6 pt-5 pb-3.5">
+          <div className="flex items-center gap-2">
+            <h2 id="manage-prompts-title" className={`${modalTitle} m-0`}>Manage prompts</h2>
+            <SectionInfoTip content="Track up to ten prompts. Your selection is the source of truth — suggestions and custom adds fill open slots." />
+          </div>
+          <p className={`${modalSubtext} m-0 mt-1`}>
+            Review what you’re tracking, add prompts you care about, and optionally use suggestions to fill open slots.
+          </p>
+        </div>
+      )}
+      footer={(
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[12px] text-gray-400 m-0">
+            {overCapacity
+              ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
+              : pendingAdds.length > 0
+                ? `${pendingAdds.length} new prompt${pendingAdds.length === 1 ? '' : 's'} will start tracking on save.`
+                : 'Changes will be applied to the next scan when you save.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
+              Cancel
+            </HLButton>
+            <HLButton
+              variant="primary"
+              color="blue"
+              size="sm"
+              disabled={!canSave}
+              onClick={handleSave}
             >
-              <X size={14} />
-            </button>
+              Save and refresh results
+            </HLButton>
           </div>
         </div>
+      )}
+    >
+      <div className="flex-1 min-h-0 flex flex-col gap-3">
+        {/* AI engines — prompts-only control; same modal chrome as competitors */}
+        <section className="shrink-0">
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-[14px] font-semibold text-gray-900 m-0">AI engines</p>
+            <SectionInfoTip content="Engine selection applies globally to every tracked prompt." />
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+            {ADD_PROMPT_ENGINES.map(engine => (
+              <EngineCheckboxCard
+                key={engine.id}
+                engine={engine}
+                checked={selectedEngines.has(engine.id)}
+                onToggle={() => toggleEngine(engine.id)}
+              />
+            ))}
+          </div>
+        </section>
 
-        {/* Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left: compose */}
-            <div className="flex flex-col gap-5 min-w-0">
-              <div>
-                <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Prompt</p>
-                <textarea
-                  autoFocus
-                  value={promptText}
-                  onChange={e => setPromptText(e.target.value)}
-                  placeholder="Ask a question you want AI engines to answer about your brand, category, or comparison set."
-                  rows={4}
-                  className="w-full border border-gray-200 rounded-lg px-3.5 py-3 text-[14px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 resize-y min-h-[110px]"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center gap-1.5 mb-2">
-                  <p className="text-[12px] font-medium text-gray-500 m-0">Select AI engines</p>
-                  <InfoTip text="Choose which engines should start tracking this prompt first. Dummy options are interactive until live create/save is wired." />
-                </div>
-                <div className="grid grid-cols-2 gap-2.5">
-                  {ADD_PROMPT_ENGINES.map(engine => (
-                    <EngineCheckboxCard
-                      key={engine.id}
-                      engine={engine}
-                      checked={selectedEngines.has(engine.id)}
-                      onToggle={() => toggleEngine(engine.id)}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Region</p>
-                <div className="relative">
-                  <select
-                    value={region}
-                    onChange={e => setRegion(e.target.value)}
-                    className="w-full appearance-none border border-gray-200 rounded-lg pl-3.5 pr-10 py-2.5 text-[14px] text-gray-900 bg-white outline-none focus:border-primary-600 cursor-pointer"
-                  >
-                    {ADD_PROMPT_REGIONS.map(r => <option key={r} value={r}>{r}</option>)}
-                  </select>
-                  <ChevronDown size={16} className="text-gray-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
+        {/* Primary: compact selection roster — capped so suggestions keep usable height */}
+        <section className="shrink-0 rounded-xl border border-gray-200 bg-white overflow-hidden">
+          <div className="px-3.5 py-2.5 border-b border-gray-100">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[14px] font-semibold text-gray-900 m-0">Your selection</p>
+              <span className="shrink-0 text-[13px] font-semibold text-gray-700 tabular-nums">
+                {totalSelected}
+                <span className="text-gray-300 font-medium">/{MAX_TRACKED_PROMPTS}</span>
+              </span>
             </div>
+          </div>
 
-            {/* Right: suggestions */}
-            <div className="min-w-0 flex flex-col">
-              <div className="flex items-center gap-1.5 mb-2">
-                <p className="text-[12px] font-medium text-gray-500 m-0">AI-suggested prompts</p>
-                <InfoTip text="Suggested prompts are grouped to a topic immediately so categorization starts at prompt creation time." />
+          <div className="p-3 flex flex-col gap-1.5">
+            {selectionRows.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-gray-200 px-3 py-5 text-center">
+                <p className="text-[13px] font-medium text-gray-700 m-0">No prompts yet</p>
+                <p className="text-[12px] text-gray-500 m-0 mt-1">Add a prompt you already know — or grab one from suggestions below.</p>
               </div>
-              <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[420px] pr-0.5">
-                {ADD_PROMPT_SUGGESTIONS.map(item => {
-                  const active = activeSuggestion === item.prompt
+            ) : (
+              <div
+                ref={selectionListRef}
+                className="max-h-[220px] overflow-y-auto flex flex-col gap-1.5 pr-0.5"
+                style={{ scrollbarWidth: 'thin' }}
+              >
+                {selectionRows.map((p) => {
+                  const isPending = p._kind === 'pending'
                   return (
-                    <button
-                      key={item.prompt}
-                      type="button"
-                      onClick={() => selectSuggestion(item)}
-                      className={`w-full text-left rounded-lg border bg-white px-3.5 py-3 transition-colors ${
-                        active ? 'border-primary-600' : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                    <div
+                      key={p.id}
+                      className={`group flex items-center gap-2.5 rounded-lg border px-3 py-2 ${rowMotionClass(p.id)}`}
                     >
-                      <div className="flex items-center gap-2 mb-2 flex-wrap">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-50 text-primary-700 text-[11px] font-medium border border-primary-200">
-                          {item.topic}
-                        </span>
-                        <span className="text-[12px] font-normal text-gray-400">{item.volume}</span>
-                      </div>
-                      <p className="text-[14px] font-medium text-gray-900 m-0 leading-snug">{item.prompt}</p>
-                    </button>
+                      <p className="min-w-0 flex-1 text-[13px] font-medium text-gray-900 m-0 truncate">{p.prompt}</p>
+                      <ModalTableRemoveButton
+                        label={isPending ? 'Remove prompt' : 'Delete prompt'}
+                        onClick={() => (isPending ? removePending(p.id) : deleteTracked(p.id))}
+                      />
+                    </div>
                   )
                 })}
               </div>
-            </div>
-          </div>
-        </div>
+            )}
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between gap-3 shrink-0 flex-wrap">
-          <p className="text-[13px] text-gray-400 m-0">Saving will queue this prompt for the next sync cycle.</p>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              disabled={!canSave}
-              onClick={handleSave}
-              className={`h-9 px-4 rounded-lg text-[13px] font-semibold transition-colors ${
-                canSave
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Save prompt
-            </button>
+            {!showAddForm ? (
+              <button
+                type="button"
+                disabled={atCapacity}
+                onClick={() => setShowAddForm(true)}
+                className={`w-full h-9 inline-flex items-center justify-center gap-1.5 rounded-lg text-[13px] font-semibold transition-all ${
+                  atCapacity
+                    ? 'bg-white text-gray-300 border border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-800 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                }`}
+              >
+                <Plus size={14} strokeWidth={2.25} />
+                Add a prompt
+              </button>
+            ) : (
+              <div className="rounded-lg border border-primary-300 bg-white p-3 flex flex-col gap-2.5">
+                <div>
+                  <p className="text-[13px] font-semibold text-gray-900 m-0">Add a prompt</p>
+                  <p className="text-[12px] text-gray-500 m-0 mt-0.5">Type a buyer-intent prompt to track.</p>
+                </div>
+                <textarea
+                  value={customPrompt}
+                  onChange={e => setCustomPrompt(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                      e.preventDefault()
+                      addCustomPrompt()
+                    }
+                  }}
+                  placeholder="e.g. Best CRM for small businesses with AI search visibility"
+                  rows={2}
+                  disabled={atCapacity}
+                  autoFocus
+                  className={`${FORM_TEXTAREA_CLASS} min-h-[56px] disabled:bg-gray-50 disabled:text-gray-400`}
+                />
+                <div className="flex items-center justify-end gap-2">
+                  <HLButton
+                    variant="secondary"
+                    color="gray"
+                    size="sm"
+                    onClick={() => { setShowAddForm(false); setCustomPrompt('') }}
+                  >
+                    Cancel
+                  </HLButton>
+                  <HLButton
+                    variant="primary"
+                    color="blue"
+                    size="sm"
+                    disabled={!canAddCustom}
+                    onClick={addCustomPrompt}
+                  >
+                    Add
+                  </HLButton>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
+        </section>
+
+        {/* Secondary: suggestions get the remaining modal height */}
+        <section className="flex-1 min-h-[200px] flex flex-col">
+          <div className="flex items-baseline gap-2 mb-2 shrink-0">
+            <p className="text-[14px] font-semibold text-gray-900 m-0">Suggested prompts</p>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+            {selectableSuggestions.length === 0 ? (
+              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
+            ) : (
+              <div className="flex flex-col gap-1.5 content-start">
+                {selectableSuggestions.map(item => (
+                  <button
+                    key={item.prompt}
+                    type="button"
+                    disabled={atCapacity}
+                    onClick={() => stagePrompt(item)}
+                    className={`flex items-center gap-2.5 text-left rounded-lg border border-dashed px-3 py-2.5 transition-all outline-none focus:outline-none ${
+                      atCapacity
+                        ? 'border-gray-100 bg-white text-gray-300 cursor-not-allowed'
+                        : 'border-gray-200 bg-white hover:border-primary-300'
+                    }`}
+                  >
+                    <p className={`min-w-0 flex-1 text-[13px] font-medium m-0 line-clamp-2 ${atCapacity ? 'text-gray-300' : 'text-gray-900'}`}>
+                      {item.prompt}
+                    </p>
+                    <span className={`text-[12px] font-semibold shrink-0 ${atCapacity ? 'text-gray-300' : 'text-primary-600'}`}>
+                      Add
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
       </div>
-    </div>,
-    document.body,
+    </HLModal>
   )
 }
 
@@ -2292,10 +2231,34 @@ function CompetitorsTabContent() {
   const leader = COMPETITOR_LEADERBOARD[0]
 
   const KPIS = [
-    { label: 'Tracked brands',    value: String(COMPETITOR_LEADERBOARD.length), Icon: Users,      color: 'var(--primary-600)' },
-    { label: 'Your rank',         value: `#${me.rank}`,                          Icon: Award,      color: '#6938EF' },
-    { label: 'Leader visibility', value: String(leader.visibility),             Icon: TrendingUp, color: '#16A34A' },
-    { label: 'SoV gap',           value: `${leader.sov - me.sov} pts`,           Icon: BarChart3,  color: '#D97706' },
+    {
+      label: 'Tracked brands',
+      value: String(COMPETITOR_LEADERBOARD.length),
+      Icon: Users,
+      color: 'var(--primary-600)',
+      help: 'Shows the total number of brands included in your competitive analysis. This is the group used to calculate rankings, Share of Voice, and other comparison metrics, so it defines who you’re measuring yourself against. More tracked brands provide broader competitive insights.',
+    },
+    {
+      label: 'Your rank',
+      value: `#${me.rank}`,
+      Icon: Award,
+      color: '#6938EF',
+      help: 'Shows where your brand currently ranks among all tracked competitors based on overall AI visibility. It gives you a quick snapshot of your competitive position and how you’re performing relative to the rest of the market. A lower rank is better (#1 is best).',
+    },
+    {
+      label: 'Leader visibility',
+      value: String(leader.visibility),
+      Icon: TrendingUp,
+      color: '#16A34A',
+      help: 'Shows the visibility score of the highest-ranking brand in your tracked competitor set. It serves as the benchmark for your category and helps you understand the level of visibility needed to become or remain the market leader. A higher score means a stronger competitive benchmark.',
+    },
+    {
+      label: 'SoV gap',
+      value: `${leader.sov - me.sov} pts`,
+      Icon: BarChart3,
+      color: '#D97706',
+      help: 'Shows the difference in Share of Voice between your brand and the market leader. It helps you understand how much competitive visibility you need to gain before you match or overtake the leading brand. A smaller gap is better.',
+    },
   ]
 
   return (
@@ -2303,7 +2266,7 @@ function CompetitorsTabContent() {
       {/* KPI cards */}
       <div className="grid grid-cols-4 gap-3">
         {KPIS.map(kpi => (
-          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} Icon={kpi.Icon} iconColor={kpi.color} help />
+          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} Icon={kpi.Icon} iconColor={kpi.color} helpContent={kpi.help} />
         ))}
       </div>
 
@@ -2311,11 +2274,13 @@ function CompetitorsTabContent() {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5 flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <div className="flex items-center gap-1.5 mb-0.5">
+            <div className="flex items-center gap-1.5">
               <h3 className="text-[15px] font-semibold text-gray-900 m-0">Competitor views</h3>
-              <HelpCircle size={14} className="text-gray-300" />
+              <SectionInfoTip
+                id="pt-competitor-views-info"
+                content="This leaderboard shows how each brand performs across AI-generated answers. Compare visibility, share of voice, average position, and sentiment to identify who leads the conversation."
+              />
             </div>
-            <p className="text-[13px] text-gray-500 m-0">Leaderboard, mentions vs sources, and by-topic heatmap for the same tracked set</p>
           </div>
           <div className="inline-flex items-center gap-1 bg-gray-100 rounded-lg p-1 shrink-0">
             {COMPETITOR_VIEWS.map(v => (
@@ -2333,15 +2298,15 @@ function CompetitorsTabContent() {
         </div>
 
         {view === 'Leaderboard' && (
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse table-fixed">
             <thead>
               <tr className="border-y border-gray-200 bg-gray-50">
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[70px]">Rank</th>
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900">Brand</th>
-                <th className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 w-[180px]">Visibility</th>
-                <th className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 w-[130px]">Share of voice</th>
-                <th className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 w-[120px]">Avg position</th>
-                <th className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 w-[120px]">Sentiment</th>
+                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[70px]">Rank</th>
+                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap">Brand</th>
+                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[180px]">Visibility</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[140px] text-center">Share of voice</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[124px] text-center">Avg position</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[108px] text-center">Sentiment</th>
               </tr>
             </thead>
             <tbody>
@@ -2351,16 +2316,7 @@ function CompetitorsTabContent() {
                   <tr key={c.rank} className={`border-b border-gray-100 last:border-b-0 transition-colors ${c.isMe ? 'bg-primary-50' : 'hover:bg-gray-50'}`}>
                     <td className="px-5 py-3.5 text-[13px] font-medium text-gray-500">#{c.rank}</td>
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <CompetitorAvatar c={c} size={32} />
-                        <div className="min-w-0">
-                          <div className="flex items-center gap-2">
-                            <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
-                            {c.isMe && <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[11px] font-medium shrink-0">You</span>}
-                          </div>
-                          <p className="text-[12px] text-gray-400 truncate m-0">{c.domain}</p>
-                        </div>
-                      </div>
+                      <CompetitorBrandCell c={c} showDomain />
                     </td>
                     <td className="px-5 py-3.5">
                       <VisibilityMeter value={c.visibility} barWidth="110px" />
@@ -2380,13 +2336,13 @@ function CompetitorsTabContent() {
         )}
 
         {view === 'Mentions vs sources' && (
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse table-fixed">
             <thead>
               <tr className="border-y border-gray-200 bg-gray-50">
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900">Brand</th>
-                <th className="px-5 py-2.5 text-right text-[12px] font-semibold text-gray-900 w-[160px]">AI mentions</th>
-                <th className="px-5 py-2.5 text-right text-[12px] font-semibold text-gray-900 w-[160px]">Source citations</th>
-                <th className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 w-[140px]">Citation rate</th>
+                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[42%]">Brand</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[18%] text-right">AI mentions</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-right">Source citations</th>
+                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-center">Citation rate</th>
               </tr>
             </thead>
             <tbody>
@@ -2396,16 +2352,10 @@ function CompetitorsTabContent() {
                 return (
                   <tr key={c.rank} className={`border-b border-gray-100 last:border-b-0 transition-colors ${c.isMe ? 'bg-primary-50' : 'hover:bg-gray-50'}`}>
                     <td className="px-5 py-3.5">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <CompetitorAvatar c={c} size={32} />
-                        <div className="flex items-center gap-2 min-w-0">
-                          <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
-                          {c.isMe && <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[11px] font-medium shrink-0">You</span>}
-                        </div>
-                      </div>
+                      <CompetitorBrandCell c={c} />
                     </td>
-                    <td className="px-5 py-3.5 text-right text-[15px] font-semibold text-gray-900 tabular-nums">{c.mentions}</td>
-                    <td className="px-5 py-3.5 text-right text-[15px] font-semibold text-gray-900 tabular-nums">{c.citations}</td>
+                    <td className="px-5 py-3.5 text-right text-[15px] font-medium text-gray-900 tabular-nums">{c.mentions}</td>
+                    <td className="px-5 py-3.5 text-right text-[15px] font-medium text-gray-900 tabular-nums">{c.citations}</td>
                     <td className="px-5 py-3.5 text-center">
                       <span
                         className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[12px] font-semibold tabular-nums"
@@ -2423,40 +2373,26 @@ function CompetitorsTabContent() {
 
         {view === 'By topic' && (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse table-fixed" style={{ minWidth: 720 }}>
               <thead>
                 <tr className="border-y border-gray-200 bg-gray-50">
-                  <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 min-w-[200px]">Brand</th>
+                  <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[220px]">Brand</th>
                   {COMPETITOR_TOPICS.map(t => (
-                    <th key={t} className="px-4 py-2.5 text-center text-[12px] font-semibold text-gray-900 min-w-[110px]">{t}</th>
+                    <th key={t} className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 whitespace-nowrap">{t}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {COMPETITOR_LEADERBOARD.map(c => (
                   <tr key={c.rank} className={`border-b border-gray-100 last:border-b-0 ${c.isMe ? 'bg-primary-50' : ''}`}>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3 min-w-0">
-                        <CompetitorAvatar c={c} size={28} />
-                        <div className="flex items-center gap-2 min-w-0">
-                          <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
-                          {c.isMe && <span className="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-100 text-primary-700 text-[11px] font-medium shrink-0">You</span>}
-                        </div>
-                      </div>
+                    <td className="px-5 py-3.5">
+                      <CompetitorBrandCell c={c} />
                     </td>
                     {COMPETITOR_TOPICS.map((t, ti) => {
                       const score = competitorTopicScore(c.visibility, ti)
                       return (
-                        <td key={t} className="px-4 py-3 text-center">
-                          <span
-                            className="inline-flex items-center justify-center w-12 h-8 rounded-md text-[12px] font-semibold tabular-nums"
-                            style={{
-                              background: `color-mix(in srgb, var(--primary-600) ${Math.round(score * 0.85)}%, transparent)`,
-                              color: score >= 55 ? '#fff' : 'var(--gray-700)',
-                            }}
-                          >
-                            {score}
-                          </span>
+                        <td key={t} className="px-5 py-3.5 text-center text-[13px] font-medium text-gray-900 tabular-nums">
+                          {score}
                         </td>
                       )
                     })}
@@ -2471,137 +2407,1313 @@ function CompetitorsTabContent() {
   )
 }
 
-function AddCompetitorModal({ onClose, onSave }) {
-  const [company, setCompany] = useState('')
-  const [website, setWebsite] = useState('')
-  const [address, setAddress] = useState('')
-  const [country, setCountry] = useState('United States')
+const MAX_TRACKED_COMPETITORS = 5
 
-  const canSave = company.trim().length > 0 && website.trim().length > 0
+// HARDCODED: AI-suggested competitors for the manage modal (prototyping)
+const ADD_COMPETITOR_SUGGESTIONS = [
+  { name: 'Keap', domain: 'keap.com', description: 'CRM and marketing automation frequently compared in AI answers.', visibility: 35, sov: 9 },
+  { name: 'Monday CRM', domain: 'monday.com', description: 'Work management platform cited in small-business software roundups.', visibility: 28, sov: 6 },
+  { name: 'Zoho CRM', domain: 'zoho.com', description: 'Often cited alongside mid-market CRM platforms in AI roundups.', visibility: 24, sov: 7 },
+  { name: 'Pipedrive', domain: 'pipedrive.com', description: 'Sales CRM frequently compared for pipeline and deal tracking.', visibility: 41, sov: 11 },
+]
 
-  function handleSave() {
-    if (!canSave) return
-    onSave({ company: company.trim(), website: website.trim(), address: address.trim(), country })
+function ManageCompetitorsModal({ onClose, onSave }) {
+  const [trackedCompetitors, setTrackedCompetitors] = useState(() =>
+    COMPETITOR_LEADERBOARD.slice(0, 3).map(c => ({ ...c })),
+  )
+  const [pendingCompetitors, setPendingCompetitors] = useState([])
+  const [customBrand, setCustomBrand] = useState('')
+  const [customWebsite, setCustomWebsite] = useState('')
+  const [customCountry, setCustomCountry] = useState('United States')
+  const [showAddForm, setShowAddForm] = useState(false)
+  const { listRef: selectionListRef, markAdded, animateRemove, rowMotionClass } = useSelectionRowMotion()
+
+  const totalSelected = trackedCompetitors.length + pendingCompetitors.length
+  const atCapacity = totalSelected >= MAX_TRACKED_COMPETITORS
+
+  function deleteTracked(domain) {
+    animateRemove(domain, () => {
+      setTrackedCompetitors(prev => prev.filter(c => c.domain !== domain))
+    })
   }
 
-  return createPortal(
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-6"
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
-    >
-      <div className="absolute inset-0 bg-gray-900/40" aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[520px] max-h-[calc(100vh-48px)] flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="px-6 pt-6 pb-4 border-b border-gray-200 shrink-0 flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="text-[16px] font-semibold text-gray-900 m-0">Add competitor</h2>
-            <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">Add a brand to track alongside yours across AI answer engines.</p>
+  function stageCompetitor(item) {
+    if (atCapacity) return
+    if (trackedCompetitors.some(c => c.domain === item.domain)) return
+    if (pendingCompetitors.some(c => c.domain === item.domain)) return
+    const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    // Newest first — appears at top of Your selection
+    setPendingCompetitors(prev => [{ ...item, id }, ...prev])
+    markAdded(id)
+  }
+
+  function removePending(id) {
+    animateRemove(id, () => {
+      setPendingCompetitors(prev => prev.filter(c => c.id !== id))
+    })
+  }
+
+  function addCustomCompetitor() {
+    const name = customBrand.trim()
+    const website = customWebsite.trim().replace(/^https?:\/\//i, '')
+    if (!name || !website || atCapacity) return
+    stageCompetitor({
+      name,
+      domain: website.split('/')[0],
+      description: 'Custom competitor added for tracking.',
+      visibility: 0,
+      sov: 0,
+      country: customCountry,
+    })
+    setCustomBrand('')
+    setCustomWebsite('')
+    setShowAddForm(false)
+  }
+
+  function handleSave() {
+    onSave({ tracked: trackedCompetitors, pending: pendingCompetitors })
+  }
+
+  const stagedDomains = new Set([
+    ...trackedCompetitors.map(c => c.domain),
+    ...pendingCompetitors.map(c => c.domain),
+  ])
+  const availableSuggestions = ADD_COMPETITOR_SUGGESTIONS.filter(item => !stagedDomains.has(item.domain))
+  const canAddCustom = Boolean(customBrand.trim() && customWebsite.trim()) && !atCapacity
+
+  const selectionRows = [
+    ...pendingCompetitors.map(c => ({ ...c, _kind: 'pending' })),
+    ...trackedCompetitors.map(c => ({ ...c, _kind: 'tracked' })),
+  ]
+
+  return (
+    <HLModal
+      id="manage-competitors"
+      width={880}
+      height={MODAL_MANAGE_HEIGHT}
+      headerDivider
+      onClose={onClose}
+      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
+      footerClassName="px-6 py-3.5"
+      header={(
+        <div className="px-6 pt-5 pb-3.5">
+          <div className="flex items-center gap-2">
+            <h2 id="manage-competitors-title" className={`${modalTitle} m-0`}>Manage competitors</h2>
+            <SectionInfoTip content="Track up to five brands. Your selection is the source of truth — suggestions and custom adds fill open slots." />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors shrink-0"
-          >
-            <X size={14} />
-          </button>
+          <p className={`${modalSubtext} m-0 mt-1`}>
+            Review what you’re tracking, add brands you care about, and optionally use suggestions to fill open slots.
+          </p>
         </div>
-
-        {/* Body */}
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 flex flex-col gap-5">
-          <div>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Company name</p>
-            <HLInput
-              autoFocus
-              value={company}
-              onChange={e => setCompany(e.target.value)}
-              placeholder="e.g. HubSpot"
-            />
+      )}
+      footer={(
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[12px] text-gray-400 m-0">
+            {pendingCompetitors.length > 0
+              ? `${pendingCompetitors.length} new competitor${pendingCompetitors.length === 1 ? '' : 's'} will start tracking on save.`
+              : 'Changes will be applied to the next scan when you save.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
+              Cancel
+            </HLButton>
+            <HLButton variant="primary" color="blue" size="sm" onClick={handleSave}>
+              Save and refresh results
+            </HLButton>
+          </div>
+        </div>
+      )}
+    >
+      <div className="flex-1 min-h-0 flex flex-col gap-4">
+        {/* Primary: selection roster + add */}
+        <section className="shrink-0 rounded-2xl border border-gray-200 bg-white overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-gray-100">
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold text-gray-900 m-0">Your selection</p>
+                <p className="text-[12px] text-gray-500 m-0 mt-1">
+                  Brands in your competitive set for AI answers
+                </p>
+              </div>
+              <span className="shrink-0 text-[13px] font-semibold text-gray-700 tabular-nums">
+                {totalSelected}
+                <span className="text-gray-300 font-medium">/{MAX_TRACKED_COMPETITORS}</span>
+              </span>
+            </div>
           </div>
 
-          <div>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Website</p>
-            <HLInput
-              prefixIcon={Globe}
-              value={website}
-              onChange={e => setWebsite(e.target.value)}
-              placeholder="e.g. hubspot.com"
-            />
-          </div>
-
-          <div>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Address</p>
-            <HLInput
-              value={address}
-              onChange={e => setAddress(e.target.value)}
-              placeholder="Street, city, state"
-            />
-          </div>
-
-          <div>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Country</p>
-            <div className="relative">
-              <select
-                value={country}
-                onChange={e => setCountry(e.target.value)}
-                className={`${HL_INPUT_CLASS} appearance-none pr-10 cursor-pointer`}
+          <div className="p-4 flex flex-col gap-2">
+            {selectionRows.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center">
+                <p className="text-[13px] font-medium text-gray-700 m-0">No competitors yet</p>
+                <p className="text-[12px] text-gray-500 m-0 mt-1">Add a brand you already know — or grab one from suggestions below.</p>
+              </div>
+            ) : (
+              <div
+                ref={selectionListRef}
+                className="max-h-[220px] overflow-y-auto flex flex-col gap-2 pr-0.5"
+                style={{ scrollbarWidth: 'thin' }}
               >
-                {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                {selectionRows.map((c) => {
+                  const isPending = c._kind === 'pending'
+                  const rowId = isPending ? c.id : c.domain
+                  return (
+                    <div
+                      key={rowId}
+                      className={`group flex items-center gap-3 rounded-xl border px-3.5 py-3 ${rowMotionClass(rowId)}`}
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <p className="text-[14px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
+                          {c.isMe && (
+                            <span className="shrink-0 text-[10px] font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded-md px-1.5 py-0.5">
+                              You
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">
+                          {c.domain}
+                          {c.visibility != null && c.visibility > 0 ? (
+                            <span className="text-gray-400"> · Mentioned in {c.visibility}% of AI answers</span>
+                          ) : null}
+                        </p>
+                      </div>
+                      {(isPending || !c.isMe) && (
+                        <ModalTableRemoveButton
+                          label={isPending ? 'Remove competitor' : 'Delete competitor'}
+                          onClick={() => (isPending ? removePending(c.id) : deleteTracked(c.domain))}
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+
+            {!showAddForm ? (
+              <button
+                type="button"
+                disabled={atCapacity}
+                onClick={() => setShowAddForm(true)}
+                className={`mt-1 w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition-all ${
+                  atCapacity
+                    ? 'bg-white text-gray-300 border border-gray-200 cursor-not-allowed'
+                    : 'bg-white text-gray-800 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                }`}
+              >
+                <Plus size={15} strokeWidth={2.25} />
+                Add a competitor
+              </button>
+            ) : (
+              <div className="mt-1 rounded-xl border border-primary-300 bg-white p-4 flex flex-col gap-3">
+                <div>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0">Add a competitor</p>
+                  <p className="text-[12px] text-gray-500 m-0 mt-0.5">Brand name, website, and country.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label htmlFor="manage-competitor-brand" className="block text-[12px] font-medium text-gray-500 mb-1.5">Brand name</label>
+                    <HLInput
+                      id="manage-competitor-brand"
+                      size="sm"
+                      value={customBrand}
+                      onChange={e => setCustomBrand(e.target.value)}
+                      placeholder="e.g. HubSpot"
+                      disabled={atCapacity}
+                      autoFocus
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="manage-competitor-website" className="block text-[12px] font-medium text-gray-500 mb-1.5">Website</label>
+                    <HLInput
+                      id="manage-competitor-website"
+                      size="sm"
+                      prefixIcon={Globe}
+                      value={customWebsite}
+                      onChange={e => setCustomWebsite(e.target.value)}
+                      placeholder="e.g. hubspot.com"
+                      disabled={atCapacity}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="manage-competitor-country" className="block text-[12px] font-medium text-gray-500 mb-1.5">Country</label>
+                    <div className="relative">
+                      <select
+                        id="manage-competitor-country"
+                        value={customCountry}
+                        onChange={e => setCustomCountry(e.target.value)}
+                        disabled={atCapacity}
+                        className="w-full h-8 px-3 pr-8 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
+                      >
+                        {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                      </select>
+                      <ChevronDown size={14} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-end gap-2">
+                  <HLButton
+                    variant="secondary"
+                    color="gray"
+                    size="sm"
+                    onClick={() => { setShowAddForm(false); setCustomBrand(''); setCustomWebsite('') }}
+                  >
+                    Cancel
+                  </HLButton>
+                  <HLButton
+                    variant="primary"
+                    color="blue"
+                    size="sm"
+                    disabled={!canAddCustom}
+                    onClick={addCustomCompetitor}
+                  >
+                    Add
+                  </HLButton>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Secondary: optional suggestions — fuller layout */}
+        <section className="flex-1 min-h-0 flex flex-col">
+          <div className="flex items-baseline gap-2 mb-3 shrink-0">
+            <p className="text-[14px] font-semibold text-gray-900 m-0">Suggested competitors</p>
+          </div>
+          <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
+            {availableSuggestions.length === 0 ? (
+              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 content-start">
+                {availableSuggestions.map(item => (
+                  <button
+                    key={item.domain}
+                    type="button"
+                    disabled={atCapacity}
+                    onClick={() => stageCompetitor(item)}
+                    className={`flex items-center gap-3 text-left rounded-xl border border-dashed px-3.5 py-3 transition-all outline-none focus:outline-none ${
+                      atCapacity
+                        ? 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
+                        : 'border-gray-300 bg-white hover:border-primary-300'
+                    }`}
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className={`text-[13px] font-semibold m-0 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-900'}`}>
+                        {item.name}
+                      </p>
+                      <p className={`text-[11px] m-0 mt-0.5 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-500'}`}>
+                        {item.domain}
+                        {item.visibility > 0 ? ` · Mentioned in ${item.visibility}% of AI answers` : ''}
+                      </p>
+                    </div>
+                    <span className={`text-[12px] font-semibold shrink-0 ${atCapacity ? 'text-gray-300' : 'text-primary-600'}`}>
+                      Add
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      </div>
+    </HLModal>
+  )
+}
+
+// ── First-run lifecycle (setup → tracking → error → ready) ─────────────────
+
+const MAX_SETUP_COMPETITORS = 5
+const MAX_SETUP_PROMPTS = 10
+
+const TRACKING_STAGES = [
+  { at: 0,  msg: 'Pulling fresh prompt answers from tracked AI engines' },
+  { at: 28, msg: 'Comparing answer visibility and citation coverage' },
+  { at: 55, msg: 'Scoring competitor share of voice by prompt' },
+  { at: 78, msg: 'Ranking engine-level performance signals' },
+]
+
+const TRACKING_ENGINES = [
+  { name: 'Perplexity', color: '#20808D' },
+  { name: 'Claude', color: '#D97706' },
+  { name: 'Gemini', color: '#6938EF' },
+]
+
+// HARDCODED: AI-suggested competitors for first-run setup (prototyping)
+const SETUP_COMPETITOR_SUGGESTIONS = [
+  { name: 'Semrush', domain: 'semrush.com', category: 'SEO platform' },
+  { name: 'Ahrefs', domain: 'ahrefs.com', category: 'SEO platform' },
+  { name: 'Yext', domain: 'yext.com', category: 'Local listings' },
+]
+
+const SETUP_STEPS = [
+  { id: 1, short: 'Brand', hint: 'Verify your brand' },
+  { id: 2, short: 'Competitors', hint: 'Add competitors' },
+  { id: 3, short: 'Prompts', hint: 'Add or select prompts' },
+]
+
+const SETUP_SELECT_CLASS =
+  'w-full h-8 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
+
+const PITCH_ENGINES = [
+  { name: 'ChatGPT', Logo: ChatGptLogo },
+  { name: 'Claude', Logo: ClaudeLogo },
+  { name: 'Gemini', Logo: GeminiLogo },
+  { name: 'Perplexity', Logo: PerplexityLogo },
+]
+
+const PITCH_DISCOVER_ITEMS = [
+  {
+    title: 'Where AI recommends you',
+    body: 'See which AI assistants mention your business and where you\'re missing from the conversation.',
+    Icon: Search,
+    iconWrap: 'bg-purple-50 text-purple-600',
+  },
+  {
+    title: 'Who\'s getting recommended instead',
+    body: 'Compare your visibility with competitors across the same customer questions.',
+    Icon: Award,
+    iconWrap: 'bg-primary-50 text-primary-600',
+  },
+  {
+    title: 'How to improve your visibility',
+    body: 'Get prioritized recommendations that help AI recommend your business more often.',
+    Icon: Sparkles,
+    iconWrap: 'bg-success-50 text-success-600',
+  },
+]
+
+const PITCH_WORKFLOW_STEPS = [
+  { title: 'Review your report', Icon: FileText },
+  { title: 'Compare with competitors', Icon: Users },
+  { title: 'Improve your visibility', Icon: Sparkles },
+  { title: 'Track your progress', Icon: TrendingUp },
+]
+
+const PITCH_REPORT_INCLUDES = [
+  'AI recommendation visibility',
+  'Competitor comparison',
+  'Trusted sources influencing AI',
+  'Content opportunities',
+  'Citation opportunities',
+  'Recommended improvements',
+]
+
+function competitorInitials(name) {
+  return String(name || '')
+    .split(/\s+/)
+    .filter(Boolean)
+    .map(w => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase() || '?'
+}
+
+function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
+  return (
+    <div
+      className="w-full shrink-0 px-5 sm:px-6 py-5 border-b border-gray-100 pt-setup-fade-up"
+      style={{ animationDelay: '60ms' }}
+      role="list"
+      aria-label="Setup progress"
+    >
+      <div className="flex items-center w-full">
+        {SETUP_STEPS.map((step, index) => {
+          const isComplete = Boolean(completed[step.id]) && activeStep !== step.id
+          const isCurrent = activeStep === step.id
+          const canSelect = Boolean(onStepSelect) && (
+            isCurrent
+            || isComplete
+            || (step.id === 1)
+            || (step.id === 2 && completed[1])
+            || (step.id === 3 && completed[2])
+          )
+
+          const stepInner = (
+            <div className="flex items-center gap-3 min-w-0">
+              <span
+                className={`inline-flex items-center justify-center w-8 h-8 rounded-full text-[13px] font-semibold tabular-nums shrink-0 transition-all duration-300 ${
+                  isComplete
+                    ? 'bg-success-600 text-white'
+                    : isCurrent
+                      ? 'bg-primary-600 text-white ring-4 ring-primary-100'
+                      : 'bg-white border-2 border-gray-200 text-gray-400'
+                }`}
+              >
+                {isComplete ? <Check size={14} strokeWidth={2.5} /> : step.id}
+              </span>
+              <div className="min-w-0 text-left">
+                <p
+                  className={`text-[13px] font-semibold m-0 leading-tight truncate ${
+                    isCurrent || isComplete ? 'text-gray-900' : 'text-gray-400'
+                  }`}
+                >
+                  {step.short}
+                </p>
+                <p
+                  className={`text-[12px] m-0 mt-0.5 leading-snug truncate ${
+                    isCurrent
+                      ? 'text-primary-600'
+                      : isComplete
+                        ? 'text-gray-500'
+                        : 'text-gray-400'
+                  }`}
+                >
+                  {step.hint}
+                </p>
+              </div>
+            </div>
+          )
+
+          return (
+            <div
+              key={step.id}
+              className={`flex items-center min-w-0 ${index < SETUP_STEPS.length - 1 ? 'flex-1' : 'shrink-0'}`}
+              role="listitem"
+              aria-current={isCurrent ? 'step' : undefined}
+            >
+              {canSelect ? (
+                <button
+                  type="button"
+                  onClick={() => onStepSelect(step.id)}
+                  className="min-w-0 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary-200 text-left"
+                >
+                  {stepInner}
+                </button>
+              ) : (
+                <div className="min-w-0">
+                  {stepInner}
+                </div>
+              )}
+              {index < SETUP_STEPS.length - 1 && (
+                <div
+                  className={`flex-1 h-0.5 mx-3 sm:mx-4 rounded-full transition-colors duration-300 min-w-[1.25rem] ${
+                    completed[step.id] ? 'bg-success-500' : 'bg-gray-200'
+                  }`}
+                  aria-hidden="true"
+                />
+              )}
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function PromptTrackingPitchPage({ onGetStarted }) {
+  return (
+    <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 p-4 sm:p-5 xl:p-6 flex flex-col">
+      <div className="w-full max-w-[1040px] mx-auto flex-1 min-h-0 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden relative pt-setup-fade-up">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 55% 40% at 0% 0%, rgba(105,56,239,0.07), transparent 55%), radial-gradient(ellipse 40% 30% at 100% 0%, rgba(21,94,239,0.05), transparent 50%)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div
+          className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-8 sm:px-10 sm:py-10 flex flex-col gap-10 sm:gap-12"
+          style={{ scrollbarGutter: 'stable' }}
+        >
+          {/* Hero */}
+          <section>
+            <div
+              className="flex items-center mb-4"
+              role="list"
+              aria-label="Monitored AI engines"
+            >
+              {PITCH_ENGINES.map(({ name, Logo }, i) => (
+                <span
+                  key={name}
+                  role="listitem"
+                  title={name}
+                  className={`relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-200 shadow-xs ring-2 ring-white ${
+                    i === 0 ? '' : '-ml-2.5'
+                  }`}
+                  style={{ zIndex: PITCH_ENGINES.length - i }}
+                >
+                  <Logo size={18} />
+                  <span className="sr-only">{name}</span>
+                </span>
+              ))}
+            </div>
+            <div className="max-w-[720px]">
+              <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight">
+                <span className="block whitespace-nowrap">
+                  See when AI recommends <span className="text-primary-600">your business</span>
+                </span>
+                <span className="block mt-1 sm:mt-1.5">and when it recommends someone else.</span>
+              </h1>
+              <p className="text-[15px] text-gray-500 m-0 mt-3 leading-relaxed">
+                <span className="block">Track the questions your customers ask AI, compare your visibility with competitors,</span>
+                <span className="block">and discover exactly what to improve to appear in more AI answers.</span>
+              </p>
+            </div>
+            <div className="mt-6">
+              <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
+                Get started
+              </HLButton>
+            </div>
+          </section>
+
+          {/* What you'll discover */}
+          <section>
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 mb-4">What you&apos;ll discover</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              {PITCH_DISCOVER_ITEMS.map(({ title, body, Icon, iconWrap }, i) => (
+                <div
+                  key={title}
+                  className="group flex flex-col h-full rounded-2xl border border-gray-200 bg-gradient-to-b from-purple-50/50 to-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                  style={{ animationDelay: `${60 + i * 40}ms` }}
+                >
+                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${iconWrap}`}>
+                    <Icon size={18} />
+                  </span>
+                  <p className="text-[15px] font-semibold text-gray-900 m-0 mt-4 leading-snug">{title}</p>
+                  <p className="text-[13px] text-gray-500 m-0 mt-2 leading-relaxed flex-1">{body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* How it works — process rail */}
+          <section>
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 mb-5">How it works</h2>
+            <ol className="relative m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
+              {/* Connector line (desktop) */}
+              <div
+                className="hidden lg:block absolute top-5 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-purple-200 via-primary-200 to-purple-200"
+                aria-hidden="true"
+              />
+              {PITCH_WORKFLOW_STEPS.map(({ title, Icon }) => (
+                <li key={title} className="relative flex flex-col items-center text-center gap-3">
+                  <span className="relative z-[1] inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-purple-200 text-purple-600 shadow-sm">
+                    <Icon size={18} />
+                  </span>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 leading-snug px-1">
+                    {title}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Your first report includes */}
+          <section className="flex flex-col gap-4">
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0">Your first report includes</h2>
+            <div className="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50/90 to-white px-5 py-5 sm:px-6 sm:py-6">
+              <ul className="m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-2 gap-x-10 gap-y-3.5">
+                {PITCH_REPORT_INCLUDES.map(label => (
+                  <li key={label} className="flex items-center gap-3 min-w-0">
+                    <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-success-50 text-success-600 shrink-0">
+                      <Check size={12} strokeWidth={2.5} />
+                    </span>
+                    <span className="text-[14px] font-medium text-gray-800 leading-snug">{label}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="pt-1">
+              <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
+                Get started
+              </HLButton>
+            </div>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PromptTrackingInitialState({ onStart }) {
+  const [setupStarted, setSetupStarted] = useState(false)
+  const [brandName, setBrandName] = useState('Go High Level')
+  const [brandWebsite, setBrandWebsite] = useState('https://gohighlevel.com')
+  const [region, setRegion] = useState('United States')
+  const [competitors, setCompetitors] = useState([])
+  const [compName, setCompName] = useState('')
+  const [compDomain, setCompDomain] = useState('')
+  const [showCustomCompetitor, setShowCustomCompetitor] = useState(false)
+  const [prompts, setPrompts] = useState([])
+  const [customPrompt, setCustomPrompt] = useState('')
+  const [showCustomPrompt, setShowCustomPrompt] = useState(false)
+  // Prefill is ready on mount — land on competitors with brand collapsed as complete.
+  const [activeStep, setActiveStep] = useState(2)
+  const [step1Confirmed, setStep1Confirmed] = useState(true)
+  const [step2Confirmed, setStep2Confirmed] = useState(false)
+  const selectedPromptsListRef = useRef(null)
+
+  const brandReady = brandName.trim().length > 0 && brandWebsite.trim().length > 0
+  const canTrack = brandReady && prompts.length > 0
+  const atCompLimit = competitors.length >= MAX_SETUP_COMPETITORS
+  const atPromptLimit = prompts.length >= MAX_SETUP_PROMPTS
+
+  const availablePrompts = ADD_PROMPT_SUGGESTIONS.filter(
+    s => !prompts.some(p => p.prompt === s.prompt),
+  ).slice(0, 8)
+
+  useEffect(() => {
+    if (prompts.length === 0 || !selectedPromptsListRef.current) return
+    const el = selectedPromptsListRef.current
+    el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+  }, [prompts.length])
+
+  function focusStep(id) {
+    if (id === 1) {
+      setActiveStep(1)
+      return
+    }
+    if (id === 2 && step1Confirmed && brandReady) {
+      setActiveStep(2)
+      return
+    }
+    if (id === 3 && step2Confirmed) {
+      setActiveStep(3)
+    }
+  }
+
+  function confirmBrand() {
+    if (!brandReady) return
+    setStep1Confirmed(true)
+    setActiveStep(2)
+  }
+
+  function confirmCompetitors() {
+    setStep2Confirmed(true)
+    setActiveStep(3)
+  }
+
+  function toggleCompetitor(item) {
+    if (competitors.some(c => c.domain === item.domain)) {
+      setCompetitors(prev => prev.filter(c => c.domain !== item.domain))
+      return
+    }
+    if (atCompLimit) return
+    setCompetitors(prev => [...prev, item])
+  }
+
+  function addCustomCompetitor() {
+    const name = compName.trim()
+    const domain = compDomain.trim().replace(/^https?:\/\//i, '').replace(/\/$/, '')
+    if (!name || !domain || atCompLimit) return
+    if (competitors.some(c => c.domain === domain)) return
+    setCompetitors(prev => [...prev, {
+      name,
+      domain,
+      category: 'Custom',
+    }])
+    setCompName('')
+    setCompDomain('')
+    setShowCustomCompetitor(false)
+  }
+
+  function addPrompt(item) {
+    if (atPromptLimit) return
+    if (prompts.some(p => p.prompt === item.prompt)) return
+    setPrompts(prev => [...prev, item])
+  }
+
+  function addCustomPrompt() {
+    const text = customPrompt.trim()
+    if (!text || atPromptLimit) return
+    addPrompt({ prompt: text, topic: 'Custom', volume: '—' })
+    setCustomPrompt('')
+    setShowCustomPrompt(false)
+  }
+
+  function closeCustomPrompt() {
+    setShowCustomPrompt(false)
+    setCustomPrompt('')
+  }
+
+  function removePrompt(text) {
+    setPrompts(prev => prev.filter(p => p.prompt !== text))
+  }
+
+  function handleTrack() {
+    if (!canTrack) return
+    onStart({
+      brandName: brandName.trim(),
+      brandWebsite: brandWebsite.trim(),
+      region,
+      competitors,
+      prompts,
+      engines: TRACKING_ENGINES.map(e => e.name),
+    })
+  }
+
+  const completed = {
+    1: step1Confirmed && brandReady,
+    2: step2Confirmed,
+    3: false,
+  }
+
+  const brandStep = (
+    <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-1">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <h2 className="text-[16px] font-semibold text-gray-900 m-0">Confirm brand and region</h2>
+        <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed">
+          We match AI answers to your brand name and market — so visibility scores reflect where you actually sell.
+        </p>
+        <div className="flex flex-col gap-3.5 mt-5">
+          <div>
+            <label htmlFor="pt-setup-brand" className="block text-[12px] font-medium text-gray-500 mb-2">Brand name</label>
+            <HLInput
+              id="pt-setup-brand"
+              size="sm"
+              prefixIcon={Sparkles}
+              value={brandName}
+              onChange={e => setBrandName(e.target.value)}
+              placeholder="e.g. Go High Level"
+            />
+          </div>
+          <div>
+            <label htmlFor="pt-setup-website" className="block text-[12px] font-medium text-gray-500 mb-2">Brand website</label>
+            <HLInput
+              id="pt-setup-website"
+              size="sm"
+              prefixIcon={Globe}
+              value={brandWebsite}
+              onChange={e => setBrandWebsite(e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+          <div>
+            <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
+            <div className="relative">
+              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+              <select
+                id="pt-setup-region"
+                value={region}
+                onChange={e => setRegion(e.target.value)}
+                className={SETUP_SELECT_CLASS}
+              >
+                {ADD_PROMPT_REGIONS.map(r => (
+                  <option key={r} value={r}>{r}</option>
+                ))}
               </select>
-              <ChevronDown size={16} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
             </div>
           </div>
         </div>
+      </div>
+      <div className="shrink-0 pt-4 mt-4 border-t border-gray-100 flex items-center justify-end gap-3">
+        <button
+          type="button"
+          disabled={!brandReady}
+          onClick={confirmBrand}
+          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold transition-colors"
+        >
+          Continue
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  )
 
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-2 shrink-0">
+  const competitorsStep = (
+    <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-2">
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-[16px] font-semibold text-gray-900 m-0">Who do you compete with?</h2>
+          <p className="text-[13px] text-gray-400 m-0 tabular-nums shrink-0" aria-live="polite">
+            {competitors.length}/{MAX_SETUP_COMPETITORS} selected
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2 mt-5 mb-2.5">
+          <Sparkles size={13} className="text-purple-500/80 shrink-0" />
+          <p className="text-[12px] font-medium text-gray-500 m-0">Recommended for you</p>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {SETUP_COMPETITOR_SUGGESTIONS.map((s, i) => {
+            const selected = competitors.some(c => c.domain === s.domain)
+            return (
+              <button
+                key={s.domain}
+                type="button"
+                disabled={!selected && atCompLimit}
+                onClick={() => toggleCompetitor(s)}
+                aria-pressed={selected}
+                className={`w-full flex items-center gap-3 text-left rounded-xl border px-3.5 py-3 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none focus-visible:outline-none pt-setup-fade-up ${
+                  selected
+                    ? 'border-primary-600 bg-primary-50/40 focus-visible:border-primary-600'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60 focus-visible:border-primary-300'
+                }`}
+                style={{ animationDelay: `${60 + i * 40}ms` }}
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{s.name}</p>
+                  <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">{s.category}</p>
+                </div>
+                <span
+                  className={`w-5 h-5 rounded-full inline-flex items-center justify-center shrink-0 border transition-all duration-200 ${
+                    selected
+                      ? 'bg-primary-600 border-primary-600 text-white'
+                      : 'border-gray-300 bg-white'
+                  }`}
+                >
+                  {selected && <Check size={11} strokeWidth={2.5} />}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
+        {competitors.filter(c => !SETUP_COMPETITOR_SUGGESTIONS.some(s => s.domain === c.domain)).length > 0 && (
+          <div className="mt-2 flex flex-col gap-2">
+            {competitors
+              .filter(c => !SETUP_COMPETITOR_SUGGESTIONS.some(s => s.domain === c.domain))
+              .map(c => (
+                <div
+                  key={c.domain}
+                  className="flex items-center gap-3 rounded-xl border border-primary-600 bg-primary-50/40 px-3.5 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
+                    <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">{c.domain}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => toggleCompetitor(c)}
+                    aria-label={`Remove ${c.name}`}
+                    className="w-7 h-7 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
+                  >
+                    <X size={13} />
+                  </button>
+                </div>
+              ))}
+          </div>
+        )}
+
+        <div className="mt-3">
+          {!showCustomCompetitor ? (
+            <button
+              type="button"
+              onClick={() => setShowCustomCompetitor(true)}
+              disabled={atCompLimit}
+              className="w-full flex items-center gap-3 rounded-xl border border-primary-200 px-4 py-3.5 text-left transition-all disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none group"
+              style={{
+                backgroundImage: 'linear-gradient(135deg, #EEF4FF 0%, #F4F3FF 55%, #F9F5FF 100%)',
+              }}
+            >
+              <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/90 text-primary-600 border border-primary-100 shrink-0 shadow-xs">
+                <Plus size={16} strokeWidth={2} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[13px] font-semibold text-gray-900 m-0">Add another company</p>
+                <p className="text-[12px] text-gray-500 m-0 mt-0.5">Enter a name and domain to track</p>
+              </div>
+            </button>
+          ) : (
+            <div className="rounded-xl border border-primary-300 bg-white p-3.5 flex flex-col gap-2.5 pt-setup-fade-up">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <HLInput
+                  size="sm"
+                  value={compName}
+                  onChange={e => setCompName(e.target.value)}
+                  placeholder="Competitor name"
+                  autoFocus
+                />
+                <HLInput
+                  size="sm"
+                  value={compDomain}
+                  onChange={e => setCompDomain(e.target.value)}
+                  placeholder="Competitor URL"
+                />
+              </div>
+              <div className="flex items-center justify-end gap-2">
+                <HLButton variant="secondary" color="gray" size="xs" onClick={() => { setShowCustomCompetitor(false); setCompName(''); setCompDomain('') }}>
+                  Cancel
+                </HLButton>
+                <HLButton
+                  variant="primary"
+                  color="blue"
+                  size="xs"
+                  disabled={!compName.trim() || !compDomain.trim() || atCompLimit}
+                  onClick={addCustomCompetitor}
+                >
+                  Add
+                </HLButton>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="shrink-0 pt-4 mt-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+        <HLButton variant="secondary" color="gray" size="sm" onClick={() => setActiveStep(1)}>
+          Back
+        </HLButton>
+        <div className="flex items-center gap-3 ml-auto">
           <button
             type="button"
-            onClick={onClose}
-            className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={confirmCompetitors}
+            className="text-[13px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
           >
-            Cancel
+            Skip for now
           </button>
           <button
             type="button"
-            disabled={!canSave}
-            onClick={handleSave}
-            className={`h-9 px-4 rounded-lg text-[13px] font-semibold transition-colors ${
-              canSave ? 'bg-primary-600 hover:bg-primary-700 text-white' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+            onClick={confirmCompetitors}
+            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
           >
-            Add competitor
+            Continue
+            <ChevronRight size={14} />
           </button>
         </div>
       </div>
-    </div>,
-    document.body,
+    </div>
+  )
+
+  const promptsStep = (
+    <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-3">
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="shrink-0 flex items-center justify-between gap-4">
+          <h2 className="text-[16px] font-semibold text-gray-900 m-0">Add prompts</h2>
+          <div className="shrink-0 text-right" aria-live="polite">
+            <p className="text-[18px] font-semibold text-gray-900 m-0 tabular-nums leading-none tracking-tight">
+              {prompts.length}
+              <span className="text-gray-300 font-medium">/{MAX_SETUP_PROMPTS}</span>
+            </p>
+            <p className="text-[11px] text-gray-400 m-0 mt-1">prompts</p>
+          </div>
+        </div>
+
+        {prompts.length > 0 && (
+          <div className="shrink-0 mt-4 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-2">
+              <p className="text-[12px] font-semibold text-gray-900 m-0">
+                Your selection
+                <span className="ml-1.5 font-medium text-gray-400 tabular-nums">
+                  {prompts.length} selected
+                </span>
+              </p>
+              {prompts.length > 4 && (
+                <p className="text-[11px] text-gray-400 m-0">Scroll to see all</p>
+              )}
+            </div>
+            <div
+              ref={selectedPromptsListRef}
+              className="relative rounded-xl border border-primary-100 bg-primary-50/20 p-2 max-h-[200px] overflow-y-auto overscroll-contain flex flex-col gap-1.5"
+              style={{ scrollbarWidth: 'thin' }}
+              aria-label="Selected prompts"
+            >
+              {prompts.map((p, i) => (
+                <div
+                  key={p.prompt}
+                  className="flex items-start gap-2 rounded-lg border border-primary-100 bg-white px-3 py-2 pt-setup-scale-in"
+                  style={{ animationDelay: `${i * 40}ms` }}
+                >
+                  <span className="text-[11px] font-semibold text-primary-600 tabular-nums shrink-0 mt-0.5 w-4">
+                    {i + 1}
+                  </span>
+                  <p className="text-[12px] text-gray-800 leading-snug m-0 flex-1 min-w-0 line-clamp-2">{p.prompt}</p>
+                  <button
+                    type="button"
+                    onClick={() => removePrompt(p.prompt)}
+                    className="w-6 h-6 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 transition-colors inline-flex items-center justify-center shrink-0"
+                    aria-label="Remove prompt"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 min-h-0 flex flex-col mt-4">
+          <div className="shrink-0 flex items-center justify-between gap-3 mb-2">
+            <p className="text-[12px] font-semibold text-gray-900 m-0">AI suggested prompts</p>
+            {!showCustomPrompt && (
+              <button
+                type="button"
+                disabled={atPromptLimit}
+                onClick={() => setShowCustomPrompt(true)}
+                className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary-600 hover:text-primary-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                <Plus size={14} strokeWidth={2.25} />
+                Add a prompt yourself
+              </button>
+            )}
+          </div>
+
+          {showCustomPrompt && (
+            <div className="shrink-0 mb-3 rounded-xl border border-primary-200 bg-white px-3.5 py-3 pt-setup-fade-up">
+              <p className="text-[12px] font-semibold text-gray-900 m-0 mb-2">Add a prompt yourself</p>
+              <HLInput
+                size="sm"
+                value={customPrompt}
+                onChange={e => setCustomPrompt(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addCustomPrompt()
+                  }
+                }}
+                placeholder="Type a buyer-intent question…"
+                disabled={atPromptLimit}
+                autoFocus
+              />
+              <div className="flex items-center justify-end gap-3 mt-2.5">
+                <button
+                  type="button"
+                  onClick={closeCustomPrompt}
+                  className="text-[12px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <HLButton
+                  variant="primary"
+                  color="blue"
+                  size="sm"
+                  disabled={!customPrompt.trim() || atPromptLimit}
+                  onClick={addCustomPrompt}
+                >
+                  Add
+                </HLButton>
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 min-h-0 rounded-xl border border-gray-200 overflow-y-auto divide-y divide-gray-100 bg-white">
+            {availablePrompts.length === 0 ? (
+              <p className="text-[12px] text-gray-400 m-0 px-3.5 py-4 text-center">All suggestions are in your selection.</p>
+            ) : (
+              availablePrompts.map((s, i) => (
+                <div
+                  key={s.prompt}
+                  className="flex items-start gap-3 px-3.5 py-2.5 bg-white hover:bg-primary-50/40 transition-colors duration-200"
+                  style={{ animationDelay: `${80 + i * 40}ms` }}
+                >
+                  <div className="min-w-0 flex-1">
+                    <span className="text-[11px] text-gray-400 tabular-nums">{s.volume}</span>
+                    <p className="text-[12px] text-gray-800 leading-snug m-0 mt-0.5 line-clamp-2">{s.prompt}</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={atPromptLimit}
+                    onClick={() => addPrompt(s)}
+                    className={`shrink-0 text-[12px] font-semibold transition-all duration-200 mt-0.5 ${
+                      atPromptLimit ? 'text-gray-300 cursor-not-allowed' : 'text-primary-600 hover:text-primary-700'
+                    }`}
+                  >
+                    Track
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {prompts.length === 0 && (
+          <p className="shrink-0 text-[12px] text-gray-400 m-0 mt-3 text-center">Add at least one prompt to start tracking.</p>
+        )}
+      </div>
+
+      <div className="shrink-0 pt-4 mt-4 border-t border-gray-100 flex items-center justify-between gap-3 flex-wrap">
+        <HLButton variant="secondary" color="gray" size="sm" onClick={() => setActiveStep(2)}>
+          Back
+        </HLButton>
+        <button
+          type="button"
+          disabled={!canTrack}
+          onClick={handleTrack}
+          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold transition-colors"
+        >
+          Track and show results
+          <ChevronRight size={14} />
+        </button>
+      </div>
+    </div>
+  )
+
+  if (!setupStarted) {
+    return <PromptTrackingPitchPage onGetStarted={() => setSetupStarted(true)} />
+  }
+
+  return (
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden relative bg-gray-50 p-4 sm:p-5 xl:p-6">
+      <div className="min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs max-w-[880px] w-full mx-auto">
+        <div className="shrink-0 px-5 sm:px-6 pt-4 pb-0">
+          <button
+            type="button"
+            onClick={() => setSetupStarted(false)}
+            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
+          >
+            <ArrowLeft size={14} />
+            Back to overview
+          </button>
+        </div>
+        <SetupProgressHeader
+          activeStep={activeStep}
+          completed={completed}
+          onStepSelect={focusStep}
+        />
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4 sm:p-5">
+          {activeStep === 1 && brandStep}
+          {activeStep === 2 && competitorsStep}
+          {activeStep === 3 && promptsStep}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Shared shell for tracking progress + error so the error card replaces the
+// loading card in the same spot — same padding, alignment, and column width.
+const TRACKING_STATUS_SHELL =
+  'flex-1 min-h-0 overflow-y-auto bg-gray-50 flex justify-center p-6'
+const TRACKING_STATUS_COLUMN = 'w-full max-w-[760px] flex flex-col gap-4'
+
+function PromptTrackingProgressView({ progress, setup }) {
+  const brand = setup?.brandName || 'your brand'
+  const promptCount = setup?.prompts?.length ?? PROMPTS_DATA.length
+  const competitorCount = setup?.competitors?.length ?? 0
+  const engineCount = setup?.engines?.length ?? TRACKING_ENGINES.length
+
+  const activeStage = [...TRACKING_STAGES].reverse().find(s => progress >= s.at) || TRACKING_STAGES[0]
+  const secondsLeft = Math.max(0, Math.round((100 - progress) / 100 * 22))
+  const etaText = secondsLeft === 0 ? 'Almost done' : `About ${secondsLeft}s remaining`
+
+  return (
+    <div className={TRACKING_STATUS_SHELL} style={{ scrollbarGutter: 'stable' }}>
+      <div className={TRACKING_STATUS_COLUMN}>
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
+                  Refreshing AI rank tracking for {brand}
+                </h1>
+                <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2 max-w-[480px]">
+                  We are pulling fresh prompt answers, competitor visibility, citation coverage, and engine-level ranking data before reopening the dashboard.
+                </p>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5 shrink-0 min-w-[180px]">
+                <p className="text-[11px] font-semibold text-gray-400 m-0 mb-2.5">Refresh setup</p>
+                <div className="flex flex-col gap-1.5">
+                  {[
+                    { label: 'Prompts', value: promptCount },
+                    { label: 'Competitors', value: competitorCount },
+                    { label: 'AI engines', value: engineCount },
+                    { label: 'Change type', value: 'First setup', strong: true },
+                  ].map(row => (
+                    <div key={row.label} className="flex items-center justify-between gap-4">
+                      <span className="text-[12px] text-gray-500">{row.label}</span>
+                      <span className={`text-[12px] tabular-nums ${row.strong ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}`}>
+                        {row.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="rounded-xl border border-gray-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <p className="text-[13px] font-medium text-gray-700 m-0 leading-snug max-w-[420px]">
+                  {activeStage.msg}
+                </p>
+                <span className="text-[18px] font-bold text-gray-900 tabular-nums shrink-0">{Math.round(progress)}%</span>
+              </div>
+
+              <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden mb-2">
+                <div
+                  className="h-full rounded-full transition-all duration-300 ease-out"
+                  style={{
+                    width: `${progress}%`,
+                    background: 'linear-gradient(90deg, var(--purple-600) 0%, var(--primary-600) 100%)',
+                  }}
+                />
+              </div>
+              <p className="text-[12px] text-gray-400 m-0 mb-4">{etaText}</p>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {TRACKING_ENGINES.map(eng => (
+                  <span
+                    key={eng.name}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50"
+                  >
+                    <EngineLogo name={eng.name} size={12} chip={false} />
+                    <span className="text-[12px] font-medium text-gray-700">{eng.name}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function PromptTrackingErrorContent({ onRetry }) {
+  // Same shell + column as PromptTrackingProgressView so the error replaces
+  // the loading card with no layout shift (top-aligned in the same column).
+  return (
+    <div className={TRACKING_STATUS_SHELL} style={{ scrollbarGutter: 'stable' }}>
+      <div className={TRACKING_STATUS_COLUMN}>
+        <div className="bg-white border border-gray-200 rounded-xl px-8 py-9 flex flex-col items-center text-center w-full shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-error-50 flex items-center justify-center mb-5">
+            <AlertTriangle size={26} className="text-error-600" />
+          </div>
+          <p className="text-[16px] font-semibold text-gray-900 mb-1.5">Tracking could not be completed</p>
+          <p className="text-[14px] font-normal text-gray-500 leading-relaxed mb-6 max-w-[320px]">
+            Prompt tracking ran into an error and couldn&apos;t finish. No visibility data was captured for this run.
+          </p>
+          <button
+            type="button"
+            onClick={onRetry}
+            className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+          >
+            Retry scan
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────
 
 const PAGE_TABS = [
-  { id: 'Overview',    label: 'Overview',    Icon: TrendingUp    },
+  { id: 'Overview',    label: 'Overview',    Icon: LayoutDashboard },
   { id: 'Prompts',     label: 'Prompts',     Icon: MessageCircle },
   { id: 'Sources',     label: 'Sources',     Icon: Globe         },
   { id: 'Competitors', label: 'Competitors', Icon: BarChart3     },
 ]
 
 export default function PromptTrackingDashboard() {
+  const [phase, setPhase] = useState(() => sessionStorage.getItem('pt_hasTracking') === '1' ? 'ready' : 'setup')
   const [activeTab, setActiveTab]       = useState('Overview')
   const [engineFilter, setEngineFilter] = useState('All AI engines')
   const [periodFilter, setPeriodFilter] = useState('Last 30 days')
-  const [showAddModal, setShowAddModal] = useState(false)
-  const [showAddCompetitor, setShowAddCompetitor] = useState(false)
+  const [showManagePrompts, setShowManagePrompts] = useState(false)
+  const [showManageCompetitors, setShowManageCompetitors] = useState(false)
   const [successToast, setSuccessToast] = useState(null)
-  // A prompt opened from the Overview "Organic-AI overlap" cards is shown inside
-  // the Prompts tab detail page, but keeps a "Back to overview" affordance.
   const [promptFromOverview, setPromptFromOverview] = useState(null)
+  const [isTracking, setIsTracking] = useState(false)
+  const [trackingProgress, setTrackingProgress] = useState(0)
+  const [setupDraft, setSetupDraft] = useState(null)
   const toastTimer = useRef(null)
+  const contentScrollRef = useRef(null)
+  const trackingIntervalRef = useRef(null)
+  // DEMO: first completed tracking run of the session fails; retry lands on ready.
+  const trackingHasFailedRef = useRef(false)
 
   function openPromptInPromptsTab(prompt) {
-    setPromptFromOverview(prompt)
+    setPromptFromOverview(resolvePromptForDetail(prompt))
     setActiveTab('Prompts')
+    requestAnimationFrame(() => scrollContentToTop(contentScrollRef))
   }
 
   function backToOverviewFromPrompt() {
@@ -2609,7 +3721,47 @@ export default function PromptTrackingDashboard() {
     setActiveTab('Overview')
   }
 
+  function handleStartTracking(draft) {
+    setSetupDraft(draft || null)
+    sessionStorage.setItem('pt_hasTracking', '1')
+    setPhase('tracking')
+    setIsTracking(true)
+    setTrackingProgress(0)
+  }
+
+  function handleRetryTracking() {
+    trackingHasFailedRef.current = true
+    setPhase('ready')
+  }
+
   useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current) }, [])
+
+  useEffect(() => {
+    if (!isTracking) return
+    trackingIntervalRef.current = setInterval(() => {
+      setTrackingProgress(p => {
+        const step = p < 50 ? 1.8 : p < 80 ? 1.0 : 0.45
+        return Math.min(100, p + step)
+      })
+    }, 80)
+    return () => clearInterval(trackingIntervalRef.current)
+  }, [isTracking])
+
+  useEffect(() => {
+    if (!isTracking || trackingProgress < 100) return
+    clearInterval(trackingIntervalRef.current)
+    const t = setTimeout(() => {
+      setIsTracking(false)
+      setTrackingProgress(0)
+      if (!trackingHasFailedRef.current) {
+        trackingHasFailedRef.current = true
+        setPhase('error')
+      } else {
+        setPhase('ready')
+      }
+    }, 800)
+    return () => clearTimeout(t)
+  }, [trackingProgress, isTracking])
 
   function fireToast(message) {
     if (toastTimer.current) clearTimeout(toastTimer.current)
@@ -2618,23 +3770,47 @@ export default function PromptTrackingDashboard() {
   }
 
   function handleSavePrompt() {
-    // Prototype: newly saved prompts are queued rather than inserted live.
-    setShowAddModal(false)
-    fireToast('The prompt was successfully saved.')
+    setShowManagePrompts(false)
+    fireToast('Changes have been saved and will be applied to the next scan.')
   }
 
   function handleSaveCompetitor() {
-    // Prototype: newly added competitors are queued rather than inserted live.
-    setShowAddCompetitor(false)
-    fireToast('The competitor was successfully added.')
+    setShowManageCompetitors(false)
+    fireToast('Changes have been saved and will be applied to the next scan.')
+  }
+
+  if (phase === 'setup') {
+    return (
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden">
+        <PromptTrackingInitialState onStart={handleStartTracking} />
+      </div>
+    )
+  }
+
+  const trackingPct = Math.min(100, Math.round(trackingProgress))
+
+  // Tracking + error: full canvas only — no page header (matches setup).
+  // Both views share TRACKING_STATUS_SHELL so error replaces loading in-place.
+  if (phase === 'tracking') {
+    return (
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+        <PromptTrackingProgressView progress={trackingPct} setup={setupDraft} />
+      </div>
+    )
+  }
+
+  if (phase === 'error') {
+    return (
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+        <PromptTrackingErrorContent onRetry={handleRetryTracking} />
+      </div>
+    )
   }
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
 
-      {/* Fixed page header — title, brand, tabs and toolbar never scroll */}
       <div className="bg-white border-b border-gray-200 shrink-0">
-        {/* Title */}
         <div className="px-6 pt-5 flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-start gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
@@ -2645,9 +3821,26 @@ export default function PromptTrackingDashboard() {
               <p className="text-[13px] text-gray-500 mt-0.5">User-defined prompt tracking across LLMs.</p>
             </div>
           </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                sessionStorage.removeItem('pt_hasTracking')
+                trackingHasFailedRef.current = false
+                setSetupDraft(null)
+                setIsTracking(false)
+                setTrackingProgress(0)
+                setPromptFromOverview(null)
+                setActiveTab('Overview')
+                setPhase('setup')
+              }}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              Preview initial state
+            </button>
+          </div>
         </div>
 
-        {/* Tab nav with icons */}
         <div className="px-6 mt-4 flex items-center gap-1 -mx-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
           {PAGE_TABS.map(({ id, label, Icon }) => {
             const isActive = activeTab === id
@@ -2668,51 +3861,65 @@ export default function PromptTrackingDashboard() {
           })}
         </div>
 
-        {/* Toolbar — filters + contextual CTA, sits directly under the tabs */}
-        <div className="px-6 py-3 border-t border-gray-100 bg-white flex items-center justify-between gap-3 flex-wrap">
+        <div className="px-6 py-2 border-t border-gray-100 bg-white flex items-center justify-between gap-3 min-h-12">
           <div className="flex items-center gap-2">
-            <DarkDropdown value={engineFilter} onChange={setEngineFilter} options={ENGINE_OPTIONS} icon={Bot} variant="default" />
+            {activeTab !== 'Overview' && (
+              <DarkDropdown value={engineFilter} onChange={setEngineFilter} options={ENGINE_OPTIONS} icon={Bot} variant="default" />
+            )}
             <DarkDropdown value={periodFilter} onChange={setPeriodFilter} options={PERIOD_OPTIONS} icon={Clock} variant="active" dateRangeOption="Custom date range" />
           </div>
           {activeTab === 'Prompts' && (
             <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
+              type="button"
+              onClick={() => setShowManagePrompts(true)}
+              className="inline-flex items-center justify-center h-8 px-3.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
             >
-              <Plus size={14} />
-              Add prompt
+              Manage prompts
             </button>
           )}
           {activeTab === 'Competitors' && (
             <button
-              onClick={() => setShowAddCompetitor(true)}
-              className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
+              type="button"
+              onClick={() => setShowManageCompetitors(true)}
+              className="inline-flex items-center justify-center h-8 px-3.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
             >
-              <Plus size={14} />
-              Add competitor
+              Manage competitors
             </button>
           )}
         </div>
       </div>
 
-      {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto min-h-0" style={{ scrollbarGutter: 'stable' }}>
-        {activeTab === 'Overview'    && <div className="px-5 pt-5 pb-5"><OverviewContent onOpenInPromptsTab={openPromptInPromptsTab} /></div>}
-        {activeTab === 'Prompts'     && <PromptsTabContent injectedPrompt={promptFromOverview} onInjectedBack={backToOverviewFromPrompt} />}
-        {activeTab === 'Sources'     && <div className="px-5 pt-5 pb-5"><SourceInventoryContent /></div>}
+      <div
+        ref={contentScrollRef}
+        className={`flex-1 min-h-0 ${activeTab === 'Prompts' || activeTab === 'Sources' ? 'overflow-hidden' : 'overflow-y-auto'}`}
+        style={{ scrollbarGutter: 'stable' }}
+      >
+        {activeTab === 'Overview'    && <div className="px-5 pt-5 pb-5"><OverviewContent contentScrollRef={contentScrollRef} /></div>}
+        {activeTab === 'Prompts'     && (
+          <PromptsTabContent
+            injectedPrompt={promptFromOverview}
+            onInjectedBack={backToOverviewFromPrompt}
+            contentScrollRef={contentScrollRef}
+          />
+        )}
+        {activeTab === 'Sources'     && (
+          <div className="h-full min-h-0 px-5 pt-5 pb-5">
+            <SourceInventoryContent />
+          </div>
+        )}
         {activeTab === 'Competitors' && <CompetitorsTabContent />}
       </div>
 
-      {showAddModal && (
-        <AddPromptModal
-          onClose={() => setShowAddModal(false)}
+      {showManagePrompts && (
+        <ManagePromptsModal
+          onClose={() => setShowManagePrompts(false)}
           onSave={handleSavePrompt}
         />
       )}
 
-      {showAddCompetitor && (
-        <AddCompetitorModal
-          onClose={() => setShowAddCompetitor(false)}
+      {showManageCompetitors && (
+        <ManageCompetitorsModal
+          onClose={() => setShowManageCompetitors(false)}
           onSave={handleSaveCompetitor}
         />
       )}

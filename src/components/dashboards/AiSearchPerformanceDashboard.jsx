@@ -1,14 +1,17 @@
 import { useState, useRef, useEffect, Fragment } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  TrendingUp, Globe, Search, Plus, MapPin, Link2,
-  ChevronRight, ChevronDown, ExternalLink, MessageCircle, HelpCircle,
-  LayoutList, Megaphone, Calendar, Sparkles, BarChart3, Award, ArrowUp,
+  TrendingUp, Globe, Search, Plus, Link2, LayoutDashboard,
+  ChevronRight, ChevronDown, ExternalLink, MessageCircle, Info,
+  Megaphone, Calendar, Sparkles, BarChart3, Award, ArrowUp,
   Users, ArrowLeft, Check, CircleCheck, Bot, Star, X,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
+import HLButton from '../HLButton.jsx'
 import VisibilityMeter from '../VisibilityMeter.jsx'
-import CompanyLogo from '../CompanyLogo.jsx'
+import SectionInfoTip from '../SectionInfoTip.jsx'
+import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
+import EngineLogo from '../EngineLogo.jsx'
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
 
@@ -522,8 +525,6 @@ function BrandsCell({ brands, extraBrands = 0 }) {
 
 // ── Data ───────────────────────────────────────────────────────────────────
 
-const COMPETITOR_COLORS = ['#6938EF', '#16A34A', 'var(--primary-600)', '#D97706', '#DC2626', '#4F46E5']
-
 const KPI_CARDS = [
   { label: 'Brand presence',         value: '418',   change: '8.2%',  up: true,  data: [260, 290, 330, 365, 395, 418],             color: '#6938EF', Icon: Award    },
   { label: 'AI opportunity traffic', value: '12.4K', change: '12.8%', up: true,  data: [8200, 9100, 9800, 10600, 11400, 12400],    color: '#155EEF', Icon: BarChart3 },
@@ -533,20 +534,20 @@ const KPI_CARDS = [
 ]
 
 const COMPETITORS = [
-  { name: 'GoHighLevel',    domain: 'gohighlevel.com',    pct: 14.20, color: '#6938EF' },
-  { name: 'HubSpot',        domain: 'hubspot.com',        pct: 22.80, color: '#16A34A' },
-  { name: 'ActiveCampaign', domain: 'activecampaign.com', pct: 18.60, color: 'var(--primary-600)' },
-  { name: 'ClickFunnels',   domain: 'clickfunnels.com',   pct: 15.90, color: '#D97706' },
-  { name: 'Klaviyo',        domain: 'klaviyo.com',        pct: 12.70, color: '#DC2626' },
-  { name: 'Keap',           domain: 'keap.com',           pct: 11.40, color: '#4F46E5' },
+  { name: 'GoHighLevel',    domain: 'gohighlevel.com',    pct: 14.20 },
+  { name: 'HubSpot',        domain: 'hubspot.com',        pct: 22.80 },
+  { name: 'ActiveCampaign', domain: 'activecampaign.com', pct: 18.60 },
+  { name: 'ClickFunnels',   domain: 'clickfunnels.com',   pct: 15.90 },
+  { name: 'Klaviyo',        domain: 'klaviyo.com',        pct: 12.70 },
+  { name: 'Keap',           domain: 'keap.com',           pct: 11.40 },
 ]
 
 const AI_ENGINES = [
-  { name: 'AI overview', subtitle: 'AI overview', pct: 49, color: '#6938EF' },
-  { name: 'AI mode',     subtitle: 'AI mode',     pct: 22, color: '#16A34A' },
-  { name: 'Gemini',      subtitle: 'Gemini',      pct: 28, color: 'var(--primary-600)' },
-  { name: 'ChatGPT',     subtitle: 'ChatGPT',     pct: 18, color: '#D97706' },
-  { name: 'Perplexity',  subtitle: 'Perplexity',  pct: 20, color: '#DC2626' },
+  { name: 'AI overview', subtitle: 'AI overview', pct: 49 },
+  { name: 'AI mode',     subtitle: 'AI mode',     pct: 22 },
+  { name: 'Gemini',      subtitle: 'Gemini',      pct: 28 },
+  { name: 'ChatGPT',     subtitle: 'ChatGPT',     pct: 18 },
+  { name: 'Perplexity',  subtitle: 'Perplexity',  pct: 20 },
 ]
 
 const TOPIC_PRESENCE = [
@@ -877,10 +878,10 @@ function PromptDetailContent({ prompt, onBack }) {
   const [sourcesView, setSourcesView]   = useState('URL')
 
   const DETAIL_KPI = [
-    { label: 'Visibility score', value: '82/100', desc: 'Current prompt-level visibility across tracked engines.' },
-    { label: 'Avg position',     value: '#1.8',   desc: 'Average cited position when the brand appears.' },
-    { label: 'AI responses',     value: '112',    desc: 'Latest prompt responses available for drill-down.' },
-    { label: 'Search volume',    value: '1.9K',   desc: 'Demand proxy carried through from the tracked prompt feed.' },
+    { label: 'Visibility score', value: '82/100', desc: 'Current prompt-level visibility across tracked engines.', Icon: Award, color: '#6938EF' },
+    { label: 'Average position', value: '#1.8', desc: 'Average cited position when the brand appears.', Icon: TrendingUp, color: '#16A34A' },
+    { label: 'AI responses', value: '112', desc: 'Latest prompt responses available for drill-down.', Icon: Bot, color: 'var(--primary-600)' },
+    { label: 'Search volume', value: '1.9K', desc: 'Demand proxy carried through from the tracked prompt feed.', Icon: BarChart3, color: '#D97706' },
   ]
 
   return (
@@ -899,10 +900,9 @@ function PromptDetailContent({ prompt, onBack }) {
             <ChevronDown size={14} className="text-gray-400" />
           </button>
         </div>
-        <button className="flex items-center gap-1.5 px-3.5 py-2 rounded bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
-          <Plus size={14} />
+        <HLButton variant="primary" color="blue" size="sm">
           Add prompt
-        </button>
+        </HLButton>
       </div>
 
       {/* Back link */}
@@ -911,45 +911,24 @@ function PromptDetailContent({ prompt, onBack }) {
         Back to Prompts
       </button>
 
-      {/* Hero: prompt headline + snapshot card */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5 flex gap-6">
-        {/* Left: tags + headline + desc */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">AI Visibility</span>
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">Winning</span>
-            <span className="text-[12px] text-gray-400">Last 30 days</span>
-            <span className="text-[12px] text-gray-400">US</span>
-          </div>
-          <h2 className="text-[24px] font-bold text-gray-900 leading-snug mb-3">{prompt}</h2>
-          <p className="text-[13px] text-gray-500 leading-relaxed">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
+      {/* Hero: prompt headline + KPI cards */}
+      <div className="border border-gray-200 rounded-lg bg-white p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">AI Visibility</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">Winning</span>
+          <span className="text-[12px] text-gray-400">Last 30 days</span>
+          <span className="text-[12px] text-gray-400">US</span>
         </div>
+        <h2 className="text-[20px] font-semibold text-gray-900 leading-snug mb-2">{prompt}</h2>
+        <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
 
-        {/* Right: snapshot card */}
-        <div className="w-[220px] shrink-0 border border-gray-200 rounded-lg p-4 bg-gray-50">
-          <p className="text-[12px] font-medium text-primary-600 mb-3">Prompt snapshot</p>
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { label: 'Brand',          value: 'GoHighLevel' },
-              { label: 'Top engine',     value: 'Perplexity'    },
-              { label: 'AI responses',   value: '112'           },
-              { label: 'Prompt sources', value: '2'             },
-            ].map(item => (
-              <div key={item.label} className="border border-gray-200 rounded-md bg-white p-2.5">
-                <p className="text-[12px] text-gray-400 font-medium mb-1">{item.label}</p>
-                <p className="text-[13px] font-semibold text-gray-900">{item.value}</p>
-              </div>
+        <div className="mt-4 pt-4 border-t border-gray-100">
+          <div className="grid grid-cols-4 gap-3">
+            {DETAIL_KPI.map(kpi => (
+              <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
             ))}
           </div>
-          <p className="text-[12px] text-gray-400 mt-3">Topic: AI Visibility · 2 source domains · US</p>
         </div>
-      </div>
-
-      {/* 4 KPI mini-cards */}
-      <div className="grid grid-cols-4 gap-3">
-        {DETAIL_KPI.map(kpi => (
-          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} description={kpi.desc} />
-        ))}
       </div>
 
       {/* Prompt Visibility Trend chart */}
@@ -1001,31 +980,26 @@ function PromptDetailContent({ prompt, onBack }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[120px] border-r border-gray-200">AI</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200">Chat</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[180px] border-r border-gray-200">Brands</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[72px] border-r border-gray-200">Sources</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[110px]">Created</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[120px] border-r border-gray-200">AI</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[180px] border-r border-gray-200">Brands</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[72px] border-r border-gray-200">Sources</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
                 </tr>
               </thead>
               <tbody>
                 {AI_RESPONSES_DATA.map((row, i) => (
                   <tr key={i} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="inline-flex items-center justify-center w-7 h-7 rounded-full text-white text-[12px] font-bold shrink-0" style={{ background: row.color }}>
-                          {row.abbr}
-                        </span>
-                        <div>
-                          <p className="text-[13px] font-semibold text-gray-900">{row.engine}</p>
-                          <p className="text-[12px] text-success-600 font-medium">{row.status}</p>
-                        </div>
+                      <div className="flex items-center gap-2">
+                        <EngineLogo name={row.engine} size={16} className="w-7 h-7" />
+                        <p className="text-[13px] font-semibold text-gray-900 m-0">{row.engine}</p>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <p className="text-[13px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
-                      <button className="text-[12px] text-primary-600 hover:underline flex items-center gap-1">
-                        Open full response <ExternalLink size={11} />
+                      <button type="button" className="text-[12px] text-primary-600 hover:underline">
+                        Open full response
                       </button>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
@@ -1067,14 +1041,14 @@ function PromptDetailContent({ prompt, onBack }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 min-w-[280px]">URL</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[72px]">Open</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[88px]">Coverage</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px]">Seen in chats</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[120px]">Brand mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[150px]">Other brands mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 w-[110px]">Last seen</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[280px]">URL</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Open</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[150px]">Other brands mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
                 </tr>
               </thead>
               <tbody>
@@ -1168,9 +1142,12 @@ function PromptTrackingContent() {
         {/* Visibility Trend card */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-[15px] font-semibold text-gray-900">Visibility trend</h3>
-              <p className="text-[13px] text-gray-500 mt-0.5">Visibility score movement across the current reporting window</p>
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Visibility trend</h3>
+              <SectionInfoTip
+                id="asp-visibility-trend-info"
+                content="Track how your brand's visibility, mentions, or citations change over time and compare performance against competitors."
+              />
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
@@ -1203,71 +1180,35 @@ function PromptTrackingContent() {
           <MultiLineChart lines={trendLines} xLabels={TREND_X_LABELS} height={200} metricLabel={trendMetric} fill />
         </div>
 
-        {/* Competitor Ranking card */}
-        <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0">
-          <div className="flex items-start justify-between mb-3">
-            <div>
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Competitor ranking</h3>
-              <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">Visibility score analysis across your tracked brands</p>
-            </div>
-          </div>
-          {/* Header row — grey table-header treatment, sentence case */}
-          <div className="grid text-[12px] font-medium text-gray-500 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2 py-2" style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
-            <span>Rank</span>
-            <span className="pl-8">Brand</span>
-            <span className="text-right">Pos.</span>
-            <span className="text-right">Visibility</span>
-            <span className="text-right">Sent.</span>
-            <span className="text-right">SoV</span>
-          </div>
-          <div className="flex flex-col border-x border-b border-gray-200 rounded-b-lg overflow-hidden">
-            {COMPETITOR_RANKING_DATA.map(c => (
-              <div key={c.rank} className={`grid items-center py-2 px-2 ${c.isMe ? 'bg-purple-50' : 'bg-white hover:bg-gray-50'} transition-colors`}
-                style={{ gridTemplateColumns: '24px 1fr 36px 52px 40px 36px' }}>
-                <span className="text-[12px] font-medium text-gray-500">#{c.rank}</span>
-                <div className="flex items-center gap-2 min-w-0">
-                  <CompanyLogo
-                    domain={c.domain}
-                    size={24}
-                    rounded="rounded-full"
-                    fallback={
-                      <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-white text-[11px] font-semibold shrink-0" style={{ background: c.color }}>
-                        {c.initials}
-                      </span>
-                    }
-                  />
-                  <div className="min-w-0">
-                    <p className={`text-[12px] font-medium truncate m-0 ${c.isMe ? 'text-purple-700' : 'text-gray-900'}`}>{c.name}</p>
-                    <p className="text-[11px] text-gray-400 truncate m-0">{c.domain}</p>
-                  </div>
-                </div>
-                <span className="text-[12px] font-medium text-gray-600 text-right">{c.pos}</span>
-                <span className="text-[12px] font-medium text-gray-900 text-right">{c.visibility}</span>
-                <span className={`text-[12px] font-medium text-right ${c.sentUp ? 'text-success-600' : 'text-error-600'}`}>{c.sent}</span>
-                <span className="text-[12px] font-medium text-gray-600 text-right">{c.sov}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CompetitorRankingMiniTable
+          infoId="asp-competitor-ranking-info"
+          infoContent="Compare your brand's visibility, average position, sentiment, and share of voice against tracked competitors."
+          rows={COMPETITOR_RANKING_DATA}
+        />
       </div>
 
       {/* Row 4: Engine Coverage */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
-          <h3 className="text-[15px] font-semibold text-gray-900">Engine coverage</h3>
-          <p className="text-[13px] text-gray-500 mt-0.5">Per-engine visibility, presence, citation rate, and positioning context</p>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine coverage</h3>
+            <SectionInfoTip
+              id="asp-engine-coverage-info"
+              content="See how your brand performs across different AI search engines."
+            />
+          </div>
         </div>
         <div className="px-5 pb-5">
           <div className="border border-gray-200 rounded-lg overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[180px]">Engine</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[160px]">Visibility</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[88px]">Presence</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[140px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[100px]">Citation rate</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900">Insight</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px]">Engine</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Visibility</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Presence</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Citation rate</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap">Insight</th>
                 </tr>
               </thead>
               <tbody>
@@ -1280,7 +1221,6 @@ function PromptTrackingContent() {
                         </span>
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
-                          <p className="text-[12px] text-gray-400">{eng.sub}</p>
                         </div>
                       </div>
                     </td>
@@ -1304,11 +1244,13 @@ function PromptTrackingContent() {
 
       {/* Row 5: How AI is describing GoHighLevel */}
       <div className="border border-gray-200 rounded-lg bg-white p-4">
-        <div className="flex items-start gap-1.5 mb-1">
+        <div className="flex items-center gap-1.5 mb-3">
           <h3 className="text-[15px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
-          <HelpCircle size={14} className="text-gray-300 mt-0.5 shrink-0" />
+          <SectionInfoTip
+            id="asp-ai-describing-info"
+            content="See how AI platforms describe your brand across detected mentions, from strong recommendations to negative or dismissive responses."
+          />
         </div>
-        <p className="text-[13px] font-normal text-gray-500 m-0 mb-3">Recommendation strength, neutral framing, and negative dismissal across detected mentions</p>
 
         {/* Segmented bar */}
         <div className="flex rounded-full overflow-hidden h-3 mb-3">
@@ -1340,28 +1282,30 @@ function PromptTrackingContent() {
       {/* Row 6: Organic-AI Overlap */}
       <div className="border border-gray-200 rounded-lg bg-white p-4">
         <div className="flex items-start justify-between mb-3">
-          <div className="flex items-start gap-1.5">
+          <div className="flex items-center gap-1.5">
             <h3 className="text-[15px] font-semibold text-gray-900 m-0">Organic-AI overlap</h3>
-            <HelpCircle size={14} className="text-gray-300 mt-0.5 shrink-0" />
+            <SectionInfoTip
+              id="asp-organic-ai-overlap-info"
+              content="See how much of your Google AI Overview visibility comes from pages that already rank in organic search."
+            />
           </div>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 text-[12px] font-medium border border-primary-200 whitespace-nowrap">
             5 shared URLs
           </span>
         </div>
-        <p className="text-[13px] font-normal text-gray-500 m-0 mb-3">Where Google AI Overview is borrowing from your organic footprint</p>
 
         <div className="grid gap-3" style={{ gridTemplateColumns: '180px 200px 1fr' }}>
           {/* Overlap % */}
           <div className="border border-gray-200 rounded-lg px-3 py-3 bg-gray-50">
             <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0 normal-case">Overlap %</p>
-            <p className="text-[20px] font-semibold text-gray-900 leading-none mb-1.5 m-0">34%</p>
+            <p className="text-[14px] font-semibold text-gray-900 leading-none mb-1.5 m-0 tabular-nums">34%</p>
             <p className="text-[12px] font-normal text-gray-500 leading-snug m-0">High overlap means traditional SEO is feeding your AIO visibility.</p>
           </div>
 
           {/* Drift watch */}
           <div className="border border-gray-200 rounded-lg px-3 py-3 bg-gray-50">
             <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0 normal-case">Drift watch</p>
-            <p className="text-[20px] font-semibold text-gray-900 leading-snug mb-1.5 m-0">2 prompts flagged</p>
+            <p className="text-[14px] font-semibold text-gray-900 leading-snug mb-1.5 m-0">2 prompts flagged</p>
             <p className="text-[12px] font-normal text-gray-500 leading-snug m-0">Watch prompts where overlap is slipping while AIO position is weakening.</p>
           </div>
 
@@ -1388,9 +1332,12 @@ function PromptTrackingContent() {
       {/* Row 7: Top performing prompts — HighRise-style data table */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
-          <div>
+          <div className="flex items-center gap-1.5">
             <h3 className="text-[15px] font-semibold text-gray-900 m-0">Top performing prompts</h3>
-            <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">Highest-visibility prompts in the current date range</p>
+            <SectionInfoTip
+              id="asp-top-prompts-info"
+              content="See the prompts where your brand achieved the highest AI visibility during the selected date range."
+            />
           </div>
           <span className="text-[13px] font-medium text-success-600 shrink-0">Top 5</span>
         </div>
@@ -1399,13 +1346,13 @@ function PromptTrackingContent() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-12 normal-case">#</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-r border-gray-200 normal-case">Prompt</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-12 normal-case">#</th>
+                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 normal-case">Prompt</th>
                   <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[110px] normal-case">Visibility</th>
                   <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 w-[130px] normal-case">
-                    <span className="inline-flex items-center justify-end gap-1">
+                    <span className="inline-flex items-center gap-1">
                       Trend score
-                      <HelpCircle size={11} className="text-gray-300" />
+                      <SectionInfoTip id="asp-trend-score-info" content="Change in visibility score over the selected period." />
                     </span>
                   </th>
                 </tr>
@@ -1550,8 +1497,8 @@ function OverviewContent() {
                 </div>
                 <div className="flex-1 bg-gray-100 rounded-full h-2 relative overflow-hidden">
                   <div
-                    className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
-                    style={{ width: `${(c.pct / maxPct) * 100}%`, background: c.color }}
+                    className="absolute inset-y-0 left-0 rounded-full bg-primary-600 transition-all duration-500"
+                    style={{ width: `${(c.pct / maxPct) * 100}%` }}
                   />
                 </div>
                 <span className="w-[56px] shrink-0 text-right text-[13px] font-semibold text-gray-900 tabular-nums">
@@ -1584,32 +1531,31 @@ function OverviewContent() {
           </button>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-[12px] font-semibold text-gray-900 pb-3 pr-4 w-[260px]">Topic</th>
-                {COMPETITORS.map((c, i) => (
-                  <th key={c.name} className="text-[12px] font-semibold text-gray-900 pb-3 px-2 text-center min-w-[90px]">
-                    <div className="flex flex-col items-center gap-1">
-                      <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: COMPETITOR_COLORS[i] }} />
-                      <span className="whitespace-nowrap">{c.name}</span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {TOPIC_PRESENCE.map(row => (
-                <tr key={row.topic} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                  <td className="py-3 pr-4 text-[13px] font-medium text-gray-800">{row.topic}</td>
-                  {row.scores.map((score, i) => (
-                    <td key={i} className="py-3 px-2 text-[13px] text-gray-700 text-center">{score.toFixed(2)}%</td>
+        <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse table-fixed" style={{ minWidth: 760 }}>
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-4 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[260px]">Topic</th>
+                  {COMPETITORS.map(c => (
+                    <th key={c.name} className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[96px]">
+                      {c.name}
+                    </th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {TOPIC_PRESENCE.map(row => (
+                  <tr key={row.topic} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
+                    <td className="px-4 py-3 text-[13px] font-medium text-gray-800">{row.topic}</td>
+                    {row.scores.map((score, i) => (
+                      <td key={i} className="px-3 py-3 text-[13px] text-gray-700 text-right tabular-nums">{score.toFixed(2)}%</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1731,19 +1677,6 @@ const SUGGESTED_PROMPTS = [
   },
 ]
 
-function InfoTip({ text }) {
-  return (
-    <span className="relative group/tip inline-flex items-center">
-      <HelpCircle size={12} className="text-gray-400 cursor-help" />
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 z-50 hidden group-hover/tip:block pointer-events-none w-56">
-        <span className="block bg-gray-900 text-white text-[12px] font-normal rounded-lg px-2.5 py-1.5 shadow-md leading-snug">
-          {text}
-        </span>
-      </span>
-    </span>
-  )
-}
-
 function inferTopicFromPrompt(text) {
   const t = text.trim().toLowerCase()
   if (!t) return null
@@ -1797,7 +1730,7 @@ function TrackPromptModal({ onClose, onSave }) {
             <div className="min-w-0">
               <div className="flex items-center gap-2">
                 <h2 className="text-[16px] font-semibold text-gray-900 m-0">Track prompt</h2>
-                <InfoTip text="Track a customer-style question across AI answer engines and group it under a topic." />
+                <SectionInfoTip content="Track a customer-style question across AI answer engines and group it under a topic." />
               </div>
               <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">
                 Add a new question to the prompt workspace and preview how it will be categorized.
@@ -1832,7 +1765,7 @@ function TrackPromptModal({ onClose, onSave }) {
               <div>
                 <div className="flex items-center gap-1.5 mb-2">
                   <p className="text-[12px] font-medium text-gray-500 m-0">Auto-tagged topic</p>
-                  <InfoTip text="Topics are inferred from the prompt language and aligned to the closest prompt cluster in this screen." />
+                  <SectionInfoTip content="Topics are inferred from the prompt language and aligned to the closest prompt cluster in this screen." />
                 </div>
                 <div className="border border-gray-200 rounded-lg px-3.5 py-3 min-h-[48px] flex items-center">
                   {topic ? (
@@ -1852,7 +1785,7 @@ function TrackPromptModal({ onClose, onSave }) {
             <div className="min-w-0 flex flex-col">
               <div className="flex items-center gap-1.5 mb-2">
                 <p className="text-[12px] font-medium text-gray-500 m-0">Suggested prompts</p>
-                <InfoTip text="These suggestions are ready-to-track prompt ideas mapped to the same topic taxonomy used by the prompt table." />
+                <SectionInfoTip content="These suggestions are ready-to-track prompt ideas mapped to the same topic taxonomy used by the prompt table." />
               </div>
               <div className="flex flex-col gap-2.5 overflow-y-auto max-h-[360px] pr-0.5">
                 {SUGGESTED_PROMPTS.map(item => {
@@ -2021,7 +1954,7 @@ function PromptsContent() {
     return matchSearch && matchType && matchBrand
   })
 
-  const thClass = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
+  const thClass = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
   const tdClass = "px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle"
   const { widths: colW, onResizeStart } = useColumnResize([28, 260, 72, 96, 106, 168, 120])
 
@@ -2127,12 +2060,12 @@ function PromptsContent() {
             </colgroup>
             <thead>
               <tr>
-                <th className={`${thClass} text-center`} style={{ width: colW[0] }} />
-                <th className={thClass} style={{ width: colW[1] }}><span className="flex items-center gap-1">Topic <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 1)} /></th>
-                <th className={thClass} style={{ width: colW[2] }}><span className="flex items-center gap-1">Topic size <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 2)} /></th>
-                <th className={thClass} style={{ width: colW[3] }}><span className="flex items-center gap-1">Type <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 3)} /></th>
-                <th className={thClass} style={{ width: colW[4] }}><span className="flex items-center gap-1">Presence <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 4)} /></th>
-                <th className={thClass} style={{ width: colW[5] }}><span className="flex items-center gap-1">Brands <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 5)} /></th>
+                <th className={thClass} style={{ width: colW[0] }} />
+                <th className={thClass} style={{ width: colW[1] }}><span className="flex items-center gap-1">Topic <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 1)} /></th>
+                <th className={thClass} style={{ width: colW[2] }}><span className="flex items-center gap-1">Topic size <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 2)} /></th>
+                <th className={thClass} style={{ width: colW[3] }}><span className="flex items-center gap-1">Type <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 3)} /></th>
+                <th className={thClass} style={{ width: colW[4] }}><span className="flex items-center gap-1">Presence <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 4)} /></th>
+                <th className={thClass} style={{ width: colW[5] }}><span className="flex items-center gap-1">Brands <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => onResizeStart(e, 5)} /></th>
                 <th className={`${thClass} border-r-0`} style={{ width: colW[6] }}>AI engines</th>
               </tr>
             </thead>
@@ -2197,7 +2130,7 @@ function CitationsContent() {
   const [expanded, setExpanded] = useState(new Set([1]))
   const [searchQuery, setSearchQuery] = useState('')
   const { widths: citW, onResizeStart: citResize } = useColumnResize([28, 280, 80, 108, 88, 44, 68, 140])
-  const citTh = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
+  const citTh = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
 
   const [citTypeFilter,  setCitTypeFilter]  = useState(new Set(['Mention', 'Link']))
   const [citTopicFilter, setCitTopicFilter] = useState(new Set(CITING_TOPIC_OPTIONS.map(o => o.id)))
@@ -2300,13 +2233,13 @@ function CitationsContent() {
             <thead>
               <tr>
                 <th className="relative px-2 py-2.5 bg-gray-50 border-b border-r border-gray-200" style={{ width: citW[0] }} />
-                <th className={citTh} style={{ width: citW[1] }}><span className="flex items-center gap-1">Domain <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 1)} /></th>
-                <th className={citTh} style={{ width: citW[2] }}><span className="flex items-center gap-1">Citations <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 2)} /></th>
-                <th className={citTh} style={{ width: citW[3] }}><span className="flex items-center gap-1">Type <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 3)} /></th>
-                <th className={citTh} style={{ width: citW[4] }}><span className="flex items-center gap-1">Co-mention <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 4)} /></th>
-                <th className={citTh} style={{ width: citW[5] }}><span className="flex items-center gap-1">DT <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 5)} /></th>
-                <th className={citTh} style={{ width: citW[6] }}><span className="flex items-center gap-1">Org. traffic <HelpCircle size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 6)} /></th>
-                <th className={`${citTh} border-r-0`} style={{ width: citW[7] }}><span className="flex items-center gap-1">Topics <HelpCircle size={11} className="text-gray-400" /></span></th>
+                <th className={citTh} style={{ width: citW[1] }}><span className="flex items-center gap-1">Domain <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 1)} /></th>
+                <th className={citTh} style={{ width: citW[2] }}><span className="flex items-center gap-1">Citations <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 2)} /></th>
+                <th className={citTh} style={{ width: citW[3] }}><span className="flex items-center gap-1">Type <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 3)} /></th>
+                <th className={citTh} style={{ width: citW[4] }}><span className="flex items-center gap-1">Co-mention <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 4)} /></th>
+                <th className={citTh} style={{ width: citW[5] }}><span className="flex items-center gap-1">DT <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 5)} /></th>
+                <th className={citTh} style={{ width: citW[6] }}><span className="flex items-center gap-1">Org. traffic <Info size={11} className="text-gray-400" /></span><ResizeHandle onMouseDown={e => citResize(e, 6)} /></th>
+                <th className={`${citTh} border-r-0`} style={{ width: citW[7] }}><span className="flex items-center gap-1">Topics <Info size={11} className="text-gray-400" /></span></th>
               </tr>
             </thead>
             <tbody>
@@ -2364,17 +2297,9 @@ function CitationsContent() {
 // ── Main ───────────────────────────────────────────────────────────────────
 
 const SUB_TABS = [
-  { id: 'overview',  label: 'Overview',  icon: TrendingUp    },
+  { id: 'overview',  label: 'Overview',  icon: LayoutDashboard },
   { id: 'prompts',   label: 'Prompts',   icon: MessageCircle },
   { id: 'citations', label: 'Citations', icon: Globe         },
-]
-
-const FILTER_CHIPS = [
-  { Icon: Globe,      label: 'gohighlevel.com' },
-  { Icon: Link2,      label: 'Base domain'     },
-  { Icon: MapPin,     label: 'United States'   },
-  { label: '#GoHighLevel' },
-  { Icon: LayoutList, label: 'Selected: 5'     },
 ]
 
 export default function AiSearchPerformanceDashboard() {
@@ -2401,19 +2326,6 @@ export default function AiSearchPerformanceDashboard() {
               Add competitors
             </button>
           </div>
-        </div>
-
-        {/* Filter chips row */}
-        <div className="flex items-center gap-2 flex-wrap pb-3">
-          {FILTER_CHIPS.map(({ Icon, label }) => (
-            <span
-              key={label}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-200 bg-white text-[12px] font-medium text-gray-600 whitespace-nowrap select-none"
-            >
-              {Icon && <Icon size={11} className="text-gray-400 shrink-0" />}
-              {label}
-            </span>
-          ))}
         </div>
 
         {/* Tab nav with icons */}

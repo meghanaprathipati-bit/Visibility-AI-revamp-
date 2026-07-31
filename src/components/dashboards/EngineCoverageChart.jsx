@@ -1,4 +1,4 @@
-import { HelpCircle } from '../../icons/index.js'
+import SectionInfoTip from '../SectionInfoTip.jsx'
 import { ENGINE_COVERAGE } from '../../data/aiRankDashboard.js'
 
 const ENGINE_COLORS = {
@@ -18,9 +18,11 @@ export default function EngineCoverageChart() {
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
           <h3 className="text-[16px] font-semibold text-gray-900">Engine coverage</h3>
-          <HelpCircle size={14} className="text-gray-400 shrink-0" />
+          <SectionInfoTip
+            id="engine-coverage-chart-info"
+            content="See how your brand performs across different AI search engines."
+          />
         </div>
-        <p className="text-[12px] text-gray-500 mt-0.5">How your brand appears across AI search engines</p>
       </div>
 
       <div className="overflow-x-auto">
