@@ -2939,14 +2939,20 @@ function PromptTrackingPitchPage({ onGetStarted }) {
                 </span>
               ))}
             </div>
-            <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.2] tracking-tight max-w-[720px]">
-              See when AI recommends your business—and when it recommends someone else.
-            </h1>
-            <p className="text-[15px] text-gray-500 m-0 mt-3 leading-relaxed max-w-[560px]">
-              Track the questions your customers ask AI, compare your visibility with competitors, and discover exactly what to improve to appear in more AI answers.
-            </p>
+            <div className="max-w-[720px]">
+              <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight">
+                <span className="block whitespace-nowrap">
+                  See when AI recommends <span className="text-primary-600">your business</span>
+                </span>
+                <span className="block mt-1 sm:mt-1.5">and when it recommends someone else.</span>
+              </h1>
+              <p className="text-[15px] text-gray-500 m-0 mt-3 leading-relaxed">
+                <span className="block">Track the questions your customers ask AI, compare your visibility with competitors,</span>
+                <span className="block">and discover exactly what to improve to appear in more AI answers.</span>
+              </p>
+            </div>
             <div className="mt-6">
-              <HLButton variant="primary" color="purple" size="md" onClick={onGetStarted}>
+              <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
                 Get started
               </HLButton>
             </div>
@@ -3011,7 +3017,7 @@ function PromptTrackingPitchPage({ onGetStarted }) {
             </div>
 
             <div className="pt-1">
-              <HLButton variant="primary" color="purple" size="md" onClick={onGetStarted}>
+              <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
                 Get started
               </HLButton>
             </div>
