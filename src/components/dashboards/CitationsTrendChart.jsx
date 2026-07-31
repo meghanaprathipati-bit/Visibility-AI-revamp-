@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { HelpCircle } from '../../icons/index.js'
+import SectionInfoTip from '../SectionInfoTip.jsx'
 import { CITATIONS_TIME_SERIES } from '../../data/aiRankDashboard.js'
 
 const SERIES_OPTIONS = [
@@ -69,9 +69,11 @@ export default function CitationsTrendChart() {
         <div>
           <div className="flex items-center gap-1.5">
             <h3 className="text-[16px] font-semibold text-gray-900">Citations trend</h3>
-            <HelpCircle size={14} className="text-gray-400 shrink-0" />
+            <SectionInfoTip
+              id="citations-trend-info"
+              content="Track visibility, mentions, and citations over time"
+            />
           </div>
-          <p className="text-[12px] text-gray-500 mt-0.5">Track visibility, mentions, and citations over time</p>
         </div>
         <div className="flex flex-col items-end gap-2">
           <div className="flex gap-1">

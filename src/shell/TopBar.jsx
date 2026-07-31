@@ -1,5 +1,5 @@
 import { useRef, useState, useLayoutEffect, useEffect } from 'react'
-import { Sparkles, Megaphone, Bell, HelpCircle, ChevronDown } from '../icons/index.js'
+import { Sparkles, Megaphone, Bell, Info, ChevronDown } from '../icons/index.js'
 
 function GlobalIcons({ onOpenNotifications, onOpenHelp }) {
   return (
@@ -38,7 +38,7 @@ function GlobalIcons({ onOpenNotifications, onOpenHelp }) {
         onClick={onOpenHelp}
         className="size-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-500 hover:bg-gray-50 transition-colors"
       >
-        <HelpCircle size={16} />
+        <Info size={16} />
       </button>
       <button className="size-8 rounded-full bg-gray-700 flex items-center justify-center hover:bg-gray-800 transition-colors ml-1">
         <span className="text-white text-[12px] font-semibold leading-none">SS</span>

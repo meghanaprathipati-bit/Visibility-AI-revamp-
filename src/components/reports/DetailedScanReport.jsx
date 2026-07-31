@@ -72,7 +72,7 @@ function ReportTable({ columns, rows }) {
             {columns.map(col => (
               <th
                 key={col}
-                className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide px-3 py-2.5 whitespace-nowrap"
+                className="text-[12px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap"
               >
                 {col}
               </th>

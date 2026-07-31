@@ -1,4 +1,4 @@
-import { HelpCircle } from '../../icons/index.js'
+import SectionInfoTip from '../SectionInfoTip.jsx'
 import { SENTIMENT_BREAKDOWN, DUMMY_DOMAIN } from '../../data/aiRankDashboard.js'
 
 const CATEGORIES = [
@@ -25,11 +25,11 @@ export default function AiSentimentChart() {
           <h3 className="text-[16px] font-semibold text-gray-900">
             How AI is describing {DUMMY_DOMAIN}
           </h3>
-          <HelpCircle size={14} className="text-gray-400 shrink-0" />
+          <SectionInfoTip
+            id="ai-sentiment-chart-info"
+            content={`Sentiment breakdown from ${total} classified AI responses`}
+          />
         </div>
-        <p className="text-[12px] text-gray-500 mt-0.5">
-          Sentiment breakdown from {total} classified AI responses
-        </p>
       </div>
 
       <div className="flex h-4 w-full overflow-hidden rounded-full mb-5">

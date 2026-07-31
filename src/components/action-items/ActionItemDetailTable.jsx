@@ -26,11 +26,11 @@ export default function ActionItemDetailTable({
         <thead>
           <tr className="bg-gray-50 border-b border-gray-100">
             {selectable && <th className="px-3.5 py-2" aria-hidden="true" />}
-            <th className="px-3.5 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wide">{columns.page}</th>
+            <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.page}</th>
             {showCurrent && (
-              <th className="px-3.5 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wide">{columns.current}</th>
+              <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.current}</th>
             )}
-            <th className="px-3.5 py-2 text-left text-[11px] font-medium text-gray-500 uppercase tracking-wide">{columns.recommendation}</th>
+            <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.recommendation}</th>
           </tr>
         </thead>
         <tbody>

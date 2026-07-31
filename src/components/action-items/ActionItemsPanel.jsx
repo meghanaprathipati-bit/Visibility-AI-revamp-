@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Check, HelpCircle, X } from '../../icons/index.js'
+import { Check, Info, X } from '../../icons/index.js'
 import { actionItems as defaultActionItems } from '../../data/actionItems.js'
 import HLButton from '../HLButton.jsx'
 import HLCheckbox from '../HLCheckbox.jsx'
@@ -189,7 +189,7 @@ function ActionItemsFooter({
     return (
       <div className={`shrink-0 border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3 ${bgClass}`}>
         <span className="inline-flex items-center gap-1.5 text-[13px] text-gray-500 min-w-0">
-          <HelpCircle size={14} className="shrink-0 text-gray-400" />
+          <Info size={14} className="shrink-0 text-gray-400" />
           Fix manual actions and then rescan to verify.
         </span>
         <div className="flex items-center gap-2 shrink-0">

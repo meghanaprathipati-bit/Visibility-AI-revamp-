@@ -3,7 +3,7 @@ import {
   ArrowUp,
   Check,
   CircleCheck,
-  HelpCircle,
+  Info,
   RefreshCw,
   X,
 } from '../../icons/index.js'
@@ -488,7 +488,7 @@ export default function ImplementSummaryCard({ summary: initialSummary, onItemRe
 
       <div className="px-3 py-3 border-t border-gray-200">
         <div className="flex items-start gap-2 mb-2">
-          <HelpCircle size={14} className="text-gray-500 shrink-0 mt-0.5" />
+          <Info size={14} className="text-gray-500 shrink-0 mt-0.5" />
           <p className="text-[12px] text-gray-500 leading-relaxed m-0">{footerText}</p>
         </div>
         {disclaimer && (

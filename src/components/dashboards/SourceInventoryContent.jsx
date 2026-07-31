@@ -1,29 +1,108 @@
-import { useState, useRef, useEffect, Fragment } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
   Search, Globe, ChevronDown, X, ExternalLink,
-  HelpCircle, Check, Zap, Link2, FileText,
-  TrendingUp, Users, ChevronRight,
+  Check, Link2, FileText, Info,
+  TrendingUp, Users, ChevronRight, ArrowLeft, Calendar,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import CompanyLogo from '../CompanyLogo.jsx'
+import SectionInfoTip from '../SectionInfoTip.jsx'
+import HLTooltip from '../HLTooltip.jsx'
+import HLInput from '../HLInput.jsx'
+import DateRangePicker, { formatRange } from '../DateRangePicker.jsx'
+import FullResponseModal, { TABLE_TH_CLASS, responseFromDetailRow } from '../FullResponseModal.jsx'
+import AdvancedFilterDrawer from '../AdvancedFilterDrawer.jsx'
 
-// ── Constants ─────────────────────────────────────────────────────────────────
+// Canonical parent-table header — matches Competitors / Site Health top-level tables.
+const TABLE_TH = `px-5 py-2.5 text-left ${TABLE_TH_CLASS} whitespace-nowrap bg-gray-50 sticky top-0 z-[1]`
 
-// Fixed width for the leading expand-chevron column (matches Site health tables).
-const EXPAND_COL = 40
+// Table header label + compact info tip (keeps column alignment).
+function ThLabel({ children, tip, id, align = 'left' }) {
+  const justify = align === 'center' ? 'justify-center' : align === 'right' ? 'justify-end' : 'justify-start'
+  return (
+    <span className={`inline-flex items-center gap-1 ${justify} w-full`}>
+      <span>{children}</span>
+      {tip ? (
+        <HLTooltip id={id} content={tip} variant="dark" placement="top" wrap triggerClassName="inline-flex items-center">
+          <Info size={12} className="text-gray-400 shrink-0 cursor-help" aria-label="More information" />
+        </HLTooltip>
+      ) : null}
+    </span>
+  )
+}
 
-const FILTER_METRICS = [
-  'Prompt Coverage', 'Coverage', 'Mention Rate',
-  'Competitor Mention', 'Other Brands Mentioned',
-  'Domain Traffic', 'Domain Trust',
-  'Has Backlink To Your Domain',
-  'Links Available To Your Website',
-  'Brand Mentioned', 'Count of Backlinks',
-  'Page Traffic', 'Referring Domains',
+const SI_COL_TIPS = {
+  domain: 'Source domain cited in AI answers. Use this to prioritize outreach and content refresh by host.',
+  page: 'Specific page cited in AI answers. Use this to find the exact URLs driving mentions.',
+  aiAnswers: 'Number of AI answers that cited this source in the current period. Higher means it appears more often in AI responses.',
+  prompts: 'Distinct tracked prompts where this source was cited. More prompts mean broader topical reach.',
+  promptCoverage: 'Share of AI answers for those prompts that cited this source. Higher means more consistent use across prompts.',
+  mentionRate: 'How often your brand is mentioned when this domain is cited. Higher means stronger brand presence on this source.',
+  coverage: 'How often your brand is covered when this page is cited. Higher is better for brand presence on this page.',
+  domainTrust: 'Estimated trust score for the domain. Higher-trust sources usually carry more weight in AI answers.',
+  brand: 'Whether your brand was mentioned when this page was cited in AI answers.',
+  backlink: 'Whether this source links back to your website. Mentions with backlinks usually drive more authority and traffic.',
+}
+
+// ── Advanced filter columns (HLAdvanceFilter columnOptions) ───────────────────
+
+const SI_FILTER_COLS = [
+  { label: 'Prompt coverage', value: 'promptCoverage', type: 'number' },
+  { label: 'Coverage', value: 'coverage', type: 'number' },
+  { label: 'Mention rate', value: 'mentionRate', type: 'number' },
+  { label: 'Competitor mention', value: 'competitorMention', type: 'string' },
+  { label: 'Other brands mentioned', value: 'otherBrands', type: 'string' },
+  { label: 'Domain traffic', value: 'domainTraffic', type: 'string' },
+  { label: 'Domain trust', value: 'domainTrust', type: 'number' },
+  { label: 'Has backlink to your domain', value: 'hasBacklink', type: 'boolean' },
+  { label: 'Brand mentioned', value: 'brandMentioned', type: 'number' },
+  { label: 'Count of backlinks', value: 'countBacklinks', type: 'string' },
+  { label: 'Page traffic', value: 'pageTraffic', type: 'string' },
+  { label: 'Referring domains', value: 'referringDomains', type: 'string' },
 ]
 
-const FILTER_OPERATORS = ['At least', 'At most', 'Equals']
+function applySiFilterRule(row, rule) {
+  const col = SI_FILTER_COLS.find(c => c.value === rule.field)
+  if (!col) return true
+  let rawVal = row[rule.field]
+  if (Array.isArray(rawVal)) rawVal = rawVal.join(', ')
+  if (rawVal === undefined || rawVal === null || rawVal === '') {
+    return ['isEmpty', 'false'].includes(rule.operator)
+  }
+  if (col.type === 'boolean') {
+    const bool = Boolean(rawVal)
+    if (rule.operator === 'true') return bool === true
+    if (rule.operator === 'false') return bool === false
+    return true
+  }
+  if (col.type === 'number') {
+    const n = typeof rawVal === 'number' ? rawVal : Number(String(rawVal).replace(/[^\d.-]/g, ''))
+    const rv = Number(rule.value)
+    switch (rule.operator) {
+      case 'eq': return n === rv
+      case 'ne': return n !== rv
+      case 'gt': return n > rv
+      case 'gte': return n >= rv
+      case 'lt': return n < rv
+      case 'lte': return n <= rv
+      default: return true
+    }
+  }
+  const v = String(rawVal).toLowerCase()
+  const rv = (rule.value || '').toLowerCase()
+  switch (rule.operator) {
+    case 'contains': return v.includes(rv)
+    case 'notContains': return !v.includes(rv)
+    case 'equals': return v === rv
+    case 'notEquals': return v !== rv
+    case 'startsWith': return v.startsWith(rv)
+    case 'endsWith': return v.endsWith(rv)
+    case 'isEmpty': return v === ''
+    case 'notEmpty': return v !== ''
+    default: return true
+  }
+}
 
 // ── Mock Data ─────────────────────────────────────────────────────────────────
 
@@ -141,6 +220,235 @@ const DOMAIN_DATA = [
     hasBacklink: true,
     countBacklinks: '812',
     referringDomains: '520',
+  },
+  // HARDCODED: extra domains so Sources table pagination is demonstrable in the prototype.
+  {
+    id: 'trustpilot',
+    domain: 'trustpilot.com',
+    type: 'External domain',
+    pages: 3,
+    aiAnswers: 28,
+    prompts: 26,
+    promptCoverage: 84,
+    coverage: 22,
+    brandMentioned: 0,
+    mentionRate: 5,
+    competitorMention: ['HubSpot', 'Salesforce'],
+    otherBrands: ['Zoho'],
+    domainTraffic: '42K',
+    domainTrust: 86,
+    hasBacklink: true,
+    countBacklinks: '2.1K',
+    referringDomains: '1.4K',
+  },
+  {
+    id: 'clutch',
+    domain: 'clutch.co',
+    type: 'External domain',
+    pages: 2,
+    aiAnswers: 24,
+    prompts: 22,
+    promptCoverage: 79,
+    coverage: 16,
+    brandMentioned: 1,
+    mentionRate: 8,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['Keap', 'ActiveCampaign'],
+    domainTraffic: '18K',
+    domainTrust: 77,
+    hasBacklink: false,
+    countBacklinks: '0',
+    referringDomains: '0',
+  },
+  {
+    id: 'forbes',
+    domain: 'forbes.com',
+    type: 'External domain',
+    pages: 1,
+    aiAnswers: 19,
+    prompts: 18,
+    promptCoverage: 72,
+    coverage: 14,
+    brandMentioned: 0,
+    mentionRate: 3,
+    competitorMention: ['Salesforce', 'HubSpot'],
+    otherBrands: ['Adobe'],
+    domainTraffic: '110K',
+    domainTrust: 94,
+    hasBacklink: false,
+    countBacklinks: '0',
+    referringDomains: '0',
+  },
+  {
+    id: 'techcrunch',
+    domain: 'techcrunch.com',
+    type: 'External domain',
+    pages: 2,
+    aiAnswers: 21,
+    prompts: 19,
+    promptCoverage: 76,
+    coverage: 15,
+    brandMentioned: 0,
+    mentionRate: 4,
+    competitorMention: ['Notion'],
+    otherBrands: ['Slack', 'Asana'],
+    domainTraffic: '88K',
+    domainTrust: 91,
+    hasBacklink: true,
+    countBacklinks: '640',
+    referringDomains: '410',
+  },
+  {
+    id: 'semrush',
+    domain: 'semrush.com',
+    type: 'External domain',
+    pages: 3,
+    aiAnswers: 27,
+    prompts: 25,
+    promptCoverage: 82,
+    coverage: 21,
+    brandMentioned: 1,
+    mentionRate: 10,
+    competitorMention: ['Ahrefs', 'Moz'],
+    otherBrands: ['Surfer'],
+    domainTraffic: '64K',
+    domainTrust: 89,
+    hasBacklink: true,
+    countBacklinks: '1.1K',
+    referringDomains: '720',
+  },
+  {
+    id: 'hubspot-blog',
+    domain: 'blog.hubspot.com',
+    type: 'External domain',
+    pages: 4,
+    aiAnswers: 30,
+    prompts: 28,
+    promptCoverage: 86,
+    coverage: 26,
+    brandMentioned: 0,
+    mentionRate: 2,
+    competitorMention: ['HubSpot', 'Salesforce'],
+    otherBrands: ['Marketo'],
+    domainTraffic: '210K',
+    domainTrust: 93,
+    hasBacklink: false,
+    countBacklinks: '0',
+    referringDomains: '0',
+  },
+  {
+    id: 'linkedin',
+    domain: 'linkedin.com',
+    type: 'External domain',
+    pages: 3,
+    aiAnswers: 22,
+    prompts: 20,
+    promptCoverage: 74,
+    coverage: 13,
+    brandMentioned: 1,
+    mentionRate: 7,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['Salesforce', 'Pipedrive'],
+    domainTraffic: '1.8M',
+    domainTrust: 95,
+    hasBacklink: true,
+    countBacklinks: '9.2K',
+    referringDomains: '6.1K',
+  },
+  {
+    id: 'medium',
+    domain: 'medium.com',
+    type: 'External domain',
+    pages: 2,
+    aiAnswers: 17,
+    prompts: 16,
+    promptCoverage: 68,
+    coverage: 11,
+    brandMentioned: 0,
+    mentionRate: 3,
+    competitorMention: ['Notion'],
+    otherBrands: ['Clay'],
+    domainTraffic: '540K',
+    domainTrust: 82,
+    hasBacklink: true,
+    countBacklinks: '290',
+    referringDomains: '180',
+  },
+  {
+    id: 'youtube',
+    domain: 'youtube.com',
+    type: 'External domain',
+    pages: 2,
+    aiAnswers: 20,
+    prompts: 18,
+    promptCoverage: 71,
+    coverage: 12,
+    brandMentioned: 1,
+    mentionRate: 6,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['ClickFunnels'],
+    domainTraffic: '3.1M',
+    domainTrust: 96,
+    hasBacklink: false,
+    countBacklinks: '0',
+    referringDomains: '0',
+  },
+  {
+    id: 'quora',
+    domain: 'quora.com',
+    type: 'External domain',
+    pages: 3,
+    aiAnswers: 18,
+    prompts: 17,
+    promptCoverage: 69,
+    coverage: 10,
+    brandMentioned: 0,
+    mentionRate: 2,
+    competitorMention: ['Salesforce', 'Zoho'],
+    otherBrands: ['Keap'],
+    domainTraffic: '320K',
+    domainTrust: 80,
+    hasBacklink: true,
+    countBacklinks: '410',
+    referringDomains: '260',
+  },
+  {
+    id: 'wikipedia',
+    domain: 'en.wikipedia.org',
+    type: 'External domain',
+    pages: 1,
+    aiAnswers: 14,
+    prompts: 13,
+    promptCoverage: 62,
+    coverage: 9,
+    brandMentioned: 0,
+    mentionRate: 1,
+    competitorMention: ['Salesforce'],
+    otherBrands: ['Oracle'],
+    domainTraffic: '5.2M',
+    domainTrust: 98,
+    hasBacklink: false,
+    countBacklinks: '0',
+    referringDomains: '0',
+  },
+  {
+    id: 'getapp',
+    domain: 'getapp.com',
+    type: 'External domain',
+    pages: 2,
+    aiAnswers: 16,
+    prompts: 15,
+    promptCoverage: 66,
+    coverage: 12,
+    brandMentioned: 1,
+    mentionRate: 9,
+    competitorMention: ['HubSpot', 'Pipedrive'],
+    otherBrands: ['Freshsales'],
+    domainTraffic: '28K',
+    domainTrust: 75,
+    hasBacklink: true,
+    countBacklinks: '380',
+    referringDomains: '240',
   },
 ]
 
@@ -305,6 +613,247 @@ const PAGE_DATA = [
     competitorMention: [],
     otherBrands: ['Lemlist'],
   },
+  // HARDCODED: extra pages so Sources page-view pagination is demonstrable.
+  {
+    id: 'trustpilot-ghl',
+    title: 'GoHighLevel Reviews on Trustpilot',
+    url: 'https://www.trustpilot.com/review/gohighlevel.com',
+    domain: 'trustpilot.com',
+    type: 'Third-party source',
+    aiAnswers: 28,
+    prompts: 26,
+    promptCoverage: 84,
+    coverage: 18,
+    domainTraffic: '42K',
+    domainTrust: 86,
+    pageTraffic: '820',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '92',
+    brandMentioned: false,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['Zoho'],
+  },
+  {
+    id: 'clutch-agencies',
+    title: 'Top Marketing Automation Agencies',
+    url: 'https://clutch.co/agencies/marketing-automation',
+    domain: 'clutch.co',
+    type: 'Third-party source',
+    aiAnswers: 24,
+    prompts: 22,
+    promptCoverage: 79,
+    coverage: 15,
+    domainTraffic: '18K',
+    domainTrust: 77,
+    pageTraffic: '610',
+    linksAvailable: 'no',
+    hasBacklink: false,
+    countBacklinks: '0',
+    brandMentioned: true,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['Keap'],
+  },
+  {
+    id: 'forbes-ai-crm',
+    title: 'How AI Is Changing CRM for Agencies',
+    url: 'https://www.forbes.com/sites/ai-crm-agencies/',
+    domain: 'forbes.com',
+    type: 'Third-party source',
+    aiAnswers: 19,
+    prompts: 18,
+    promptCoverage: 72,
+    coverage: 11,
+    domainTraffic: '110K',
+    domainTrust: 94,
+    pageTraffic: '1.2K',
+    linksAvailable: 'no',
+    hasBacklink: false,
+    countBacklinks: '0',
+    brandMentioned: false,
+    competitorMention: ['Salesforce', 'HubSpot'],
+    otherBrands: ['Adobe'],
+  },
+  {
+    id: 'tc-visibility',
+    title: 'AI Search Visibility Tools Startups Are Watching',
+    url: 'https://techcrunch.com/2026/03/ai-search-visibility-tools/',
+    domain: 'techcrunch.com',
+    type: 'Third-party source',
+    aiAnswers: 21,
+    prompts: 19,
+    promptCoverage: 76,
+    coverage: 13,
+    domainTraffic: '88K',
+    domainTrust: 91,
+    pageTraffic: '940',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '38',
+    brandMentioned: false,
+    competitorMention: ['Notion'],
+    otherBrands: ['Slack'],
+  },
+  {
+    id: 'semrush-aio',
+    title: 'AI Overviews SEO Guide for Brands',
+    url: 'https://www.semrush.com/blog/ai-overviews-seo/',
+    domain: 'semrush.com',
+    type: 'Third-party source',
+    aiAnswers: 27,
+    prompts: 25,
+    promptCoverage: 82,
+    coverage: 20,
+    domainTraffic: '64K',
+    domainTrust: 89,
+    pageTraffic: '1.1K',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '74',
+    brandMentioned: true,
+    competitorMention: ['Ahrefs'],
+    otherBrands: ['Surfer'],
+  },
+  {
+    id: 'hubspot-ai-search',
+    title: 'What Is AI Search Optimization?',
+    url: 'https://blog.hubspot.com/marketing/ai-search-optimization',
+    domain: 'blog.hubspot.com',
+    type: 'Third-party source',
+    aiAnswers: 30,
+    prompts: 28,
+    promptCoverage: 86,
+    coverage: 22,
+    domainTraffic: '210K',
+    domainTrust: 93,
+    pageTraffic: '2.8K',
+    linksAvailable: 'no',
+    hasBacklink: false,
+    countBacklinks: '0',
+    brandMentioned: false,
+    competitorMention: ['HubSpot', 'Salesforce'],
+    otherBrands: ['Marketo'],
+  },
+  {
+    id: 'linkedin-aio',
+    title: 'How Brands Win Mentions in AI Answers',
+    url: 'https://www.linkedin.com/pulse/how-brands-win-mentions-ai-answers/',
+    domain: 'linkedin.com',
+    type: 'Third-party source',
+    aiAnswers: 22,
+    prompts: 20,
+    promptCoverage: 74,
+    coverage: 12,
+    domainTraffic: '1.8M',
+    domainTrust: 95,
+    pageTraffic: '720',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '51',
+    brandMentioned: true,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['Pipedrive'],
+  },
+  {
+    id: 'medium-citations',
+    title: 'Building Citation-Ready Content for AI Engines',
+    url: 'https://medium.com/@growth/citation-ready-content-ai',
+    domain: 'medium.com',
+    type: 'Third-party source',
+    aiAnswers: 17,
+    prompts: 16,
+    promptCoverage: 68,
+    coverage: 9,
+    domainTraffic: '540K',
+    domainTrust: 82,
+    pageTraffic: '390',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '22',
+    brandMentioned: false,
+    competitorMention: ['Notion'],
+    otherBrands: ['Clay'],
+  },
+  {
+    id: 'yt-ghl-review',
+    title: 'GoHighLevel AI Visibility Walkthrough',
+    url: 'https://www.youtube.com/watch?v=ghl-ai-visibility',
+    domain: 'youtube.com',
+    type: 'Third-party source',
+    aiAnswers: 20,
+    prompts: 18,
+    promptCoverage: 71,
+    coverage: 10,
+    domainTraffic: '3.1M',
+    domainTrust: 96,
+    pageTraffic: '4.2K',
+    linksAvailable: 'no',
+    hasBacklink: false,
+    countBacklinks: '0',
+    brandMentioned: true,
+    competitorMention: ['HubSpot'],
+    otherBrands: ['ClickFunnels'],
+  },
+  {
+    id: 'quora-crm',
+    title: 'Best CRM for agencies that care about AI search?',
+    url: 'https://www.quora.com/Best-CRM-for-agencies-AI-search',
+    domain: 'quora.com',
+    type: 'Third-party source',
+    aiAnswers: 18,
+    prompts: 17,
+    promptCoverage: 69,
+    coverage: 8,
+    domainTraffic: '320K',
+    domainTrust: 80,
+    pageTraffic: '280',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '14',
+    brandMentioned: false,
+    competitorMention: ['Salesforce', 'Zoho'],
+    otherBrands: ['Keap'],
+  },
+  {
+    id: 'wiki-crm',
+    title: 'Customer relationship management',
+    url: 'https://en.wikipedia.org/wiki/Customer_relationship_management',
+    domain: 'en.wikipedia.org',
+    type: 'Third-party source',
+    aiAnswers: 14,
+    prompts: 13,
+    promptCoverage: 62,
+    coverage: 7,
+    domainTraffic: '5.2M',
+    domainTrust: 98,
+    pageTraffic: '18K',
+    linksAvailable: 'no',
+    hasBacklink: false,
+    countBacklinks: '0',
+    brandMentioned: false,
+    competitorMention: ['Salesforce'],
+    otherBrands: ['Oracle'],
+  },
+  {
+    id: 'getapp-ma',
+    title: 'Best Marketing Automation Software',
+    url: 'https://www.getapp.com/marketing-software/marketing-automation/',
+    domain: 'getapp.com',
+    type: 'Third-party source',
+    aiAnswers: 16,
+    prompts: 15,
+    promptCoverage: 66,
+    coverage: 11,
+    domainTraffic: '28K',
+    domainTrust: 75,
+    pageTraffic: '510',
+    linksAvailable: 'yes',
+    hasBacklink: true,
+    countBacklinks: '67',
+    brandMentioned: true,
+    competitorMention: ['HubSpot', 'Pipedrive'],
+    otherBrands: ['Freshsales'],
+  },
 ]
 
 // HARDCODED: prompt pool used to synthesize the expanded-row AI answers /
@@ -317,25 +866,33 @@ const DETAIL_PROMPT_POOL = [
   'Best tools to monitor citations in ChatGPT and Google AI Overview',
 ]
 
-// Build a descending date label (e.g. "Jul 22, 2026") offset by `i` days.
-function detailDate(i) {
+// Build a descending date (e.g. Jul 22, 2026) offset by `i` days — keep Date for filtering.
+function detailDateValue(i) {
   const base = new Date(2026, 6, 22)
   base.setDate(base.getDate() - i)
-  return base.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  return base
 }
 
-// Synthesize `count` rows for the expanded AI answers / prompts table.
-function buildDetailRows(count, kind) {
-  const engines = kind === 'ai'
-    ? ['ChatGPT', 'Google AI Overview']
-    : ['ChatGPT', 'Google AI Overview', 'Perplexity']
-  return Array.from({ length: Math.max(0, count) }, (_, i) => ({
-    id: i,
-    prompt: DETAIL_PROMPT_POOL[i % DETAIL_PROMPT_POOL.length],
-    engine: engines[i % engines.length],
-    date: detailDate(i),
-    cacheUrl: '#',
-  }))
+function formatDetailDate(d) {
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+// HARDCODED: synthesize AI-answer / prompt rows for a source (prototyping).
+// Sized to the larger of aiAnswers / prompts counts.
+function buildDetailRows(source) {
+  const count = Math.max(source.aiAnswers || 0, source.prompts || 0)
+  const engines = ['ChatGPT', 'Google AI Overview', 'Perplexity']
+  return Array.from({ length: count }, (_, i) => {
+    const dateValue = detailDateValue(i)
+    return {
+      id: i,
+      prompt: DETAIL_PROMPT_POOL[i % DETAIL_PROMPT_POOL.length],
+      engine: engines[i % engines.length],
+      dateValue,
+      date: formatDetailDate(dateValue),
+      cacheUrl: '#',
+    }
+  })
 }
 
 const ENGINE_BREAKDOWN_MAP = {
@@ -423,7 +980,7 @@ function TrustScore({ score }) {
 
 // Prompt coverage: percentage only (no progress bar), medium weight.
 function CoverageBar({ value }) {
-  return <span className="block text-right text-[13px] font-medium text-gray-900">{value}%</span>
+  return <span className="text-[13px] font-medium text-gray-900 tabular-nums">{value}%</span>
 }
 
 // ── Count Button with Portal Tooltip ─────────────────────────────────────────
@@ -486,21 +1043,6 @@ function CountButton({ count, type, id, onDetailOpen }) {
 }
 
 // ── Filter Components ─────────────────────────────────────────────────────────
-
-function FilterChip({ filter, onRemove }) {
-  const sym = filter.operator === 'At least' ? '≥' : filter.operator === 'At most' ? '≤' : '='
-  return (
-    <div className="inline-flex items-center gap-1.5 h-7 pl-2.5 pr-1 rounded-full border border-primary-200 bg-primary-50 text-[12px] font-medium text-primary-700 shrink-0">
-      <span>{filter.metric} {sym} {filter.value}</span>
-      <button
-        onClick={onRemove}
-        className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-primary-200 transition-colors"
-      >
-        <X size={10} className="text-primary-500" />
-      </button>
-    </div>
-  )
-}
 
 // Source mention filter — presented as a filter chip + dropdown (HighRise table
 // filter pattern), single-select: All sources / Mentioned / Not mentioned.
@@ -567,201 +1109,387 @@ function SourceFilterChip({ value, onChange }) {
   )
 }
 
-function FilterBuilderRow({ onAdd, onCancel }) {
-  const [metric, setMetric] = useState('Prompt Coverage')
-  const [operator, setOperator] = useState('At least')
-  const [value, setValue] = useState('')
-  const [metricOpen, setMetricOpen] = useState(false)
-  const [opOpen, setOpOpen] = useState(false)
-  const metricRef = useRef(null)
-  const opRef = useRef(null)
-
-  useEffect(() => {
-    function handle(e) {
-      if (metricRef.current && !metricRef.current.contains(e.target)) setMetricOpen(false)
-      if (opRef.current && !opRef.current.contains(e.target)) setOpOpen(false)
-    }
-    document.addEventListener('mousedown', handle)
-    return () => document.removeEventListener('mousedown', handle)
-  }, [])
-
-  function apply() {
-    if (!value.trim()) return
-    onAdd({ metric, operator, value: value.trim() })
-    setValue('')
-  }
-
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {/* Metric */}
-      <div ref={metricRef} className="relative">
-        <button
-          onClick={() => setMetricOpen(o => !o)}
-          className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-700 hover:border-gray-300 transition-colors"
-        >
-          {metric} <ChevronDown size={10} className="text-gray-400 shrink-0" />
-        </button>
-        {metricOpen && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl z-50 p-1 max-h-[260px] overflow-y-auto" style={{ minWidth: 210, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
-            {FILTER_METRICS.map(m => (
-              <button key={m} onClick={() => { setMetric(m); setMetricOpen(false) }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[12px] text-left transition-colors ${metric === m ? 'bg-primary-50' : 'hover:bg-gray-50'}`}>
-                <span className={metric === m ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{m}</span>
-                {metric === m && <Check size={11} className="text-primary-600 shrink-0" />}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Operator */}
-      <div ref={opRef} className="relative">
-        <button
-          onClick={() => setOpOpen(o => !o)}
-          className="flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-700 hover:border-gray-300 transition-colors"
-        >
-          {operator} <ChevronDown size={10} className="text-gray-400 shrink-0" />
-        </button>
-        {opOpen && (
-          <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-xl z-50 p-1" style={{ minWidth: 140, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
-            {FILTER_OPERATORS.map(op => (
-              <button key={op} onClick={() => { setOperator(op); setOpOpen(false) }}
-                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[12px] transition-colors ${operator === op ? 'bg-primary-50' : 'hover:bg-gray-50'}`}>
-                <span className={operator === op ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{op}</span>
-                {operator === op && <Check size={11} className="text-primary-600 shrink-0" />}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Value */}
-      <input
-        type="text"
-        value={value}
-        onChange={e => setValue(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && apply()}
-        placeholder="Value"
-        className="h-8 w-24 px-3 rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600 transition-colors"
-      />
-
-      <button onClick={apply} className="h-8 px-3 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-semibold transition-colors">
-        Apply
-      </button>
-      <button onClick={onCancel} className="h-8 px-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-[12px] text-gray-600 transition-colors">
-        Cancel
-      </button>
-    </div>
-  )
-}
-
-// ── Expanded row detail ───────────────────────────────────────────────────────
-// Inline expandable detail (matches Site health "Found resources" tables): a
-// left-inset white card with a content switcher toggling between the AI answers
-// and Prompts tables (prompt · AI engine · date · cached copy).
-
-function NestedDetailTable({ columns, rows }) {
-  return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-left">
-        <thead>
-          <tr className="border-b border-gray-100">
-            {columns.map(col => (
-              <th
-                key={col.key}
-                className={`px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap ${col.className || ''} ${col.align === 'right' ? 'text-right' : 'text-left'}`}
-              >
-                {col.label}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40">
-              {columns.map(col => (
-                <td key={col.key} className={`px-4 py-2.5 align-top ${col.align === 'right' ? 'text-right' : ''}`}>
-                  {col.render(row)}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// Segmented content switcher (mirrors HighRise HLContentSwitcher).
-function ContentSwitcher({ options, value, onChange }) {
-  return (
-    <div className="inline-flex rounded-lg border border-gray-200 overflow-hidden bg-white">
-      {options.map((opt, i) => {
-        const active = value === opt.value
-        return (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={e => { e.stopPropagation(); onChange(opt.value) }}
-            className={`px-4 py-1.5 text-[13px] font-medium transition-colors ${i > 0 ? 'border-l border-gray-200' : ''} ${
-              active ? 'bg-primary-50 text-primary-700' : 'bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            {opt.label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
+// ── Source answers detail view (dedicated space + filters) ───────────────────
 
 const DETAIL_ROWS_PER_PAGE = 10
 
-function SourceExpandedDetail({ source, colSpan, tab, onTabChange }) {
-  const [page, setPage] = useState(1)
+const DETAIL_ENGINE_OPTIONS = [
+  { id: 'all', label: 'All engines', badge: 'All' },
+  { id: 'ChatGPT', label: 'ChatGPT', badge: 'ChatGPT' },
+  { id: 'Google AI Overview', label: 'Google AI Overview', badge: 'AI Overview' },
+  { id: 'Perplexity', label: 'Perplexity', badge: 'Perplexity' },
+]
 
-  // Reset to the first page whenever the active content tab changes.
-  useEffect(() => { setPage(1) }, [tab])
+const DETAIL_PERIOD_PRESETS = ['Last 7 days', 'Last 15 days', 'Last 30 days', 'Custom date range']
 
-  const total = tab === 'ai' ? source.aiAnswers : source.prompts
-  const rows = buildDetailRows(total, tab)
-  const paged = rows.slice((page - 1) * DETAIL_ROWS_PER_PAGE, page * DETAIL_ROWS_PER_PAGE)
+function stripDay(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
+}
 
-  const columns = [
-    { key: 'prompt', label: 'Prompt', render: r => <span className="text-[12px] text-gray-700 line-clamp-1 block max-w-[520px]">{r.prompt}</span> },
-    { key: 'engine', label: 'AI engine', className: 'w-[150px]', render: r => <AiEngineTag engine={r.engine} /> },
-    { key: 'date',   label: 'Date',   className: 'w-[120px]', render: r => <span className="text-[12px] text-gray-500 whitespace-nowrap">{r.date}</span> },
-    { key: 'cache',  label: 'Cached copy', className: 'w-[130px]', render: r => <a href={r.cacheUrl} onClick={e => e.stopPropagation()} className="text-[12px] font-medium text-primary-600 hover:underline whitespace-nowrap">View cache copy</a> },
-  ]
+function rangeForPeriod(period, customRange) {
+  if (period === 'Custom date range' && customRange?.start && customRange?.end) {
+    return { start: stripDay(customRange.start), end: stripDay(customRange.end) }
+  }
+  const days = period === 'Last 7 days' ? 7 : period === 'Last 15 days' ? 15 : 30
+  const end = stripDay(new Date(2026, 6, 22))
+  const start = new Date(end)
+  start.setDate(start.getDate() - (days - 1))
+  return { start, end }
+}
+
+function EngineFilterChip({ value, onChange }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(e) { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const current = DETAIL_ENGINE_OPTIONS.find(o => o.id === value) || DETAIL_ENGINE_OPTIONS[0]
 
   return (
-    <tr className="border-b border-gray-100 bg-gray-50/40">
-      <td colSpan={colSpan} className="p-0">
-        <div className="flex pb-3 pr-4">
-          <div className="shrink-0" style={{ width: EXPAND_COL, minWidth: EXPAND_COL }} />
-          <div className="flex-1 min-w-0 rounded-lg border border-gray-100 bg-white overflow-hidden">
-            {/* Content switcher: AI answers ↔ Prompts */}
-            <div className="px-4 py-3" onClick={e => e.stopPropagation()}>
-              <ContentSwitcher
-                options={[{ value: 'ai', label: 'AI answers' }, { value: 'prompts', label: 'Prompts' }]}
-                value={tab}
-                onChange={onTabChange}
-              />
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="inline-flex items-center gap-2 h-8 pl-3 pr-2 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        <span>AI engine</span>
+        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[12px]">{current.badge}</span>
+        {value !== 'all' ? (
+          <span
+            role="button"
+            onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }}
+            className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
+          >
+            <X size={11} className="text-gray-400" />
+          </span>
+        ) : (
+          <ChevronDown size={13} className="text-gray-400" />
+        )}
+      </button>
+
+      {open && (
+        <div className="absolute left-0 top-full mt-1.5 z-50 bg-white border border-gray-200 rounded-xl p-1 shadow-lg" style={{ minWidth: 220 }}>
+          {DETAIL_ENGINE_OPTIONS.map(o => {
+            const active = o.id === value
+            return (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => { onChange(o.id); setOpen(false) }}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-[14px] transition-colors ${
+                  active ? 'bg-primary-50 text-primary-700 font-medium' : 'text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <span>{o.label}</span>
+                {active && <Check size={15} className="text-primary-600" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function DetailDateFilterChip({ value, customRange, onChange, onCustomRange }) {
+  const [open, setOpen] = useState(false)
+  const [mode, setMode] = useState('list')
+  const ref = useRef(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onDown(e) { if (ref.current && !ref.current.contains(e.target)) { setOpen(false); setMode('list') } }
+    document.addEventListener('mousedown', onDown)
+    return () => document.removeEventListener('mousedown', onDown)
+  }, [open])
+
+  const customActive = value === 'Custom date range' || (customRange?.start && !DETAIL_PERIOD_PRESETS.slice(0, 3).includes(value))
+  const label = customActive && customRange?.start && customRange?.end
+    ? formatRange(customRange.start, customRange.end)
+    : value
+
+  return (
+    <div ref={ref} className="relative shrink-0">
+      <button
+        type="button"
+        onClick={() => { setOpen(o => !o); setMode('list') }}
+        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        <Calendar size={14} className="text-gray-400 shrink-0" />
+        <span className="whitespace-nowrap">{label}</span>
+        <ChevronDown size={13} className="text-gray-400" />
+      </button>
+
+      {open && mode === 'list' && (
+        <div className="absolute left-0 top-full mt-1.5 z-50 bg-white border border-gray-200 rounded-xl p-1 shadow-lg" style={{ minWidth: 200 }}>
+          {DETAIL_PERIOD_PRESETS.map(opt => {
+            const isSelected = value === opt || (opt === 'Custom date range' && customActive && value === 'Custom date range')
+            return (
+              <button
+                key={opt}
+                type="button"
+                onClick={() => {
+                  if (opt === 'Custom date range') { setMode('calendar'); return }
+                  onChange(opt)
+                  setOpen(false)
+                }}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${
+                  isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'
+                }`}
+              >
+                <span className={isSelected ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt}</span>
+                {isSelected && <Check size={13} className="text-primary-600 shrink-0" />}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {open && mode === 'calendar' && (
+        <div className="absolute left-0 top-full mt-1.5 z-50 bg-white border border-gray-200 rounded-xl shadow-lg">
+          <DateRangePicker
+            value={customRange}
+            onCancel={() => setMode('list')}
+            onApply={(r) => {
+              onCustomRange(r)
+              onChange('Custom date range')
+              setOpen(false)
+              setMode('list')
+            }}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SourceAnswersDetailView({ source, onBack }) {
+  const [period, setPeriod] = useState('Last 30 days')
+  const [customRange, setCustomRange] = useState({})
+  const [engine, setEngine] = useState('all')
+  const [promptQuery, setPromptQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const [viewingRow, setViewingRow] = useState(null)
+
+  const isPage = Boolean(source.title)
+  const title = isPage ? source.title : source.domain
+  const subtitle = isPage ? source.url?.replace(/^https?:\/\//, '') : null
+  const sourceDomain = source.domain || ''
+
+  const allRows = buildDetailRows(source)
+  const { start, end } = rangeForPeriod(period, customRange)
+
+  const filtered = allRows.filter(row => {
+    const d = stripDay(row.dateValue)
+    if (d < start || d > end) return false
+    if (engine !== 'all' && row.engine !== engine) return false
+    if (promptQuery.trim()) {
+      const q = promptQuery.trim().toLowerCase()
+      if (!row.prompt.toLowerCase().includes(q)) return false
+    }
+    return true
+  })
+
+  const total = filtered.length
+  const paged = filtered.slice((page - 1) * DETAIL_ROWS_PER_PAGE, page * DETAIL_ROWS_PER_PAGE)
+  const filtersActive = period !== 'Last 30 days' || engine !== 'all' || Boolean(promptQuery.trim()) || Boolean(customRange?.start)
+
+  function resetPage(fn) {
+    return (...args) => { fn(...args); setPage(1) }
+  }
+
+  function clearFilters() {
+    setPeriod('Last 30 days')
+    setCustomRange({})
+    setEngine('all')
+    setPromptQuery('')
+    setPage(1)
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <button
+        type="button"
+        onClick={onBack}
+        className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit"
+      >
+        <ArrowLeft size={14} />
+        Back to source inventory
+      </button>
+
+      {/* Hero */}
+      <div className="border border-gray-200 rounded-lg bg-white p-5">
+        <div className="flex items-start gap-3 min-w-0">
+          {isPage ? (
+            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+              <FileText size={18} className="text-gray-400" />
             </div>
-
-            <NestedDetailTable columns={columns} rows={paged} />
-
-            <Pagination total={total} page={page} perPage={DETAIL_ROWS_PER_PAGE} onPage={setPage} />
+          ) : (
+            <CompanyLogo
+              domain={source.domain}
+              size={40}
+              fallback={
+                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                  <Globe size={18} className="text-gray-400" />
+                </div>
+              }
+            />
+          )}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-[16px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
+              <TypeBadge type={source.type} />
+            </div>
+            {subtitle && (
+              <p className="text-[13px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
+            )}
           </div>
         </div>
-      </td>
-    </tr>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-100">
+          <CountCard
+            label="AI answers"
+            value={source.aiAnswers}
+            Icon={FileText}
+            iconColor="var(--primary-600)"
+            helpContent="Number of AI answers that cited this source in the current period. Higher means the source appears more often in AI responses."
+          />
+          <CountCard
+            label="Prompts"
+            value={source.prompts}
+            Icon={Search}
+            iconColor="var(--purple-600)"
+            helpContent="Distinct tracked prompts where this source was cited. More prompts mean broader topical reach across your tracking set."
+          />
+          <CountCard
+            label="Prompt coverage"
+            value={`${source.promptCoverage}%`}
+            Icon={TrendingUp}
+            iconColor="var(--success-600)"
+            helpContent="Share of AI answers for those prompts that cited this source. Higher coverage means the source is more consistently used when those prompts are answered."
+          />
+          <CountCard
+            label={isPage ? 'Coverage' : 'Mention rate'}
+            value={isPage ? `${source.coverage}%` : `${source.mentionRate}%`}
+            Icon={Globe}
+            iconColor="var(--warning-600)"
+            helpContent={
+              isPage
+                ? 'How often your brand is covered when this page is cited in AI answers. Higher is better for brand presence on this page.'
+                : 'How often your brand is mentioned when this domain is cited in AI answers. Higher means stronger brand presence on this source.'
+            }
+          />
+        </div>
+      </div>
+
+      {/* Answers table card */}
+      <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+        <div className="px-5 py-4 border-b border-gray-200">
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-[15px] font-semibold text-gray-900 m-0">AI answers & prompts</h3>
+            <SectionInfoTip
+              id="source-answers-detail-info"
+              content="Every AI answer that cited this source, with the prompt and engine. Filter by date, engine, or prompt text."
+            />
+          </div>
+        </div>
+
+        {/* Toolbar — filters left, search right */}
+        <div className="px-5 py-3 flex items-center gap-2 border-b border-gray-100 flex-wrap">
+          <DetailDateFilterChip
+            value={period}
+            customRange={customRange}
+            onChange={resetPage(setPeriod)}
+            onCustomRange={resetPage(setCustomRange)}
+          />
+          <EngineFilterChip value={engine} onChange={resetPage(setEngine)} />
+          <div className="ml-auto shrink-0" style={{ width: 280 }}>
+            <HLInput
+              size="sm"
+              prefixIcon={Search}
+              value={promptQuery}
+              onChange={e => { setPromptQuery(e.target.value); setPage(1) }}
+              placeholder="Search prompts"
+            />
+          </div>
+        </div>
+
+        {total === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-8">
+            <Search size={32} className="text-gray-200 mb-3" />
+            <p className="text-[14px] font-semibold text-gray-700 mb-1">No answers match</p>
+            <p className="text-[12px] text-gray-400 m-0 mb-4">Try adjusting the date range, engine, or prompt search.</p>
+            {filtersActive && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="h-8 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50">
+                    <th className={`${TABLE_TH} w-[130px]`}>Date</th>
+                    <th className={`${TABLE_TH} w-[160px]`}>AI engine</th>
+                    <th className={TABLE_TH}>Prompt</th>
+                    <th className={`${TABLE_TH} w-[88px]`} />
+                  </tr>
+                </thead>
+                <tbody>
+                  {paged.map(row => (
+                    <tr key={row.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/40">
+                      <td className="px-5 py-2.5 text-[12px] text-gray-500 whitespace-nowrap">{row.date}</td>
+                      <td className="px-5 py-2.5"><AiEngineTag engine={row.engine} /></td>
+                      <td className="px-5 py-2.5 text-[12px] text-gray-700">
+                        <span className="line-clamp-2">{row.prompt}</span>
+                      </td>
+                      <td className="px-5 py-2.5 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setViewingRow(row)}
+                          className="text-[12px] font-medium text-primary-600 hover:underline whitespace-nowrap"
+                        >
+                          View response
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {total > DETAIL_ROWS_PER_PAGE && (
+              <Pagination total={total} page={page} perPage={DETAIL_ROWS_PER_PAGE} onPage={setPage} />
+            )}
+          </>
+        )}
+      </div>
+
+      {viewingRow && (
+        <FullResponseModal
+          response={responseFromDetailRow(viewingRow, sourceDomain)}
+          promptText={viewingRow.prompt}
+          sourceHint={isPage ? source.url : source.domain}
+          onClose={() => setViewingRow(null)}
+        />
+      )}
+    </div>
   )
 }
 
 // ── Domain Table ──────────────────────────────────────────────────────────────
 
-function DomainTable({ domains, expandedId, expandedTab, onToggleExpand, onTabChange }) {
+function DomainTable({ domains, onOpenDetail }) {
   if (!domains.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center px-8">
@@ -773,99 +1501,103 @@ function DomainTable({ domains, expandedId, expandedTab, onToggleExpand, onTabCh
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full" style={{ minWidth: 720 }}>
+    <table className="w-full table-fixed" style={{ minWidth: 760 }}>
         <thead>
           <tr className="border-b border-gray-200">
-            <th className="py-3 bg-gray-50" style={{ width: EXPAND_COL, minWidth: EXPAND_COL, maxWidth: EXPAND_COL }} />
-            <th className="px-4 py-3 text-left text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ minWidth: 200 }}>Domain</th>
-            <th className="px-3 py-3 text-center text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 100 }}>AI answers</th>
-            <th className="px-3 py-3 text-center text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 90 }}>Prompts</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 130 }}>Prompt coverage</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 100 }}>Mention rate</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 100 }}>Domain trust</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50 pr-5" style={{ width: 90 }}>Backlink</th>
+            <th className={TABLE_TH} style={{ width: '28%' }}>
+              <ThLabel id="si-th-domain" tip={SI_COL_TIPS.domain}>Domain</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-center`} style={{ width: '11%' }}>
+              <ThLabel id="si-th-domain-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
+              <ThLabel id="si-th-domain-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '14%' }}>
+              <ThLabel id="si-th-domain-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '11%' }}>
+              <ThLabel id="si-th-domain-mr" tip={SI_COL_TIPS.mentionRate} align="right">Mention rate</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '12%' }}>
+              <ThLabel id="si-th-domain-trust" tip={SI_COL_TIPS.domainTrust} align="right">Domain trust</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '10%' }}>
+              <ThLabel id="si-th-domain-backlink" tip={SI_COL_TIPS.backlink} align="right">Backlink</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} text-right`} style={{ width: '88px' }} />
           </tr>
         </thead>
         <tbody>
-          {domains.map(domain => {
-            const isExpanded = expandedId === domain.id
-            return (
-              <Fragment key={domain.id}>
-                <tr
-                  onClick={() => onToggleExpand(domain.id)}
-                  className={`border-b border-gray-100 cursor-pointer transition-colors ${
-                    isExpanded ? 'bg-gray-50/70' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <td className="py-3" style={{ width: EXPAND_COL, minWidth: EXPAND_COL, maxWidth: EXPAND_COL }}>
-                    <button
-                      onClick={e => { e.stopPropagation(); onToggleExpand(domain.id) }}
-                      className="flex items-center justify-center w-6 h-6 mx-auto rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                    >
-                      <ChevronDown size={14} className={`transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <CompanyLogo
-                        domain={domain.domain}
-                        size={28}
-                        className="mt-0.5"
-                        fallback={
-                          <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                            <Globe size={13} className="text-gray-400" />
-                          </div>
-                        }
-                      />
-                      <div className="min-w-0">
-                        <a
-                          href={`https://${domain.domain}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="text-[13px] font-semibold text-primary-600 hover:underline truncate block"
-                        >
-                          {domain.domain}
-                        </a>
-                        <TypeBadge type={domain.type} />
+          {domains.map(domain => (
+            <tr
+              key={domain.id}
+              className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+            >
+              <td className="px-5 py-3">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <CompanyLogo
+                    domain={domain.domain}
+                    size={28}
+                    className="mt-0.5"
+                    fallback={
+                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+                        <Globe size={13} className="text-gray-400" />
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    <CountButton count={domain.aiAnswers} type="ai" id={domain.id} onDetailOpen={() => onToggleExpand(domain.id, 'ai')} />
-                  </td>
-                  <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    <CountButton count={domain.prompts} type="prompts" id={domain.id} onDetailOpen={() => onToggleExpand(domain.id, 'prompts')} />
-                  </td>
-                  <td className="px-3 py-3 pr-4">
-                    <CoverageBar value={domain.promptCoverage} />
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <span className={`text-[13px] font-semibold ${domain.mentionRate >= 20 ? 'text-success-600' : domain.mentionRate >= 10 ? 'text-gray-700' : 'text-gray-500'}`}>
-                      {domain.mentionRate}%
-                    </span>
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <TrustScore score={domain.domainTrust} />
-                  </td>
-                  <td className="px-3 py-3 pr-5 text-right">
-                    <BacklinkBadge hasBacklink={domain.hasBacklink} />
-                  </td>
-                </tr>
-                {isExpanded && <SourceExpandedDetail source={domain} colSpan={8} tab={expandedTab} onTabChange={t => onTabChange(t)} />}
-              </Fragment>
-            )
-          })}
+                    }
+                  />
+                  <div className="min-w-0">
+                    <a
+                      href={`https://${domain.domain}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-semibold text-primary-600 hover:underline truncate block"
+                    >
+                      {domain.domain}
+                    </a>
+                    <TypeBadge type={domain.type} />
+                  </div>
+                </div>
+              </td>
+              <td className="px-5 py-3 text-center">
+                <CountButton count={domain.aiAnswers} type="ai" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
+              </td>
+              <td className="px-5 py-3 text-center">
+                <CountButton count={domain.prompts} type="prompts" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <CoverageBar value={domain.promptCoverage} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <span className={`text-[13px] font-semibold ${domain.mentionRate >= 20 ? 'text-success-600' : domain.mentionRate >= 10 ? 'text-gray-700' : 'text-gray-500'}`}>
+                  {domain.mentionRate}%
+                </span>
+              </td>
+              <td className="px-5 py-3 text-right">
+                <TrustScore score={domain.domainTrust} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <BacklinkBadge hasBacklink={domain.hasBacklink} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <button
+                  type="button"
+                  onClick={() => onOpenDetail(domain)}
+                  className="text-[12px] font-medium text-primary-600 hover:underline"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
-    </div>
   )
 }
 
 // ── Page Table ────────────────────────────────────────────────────────────────
 
-function PageTable({ pages, expandedId, expandedTab, onToggleExpand, onTabChange }) {
+function PageTable({ pages, onOpenDetail }) {
   if (!pages.length) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-center px-8">
@@ -877,96 +1609,100 @@ function PageTable({ pages, expandedId, expandedTab, onToggleExpand, onTabChange
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full" style={{ minWidth: 800 }}>
+    <table className="w-full table-fixed" style={{ minWidth: 820 }}>
         <thead>
           <tr className="border-b border-gray-200">
-            <th className="py-3 bg-gray-50" style={{ width: EXPAND_COL, minWidth: EXPAND_COL, maxWidth: EXPAND_COL }} />
-            <th className="px-4 py-3 text-left text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ minWidth: 240 }}>Page</th>
-            <th className="px-3 py-3 text-center text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 100 }}>AI answers</th>
-            <th className="px-3 py-3 text-center text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 90 }}>Prompts</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 130 }}>Prompt coverage</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 90 }}>Coverage</th>
-            <th className="px-3 py-3 text-center text-[12px] font-semibold text-gray-900 bg-gray-50" style={{ width: 90 }}>Brand</th>
-            <th className="px-3 py-3 text-right text-[12px] font-semibold text-gray-900 bg-gray-50 pr-5" style={{ width: 90 }}>Backlink</th>
+            <th className={TABLE_TH} style={{ width: '34%' }}>
+              <ThLabel id="si-th-page" tip={SI_COL_TIPS.page}>Page</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
+              <ThLabel id="si-th-page-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-center`} style={{ width: '9%' }}>
+              <ThLabel id="si-th-page-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '14%' }}>
+              <ThLabel id="si-th-page-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '10%' }}>
+              <ThLabel id="si-th-page-coverage" tip={SI_COL_TIPS.coverage} align="right">Coverage</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
+              <ThLabel id="si-th-page-brand" tip={SI_COL_TIPS.brand} align="center">Brand</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} !text-right`} style={{ width: '9%' }}>
+              <ThLabel id="si-th-page-backlink" tip={SI_COL_TIPS.backlink} align="right">Backlink</ThLabel>
+            </th>
+            <th className={`${TABLE_TH} text-right`} style={{ width: '88px' }} />
           </tr>
         </thead>
         <tbody>
-          {pages.map(page => {
-            const isExpanded = expandedId === page.id
-            return (
-              <Fragment key={page.id}>
-                <tr
-                  onClick={() => onToggleExpand(page.id)}
-                  className={`border-b border-gray-100 cursor-pointer transition-colors ${
-                    isExpanded ? 'bg-gray-50/70' : 'hover:bg-gray-50'
-                  }`}
-                >
-                  <td className="py-3" style={{ width: EXPAND_COL, minWidth: EXPAND_COL, maxWidth: EXPAND_COL }}>
-                    <button
-                      onClick={e => { e.stopPropagation(); onToggleExpand(page.id) }}
-                      className="flex items-center justify-center w-6 h-6 mx-auto rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
+          {pages.map(page => (
+            <tr
+              key={page.id}
+              className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+            >
+              <td className="px-5 py-3">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={13} className="text-gray-400" />
+                  </div>
+                  <div className="min-w-0">
+                    <a
+                      href={page.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[13px] font-semibold text-primary-600 hover:underline line-clamp-1 block"
                     >
-                      <ChevronDown size={14} className={`transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
-                    </button>
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                        <FileText size={13} className="text-gray-400" />
-                      </div>
-                      <div className="min-w-0">
-                        <a
-                          href={page.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={e => e.stopPropagation()}
-                          className="text-[13px] font-semibold text-primary-600 hover:underline line-clamp-1 block"
-                        >
-                          {page.title}
-                        </a>
-                        <p className="text-[11px] text-gray-400 truncate mt-0.5 flex items-center gap-1">
-                          <span className="truncate">{page.url.replace('https://', '')}</span>
-                          <ExternalLink size={9} className="text-gray-300 shrink-0" />
-                        </p>
-                        <TypeBadge type={page.type} />
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    <CountButton count={page.aiAnswers} type="ai" id={page.id} onDetailOpen={() => onToggleExpand(page.id, 'ai')} />
-                  </td>
-                  <td className="px-3 py-3 text-center" onClick={e => e.stopPropagation()}>
-                    <CountButton count={page.prompts} type="prompts" id={page.id} onDetailOpen={() => onToggleExpand(page.id, 'prompts')} />
-                  </td>
-                  <td className="px-3 py-3 pr-4">
-                    <CoverageBar value={page.promptCoverage} />
-                  </td>
-                  <td className="px-3 py-3 text-right">
-                    <span className="text-[13px] font-semibold text-gray-900">{page.coverage}%</span>
-                  </td>
-                  <td className="px-3 py-3 text-center">
-                    <BrandMentionBadge mentioned={page.brandMentioned} />
-                  </td>
-                  <td className="px-3 py-3 pr-5 text-right">
-                    <BacklinkBadge hasBacklink={page.hasBacklink} />
-                  </td>
-                </tr>
-                {isExpanded && <SourceExpandedDetail source={page} colSpan={8} tab={expandedTab} onTabChange={t => onTabChange(t)} />}
-              </Fragment>
-            )
-          })}
+                      {page.title}
+                    </a>
+                    <p className="text-[11px] text-gray-400 truncate mt-0.5 flex items-center gap-1">
+                      <span className="truncate">{page.url.replace('https://', '')}</span>
+                      <ExternalLink size={9} className="text-gray-300 shrink-0" />
+                    </p>
+                    <TypeBadge type={page.type} />
+                  </div>
+                </div>
+              </td>
+              <td className="px-5 py-3 text-center">
+                <CountButton count={page.aiAnswers} type="ai" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
+              </td>
+              <td className="px-5 py-3 text-center">
+                <CountButton count={page.prompts} type="prompts" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <CoverageBar value={page.promptCoverage} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <span className="text-[13px] font-semibold text-gray-900">{page.coverage}%</span>
+              </td>
+              <td className="px-5 py-3 text-center">
+                <BrandMentionBadge mentioned={page.brandMentioned} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <BacklinkBadge hasBacklink={page.hasBacklink} />
+              </td>
+              <td className="px-5 py-3 text-right">
+                <button
+                  type="button"
+                  onClick={() => onOpenDetail(page)}
+                  className="text-[12px] font-medium text-primary-600 hover:underline"
+                >
+                  View
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
-    </div>
   )
 }
 
 // ── Pagination ────────────────────────────────────────────────────────────────
 
 function Pagination({ total, page, perPage, onPage }) {
-  const pages = Math.ceil(total / perPage)
-  const start = (page - 1) * perPage + 1
+  const pages = Math.max(1, Math.ceil(total / perPage))
+  const start = total === 0 ? 0 : (page - 1) * perPage + 1
   const end = Math.min(page * perPage, total)
 
   return (
@@ -996,7 +1732,7 @@ function Pagination({ total, page, perPage, onPage }) {
         ))}
         <button
           onClick={() => onPage(page + 1)}
-          disabled={page === pages}
+          disabled={page === pages || total === 0}
           className="flex items-center gap-1 h-7 px-2.5 rounded-lg border border-gray-200 text-[12px] font-medium text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
         >
           Next
@@ -1007,43 +1743,97 @@ function Pagination({ total, page, perPage, onPage }) {
   )
 }
 
+// Matches Site Health crawled-pages footer — rows per page + page controls.
+function HLPagination({ page, perPage, total, onPage, onPerPage }) {
+  const PER_PAGE_OPTIONS = [10, 20, 50, 100]
+  const totalPages = Math.max(1, Math.ceil(total / perPage))
+
+  function getPageNumbers() {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
+    const pages = [1]
+    if (page > 3) pages.push('…')
+    for (let p = Math.max(2, page - 1); p <= Math.min(totalPages - 1, page + 1); p++) pages.push(p)
+    if (page < totalPages - 2) pages.push('…')
+    if (totalPages > 1) pages.push(totalPages)
+    return pages
+  }
+
+  const start = total === 0 ? 0 : Math.min((page - 1) * perPage + 1, total)
+  const end = Math.min(page * perPage, total)
+
+  return (
+    <div className="shrink-0 flex items-center justify-end gap-2 px-5 py-3 border-t border-gray-200 bg-white flex-wrap">
+      <span className="text-[13px] text-gray-600 shrink-0">Rows per page</span>
+      <div className="relative shrink-0">
+        <select
+          value={perPage}
+          onChange={e => { onPerPage(Number(e.target.value)); onPage(1) }}
+          className="appearance-none h-8 pl-3 pr-7 text-[13px] font-medium text-gray-700 border border-gray-200 rounded-lg bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors"
+        >
+          {PER_PAGE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+        </select>
+        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+      </div>
+
+      <span className="text-[13px] text-gray-500 shrink-0 min-w-[90px]">{start} – {end} of {total}</span>
+
+      <button
+        type="button"
+        onClick={() => onPage(page - 1)}
+        disabled={page === 1}
+        className="h-8 px-3 text-[13px] font-medium rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+      >
+        Previous
+      </button>
+
+      <div className="flex items-center gap-1">
+        {getPageNumbers().map((p, i) =>
+          p === '…' ? (
+            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-gray-400">...</span>
+          ) : (
+            <button
+              key={p}
+              type="button"
+              onClick={() => onPage(p)}
+              className={`w-8 h-8 flex items-center justify-center text-[13px] font-medium rounded-lg border transition-colors ${
+                page === p
+                  ? 'border-primary-600 text-primary-700 font-semibold'
+                  : 'border-gray-200 text-gray-700 hover:bg-gray-50'
+              }`}
+            >
+              {p}
+            </button>
+          )
+        )}
+      </div>
+
+      <button
+        type="button"
+        onClick={() => onPage(page + 1)}
+        disabled={page === totalPages || total === 0}
+        className="h-8 px-3 text-[13px] font-medium rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+      >
+        Next
+      </button>
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function SourceInventoryContent() {
   const [view, setView] = useState('domain')
   const [sourceFilter, setSourceFilter] = useState('all')
   const [search, setSearch] = useState('')
-  const [appliedFilters, setAppliedFilters] = useState([])
-  const [filterBuilderVisible, setFilterBuilderVisible] = useState(false)
-  const [expandedId, setExpandedId] = useState(null)
-  const [expandedTab, setExpandedTab] = useState('ai')
+  const [activeRules, setActiveRules] = useState([])
+  const [showFilterDrawer, setShowFilterDrawer] = useState(false)
+  const [selectedSource, setSelectedSource] = useState(null)
   const [page, setPage] = useState(1)
-  const PER_PAGE = 10
-
-  // Toggle inline row expansion. Passing a `tab` ('ai' | 'prompts') — used by the
-  // AI answers / Prompts count buttons — opens the row on that tab instead of
-  // toggling it closed. A row/chevron click (no tab) toggles and defaults to 'ai'.
-  function toggleExpand(id, tab) {
-    if (expandedId === id && !tab) {
-      setExpandedId(null)
-      return
-    }
-    setExpandedId(id)
-    setExpandedTab(tab || 'ai')
-  }
-
-  function handleAddFilter(filter) {
-    setAppliedFilters(prev => [...prev, { ...filter, id: Date.now() }])
-    setFilterBuilderVisible(false)
-  }
-
-  function handleRemoveFilter(id) {
-    setAppliedFilters(prev => prev.filter(f => f.id !== id))
-  }
+  const [perPage, setPerPage] = useState(10)
 
   function handleViewChange(v) {
     setView(v)
-    setExpandedId(null)
+    setSelectedSource(null)
     setSearch('')
     setPage(1)
   }
@@ -1056,6 +1846,7 @@ export default function SourceInventoryContent() {
       const q = search.toLowerCase()
       if (!d.domain.toLowerCase().includes(q)) return false
     }
+    if (activeRules.length && !activeRules.every(rule => applySiFilterRule(d, rule))) return false
     return true
   })
 
@@ -1066,47 +1857,77 @@ export default function SourceInventoryContent() {
       const q = search.toLowerCase()
       if (!(p.title + p.url + p.domain).toLowerCase().includes(q)) return false
     }
+    if (activeRules.length && !activeRules.every(rule => applySiFilterRule(p, rule))) return false
     return true
   })
 
   const totalRows = view === 'domain' ? rawDomains.length : rawPages.length
-  const pagedDomains = rawDomains.slice((page - 1) * PER_PAGE, page * PER_PAGE)
-  const pagedPages = rawPages.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  const maxPage = Math.max(1, Math.ceil(totalRows / perPage) || 1)
+  const safePage = Math.min(page, maxPage)
+  const pagedDomains = rawDomains.slice((safePage - 1) * perPage, safePage * perPage)
+  const pagedPages = rawPages.slice((safePage - 1) * perPage, safePage * perPage)
+
+  if (selectedSource) {
+    return (
+      <div className="h-full min-h-0 overflow-y-auto" style={{ scrollbarGutter: 'stable' }}>
+        <SourceAnswersDetailView
+          source={selectedSource}
+          onBack={() => setSelectedSource(null)}
+        />
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="h-full min-h-0 flex flex-col gap-4">
 
       {/* KPI cards */}
-      <div className="grid grid-cols-4 gap-4">
-        <CountCard label="Mention opportunities" value="15" Icon={Search} iconColor="var(--primary-600)" help />
-        <CountCard label="Competitor-only mentions" value="6" Icon={Users} iconColor="var(--error-600)" help />
-        <CountCard label="New opportunities (7d)" value="3" Icon={TrendingUp} iconColor="var(--success-600)" help />
-        <CountCard label="Mentions without backlinks" value="7" Icon={Link2} iconColor="var(--warning-600)" help />
+      <div className="shrink-0 grid grid-cols-4 gap-4">
+        <CountCard
+          label="Mention opportunities"
+          value="15"
+          Icon={Search}
+          iconColor="var(--primary-600)"
+          helpContent="Shows the number of sources where your brand could gain visibility. These are places where competitors are already being mentioned but your brand is missing or has limited presence. More opportunities mean more growth potential."
+        />
+        <CountCard
+          label="Competitor-only mentions"
+          value="6"
+          Icon={Users}
+          iconColor="var(--error-600)"
+          helpContent="Shows how many sources mention your competitors but not your brand. These are high-priority gaps because AI is already recommending competitors for topics where you could also appear. Lower is better."
+        />
+        <CountCard
+          label="New opportunities (7d)"
+          value="3"
+          Icon={TrendingUp}
+          iconColor="var(--success-600)"
+          helpContent="Shows new mention opportunities discovered in the last 7 days. It helps you spot fresh content gaps and act on emerging opportunities before they become more competitive. More new opportunities mean more areas to expand your visibility."
+        />
+        <CountCard
+          label="Mentions without backlinks"
+          value="7"
+          Icon={Link2}
+          iconColor="var(--warning-600)"
+          helpContent="Shows how often AI mentions your brand without linking to your website. These mentions indicate brand recognition, but adding citations can improve authority and drive more traffic. Lower is better."
+        />
       </div>
 
-      {/* Insight banner */}
-      <div className="flex items-start gap-3 px-4 py-3.5 rounded-lg bg-warning-50 border border-warning-300">
-        <Zap size={14} className="text-warning-600 shrink-0 mt-0.5" />
-        <p className="text-[13px] text-gray-700 leading-relaxed">
-          Prioritize sources where competitors are mentioned repeatedly while your brand is either absent or unlinked. These are the fastest content refresh and outreach opportunities in the current set.
-        </p>
-      </div>
-
-      {/* Source Inventory card */}
-      <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
+      {/* Source Inventory card — fills remaining height; table scrolls, pagination stays pinned */}
+      <div className="flex-1 min-h-0 border border-gray-200 rounded-lg bg-white overflow-hidden flex flex-col">
 
         {/* Card header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-wrap gap-3">
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[14px] font-semibold text-gray-900">Source inventory</span>
-              <HelpCircle size={13} className="text-gray-300" />
-            </div>
-            <p className="text-[12px] text-gray-400 mt-0.5">
-              {view === 'domain'
-                ? 'Domain-level coverage, mention rate, and trust context'
-                : 'Page-level source pages with AI answers, prompts, and cache copies'}
-            </p>
+        <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-wrap gap-3">
+          <div className="flex items-center gap-1.5">
+            <span className="text-[15px] font-semibold text-gray-900">Source inventory</span>
+            <SectionInfoTip
+              id="source-inventory-info"
+              content={
+                view === 'domain'
+                  ? 'Prioritize sources where competitors are mentioned repeatedly while your brand is either absent or unlinked. These are the fastest content refresh and outreach opportunities in the current set. Domain-level coverage, mention rate, and trust context.'
+                  : 'Prioritize sources where competitors are mentioned repeatedly while your brand is either absent or unlinked. These are the fastest content refresh and outreach opportunities in the current set. Page-level source pages with AI answers, prompts, and cache copies.'
+              }
+            />
           </div>
           <div className="flex items-center gap-3 flex-wrap">
             {/* View switcher */}
@@ -1129,23 +1950,29 @@ export default function SourceInventoryContent() {
         </div>
 
         {/* Toolbar — filters on the left, search on the right (HighRise table pattern) */}
-        <div className="px-5 py-3 flex items-center gap-2 border-b border-gray-100 flex-wrap">
+        <div className="shrink-0 px-5 py-3 flex items-center gap-2 border-b border-gray-100 flex-wrap">
           {/* Source mention filter chip */}
           <SourceFilterChip value={sourceFilter} onChange={id => { setSourceFilter(id); setPage(1) }} />
 
-          {filterBuilderVisible ? (
-            <FilterBuilderRow onAdd={handleAddFilter} onCancel={() => setFilterBuilderVisible(false)} />
-          ) : (
-            <button
-              onClick={() => setFilterBuilderVisible(true)}
-              className="inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap shrink-0"
-            >
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
-              </svg>
-              Advanced filter
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setShowFilterDrawer(true)}
+            className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full border text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 ${
+              activeRules.length
+                ? 'bg-primary-50 border-primary-300 text-primary-700'
+                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+            }`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
+            </svg>
+            Advanced filter
+            {activeRules.length > 0 && (
+              <span className="inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-primary-600 text-white text-[11px] font-medium">
+                {activeRules.length}
+              </span>
+            )}
+          </button>
 
           {/* Search — right-aligned */}
           <div className="ml-auto relative shrink-0" style={{ width: 280 }}>
@@ -1159,46 +1986,39 @@ export default function SourceInventoryContent() {
           </div>
         </div>
 
-        {/* Applied filter chips */}
-        {appliedFilters.length > 0 && (
-          <div className="px-5 py-2.5 flex items-center gap-2 border-b border-gray-100 flex-wrap">
-            <span className="text-[11px] font-medium text-gray-400 mr-1">Filters:</span>
-            {appliedFilters.map(f => (
-              <FilterChip key={f.id} filter={f} onRemove={() => handleRemoveFilter(f.id)} />
-            ))}
-            <button
-              onClick={() => setAppliedFilters([])}
-              className="text-[12px] text-gray-400 hover:text-gray-600 ml-1 font-medium"
-            >
-              Clear all
-            </button>
-          </div>
-        )}
-
-        {/* Table with inline expandable rows */}
-        <div className="min-w-0" style={{ minHeight: 360 }}>
+        {/* Scrollable table body */}
+        <div className="flex-1 min-h-0 min-w-0 overflow-auto" style={{ scrollbarGutter: 'stable' }}>
           {view === 'domain' ? (
             <DomainTable
               domains={pagedDomains}
-              expandedId={expandedId}
-              expandedTab={expandedTab}
-              onToggleExpand={toggleExpand}
-              onTabChange={setExpandedTab}
+              onOpenDetail={setSelectedSource}
             />
           ) : (
             <PageTable
               pages={pagedPages}
-              expandedId={expandedId}
-              expandedTab={expandedTab}
-              onToggleExpand={toggleExpand}
-              onTabChange={setExpandedTab}
+              onOpenDetail={setSelectedSource}
             />
           )}
-          {totalRows > PER_PAGE && (
-            <Pagination total={totalRows} page={page} perPage={PER_PAGE} onPage={setPage} />
-          )}
         </div>
+
+        {/* Pagination pinned below the scroll area */}
+        {totalRows > 0 && (
+          <HLPagination
+            total={totalRows}
+            page={safePage}
+            perPage={perPage}
+            onPage={setPage}
+            onPerPage={p => { setPerPage(p); setPage(1) }}
+          />
+        )}
       </div>
+
+      <AdvancedFilterDrawer
+        isOpen={showFilterDrawer}
+        onClose={() => setShowFilterDrawer(false)}
+        columnOptions={SI_FILTER_COLS}
+        onApply={rules => { setActiveRules(rules); setPage(1) }}
+      />
     </div>
   )
 }
