@@ -15,6 +15,7 @@ export { FileText } from './FileText.jsx';
 export { Pin } from './Pin.jsx';
 export { Sparkles } from './Sparkles.jsx';
 export { AiSparkleIcon } from './AiSparkleIcon.jsx';
+export { Lighthouse, LighthouseNavIcon } from './Lighthouse.jsx';
 export { Megaphone } from './Megaphone.jsx';
 export { Bell } from './Bell.jsx';
 export { HelpCircle } from './HelpCircle.jsx';

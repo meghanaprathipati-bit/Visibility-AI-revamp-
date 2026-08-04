@@ -56,9 +56,10 @@ export const SUB_TABS = [
 
 // Dummy seed chats — replace with API data in production
 export const INITIAL_CHATS = [
-  { id: 1, label: 'GBP audit for Plumber 200' },
-  { id: 2, label: 'AI visibility — ChatGPT' },
-  { id: 3, label: 'example.com SEO crawl' },
+  { id: 0, label: 'New chat' },
+  { id: 1, label: 'Full SEO crawl — Harborview Inn & Suites' },
+  { id: 2, label: 'Technical health check — US' },
+  { id: 3, label: 'Site crawlability audit — Harborview Inn & Suites' },
 ]
 
 export const INITIAL_CHAT_LABELS = Object.fromEntries(
@@ -67,7 +68,7 @@ export const INITIAL_CHAT_LABELS = Object.fromEntries(
 
 // Dummy seed projects — replace with API data in production
 export const INITIAL_PROJECTS = [
-  { id: 1, label: 'Untitled Project 31' },
+  { id: 1, label: 'Harborview Inn & Suites' },
   { id: 2, label: 'Untitled Project 30' },
   { id: 3, label: 'Untitled Project 29' },
   { id: 4, label: 'website. Show profile health' },
