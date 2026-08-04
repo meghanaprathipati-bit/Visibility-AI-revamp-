@@ -1,8 +1,11 @@
 import { buildScanResultsPayload } from './scanResults.js'
 import { SEO_SCAN_PROMPT } from './scanPrompts.js'
 
+/** Landing-page chat — project summary shows only when this chat is active */
+export const NEW_CHAT_ID = 0
+
 /** Pinned recent chat — always shows completed SEO scan in prototype */
-export const SEO_SCAN_CHAT_ID = 3
+export const SEO_SCAN_CHAT_ID = 1
 
 /** Re-export canonical SEO prompt for pinned chat label / chips */
 export { SEO_SCAN_PROMPT }

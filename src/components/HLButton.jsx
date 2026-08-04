@@ -136,6 +136,7 @@ export default function HLButton({
   loading = false,
   type = 'button',
   className = '',
+  style,
   onClick,
   ...rest
 }) {
@@ -152,7 +153,7 @@ export default function HLButton({
         disabled={isDisabled}
         aria-disabled={isDisabled || undefined}
         aria-busy={loading || undefined}
-        style={themeVars}
+        style={{ ...themeVars, ...style }}
         className={[
           'hr-button',
           'hr-button--default-type',

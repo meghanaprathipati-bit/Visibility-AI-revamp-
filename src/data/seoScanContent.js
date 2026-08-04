@@ -1,7 +1,7 @@
 /** SEO scan prototype copy — replace with API response in production */
 
 export const SEO_SCAN_CONTEXT = {
-  projectName: 'Untitled Project 31',
+  projectName: 'Harborview Inn & Suites',
   websiteUrl: 'https://ramada.9hf9h.com/',
   websiteDomain: 'ramada.9hf9h.com',
   brand: '9hf9h.com',

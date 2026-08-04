@@ -2,7 +2,8 @@ import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import {
   FileText, Package, GraduationCap, CreditCard,
   Sparkles, Bot, Send, RefreshCw, Globe, Crown, Image as ImageIcon,
-  Star, TrendingUp, Grid3x3, Tablet, Link2, Users,
+  LighthouseNavIcon, AiSparkleIcon,
+  TrendingUp, Grid3x3, Tablet, Link2, Users,
   ChevronDown, ChevronRight, Search, Plus, Settings,
   MessageChatSquareIcon, Grid01Icon, PanelLeftIcon, PanelRightIcon,
   BookOpen, Zap, Workflow, CheckSquare,
@@ -44,8 +45,17 @@ import { CLOUDFLARE_CONNECT_QUESTIONS, CLOUDFLARE_CONNECT_TITLE } from '../data/
 import { buildImplementSummary, buildRescanSummary } from '../data/implementSummary.js'
 import DesktopAccessModal from '../components/DesktopAccessModal.jsx'
 import HLTooltip from '../components/HLTooltip.jsx'
+import ProjectSummaryLanding from '../components/ProjectSummaryLanding.jsx'
+import TypingText from '../components/TypingText.jsx'
+import {
+  buildFixItPrompt,
+  getProjectSummary,
+  getRecommendationActionItem,
+  projectHasChatHistory,
+} from '../data/projectSummary.js'
 import {
   SEO_SCAN_CHAT_ID,
+  NEW_CHAT_ID,
   createSeoScanSession,
   createEmptySession,
 } from '../data/seedChats.js'
@@ -68,13 +78,13 @@ const NAV_SECTIONS = [
     items: [
       { icon: Sparkles, label: 'AI Studio' },
       { icon: Bot, label: 'AI Agents' },
-      { icon: Sparkles, label: 'Visibility', active: true },
+      { icon: LighthouseNavIcon, label: 'Visibility', active: true },
       { icon: Send, label: 'Marketing' },
       { icon: RefreshCw, label: 'Automation' },
       { icon: Globe, label: 'Sites' },
       { icon: Crown, label: 'Memberships' },
       { icon: ImageIcon, label: 'Media Storage' },
-      { icon: Star, label: 'Reputation' },
+      { icon: AiSparkleIcon, label: 'Reputation' },
       { icon: TrendingUp, label: 'Reporting' },
       { icon: Grid3x3, label: 'App marketplace' },
       { icon: Tablet, label: 'Mobile app' },
@@ -85,19 +95,22 @@ const NAV_SECTIONS = [
 ]
 
 // Prototype dummy project list — metadata fields mirror New project modal (website, GBP, created date)
+// hasChatHistory: true → returning-user project summary landing on New chat
+// hasSummary: true → prototype seed flag kept for summary payload eligibility
 const INITIAL_PROJECTS = [
-  { id: 1, label: 'Untitled Project 31', createdAt: '2026-06-12' },
-  { id: 2, label: 'Untitled Project 30', websiteUrl: 'https://acmecorp.com' },
-  { id: 3, label: 'Untitled Project 29', gbpUrl: 'https://maps.google.com/?cid=123456789' },
-  { id: 4, label: 'website. Show profile health', websiteUrl: 'https://retailco.com', gbpUrl: 'https://maps.google.com/?cid=987654321' },
-  { id: 5, label: 'Untitled Project 17', createdAt: '2026-05-03' },
-  { id: 6, label: 'Untitled Project 28', websiteUrl: 'https://textileco.com' },
+  { id: 1, label: 'Harborview Inn & Suites', createdAt: '2026-06-12', hasChatHistory: true, hasSummary: true },
+  { id: 2, label: 'Untitled Project 30', websiteUrl: 'https://acmecorp.com', hasChatHistory: true, hasSummary: true },
+  { id: 3, label: 'Untitled Project 29', gbpUrl: 'https://maps.google.com/?cid=123456789', hasChatHistory: true, hasSummary: true },
+  { id: 4, label: 'website. Show profile health', websiteUrl: 'https://retailco.com', gbpUrl: 'https://maps.google.com/?cid=987654321', hasChatHistory: true, hasSummary: true },
+  { id: 5, label: 'Untitled Project 17', createdAt: '2026-05-03', hasChatHistory: true, hasSummary: true },
+  { id: 6, label: 'Untitled Project 28', websiteUrl: 'https://textileco.com', hasChatHistory: true, hasSummary: true },
 ]
 
 const INITIAL_CHATS = [
-  { id: 1, label: 'GBP audit for Plumber 200' },
-  { id: 2, label: 'AI visibility — ChatGPT' },
-  { id: 3, label: 'example.com SEO crawl' },
+  { id: NEW_CHAT_ID, label: 'New chat' },
+  { id: 1, label: 'Full SEO crawl — Harborview Inn & Suites' },
+  { id: 2, label: 'Technical health check — US' },
+  { id: 3, label: 'Site crawlability audit — Harborview Inn & Suites' },
 ]
 
 const INITIAL_CHAT_LABELS = Object.fromEntries(INITIAL_CHATS.map(chat => [chat.id, chat.label]))
@@ -399,11 +412,12 @@ export default function VisibilityAI() {
   const [detailPanel, setDetailPanel] = useState(null)
   /** Prototype implement flow state — replace with API job state in production */
   const [implementFlow, setImplementFlow] = useState(null)
-  const [activeChatId, setActiveChatId] = useState(1)
+  const [activeChatId, setActiveChatId] = useState(NEW_CHAT_ID)
   const [projects, setProjects] = useState(INITIAL_PROJECTS)
   const [activeProjectId, setActiveProjectId] = useState(1)
   const [nextProjectId, setNextProjectId] = useState(INITIAL_PROJECTS.length + 1)
   const [chatSessions, setChatSessions] = useState({
+    [NEW_CHAT_ID]: createEmptySession(),
     [SEO_SCAN_CHAT_ID]: createSeoScanSession(),
   })
   const [chatLabels, setChatLabels] = useState(INITIAL_CHAT_LABELS)
@@ -418,6 +432,7 @@ export default function VisibilityAI() {
       {
         id,
         label: data.name,
+        hasChatHistory: false,
         ...(websiteUrl ? { websiteUrl } : {}),
         ...(gbpUrl ? { gbpUrl } : {}),
         ...(!websiteUrl && !gbpUrl ? { createdAt: new Date().toISOString().slice(0, 10) } : {}),
@@ -426,6 +441,7 @@ export default function VisibilityAI() {
     ])
     setActiveProjectId(id)
     setNextProjectId(n => n + 1)
+    handleNewChatSession(NEW_CHAT_ID)
   }
 
   function applyAutoChatTitle(chatId, titleOrMessage, useAsIs = false) {
@@ -527,6 +543,12 @@ export default function VisibilityAI() {
     setChatPanelCollapsed(Boolean(detailPanel))
   }, [activePanel, detailPanel])
 
+  const activeSession = chatSessions[activeChatId]
+  const activeChatLabel = chatLabels[activeChatId] ?? INITIAL_CHATS.find(c => c.id === activeChatId)?.label ?? 'New chat'
+  const activeChatInConversation = Boolean(
+    activeSession?.chatMode || (activeSession?.messages?.length ?? 0) > 0,
+  )
+
   function handleSelectChat(chatId) {
     setChatSessions(prev => {
       const next = { ...prev }
@@ -535,6 +557,8 @@ export default function VisibilityAI() {
       }
       if (chatId === SEO_SCAN_CHAT_ID && !next[chatId]) {
         next[chatId] = createSeoScanSession()
+      } else if (!next[chatId]) {
+        next[chatId] = createEmptySession()
       }
       return next
     })
@@ -568,6 +592,13 @@ export default function VisibilityAI() {
 
   function handleMessageSent(sessionSnapshot) {
     setActiveChatUsed(true)
+    setProjects(prev =>
+      prev.map(p =>
+        p.id === activeProjectId && !p.hasChatHistory
+          ? { ...p, hasChatHistory: true }
+          : p,
+      ),
+    )
     if (sessionSnapshot && activeChatId != null) {
       setChatSessions(prev => ({
         ...prev,
@@ -613,6 +644,7 @@ export default function VisibilityAI() {
           onNewChat={handleNewChatSession}
           composerHasInput={composerHasInput}
           activeChatUsed={activeChatUsed}
+          activeChatInConversation={activeChatInConversation}
         />
         <div className="flex min-w-0 min-h-0 overflow-hidden">
           {activePanel === 'Dashboards' ? (
@@ -629,6 +661,7 @@ export default function VisibilityAI() {
             <>
               <MainContent
                 activeChatId={activeChatId}
+                activeChatLabel={activeChatLabel}
                 loadedSession={chatSessions[activeChatId]}
                 activeProject={projects.find(p => p.id === activeProjectId)}
                 onSessionDraft={handleSessionDraft}
@@ -641,6 +674,11 @@ export default function VisibilityAI() {
                 implementFlow={implementFlow}
                 onImplementFlowChange={setImplementFlow}
                 onRescanComplete={handleRescanComplete}
+                onGoToDashboard={(dashboardId = 'overview') => {
+                  setActivePanel('Dashboards')
+                  setSelectedDashboardId(dashboardId)
+                  setDetailPanel(null)
+                }}
               />
               {detailPanel && (
                 <DetailSidePanel
@@ -699,46 +737,6 @@ function StopSquareIcon({ size = 10, className = '' }) {
     <svg width={size} height={size} viewBox="0 0 10 10" fill="currentColor" className={className}>
       <rect width="10" height="10" rx="1.5" />
     </svg>
-  )
-}
-
-function TypingText() {
-  const phrases = [
-    'Check your AI visibility across ChatGPT, Perplexity, and Google',
-    'Audit your Google Business Profile in seconds',
-    'Crawl your website to find SEO issues',
-    'Track your local rank against competitors',
-  ]
-  const [phraseIdx, setPhraseIdx] = useState(0)
-  const [text, setText] = useState('')
-  const [deleting, setDeleting] = useState(false)
-
-  useEffect(() => {
-    const current = phrases[phraseIdx]
-    if (!deleting && text === current) {
-      const t = setTimeout(() => setDeleting(true), 1800)
-      return () => clearTimeout(t)
-    }
-    if (deleting && text === '') {
-      setDeleting(false)
-      setPhraseIdx(i => (i + 1) % phrases.length)
-      return
-    }
-    const speed = deleting ? 22 : 42
-    const t = setTimeout(() => {
-      setText(prev =>
-        deleting ? prev.slice(0, -1) : current.slice(0, prev.length + 1)
-      )
-    }, speed)
-    return () => clearTimeout(t)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [text, deleting, phraseIdx])
-
-  return (
-    <div className="min-h-[28px] flex items-center justify-center">
-      <span className="text-[16px] text-gray-500 font-normal leading-relaxed">{text}</span>
-      <span className="inline-block w-[2px] h-[18px] bg-purple-600 ml-0.5 animate-pulse align-middle" />
-    </div>
   )
 }
 
@@ -840,6 +838,7 @@ function ChatPanel({
   onNewChat,
   composerHasInput,
   activeChatUsed,
+  activeChatInConversation = false,
 }) {
   const [chats, setChats] = useState(INITIAL_CHATS)
   const [editingId, setEditingId] = useState(null)
@@ -878,11 +877,13 @@ function ChatPanel({
   }
 
   function handleNewChat() {
-    // Only redirect to existing empty chat if it hasn't been used yet
-    const existingEmpty = chats.find(c => getChatLabel(c) === 'New chat')
-    if (existingEmpty && !activeChatUsed) {
-      onSelectChat?.(existingEmpty.id)
-      return
+    // On the summary landing, reuse an unused "New chat" tab if one exists
+    if (!activeChatInConversation) {
+      const existingEmpty = chats.find(c => getChatLabel(c) === 'New chat')
+      if (existingEmpty && !activeChatUsed) {
+        onSelectChat?.(existingEmpty.id)
+        return
+      }
     }
     const newId = nextId
     const newChat = { id: newId, label: 'New chat' }
@@ -1747,6 +1748,7 @@ function AiFeedbackRow({ ts }) {
 
 function MainContent({
   activeChatId,
+  activeChatLabel = 'New chat',
   loadedSession,
   activeProject,
   onSessionDraft,
@@ -1759,6 +1761,7 @@ function MainContent({
   implementFlow,
   onImplementFlowChange,
   onRescanComplete,
+  onGoToDashboard,
 }) {
   const [inputValue, setInputValueRaw] = useState('')
   function setInputValue(val) {
@@ -2374,9 +2377,11 @@ function MainContent({
 
 
   const chatFooter = (
-    <div
-      className={`shrink-0 bg-white ${aiVisibilityAttachedComposer ? '' : 'border-t border-gray-200'}`}
-    >
+    <div className="shrink-0 relative bg-white">
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-full h-24 bg-gradient-to-t from-white via-white/90 to-transparent"
+        aria-hidden="true"
+      />
       <div className={`mx-auto pb-2 pt-2 px-6 ${detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'}`}>
         {pendingQuestions && (
           <div className="mb-2">
@@ -2488,7 +2493,52 @@ function MainContent({
     </div>
   )
 
+  function handleFixRecommendation(recommendation) {
+    const actionItem = getRecommendationActionItem(recommendation)
+    const prompt = buildFixItPrompt(recommendation)
+    submitPrompt(prompt, { chatTitle: `Fix: ${recommendation.title}`, chatTitleAsIs: true })
+    if (actionItem) {
+      onOpenDetailPanel?.({
+        type: 'action-items',
+        title: recommendation.title,
+        subtitle: recommendation.description,
+        items: [actionItem],
+      })
+    }
+  }
+
   if (!chatMode) {
+    const isNewChatLanding =
+      activeChatLabel === 'New chat' && messages.length === 0
+    const showProjectSummary =
+      isNewChatLanding && projectHasChatHistory(activeProject)
+
+    if (showProjectSummary) {
+      return (
+        <ProjectSummaryLanding
+          project={activeProject}
+          summary={getProjectSummary(activeProject)}
+          detailPanelOpen={detailPanelOpen}
+          onStartSummaryChat={prompt => {
+            submitPrompt(prompt, { chatTitle: 'Project summary', chatTitleAsIs: true })
+          }}
+          onGoToDashboard={onGoToDashboard}
+          onFixRecommendation={handleFixRecommendation}
+          onChipClick={handleQuickActionSelect}
+          footer={(
+            <PromptComposer
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onSend={handleSend}
+              inputRef={inputRef}
+              focusKey={composerFocusKey}
+              placeholder="Ask about SEO, or type a domain to audit..."
+            />
+          )}
+        />
+      )
+    }
+
     return (
       <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center py-10 overflow-y-auto overflow-x-hidden w-full">
@@ -2540,12 +2590,13 @@ function MainContent({
 
   return (
     <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
-      <div ref={chatScrollRef} className="flex-1 min-h-0 overflow-y-auto py-8">
-        <div
-          className={`mx-auto flex flex-col gap-6 px-6 ${
-            detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'
-          }`}
-        >
+      <div className="relative flex-1 min-h-0">
+        <div ref={chatScrollRef} className="absolute inset-0 overflow-y-auto py-8">
+          <div
+            className={`mx-auto flex flex-col gap-6 px-6 pb-24 ${
+              detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'
+            }`}
+          >
           {messages.map((msg, msgIndex) => {
             const prevMsg = msgIndex > 0 ? messages[msgIndex - 1] : null
             const afterUserBubble = prevMsg?.type === 'user' && msg.type !== 'user'
@@ -3094,6 +3145,7 @@ function MainContent({
             return null
           })}
           <div ref={messagesEndRef} />
+          </div>
         </div>
       </div>
 
