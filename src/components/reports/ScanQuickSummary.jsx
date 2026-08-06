@@ -14,7 +14,7 @@ function ReportTable({ title, columns, rows, className = '' }) {
               {columns.map(col => (
                 <th
                   key={col}
-                  className="text-[11px] font-semibold text-gray-500 px-3 py-2.5 whitespace-nowrap"
+                  className="text-[14px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap"
                 >
                   {col}
                 </th>
@@ -25,7 +25,7 @@ function ReportTable({ title, columns, rows, className = '' }) {
             {rows.map((row, idx) => (
               <tr key={idx} className="border-b border-gray-100 last:border-0">
                 {row.map((cell, cellIdx) => (
-                  <td key={cellIdx} className="text-[13px] text-gray-700 px-3 py-2.5 align-top leading-snug">
+                  <td key={cellIdx} className="text-[14px] text-gray-700 px-3 py-2.5 align-top leading-snug">
                     {cell}
                   </td>
                 ))}
@@ -46,7 +46,7 @@ function CategorySnapshotItem({ category }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[14px] font-semibold text-gray-900">{category.name}</span>
         {category.status && (
-          <span className="inline-flex text-[11px] font-medium px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
+          <span className="inline-flex text-[12px] font-medium px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
             {category.status}
           </span>
         )}
@@ -77,7 +77,7 @@ export default function ScanQuickSummary({ report }) {
   return (
     <div className="flex flex-col">
       {report.summaryTitle && (
-        <p className="text-[15px] font-semibold text-gray-900 leading-snug mb-4">{report.summaryTitle}</p>
+        <p className="text-[14px] font-semibold text-gray-900 leading-snug mb-4">{report.summaryTitle}</p>
       )}
 
       {(report.channelsAnalyzed || report.opportunityScope) && (

@@ -68,7 +68,7 @@ export default function CitationsTrendChart() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[16px] font-semibold text-gray-900">Citations trend</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Citations trend</h3>
             <SectionInfoTip
               id="citations-trend-info"
               content="Track visibility, mentions, and citations over time"

@@ -4,6 +4,7 @@ import HLCheckbox from '../HLCheckbox.jsx'
 import HLTooltip from '../HLTooltip.jsx'
 import ActionItemDetailTable from './ActionItemDetailTable.jsx'
 import ActionItemDetailSingle from './ActionItemDetailSingle.jsx'
+import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 
 const MANUAL_FIX_TOOLTIP = 'Auto-fix unavailable. View the manual fix.'
 
@@ -53,7 +54,7 @@ function SubscribeFlow() {
           <button
             type="button"
             onClick={() => setStage('implement')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-semibold transition-colors"
+            className={`${BTN_PRIMARY} shrink-0`}
           >
             Configure
           </button>

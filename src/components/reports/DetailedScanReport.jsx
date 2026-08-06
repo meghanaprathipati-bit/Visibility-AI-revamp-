@@ -57,7 +57,7 @@ const TONE_STYLES = {
 function ToneBadge({ tone, children }) {
   const styles = TONE_STYLES[tone] ?? TONE_STYLES.notice
   return (
-    <span className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
+    <span className={`inline-flex text-[12px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
       {children}
     </span>
   )
@@ -72,7 +72,7 @@ function ReportTable({ columns, rows }) {
             {columns.map(col => (
               <th
                 key={col}
-                className="text-[12px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap"
+                className="text-[14px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap"
               >
                 {col}
               </th>
@@ -83,7 +83,7 @@ function ReportTable({ columns, rows }) {
           {rows.map((row, idx) => (
             <tr key={idx} className="border-b border-gray-100 last:border-0">
               {row.map((cell, cellIdx) => (
-                <td key={cellIdx} className="text-[13px] text-gray-700 px-3 py-2.5 align-top leading-snug">
+                <td key={cellIdx} className="text-[14px] text-gray-700 px-3 py-2.5 align-top leading-snug">
                   {cell}
                 </td>
               ))}
@@ -117,7 +117,7 @@ function ScoreRing({ score, tone }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[26px] font-bold text-gray-900 leading-none">{score}</span>
-        <span className="text-[11px] text-gray-500 mt-0.5">/100</span>
+        <span className="text-[12px] text-gray-500 mt-0.5">/100</span>
       </div>
     </div>
   )
@@ -129,7 +129,7 @@ function SummaryMetricCard({ label, value, tone }) {
     <div className="rounded-lg border border-gray-200 bg-white px-3 py-2.5 min-w-0">
       <div className="flex items-center gap-2 mb-1">
         <span className={`w-2 h-2 rounded-full shrink-0 ${styles.dot}`} />
-        <p className="text-[11px] text-gray-500 leading-tight truncate">{label}</p>
+        <p className="text-[12px] text-gray-500 leading-tight truncate">{label}</p>
       </div>
       <p className={`text-[18px] font-bold leading-tight ${styles.text}`}>{value}</p>
     </div>
@@ -155,7 +155,7 @@ function RecommendedActionCard({ action }) {
         <Icon size={16} className="text-gray-700" />
       </div>
       <div className="flex flex-col gap-1.5 min-w-0">
-        <span className={`inline-flex self-start text-[11px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
+        <span className={`inline-flex self-start text-[12px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
           {action.priority}
         </span>
         <p className="text-[13px] font-semibold text-gray-900 leading-snug">{action.title}</p>
@@ -235,7 +235,7 @@ function MobileReadinessSection({ data }) {
           {data.breakdownTags.map(tag => (
             <span
               key={tag.label}
-              className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded border ${
+              className={`inline-flex items-center gap-1 text-[12px] font-medium px-2 py-0.5 rounded border ${
                 tag.pass
                   ? 'text-success-600 bg-success-50 border-success-50'
                   : 'text-error-600 bg-error-50 border-error-50'
@@ -290,12 +290,12 @@ function SeoHealthReport({ data }) {
     <div className="flex flex-col gap-6 pb-2">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h3 className="text-[16px] font-semibold text-gray-900 leading-snug">{data.title}</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900 leading-snug">{data.title}</h3>
           <p className="text-[12px] text-gray-500 mt-1">
             {data.domain} · {data.location} · {data.scanDate}
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 shrink-0 text-[11px] font-medium text-success-600 bg-success-50 border border-success-50 rounded-full px-2.5 py-1">
+        <span className="inline-flex items-center gap-1.5 shrink-0 text-[12px] font-medium text-success-600 bg-success-50 border border-success-50 rounded-full px-2.5 py-1">
           <CircleCheck size={12} />
           {data.statusLabel}
         </span>
@@ -349,7 +349,7 @@ function ScoreGauge({ label, score }) {
       <div className={`w-14 h-14 rounded-full border-[3px] flex items-center justify-center border-current ${styles.text}`}>
         <span className="text-[18px] font-bold leading-none">{score}</span>
       </div>
-      <span className="text-[11px] text-gray-500 text-center leading-tight">{label}</span>
+      <span className="text-[12px] text-gray-500 text-center leading-tight">{label}</span>
     </div>
   )
 }
@@ -369,7 +369,7 @@ export default function DetailedScanReport({ report, onPromptAction }) {
   return (
     <div className="flex flex-col gap-5">
       {report.detailedTitle && (
-        <h3 className="text-[15px] font-semibold text-gray-900 leading-snug">{report.detailedTitle}</h3>
+        <h3 className="text-[14px] font-semibold text-gray-900 leading-snug">{report.detailedTitle}</h3>
       )}
 
       <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs">

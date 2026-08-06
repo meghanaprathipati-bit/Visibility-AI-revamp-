@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import {
   Globe, RefreshCw, RefreshCw02, Download, AlertTriangle, ChevronRight, ChevronDown,
   Link2, Code2, BarChart3, ArrowUp, CircleCheck, CircleX, Info, X, FileText, Clock,
@@ -7,13 +8,24 @@ import {
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import AdvancedFilterDrawer from '../AdvancedFilterDrawer.jsx'
+import AdvancedFilterTrigger from '../AdvancedFilterTrigger.jsx'
+import IssueDetailDrawer, { PageFindingsPanel, ResourceSourcesPanel } from '../IssueDetailDrawer.jsx'
+import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
+import CompareRemoteModal from '../CompareRemoteModal.jsx'
 import ConnectFixesModal from '../implement/ConnectFixesModal.jsx'
 import HLModal from '../HLModal.jsx'
+import HLInput from '../HLInput.jsx'
+import HLTooltip from '../HLTooltip.jsx'
 
 // HighRise-style expandable table: expand + checkbox columns stay one vertical line
 // across parent rows and expanded nested content (HLDataTable expanded-row pattern).
 const TABLE_EXPAND_COL = 40
 const TABLE_CHECK_COL = 40
+/** Frozen Crawled pages cols (checkbox + URL + Issues); other cols scroll horizontally. */
+const CRAWLED_URL_COL_W = 300
+const CRAWLED_ISSUES_COL_W = 88
+const CRAWLED_STICKY_URL_LEFT = TABLE_CHECK_COL
+const CRAWLED_STICKY_ISSUES_LEFT = TABLE_CHECK_COL + CRAWLED_URL_COL_W
 const TABLE_CHECKBOX_PX = 15
 const tableCheckboxStyle = {
   accentColor: '#155EEF',
@@ -186,9 +198,12 @@ function WidgetErrorState({ onRetry, retryLabel = 'Re-scan', title = "We couldn'
         <p className="text-[13px] text-gray-400 leading-relaxed">{message}</p>
       </div>
       {onRetry && (
-        <button onClick={onRetry}
-          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-          <RefreshCw size={13} /> {retryLabel}
+        <button
+          type="button"
+          onClick={onRetry}
+          className={BTN_SECONDARY}
+        >
+          {retryLabel}
         </button>
       )}
     </div>
@@ -941,7 +956,7 @@ function HealthSummarySection({ compare, onTabSwitch }) {
       <SectionCard className="p-4 flex flex-col gap-5 min-w-0">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-semibold text-gray-700">Results by type</p>
-          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View →</button>
+          <button type="button" onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View</button>
         </div>
         <div className="flex items-end justify-between gap-2">
           <div>
@@ -960,7 +975,7 @@ function HealthSummarySection({ compare, onTabSwitch }) {
       <SectionCard className="p-4 flex flex-col gap-4 min-w-0">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-semibold text-gray-700">Page health ratio</p>
-          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View results by pages →</button>
+          <button type="button" onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View results by pages</button>
         </div>
         <PageHealthCard onTabSwitch={onTabSwitch} />
       </SectionCard>
@@ -992,7 +1007,7 @@ function FixAndIndexSection({ onTabSwitch }) {
           <div>
             <p className="text-[13px] font-semibold text-gray-700">Fix coverage</p>
           </div>
-          <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Review →</button>
+          <button type="button" onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Review</button>
         </div>
         <div className="flex items-center gap-4 flex-1">
           <div className="shrink-0">
@@ -1073,7 +1088,13 @@ function CrawlSnapshotStrip() {
   return (
     <div className="grid grid-cols-5 gap-3">
       {CRAWL_KPIS.map(({ label, value, delta, deltaPositive }) => (
-        <CountCard key={label} label={label} value={value} delta={delta} deltaUp={deltaPositive} />
+        <CountCard
+          key={label}
+          label={label}
+          value={value}
+          delta={delta}
+          deltaUp={deltaPositive}
+        />
       ))}
     </div>
   )
@@ -1095,7 +1116,7 @@ function PriorityIssuesSection({ onFindingClick, onTabSwitch }) {
         <div>
           <p className="text-[13px] font-semibold text-gray-700">Top findings</p>
         </div>
-        <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Open findings →</button>
+        <button type="button" onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">Open findings</button>
       </div>
       <div className="grid grid-cols-2 gap-3">
         {TOP_FINDINGS.map((f, i) => {
@@ -1566,16 +1587,13 @@ const DIAG_PANELS = [
 
 function TechnicalDiagnostics() {
   return (
-    <SectionCard className="p-5 flex flex-col gap-6">
-      <div>
-        <p className="text-[13px] font-semibold text-gray-700">Technical diagnostics</p>
-        <p className="text-[13px] text-gray-400 mt-0.5">Crawl, links, and performance signals</p>
-      </div>
-      <div className="grid grid-cols-3 gap-3 min-w-0">
+    <SectionCard className="p-5 sm:p-6 flex flex-col">
+      <p className="text-[14px] font-semibold text-gray-900 m-0">Technical diagnostics</p>
+      <div className="grid grid-cols-3 gap-3 min-w-0 mt-5">
         {DIAG_PANELS.map(({ id, label, Component }) => (
           <div key={id} className="border border-gray-200 rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-100">
-              <p className="text-[13px] font-semibold text-gray-800">{label}</p>
+              <p className="text-[13px] font-semibold text-gray-800 m-0">{label}</p>
             </div>
             <div className="px-4 py-4">
               <Component />
@@ -1710,15 +1728,13 @@ const SIMULATE_TOP_FINDINGS_ERROR = true
 // Top findings widget — demonstrates the reusable WidgetErrorState.
 // Renders an error state when its data can't load, with an interactive Retry
 // (error -> brief loading -> data) so the failure/recovery flow can be shown.
-function TopFindingsWidget({ onFindingClick, onTabSwitch, onRescan }) {
+function TopFindingsWidget({ onFindingClick, onTabSwitch }) {
   const [status, setStatus] = useState(SIMULATE_TOP_FINDINGS_ERROR ? 'error' : 'ready')
 
-  // The widget failed to load its scan data — recovering means re-running the
-  // whole site audit, so the CTA kicks off a fresh scan.
+  // Re-scan recovers this widget’s data locally (error → loading → findings).
   function handleRescan() {
-    if (onRescan) { onRescan(); return }
     setStatus('loading')
-    setTimeout(() => setStatus('ready'), 600)
+    setTimeout(() => setStatus('ready'), 700)
   }
 
   const isReady = status === 'ready'
@@ -1735,7 +1751,15 @@ function TopFindingsWidget({ onFindingClick, onTabSwitch, onRescan }) {
             )}
           </div>
         </div>
-        <button onClick={() => onTabSwitch?.('scan')} className="text-[12px] font-medium text-primary-600 hover:underline shrink-0">View all →</button>
+        {isReady && (
+          <button
+            type="button"
+            onClick={() => onTabSwitch?.('scan')}
+            className="text-[12px] font-medium text-primary-600 hover:underline shrink-0"
+          >
+            View all
+          </button>
+        )}
       </div>
 
       {status === 'error' ? (
@@ -1763,7 +1787,6 @@ function TopFindingsWidget({ onFindingClick, onTabSwitch, onRescan }) {
                 {/* Chip + chevron */}
                 <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap border shrink-0"
                   style={{ color: sc.color, background: sc.bg, borderColor: sc.border + '40' }}>{sc.label}</span>
-                <ChevronRight size={13} className="text-gray-400 shrink-0" />
               </button>
             )
           })}
@@ -1773,7 +1796,7 @@ function TopFindingsWidget({ onFindingClick, onTabSwitch, onRescan }) {
   )
 }
 
-function ActionCenterSection({ onFindingClick, onTabSwitch, onRescan }) {
+function ActionCenterSection({ onFindingClick, onTabSwitch }) {
   const total          = FIX_COVERAGE.reduce((s, f) => s + f.value, 0) || 1
   const autoPct        = Math.round((FIX_COVERAGE[0].value / total) * 100)
   const fixedBaseline  = 25
@@ -1784,7 +1807,7 @@ function ActionCenterSection({ onFindingClick, onTabSwitch, onRescan }) {
     <div className="grid grid-cols-2 gap-4 min-w-0">
 
       {/* ── Top Findings ── */}
-      <TopFindingsWidget onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} onRescan={onRescan} />
+      <TopFindingsWidget onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} />
 
       {/* ── Fix Coverage ── */}
       <SectionCard className="p-5 flex flex-col">
@@ -1793,8 +1816,12 @@ function ActionCenterSection({ onFindingClick, onTabSwitch, onRescan }) {
           <div>
             <p className="text-[13px] font-semibold text-gray-800">Fix coverage</p>
           </div>
-          <button onClick={() => onTabSwitch?.('scan')} className="flex items-center gap-1 text-[12px] font-medium text-primary-600 hover:underline shrink-0">
-            Review in scan results <ExternalLink size={11} />
+          <button
+            type="button"
+            onClick={() => onTabSwitch?.('scan')}
+            className="text-[12px] font-medium text-primary-600 hover:underline shrink-0"
+          >
+            Review in scan results
           </button>
         </div>
 
@@ -1940,69 +1967,16 @@ function SeoHealthSection({ onTabSwitch }) {
 
 // ─── Overview Tab ────────────────────────────────────────────────────────────
 
-function OverviewTab({ onFindingClick, onTabSwitch, onRescan }) {
-  const [compare, setCompare] = useState(false)
-  const [currentIdx, setCurrentIdx] = useState(0)
-  const [compareIdx, setCompareIdx] = useState(1)
-  const currentScan = SCAN_OPTIONS[currentIdx]
-
+function OverviewTab({ onFindingClick, onTabSwitch }) {
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
 
-      {/* Section 1: Scan comparison controls */}
-      <div className="flex items-center gap-3 flex-wrap min-w-0">
-        {/* Current report dropdown */}
-        <div className="flex items-center gap-2">
-          <span className="text-[12px] font-medium text-gray-500 shrink-0">Current report</span>
-          <div className="relative">
-            <select
-              value={currentIdx}
-              onChange={e => setCurrentIdx(Number(e.target.value))}
-              className="appearance-none h-8 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-3 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-purple-600 transition-colors"
-            >
-              {SCAN_OPTIONS.map((s, i) => (
-                <option key={s.label} value={i}>{s.label}</option>
-              ))}
-            </select>
-            <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
-
-        {compare && (
-          <>
-            <span className="text-[12px] text-gray-300 font-medium shrink-0">vs.</span>
-            <div className="flex items-center gap-2">
-              <span className="text-[12px] font-medium text-gray-500 shrink-0">Compared to</span>
-              <div className="relative">
-                <select
-                  value={compareIdx}
-                  onChange={e => setCompareIdx(Number(e.target.value))}
-                  className="appearance-none h-8 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-3 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-purple-600 transition-colors"
-                >
-                  {SCAN_OPTIONS.map((s, i) => (
-                    <option key={s.label} value={i} disabled={i === currentIdx}>{s.label}</option>
-                  ))}
-                </select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
-            </div>
-          </>
-        )}
-
-        <button
-          onClick={() => setCompare(c => !c)}
-          className="shrink-0 inline-flex items-center gap-1.5 h-8 px-3 text-[13px] font-medium rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 transition-colors"
-        >
-          <RefreshCw size={13} />
-          {compare ? 'Hide compare' : 'Compare scan'}
-        </button>
-
-      </div>
-
-      <HealthSummarySection compare={compare} onTabSwitch={onTabSwitch} />
-      <ActionCenterSection onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} onRescan={onRescan} />
-      <SeoHealthSection onTabSwitch={onTabSwitch} />
+      {/* Crawl KPIs — top of overview */}
       <CrawlSnapshotStrip />
+
+      <HealthSummarySection compare={false} onTabSwitch={onTabSwitch} />
+      <ActionCenterSection onFindingClick={onFindingClick} onTabSwitch={onTabSwitch} />
+      <SeoHealthSection onTabSwitch={onTabSwitch} />
       <TechnicalDiagnostics />
     </div>
   )
@@ -2591,7 +2565,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
         {/* Title + description */}
         <div className="flex-1 min-w-0 ml-3 pr-4">
           <div className="flex items-center gap-2 flex-wrap">
-            <p className="text-[13px] font-semibold text-gray-900 leading-snug">{finding.title}</p>
+            <p className="text-[14px] font-semibold text-gray-900 leading-snug">{finding.title}</p>
             {finding.isNew && <span className="text-[12px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
             {finding.isRegression && <span className="text-[12px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
           </div>
@@ -2624,7 +2598,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                 <button
                   key={t.id}
                   onClick={e => { e.stopPropagation(); onExpandedTabChange(t.id) }}
-                  className={`px-3 py-2.5 text-[12px] font-medium border-b-2 transition-all whitespace-nowrap -mb-px ${
+                  className={`px-3 py-2.5 text-[14px] font-medium border-b-2 transition-all whitespace-nowrap -mb-px ${
                     activeTab === t.id
                       ? 'border-primary-600 text-primary-700 font-semibold'
                       : 'border-transparent text-gray-400 hover:text-gray-700'
@@ -2677,9 +2651,9 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                     </colgroup>
                     <thead>
                       <tr className="border-b border-gray-100">
-                        <th className="px-3 py-2.5 text-[12px] font-medium text-gray-900">URL</th>
-                        <th className="px-3 py-2.5 text-[12px] font-medium text-gray-900">Current state</th>
-                        <th className="px-3 py-2.5 text-[12px] font-medium text-gray-900">
+                        <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900">URL</th>
+                        <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900">Current state</th>
+                        <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900">
                           {manualFix ? 'Value to apply' : advisoryFix ? 'Recommendation' : assistedFix ? 'Value to be applied' : 'Recommended'}
                         </th>
                         {(autoFixable || assistedFix) && <th className="py-2" />}
@@ -2724,14 +2698,14 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                             {/* URL */}
                             <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
                               <div className="flex items-center gap-1.5 min-w-0 pt-0.5">
-                                <span className="text-[12px] font-medium truncate text-primary-600">{page.url}</span>
+                                <span className="text-[14px] font-medium truncate text-primary-600">{page.url}</span>
                                 <ExternalLink size={11} className="shrink-0 text-primary-600" />
                               </div>
                             </td>
 
                             {/* Current state */}
                             <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
-                              <span className={`text-[12px] font-mono ${isFixed && !isReEdit ? 'text-gray-400' : 'text-error-700'}`}>{page.current}</span>
+                              <span className={`text-[14px] font-mono ${isFixed && !isReEdit ? 'text-gray-400' : 'text-error-700'}`}>{page.current}</span>
                             </td>
 
                             {/* Recommended / Value to be applied / Recommendation / How to fix */}
@@ -2740,7 +2714,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                 manualFix ? (
                                   /* Manual fix — a value to apply yourself (styled like the auto-fix value), copy icon inline */
                                   <div className="inline-flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                    <span className="text-[12px] font-mono text-success-700">{page.recommended}</span>
+                                    <span className="text-[14px] font-mono text-success-700">{page.recommended}</span>
                                     <button
                                       onClick={e => { e.stopPropagation(); copyRecommended(page) }}
                                       className={`transition-colors shrink-0 ${copiedUrl === page.url ? 'text-success-600' : 'text-gray-400 hover:text-gray-600'}`}
@@ -2750,7 +2724,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                     </button>
                                   </div>
                                 ) : (
-                                  <span className="text-[12px] text-gray-600 leading-relaxed">{page.recommended}</span>
+                                  <span className="text-[14px] text-gray-600 leading-relaxed">{page.recommended}</span>
                                 )
                               ) : assistedFix ? (
                                 <div onClick={e => e.stopPropagation()}>
@@ -2803,7 +2777,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                  <span className="text-[12px] font-mono text-success-700">{autoEditVal}</span>
+                                  <span className="text-[14px] font-mono text-success-700">{autoEditVal}</span>
                                   <button
                                     onClick={e => { e.stopPropagation(); isFixed ? openReEdit() : openEdit() }}
                                     className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
@@ -3079,7 +3053,7 @@ function CategoryNavBar({ activeCategoryId, openCategoryId, activeSevs, onJump }
                 key={cat.id}
                 ref={el => { chipRefs.current[cat.id] = el }}
                 onClick={() => onJump(cat.id)}
-                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[12px] font-medium transition-all whitespace-nowrap ${
+                className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[14px] font-medium transition-all whitespace-nowrap ${
                   isActive
                     ? 'bg-primary-50 text-primary-700 border-primary-300 font-semibold'
                     : isOpen
@@ -3276,10 +3250,22 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
   const allFindings    = SCAN_DATA.flatMap(c => c.findings)
   const totalOpen      = allFindings.reduce((s, f) => s + f.current, 0)
   const totalResolved  = allFindings.reduce((s, f) => s + f.fixed, 0)
-  const totalSuggested = allFindings.reduce((s, f) => s + f.newRec, 0)
-  const errCount       = allFindings.filter(f => f.severity === 'error').length
-  const warnCount      = allFindings.filter(f => f.severity === 'warning').length
-  const noticeCount    = allFindings.filter(f => f.severity === 'notice').length
+  const totalIssues    = totalOpen + totalResolved
+  const fixedPct       = totalIssues > 0 ? Math.round((totalResolved / totalIssues) * 100) : 0
+  // Finding types that still have open instances, by severity
+  const errOpen        = allFindings.filter(f => f.severity === 'error' && f.current > 0).length
+  const warnOpen       = allFindings.filter(f => f.severity === 'warning' && f.current > 0).length
+  const noticeOpen     = allFindings.filter(f => f.severity === 'notice' && f.current > 0).length
+  const severityTotal  = errOpen + warnOpen + noticeOpen
+  const severityBreakdown = [
+    { key: 'error',   label: 'Errors',   count: errOpen,    color: 'var(--error-600)' },
+    { key: 'warning', label: 'Warnings', count: warnOpen,   color: 'var(--warning-600)' },
+    { key: 'notice',  label: 'Notices',  count: noticeOpen, color: 'var(--primary-600)' },
+  ]
+  const autoFixesAvail = allFindings
+    .filter(f => f.fixType === 'auto')
+    .reduce((s, f) => s + f.current, 0)
+  const allResolved    = totalOpen === 0
 
   const activeSevs = [...sevFilter]
 
@@ -3351,34 +3337,80 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
         </div>
       )}
 
-      {/* ── Summary bar ── */}
-      <div className="border border-gray-200 rounded-lg bg-white px-4 py-3 flex items-center gap-5 flex-wrap min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-[24px] font-bold text-gray-900 leading-none">{totalOpen}</span>
-          <span className="text-[13px] font-medium text-gray-600">open issues</span>
+      {/* ── Issues summary — CountCards + severity breakdown card ── */}
+      {allResolved ? (
+        <CountCard
+          label="Open issues"
+          value={0}
+          Icon={CircleCheck}
+          iconColor="var(--success-600)"
+          description="All issues resolved"
+          helpContent="Every finding from this scan has been marked fixed. Re-scan to check for new issues."
+        />
+      ) : (
+        <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 min-w-0 items-stretch">
+          <CountCard
+            className="h-full"
+            label="Open issues"
+            value={totalOpen.toLocaleString()}
+            Icon={AlertTriangle}
+            iconColor="var(--primary-600)"
+            helpContent="Open finding instances still affecting site health. Lower is better."
+          />
+          <CountCard
+            className="h-full"
+            label="Fixed"
+            value={totalResolved.toLocaleString()}
+            delta={`${fixedPct}%`}
+            deltaUp
+            Icon={CircleCheck}
+            iconColor="var(--success-600)"
+            helpContent="Findings marked fixed as a share of all issues in this scan."
+          />
+          <CountCard
+            className="h-full"
+            label="Auto fixes available"
+            value={autoFixesAvail.toLocaleString()}
+            Icon={Zap}
+            iconColor="var(--warning-600)"
+            helpContent="Open issues that can be applied automatically with one click."
+          />
+          <CountCard
+            className="h-full"
+            label="By severity"
+            Icon={BarChart3}
+            iconColor="var(--primary-600)"
+            helpContent="Open finding types grouped by severity. Fix errors first, then warnings, then notices."
+            footer={(
+              <div className="flex flex-col gap-1.5">
+                <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-gray-100 gap-0.5">
+                  {severityBreakdown.map(s => {
+                    if (s.count <= 0 || severityTotal <= 0) return null
+                    const pct = Math.max(8, (s.count / severityTotal) * 100)
+                    return (
+                      <div
+                        key={s.key}
+                        className="h-full first:rounded-l-full last:rounded-r-full"
+                        style={{ width: `${pct}%`, background: s.color }}
+                        title={`${s.count} ${s.label.toLowerCase()}`}
+                      />
+                    )
+                  })}
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
+                  {severityBreakdown.map(s => (
+                    <div key={s.key} className="flex items-center gap-1 min-w-0">
+                      <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: s.color }} />
+                      <span className="text-[12px] font-semibold tabular-nums text-gray-900">{s.count}</span>
+                      <span className="text-[12px] text-gray-500">{s.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          />
         </div>
-        <div className="w-px h-6 bg-gray-100 shrink-0" />
-        <div className="flex items-center gap-2">
-          <span className="text-[24px] font-bold text-success-600 leading-none">{totalResolved}</span>
-          <span className="text-[13px] font-medium text-gray-600">resolved</span>
-        </div>
-        <div className="w-px h-6 bg-gray-100 shrink-0" />
-        <div className="flex items-center gap-2">
-          <span className="text-[24px] font-bold text-warning-600 leading-none">{totalSuggested}</span>
-          <span className="text-[13px] font-medium text-gray-600">suggested fixes</span>
-        </div>
-        <div className="ml-auto flex items-center gap-3 flex-wrap min-w-0">
-          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-error-600">
-            <CircleX size={12} /> {errCount} error{errCount !== 1 ? 's' : ''}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-warning-600">
-            <AlertTriangle size={12} /> {warnCount} warning{warnCount !== 1 ? 's' : ''}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-primary-600">
-            <Info size={12} /> {noticeCount} notice{noticeCount !== 1 ? 's' : ''}
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* ── Filter chips ── */}
       <div className="flex items-center gap-2">
@@ -3407,30 +3439,52 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
       </div>
 
       {/* ── Category sections (accordion) ── */}
-      {SCAN_DATA.map(cat => (
-        <CategorySection
-          key={cat.id}
-          category={cat}
-          isOpen={openCategoryId === cat.id}
-          onToggleOpen={() => setOpenCategoryId(prev => prev === cat.id ? null : cat.id)}
-          expandedFindings={expandedFindings}
-          onToggle={toggleFinding}
-          selectedIds={selectedIds}
-          onSelect={toggleSelect}
-          activeSevs={activeSevs}
-          activeFixTypes={activeFixTypes}
-          expandedTabs={expandedTabs}
-          onExpandedTabChange={setExpandedTab}
-          pageSearches={pageSearches}
-          onPageSearchChange={setPageSearch}
-          showAllPages={showAllPages}
-          onToggleShowAll={toggleShowAll}
-          fixedPages={fixedPages}
-          onFixPage={handleFixPage}
-          onFixAll={handleFixAll}
-          onFixCategory={handleFixCategory}
-        />
-      ))}
+      {(() => {
+        const sevAll = activeSevs.length === 0 || activeSevs.length === 3
+        const fixAll = activeFixTypes.length === 0 || activeFixTypes.length === 4
+        const visibleCats = SCAN_DATA.filter(cat =>
+          cat.findings.some(f =>
+            (sevAll || activeSevs.includes(f.severity)) &&
+            (fixAll || activeFixTypes.includes(f.fixType))
+          )
+        )
+        if (visibleCats.length === 0) {
+          return (
+            <SectionCard>
+              <FilterEmptyState
+                onClear={() => {
+                  setSevFilter(new Set(['error', 'warning', 'notice']))
+                  setFixFilter(new Set(['auto', 'assisted', 'manual', 'advisory']))
+                }}
+              />
+            </SectionCard>
+          )
+        }
+        return visibleCats.map(cat => (
+          <CategorySection
+            key={cat.id}
+            category={cat}
+            isOpen={openCategoryId === cat.id}
+            onToggleOpen={() => setOpenCategoryId(prev => prev === cat.id ? null : cat.id)}
+            expandedFindings={expandedFindings}
+            onToggle={toggleFinding}
+            selectedIds={selectedIds}
+            onSelect={toggleSelect}
+            activeSevs={activeSevs}
+            activeFixTypes={activeFixTypes}
+            expandedTabs={expandedTabs}
+            onExpandedTabChange={setExpandedTab}
+            pageSearches={pageSearches}
+            onPageSearchChange={setPageSearch}
+            showAllPages={showAllPages}
+            onToggleShowAll={toggleShowAll}
+            fixedPages={fixedPages}
+            onFixPage={handleFixPage}
+            onFixAll={handleFixAll}
+            onFixCategory={handleFixCategory}
+          />
+        ))
+      })()}
 
       {/* ── Confirm "Fix all" dialog ── */}
       {confirmDialog && (
@@ -3453,7 +3507,7 @@ function ScanResultsTab({ jumpTarget, onJumpConsumed }) {
             <div className="flex items-center justify-end gap-2">
               <button
                 onClick={() => setConfirmDialog(null)}
-                className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className={BTN_SECONDARY}
               >
                 Cancel
               </button>
@@ -3625,19 +3679,17 @@ const FOUND_LINKS_DATA = [
   { url: 'https://www.youtube.com/c/GoHighLevel',           type: 'External', follow: 'No follow', anchor: 'YouTube',     sources: 1, status: 200 },
 ]
 
-const RESOURCE_KPIS_TAB = [
-  { label: 'Total resources',    value: '10',       color: 'var(--purple-600)', bg: 'var(--purple-50)' },
-  { label: 'Images',             value: '4',        color: 'var(--primary-600)', bg: 'var(--primary-50)' },
-  { label: 'CSS size',           value: '183.9 KB', color: '#60A5FA', bg: 'var(--primary-50)' },
-  { label: 'JS size',            value: '1.4 MB',   color: 'var(--warning-400)', bg: 'var(--warning-100)' },
-  { label: 'Total resource size',value: '3.6 MB',   color: '#0D9488', bg: '#F0FDFA' },
-]
-
-const RESOURCE_BREAKDOWN_TAB = [
-  { label: 'Images',     size: '4.6 MB',    pct: 75, color: 'var(--purple-600)' },
-  { label: 'JavaScript', size: '1.4 MB',    pct: 22, color: 'var(--warning-400)' },
-  { label: 'CSS',        size: '183.9 KB',  pct: 3,  color: '#60A5FA' },
-]
+// HARDCODED: resource KPI + size share — derived from RESOURCE_DATA below so totals stay consistent.
+function parseResourceSizeKb(sizeStr) {
+  const n = parseFloat(sizeStr)
+  if (Number.isNaN(n)) return 0
+  if (/MB/i.test(sizeStr)) return n * 1024
+  return n
+}
+function formatResourceSize(kb) {
+  if (kb >= 1024) return `${(kb / 1024).toFixed(1)} MB`
+  return `${kb % 1 === 0 ? kb : kb.toFixed(1)} KB`
+}
 
 const RESOURCE_DATA = [
   { url: 'https://images.leadconnectorhq.com/image/f_webp,q_80/hero-banner.webp',                               sources: 3, type: 'IMG', status: 200, size: '385.0 KB', loadTime: '37ms',
@@ -3763,22 +3815,32 @@ const COMPARISON_ISSUE_SECTIONS = [
   },
 ]
 
-// ─── Report controls strip (shared) ─────────────────────────────────────────
+// DEMO: per-tab comparison rows — series aligns to AUDIT_DATES (index 0 = newest).
+const COMPARISON_CRAWLED_PAGES = [
+  { label: 'https://www.gohighlevel.com/',          change: 'unchanged', series: [2, 2, 3, 4], lowerBetter: true },
+  { label: 'https://www.gohighlevel.com/pricing',    change: 'improved',  series: [2, 4, 5, 6], lowerBetter: true },
+  { label: 'https://www.gohighlevel.com/blog',       change: 'regressed', series: [5, 3, 3, 2], lowerBetter: true },
+  { label: 'https://www.gohighlevel.com/agency',     change: 'added',     series: [1, 0, 0, 0], lowerBetter: true },
+  { label: 'https://www.gohighlevel.com/old-promo',  change: 'removed',   series: [0, 2, 2, 3], lowerBetter: true },
+]
 
-function ReportControls({ rightSlot }) {
-  return (
-    <div className="flex items-center gap-3 flex-wrap min-w-0">
-      <span className="text-[12px] font-semibold text-gray-400 shrink-0">Current report</span>
-      <div className="relative">
-        <select className="appearance-none h-8 text-[13px] font-semibold text-gray-800 border border-gray-200 rounded-lg pl-3 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-purple-600 transition-colors">
-          <option>2026-06-17 06:52:27</option>
-        </select>
-        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
-      </div>
-      {rightSlot && <div className="ml-auto">{rightSlot}</div>}
-    </div>
-  )
-}
+const COMPARISON_FOUND_LINKS = [
+  { label: 'Total links',      series: [2847, 2710, 2600, 2500] },
+  { label: 'Internal links',   series: [1870, 1802, 1750, 1700] },
+  { label: 'External links',   series: [977, 908, 850, 800] },
+  { label: 'Broken links',     series: [12, 18, 22, 30], lowerBetter: true },
+  { label: 'Nofollow links',   series: [179, 165, 150, 140] },
+  { label: 'New outbound URLs', series: [24, 0, 0, 0], lowerBetter: true },
+]
+
+const COMPARISON_FOUND_RESOURCES = [
+  { label: 'Total resources', series: [412, 398, 380, 360] },
+  { label: 'Images',          series: [210, 205, 190, 180] },
+  { label: 'CSS files',       series: [48, 46, 44, 40] },
+  { label: 'JavaScript files', series: [96, 92, 88, 80] },
+  { label: 'Broken resources', series: [6, 11, 14, 18], lowerBetter: true },
+  { label: 'Oversized images (>500 KB)', series: [9, 14, 16, 20], lowerBetter: true },
+]
 
 function FilterTabs({ filters, active, onChange }) {
   return (
@@ -3789,7 +3851,7 @@ function FilterTabs({ filters, active, onChange }) {
           <button
             key={f.id}
             onClick={() => onChange(f.id)}
-            className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[13px] font-medium transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[14px] font-medium transition-colors ${
               isActive ? 'bg-primary-600 text-white' : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
             }`}
           >
@@ -3874,6 +3936,57 @@ const ALL_COLS = [
 ]
 
 const DEFAULT_VISIBLE_COLS = Object.fromEntries(ALL_COLS.map(c => [c.id, c.defaultOn]))
+
+/** Column presets for Crawled pages — pickable cols only (URL + Issues are always on). No column count cap. */
+const COLUMN_PRESETS = [
+  {
+    id: 'seo-overview',
+    label: 'SEO overview',
+    columns: ['results', 'traffic', 'httpCode', 'indexable', 'indexStatus', 'referring', 'depth', 'keywords', 'urlProtocol'],
+  },
+  {
+    id: 'technical-seo',
+    label: 'Technical SEO',
+    columns: ['httpCode', 'indexable', 'canonical', 'robots', 'robotsMeta', 'xRobotsTag', 'numRedirects', 'redirectTarget', 'urlProtocol'],
+  },
+  {
+    id: 'content',
+    label: 'Content',
+    columns: ['title', 'titleLen', 'description', 'descLen', 'h1', 'h1Len', 'singleH1', 'dupTitle', 'wordCount'],
+  },
+  {
+    id: 'links',
+    label: 'Links',
+    columns: ['referring', 'inlinks', 'inlinksDofollow', 'inlinksNofollow', 'internalOutlinks', 'externalOutlinks', 'nofollowDofollow', 'hreflang'],
+  },
+  {
+    id: 'performance',
+    label: 'Performance',
+    columns: ['ttfb', 'loadingTime', 'cssSize', 'jsSize', 'imageSize', 'images', 'pageSize', 'htmlSize'],
+  },
+  { id: 'custom', label: 'Custom', columns: null },
+]
+
+function visibleColsFromPreset(presetId) {
+  const preset = COLUMN_PRESETS.find(p => p.id === presetId)
+  if (!preset?.columns) return null
+  const allowed = new Set(preset.columns)
+  return Object.fromEntries(ALL_COLS.map(c => [c.id, allowed.has(c.id)]))
+}
+
+function presetMatchesVisible(visibleCols, presetId) {
+  const expected = visibleColsFromPreset(presetId)
+  if (!expected) return false
+  return ALL_COLS.every(c => Boolean(visibleCols[c.id]) === Boolean(expected[c.id]))
+}
+
+function detectActivePreset(visibleCols) {
+  for (const p of COLUMN_PRESETS) {
+    if (p.id === 'custom') continue
+    if (presetMatchesVisible(visibleCols, p.id)) return p.id
+  }
+  return 'custom'
+}
 
 // ─── Advanced filter definitions ─────────────────────────────────────────────
 
@@ -3966,26 +4079,38 @@ function applyFilterRule(row, rule) {
   }
 }
 
-function FilterEmptyState({ onClear, onModify }) {
+function FilterEmptyState({
+  onClear,
+  onModify,
+  title = 'No results found',
+  description = 'No items match the filters applied. Clear filters to see all results.',
+}) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 gap-5">
+    <div className="flex flex-col items-center justify-center py-16 gap-5">
       <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
         <Search size={22} className="text-gray-400" />
       </div>
       <div className="text-center max-w-xs">
-        <p className="text-[15px] font-semibold text-gray-900 mb-1.5">No results for these filters</p>
-        <p className="text-[13px] text-gray-400 leading-relaxed">Try adjusting your filter criteria or clear the filters to see all results.</p>
+        <p className="text-[14px] font-semibold text-gray-900 mb-1.5">{title}</p>
+        <p className="text-[13px] text-gray-400 leading-relaxed">{description}</p>
       </div>
-      <div className="flex items-center gap-4">
-        <button onClick={onClear} className="text-[13px] text-gray-500 hover:text-gray-700 underline transition-colors">
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={onClear}
+          className={BTN_PRIMARY}
+        >
           Clear filters
         </button>
-        <button
-          onClick={onModify}
-          className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
-        >
-          Modify filters
-        </button>
+        {onModify && (
+          <button
+            type="button"
+            onClick={onModify}
+            className={BTN_SECONDARY}
+          >
+            Modify filters
+          </button>
+        )}
       </div>
     </div>
   )
@@ -4020,10 +4145,10 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
       <button
         type="button"
         onClick={onOpen}
-        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
+        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
       >
         {label}
-        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600 max-w-[120px] truncate">
+        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[14px] font-medium text-gray-600 max-w-[120px] truncate">
           {chipLabel}
         </span>
         <span
@@ -4040,14 +4165,14 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
             <div className="mb-1 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
                 <Search size={12} className="text-gray-400 shrink-0" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[12px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[14px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
               </div>
             </div>
           )}
           <div className="flex flex-col gap-1">
             <button
               onClick={onSelectAll}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] text-gray-700 hover:bg-gray-50 transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] text-gray-700 hover:bg-gray-50 transition-colors"
             >
               All
             </button>
@@ -4057,7 +4182,7 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
                 const checked = selected.has(opt.id)
                 return (
                   <button key={opt.id} onClick={() => onToggle(opt.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
                   >
                     <span className={checked ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt.label}</span>
                     {checked && <Check size={13} className="text-primary-600 shrink-0" />}
@@ -4071,6 +4196,98 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
   )
 }
 
+/** Truncated table cell text with a portaled tooltip (avoids overflow clipping). */
+function TruncatedCellTip({ text }) {
+  if (!text) return <span className="text-[14px] text-gray-300">—</span>
+  return (
+    <div className="w-full min-w-0 overflow-hidden">
+      <HLTooltip
+        content={text}
+        variant="dark"
+        placement="top"
+        wrap
+        triggerClassName="w-full max-w-full"
+      >
+        <span className="text-[14px] text-gray-700 truncate block cursor-default w-full">{text}</span>
+      </HLTooltip>
+    </div>
+  )
+}
+
+/** Results value in a white box; tooltip only on hover of this control (not the row). */
+function ResultsCountCell({ results }) {
+  const [tooltipPos, setTooltipPos] = useState(null)
+  const btnRef = useRef(null)
+  const count = results?.cur ?? 0
+
+  function show() {
+    if (!btnRef.current) return
+    const r = btnRef.current.getBoundingClientRect()
+    setTooltipPos({ top: r.bottom + 6, left: r.left })
+  }
+  function hide() {
+    setTooltipPos(null)
+  }
+
+  return (
+    <>
+      <button
+        ref={btnRef}
+        type="button"
+        onMouseEnter={show}
+        onMouseLeave={hide}
+        className={`inline-flex items-center justify-center min-w-[40px] px-2.5 py-1 rounded-lg border bg-white text-[12px] font-semibold text-gray-700 tabular-nums transition-all ${
+          tooltipPos
+            ? 'border-primary-600'
+            : 'border-gray-200 hover:border-primary-300'
+        }`}
+      >
+        {count}
+      </button>
+
+      {tooltipPos && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: tooltipPos.top,
+            left: tooltipPos.left,
+            zIndex: 9999,
+            boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+          }}
+          onMouseEnter={show}
+          onMouseLeave={hide}
+          className="bg-white border border-gray-200 rounded-xl p-3.5 w-[200px]"
+        >
+          <p className="text-[12px] font-semibold text-gray-400 mb-1 m-0">Results</p>
+          <p className="text-[22px] font-bold text-gray-900 leading-none mb-0.5 m-0">{count}</p>
+          <p className="text-[12px] text-gray-400 mb-3 m-0">Total in current set</p>
+          <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5">
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-[12px] font-medium text-gray-600">
+                Current
+              </span>
+              <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.cur}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[12px] font-medium text-primary-700">
+                New
+              </span>
+              <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.isNew}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-success-200 bg-success-50 text-[12px] font-medium text-success-700">
+                Fixed
+              </span>
+              <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.fix}</span>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+    </>
+  )
+}
+
 function CrawledPagesTab() {
   const [filter, setFilter]               = useState(new Set(['errors', 'warnings', 'notices']))
   const [selected, setSelected]           = useState([])
@@ -4080,7 +4297,11 @@ function CrawledPagesTab() {
   const [showFilterDrawer, setShowFilterDrawer] = useState(false)
   const [activeRules, setActiveRules]     = useState([])
   const [visibleCols, setVisibleCols]     = useState(DEFAULT_VISIBLE_COLS)
-  const [expandedRow, setExpandedRow]     = useState(null)
+  const [activePreset, setActivePreset]   = useState('seo-overview')
+  const [detailPageUrl, setDetailPageUrl] = useState(null)
+  const [detailFixFilter, setDetailFixFilter] = useState('all') // 'all' | 'Auto Fix' | 'Assisted Fix' | ...
+  // When Connect modal opens from the issue panel, remember where to return on Cancel.
+  const [reopenDetailAfterConnect, setReopenDetailAfterConnect] = useState(null) // { url, fixFilter } | null
   const [selectedFindings, setSelectedFindings] = useState({})
   const [fixedFindings, setFixedFindings] = useState(new Set())   // finding ids applied this session
   const [draftFindings, setDraftFindings] = useState(new Set())   // fixed → edited again (re-enabled)
@@ -4114,17 +4335,30 @@ function CrawledPagesTab() {
     return n
   })
 
-  // Only auto fixes can be applied in bulk. Manual / Advisory / Assisted are read-only here.
+  // Fix-type actions (same model as Scan results FindingCard):
+  // Auto / Assisted → selectable + Apply fixes; Manual → copy only; Advisory → read-only.
   const isAutoFix = f => f.fixType === 'Auto Fix'
+  const isAssistedFix = f => f.fixType === 'Assisted Fix'
   function findingStatus(f) {
     if (draftFindings.has(f.id)) return 'Draft'
     if (fixedFindings.has(f.id) || f.status === 'Fixed') return 'Fixed'
     if (f.status === 'New') return 'New'
     return 'Open'
   }
-  // Auto fixes that haven't been applied yet (Draft counts as re-openable → selectable).
-  const isFindingSelectable = f => isAutoFix(f) && findingStatus(f) !== 'Fixed'
-  const autoOpenIds = page => page.findings.filter(isFindingSelectable).map(f => f.id)
+  function findingRecValue(f) {
+    return String(findingValues[f.id] ?? f.aiValue ?? '').trim()
+  }
+  // Auto: open/Draft selectable. Assisted: selectable when value is non-empty and ≠ current.
+  const isFindingSelectable = f => {
+    if (findingStatus(f) === 'Fixed') return false
+    if (isAutoFix(f)) return true
+    if (isAssistedFix(f)) {
+      const val = findingRecValue(f)
+      return val !== '' && val !== String(f.currentValue || '').trim()
+    }
+    return false
+  }
+  const selectableFindingIds = page => page.findings.filter(isFindingSelectable).map(f => f.id)
 
   const totalSelectedFindings = Object.values(selectedFindings).flat().length
   const canApplyFixes = totalSelectedFindings > 0
@@ -4152,14 +4386,44 @@ function CrawledPagesTab() {
     setTimeout(() => setCopiedFinding(c => (c === f.id ? null : c)), 1500)
   }
 
-  // Apply the selected auto fixes: mark them Fixed (checkbox disabled) and clear selection.
-  function applySelectedFixes() {
-    const ids = Object.values(selectedFindings).flat()
+  function markFindingsFixed(ids) {
     setFixedFindings(prev => { const n = new Set(prev); ids.forEach(id => n.add(id)); return n })
     setDraftFindings(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n })
+    setEditingFinding(null)
+    setSelectedFindings(prev => {
+      const next = {}
+      Object.entries(prev).forEach(([url, list]) => {
+        const kept = list.filter(id => !ids.includes(id))
+        if (kept.length) next[url] = kept
+      })
+      return next
+    })
+  }
+
+  function fixSingleFinding(f) {
+    if (findingStatus(f) === 'Fixed') return
+    if (isAutoFix(f) || (isAssistedFix(f) && isFindingSelectable(f))) {
+      markFindingsFixed([f.id])
+    }
+  }
+
+  // Apply selected Auto / Assisted fixes: mark Fixed (checkbox disabled) and clear selection.
+  function applySelectedFixes() {
+    const ids = Object.values(selectedFindings).flat()
+    markFindingsFixed(ids)
     setSelected([])
     setSelectedFindings({})
+    setReopenDetailAfterConnect(null)
     setShowConnectModal(false)
+  }
+
+  function closeConnectModal() {
+    setShowConnectModal(false)
+    if (reopenDetailAfterConnect?.url) {
+      setDetailPageUrl(reopenDetailAfterConnect.url)
+      setDetailFixFilter(reopenDetailAfterConnect.fixFilter || 'all')
+      setReopenDetailAfterConnect(null)
+    }
   }
 
   const baseData = activeRules.length
@@ -4203,34 +4467,104 @@ function CrawledPagesTab() {
     return () => document.removeEventListener('mousedown', handleOutside)
   }, [showStatusDropdown])
 
-  const MAX_VISIBLE_COLS  = 10
-  const selectedColCount  = Object.values(visibleCols).filter(Boolean).length + 1 // +1 for frozen URL col
-  const atColLimit        = selectedColCount >= MAX_VISIBLE_COLS
+  const selectedColCount = Object.values(visibleCols).filter(Boolean).length
 
-  const toggleCol = id => setVisibleCols(v => {
-    if (!v[id] && atColLimit) return v // block adding when at limit
-    return { ...v, [id]: !v[id] }
-  })
-  // Selecting a page row cascades the selection to its auto-fix findings.
+  function applyPreset(presetId) {
+    setActivePreset(presetId)
+    if (presetId === 'custom') return
+    const next = visibleColsFromPreset(presetId)
+    if (next) setVisibleCols(next)
+  }
+
+  const toggleCol = id => {
+    setVisibleCols(v => {
+      const next = { ...v, [id]: !v[id] }
+      setActivePreset(detectActivePreset(next))
+      return next
+    })
+  }
+
+  const detailPage = detailPageUrl
+    ? CRAWLED_PAGE_DATA.find(p => p.url === detailPageUrl) || null
+    : null
+
+  const FIX_TYPE_ORDER = ['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']
+  const FIX_TYPE_LABELS = {
+    'Auto Fix': 'Auto fix',
+    'Assisted Fix': 'Assisted fix',
+    'Manual Fix': 'Manual fix',
+    Advisory: 'Advisory',
+  }
+  const detailFixTypesPresent = detailPage
+    ? FIX_TYPE_ORDER.filter(t => detailPage.findings.some(f => f.fixType === t))
+    : []
+  const detailFilteredFindings = detailPage
+    ? (detailFixFilter === 'all'
+      ? detailPage.findings
+      : detailPage.findings.filter(f => f.fixType === detailFixFilter))
+    : []
+  const detailSelectableAuto = detailPage
+    ? detailPage.findings.filter(f => isAutoFix(f) && isFindingSelectable(f))
+    : []
+  const detailSelectedCount = detailPage
+    ? (selectedFindings[detailPage.url] || []).filter(id =>
+      detailFilteredFindings.some(f => f.id === id && isFindingSelectable(f))
+    ).length
+    : 0
+
+  function openPageDetail(url) {
+    setDetailPageUrl(url)
+    setDetailFixFilter('all')
+  }
+
+  function openConnectFromDetail() {
+    if (!detailPage) return
+    setReopenDetailAfterConnect({ url: detailPage.url, fixFilter: detailFixFilter })
+    setDetailPageUrl(null)
+    setShowConnectModal(true)
+  }
+
+  function applyAutoFixesOnDetailPage() {
+    if (!detailPage || !detailSelectableAuto.length) return
+    const ids = detailSelectableAuto.map(f => f.id)
+    setSelectedFindings(prev => ({ ...prev, [detailPage.url]: ids }))
+    openConnectFromDetail()
+  }
+
+  function applySelectedOnDetailPage() {
+    if (!detailSelectedCount) return
+    openConnectFromDetail()
+  }
+
+  // Columns shown in the customize list: preset cols first when a named preset is active
+  const presetColIds = COLUMN_PRESETS.find(p => p.id === activePreset)?.columns
+  const orderedColsForPicker = (() => {
+    if (!presetColIds || activePreset === 'custom' || colSearch) {
+      return ALL_COLS.filter(c => !colSearch || c.label.toLowerCase().includes(colSearch.toLowerCase()))
+    }
+    const inPreset = ALL_COLS.filter(c => presetColIds.includes(c.id))
+    const rest = ALL_COLS.filter(c => !presetColIds.includes(c.id))
+    return [...inPreset, ...rest]
+  })()
+
+  // Selecting a page row cascades to its selectable Auto / Assisted findings.
   function toggleRow(url) {
     const page = CRAWLED_PAGE_DATA.find(p => p.url === url)
     const willSelect = !selected.includes(url)
     setSelected(s => (willSelect ? [...s, url] : s.filter(u => u !== url)))
-    setSelectedFindings(prev => ({ ...prev, [url]: willSelect && page ? autoOpenIds(page) : [] }))
+    setSelectedFindings(prev => ({ ...prev, [url]: willSelect && page ? selectableFindingIds(page) : [] }))
   }
   const allSel    = selected.length === CRAWLED_PAGE_DATA.length
   function toggleAll() {
     if (allSel) { setSelected([]); setSelectedFindings({}); return }
     setSelected(CRAWLED_PAGE_DATA.map(p => p.url))
     const map = {}
-    CRAWLED_PAGE_DATA.forEach(p => { map[p.url] = autoOpenIds(p) })
+    CRAWLED_PAGE_DATA.forEach(p => { map[p.url] = selectableFindingIds(p) })
     setSelectedFindings(map)
   }
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls />
-
       {/* Filter + action bar */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Type filter chip */}
@@ -4246,31 +4580,11 @@ function CrawledPagesTab() {
           onClose={() => setShowStatusDropdown(false)}
         />
 
-        {/* Advanced filter chip */}
-        <button
+        <AdvancedFilterTrigger
+          activeCount={activeRules.length}
           onClick={() => setShowFilterDrawer(true)}
-          className={`h-8 inline-flex items-center gap-1.5 px-3 rounded-full border text-[13px] font-medium transition-colors ${
-            activeRules.length
-              ? 'bg-primary-50 border-primary-300 text-primary-700'
-              : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-          }`}
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-          </svg>
-          Advanced filter
-          {activeRules.length > 0 && (
-            <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-primary-600 text-white text-[12px] font-medium">
-              {activeRules.length}
-            </span>
-          )}
-        </button>
-
-        {activeRules.length > 0 && (
-          <button onClick={() => setActiveRules([])} className="text-[12px] text-gray-400 hover:text-gray-600 underline transition-colors">
-            Clear
-          </button>
-        )}
+          onClear={() => setActiveRules([])}
+        />
 
         <div className="ml-auto flex items-center gap-2">
           {/* Search — right-aligned, filters stay on the left */}
@@ -4287,92 +4601,84 @@ function CrawledPagesTab() {
             {/* Column count trigger */}
             <button
               onClick={() => { setShowColumns(c => !c); setColSearch('') }}
-              className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              className="h-8 inline-flex items-center gap-1.5 px-3 text-[14px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
               <LayoutDashboard size={13} />
               {selectedColCount}/{ALL_COLS.length} Columns
             </button>
 
             {showColumns && (
-              <div className="absolute right-0 top-10 z-50 bg-white border border-gray-200 rounded-lg overflow-hidden w-72" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
-                {/* Search */}
+              <div className="absolute right-0 top-10 z-50 bg-white border border-gray-200 rounded-lg overflow-hidden w-80" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
+                {/* Presets */}
                 <div className="p-2 border-b border-gray-100">
+                  <p className="text-[12px] font-medium text-gray-500 px-1 mb-1.5 m-0">Column preset</p>
+                  <div className="flex flex-col">
+                    {COLUMN_PRESETS.map(preset => (
+                      <label
+                        key={preset.id}
+                        className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 cursor-pointer"
+                      >
+                        <input
+                          type="radio"
+                          name="column-preset"
+                          checked={activePreset === preset.id}
+                          onChange={() => applyPreset(preset.id)}
+                          style={{ accentColor: '#155EEF', width: 14, height: 14 }}
+                        />
+                        <span className="text-[13px] text-gray-700">{preset.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search */}
+                <div className="p-2 border-b border-gray-100 flex flex-col gap-1.5">
                   <div className="relative flex items-center">
                     <Search size={13} className="absolute left-2.5 text-gray-400 pointer-events-none" />
                     <input
                       value={colSearch}
                       onChange={e => setColSearch(e.target.value)}
-                      placeholder="Please input"
+                      placeholder="Search"
                       className="w-full pl-7 pr-3 py-1.5 text-[13px] text-gray-700 placeholder:text-gray-400 border border-primary-600 rounded-lg outline-none bg-white"
                     />
                   </div>
                 </div>
 
-                {/* Warning when at limit — inset with padding to match other elements */}
-                {atColLimit && (
-                  <div className="px-2 pt-2">
-                    <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg" style={{ background: 'var(--warning-50)', border: '1px solid var(--warning-200)' }}>
-                      <AlertTriangle size={11} style={{ color: 'var(--warning-600)', flexShrink: 0 }} />
-                      <span className="text-[12px] font-medium" style={{ color: 'var(--warning-600)' }}>
-                        Max {MAX_VISIBLE_COLS} columns selected. Deselect one to add another.
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                {/* Count + select all */}
                 <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
-                  <span className="text-[12px] text-gray-500">{selectedColCount} of {MAX_VISIBLE_COLS} columns selected</span>
-                  {!atColLimit && (
-                    <button
-                      onClick={() => {
-                        // Select URL + first (MAX_VISIBLE_COLS - 1) other columns
-                        const firstN = ALL_COLS.slice(0, MAX_VISIBLE_COLS - 1).map(c => c.id)
-                        setVisibleCols(Object.fromEntries(ALL_COLS.map(c => [c.id, firstN.includes(c.id)])))
-                      }}
-                      className="text-[12px] font-semibold text-primary-600 hover:underline"
-                    >
-                      Select first {MAX_VISIBLE_COLS}
-                    </button>
-                  )}
+                  <span className="text-[12px] text-gray-500">{selectedColCount} of {ALL_COLS.length} columns selected</span>
                 </div>
 
-                {/* Column list — 12 rows visible, scrolls for the rest */}
-                <div className="overflow-y-auto" style={{ maxHeight: 12 * 34 }}>
-                  {/* URL — always visible, frozen */}
+                {/* Column list — URL + Issues always on; preset cols listed first when applicable */}
+                <div className="overflow-y-auto" style={{ maxHeight: 10 * 34 }}>
                   <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors" style={{ height: 34 }}>
-                    <span className="text-gray-200 select-none text-[14px] shrink-0">⠿</span>
                     <input type="checkbox" checked disabled style={{ accentColor: '#155EEF', width: 15, height: 15, flexShrink: 0 }} />
                     <span className="text-[13px] text-gray-700 flex-1">URL</span>
                   </div>
+                  <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors" style={{ height: 34 }}>
+                    <input type="checkbox" checked disabled style={{ accentColor: '#155EEF', width: 15, height: 15, flexShrink: 0 }} />
+                    <span className="text-[13px] text-gray-700 flex-1">Issues</span>
+                  </div>
 
-                  {/* All columns — flat list */}
-                  {ALL_COLS
-                    .filter(c => !colSearch || c.label.toLowerCase().includes(colSearch.toLowerCase()))
-                    .map(col => {
-                      const isChecked   = !!visibleCols[col.id]
-                      const isDisabled  = !isChecked && atColLimit
-                      return (
-                        <div
-                          key={col.id}
-                          className={`flex items-center gap-2 px-3 py-2 transition-colors ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'}`}
-                          style={{ height: 34 }}
-                          onClick={() => !isDisabled && toggleCol(col.id)}
-                        >
-                          <span className="text-gray-300 select-none text-[14px] shrink-0">⠿</span>
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            disabled={isDisabled}
-                            onChange={() => !isDisabled && toggleCol(col.id)}
-                            onClick={e => e.stopPropagation()}
-                            style={{ accentColor: '#155EEF', width: 15, height: 15, flexShrink: 0, cursor: isDisabled ? 'not-allowed' : 'pointer' }}
-                          />
-                          <span className="text-[13px] text-gray-700 flex-1">{col.label}</span>
-                        </div>
-                      )
-                    })
-                  }
+                  {orderedColsForPicker.map(col => {
+                    const isChecked = !!visibleCols[col.id]
+                    return (
+                      <div
+                        key={col.id}
+                        className="flex items-center gap-2 px-3 py-2 transition-colors hover:bg-gray-50 cursor-pointer"
+                        style={{ height: 34 }}
+                        onClick={() => toggleCol(col.id)}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => toggleCol(col.id)}
+                          onClick={e => e.stopPropagation()}
+                          style={{ accentColor: '#155EEF', width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
+                        />
+                        <span className="text-[13px] text-gray-700 flex-1">{col.label}</span>
+                      </div>
+                    )
+                  })}
                 </div>
               </div>
             )}
@@ -4386,137 +4692,160 @@ function CrawledPagesTab() {
             }`}
           >
             <Zap size={13} />
-            Apply fixes{totalSelectedFindings > 0 ? ` (${totalSelectedFindings})` : ''}
+            Connect to fix{totalSelectedFindings > 0 ? ` (${totalSelectedFindings})` : ''}
           </button>
         </div>
       </div>
 
-      <SectionCard className="overflow-hidden">
+      <SectionCard>
         <div ref={tableScrollRef} className="overflow-x-auto">
-        <table className="w-full border-collapse text-left">
+        {/* w-max keeps column min-widths; URL + Issues stay sticky while other cols scroll */}
+        <table className="min-w-full w-max border-separate border-spacing-0 text-left [&_th]:border-b [&_th]:border-gray-100 [&_td]:border-b [&_td]:border-gray-50">
           <thead>
-            <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="py-3" style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL, maxWidth: TABLE_EXPAND_COL }} />
-              <th className="py-3" style={{ width: TABLE_CHECK_COL, minWidth: TABLE_CHECK_COL, maxWidth: TABLE_CHECK_COL }}>
+            <tr className="bg-gray-50">
+              <th
+                className="sticky z-30 py-3 bg-gray-50"
+                style={{ left: 0, width: TABLE_CHECK_COL, minWidth: TABLE_CHECK_COL, maxWidth: TABLE_CHECK_COL }}
+              >
                 <div className="flex items-center justify-center">
                   <TableCheckbox checked={allSel} indeterminate={selected.length > 0 && !allSel} onChange={toggleAll} />
                 </div>
               </th>
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[300px]">Page URL</th>
-              {visibleCols.results          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Results</th>}
-              {visibleCols.traffic          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Total traffic</th>}
-              {visibleCols.httpCode         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">HTTP status</th>}
-              {visibleCols.indexable        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Indexable</th>}
-              {visibleCols.indexStatus      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[160px]">Indexability status</th>}
-              {visibleCols.referring        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Referring pages</th>}
-              {visibleCols.depth            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Depth</th>}
-              {visibleCols.keywords         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Keywords</th>}
-              {visibleCols.urlProtocol      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">URL protocol</th>}
-              {visibleCols.robots           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Blocked by robots.txt</th>}
-              {visibleCols.title            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[220px]">Title</th>}
-              {visibleCols.titleLen         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Title length</th>}
-              {visibleCols.descLen          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Description length</th>}
-              {visibleCols.canonical        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px]">Canonical URL</th>}
-              {visibleCols.h1               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">H1</th>}
-              {visibleCols.h1Len            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H1 length</th>}
-              {visibleCols.singleH1         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Single H1</th>}
-              {visibleCols.dupH1            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Duplicate H1</th>}
-              {visibleCols.h2               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">H2</th>}
-              {visibleCols.h2Len            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H2 length</th>}
-              {visibleCols.singleH2         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Single H2</th>}
-              {visibleCols.errorsCol        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Errors</th>}
-              {visibleCols.warningsCol      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Warnings</th>}
-              {visibleCols.noticesCol       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Notices</th>}
-              {visibleCols.urlLength        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">URL length</th>}
-              {visibleCols.inSitemap        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Is in sitemap</th>}
-              {visibleCols.ttfb             && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">TTFB</th>}
-              {visibleCols.robotsMeta       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Robots meta tag</th>}
-              {visibleCols.xRobotsTag       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">X-Robots-Tag</th>}
-              {visibleCols.dupTitle         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Duplicate title</th>}
-              {visibleCols.description      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[220px]">Description</th>}
-              {visibleCols.dupDesc          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Duplicate description</th>}
-              {visibleCols.hreflangTags     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Hreflang tags</th>}
-              {visibleCols.hreflang         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Hreflang</th>}
-              {visibleCols.h3               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H3</th>}
-              {visibleCols.h4               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H4</th>}
-              {visibleCols.h5               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H5</th>}
-              {visibleCols.h6               && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">H6</th>}
-              {visibleCols.textHtmlRatio    && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Text to HTML ratio</th>}
-              {visibleCols.htmlSize         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">HTML size</th>}
-              {visibleCols.wordCount        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Word count</th>}
-              {visibleCols.pageSize         && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Page size</th>}
-              {visibleCols.refreshRedirect  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Refresh redirect time</th>}
-              {visibleCols.nofollowDofollow && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Follow type</th>}
-              {visibleCols.inlinks          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Inlinks</th>}
-              {visibleCols.inlinksDofollow  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Inlinks dofollow</th>}
-              {visibleCols.inlinksNofollow  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Inlinks nofollow</th>}
-              {visibleCols.redirectInlinks  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Redirect inlinks</th>}
-              {visibleCols.numRedirects     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Number of redirects</th>}
-              {visibleCols.redirectTarget   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px]">Redirect target URL</th>}
-              {visibleCols.internalOutlinks && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Internal outlinks</th>}
-              {visibleCols.externalOutlinks && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">External outlinks</th>}
-              {visibleCols.lastModified     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Last modified</th>}
-              {visibleCols.mixedContent     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Mixed content</th>}
-              {visibleCols.metaRefresh      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Meta refresh redirects</th>}
-              {visibleCols.contentHash      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Content hash</th>}
-              {visibleCols.cssSize          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">CSS size</th>}
-              {visibleCols.jsSize           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">JS size</th>}
-              {visibleCols.imageSize        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Image size</th>}
-              {visibleCols.images           && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Images</th>}
-              {visibleCols.loadingTime      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Loading time</th>}
-              {visibleCols.isAmp            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Is AMP</th>}
+              <th
+                className="sticky z-30 px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50"
+                style={{ left: CRAWLED_STICKY_URL_LEFT, width: CRAWLED_URL_COL_W, minWidth: CRAWLED_URL_COL_W, maxWidth: CRAWLED_URL_COL_W }}
+              >
+                Page URL
+              </th>
+              <th
+                className="sticky z-30 px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50"
+                style={{
+                  left: CRAWLED_STICKY_ISSUES_LEFT,
+                  width: CRAWLED_ISSUES_COL_W,
+                  minWidth: CRAWLED_ISSUES_COL_W,
+                  maxWidth: CRAWLED_ISSUES_COL_W,
+                  boxShadow: '4px 0 8px -4px rgba(16, 24, 40, 0.12)',
+                }}
+              >
+                Issues
+              </th>
+              {visibleCols.results          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Results</th>}
+              {visibleCols.traffic          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Total traffic</th>}
+              {visibleCols.httpCode         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">HTTP status</th>}
+              {visibleCols.indexable        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Indexable</th>}
+              {visibleCols.indexStatus      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[160px]">Indexability status</th>}
+              {visibleCols.referring        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Referring pages</th>}
+              {visibleCols.depth            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Depth</th>}
+              {visibleCols.keywords         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Keywords</th>}
+              {visibleCols.urlProtocol      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">URL protocol</th>}
+              {visibleCols.robots           && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Blocked by robots.txt</th>}
+              {visibleCols.title            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px] w-[200px]">Title</th>}
+              {visibleCols.titleLen         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Title length</th>}
+              {visibleCols.descLen          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Description length</th>}
+              {visibleCols.canonical        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px]">Canonical URL</th>}
+              {visibleCols.h1               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">H1</th>}
+              {visibleCols.h1Len            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H1 length</th>}
+              {visibleCols.singleH1         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Single H1</th>}
+              {visibleCols.dupH1            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Duplicate H1</th>}
+              {visibleCols.h2               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">H2</th>}
+              {visibleCols.h2Len            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H2 length</th>}
+              {visibleCols.singleH2         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Single H2</th>}
+              {visibleCols.errorsCol        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Errors</th>}
+              {visibleCols.warningsCol      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Warnings</th>}
+              {visibleCols.noticesCol       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Notices</th>}
+              {visibleCols.urlLength        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">URL length</th>}
+              {visibleCols.inSitemap        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Is in sitemap</th>}
+              {visibleCols.ttfb             && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">TTFB</th>}
+              {visibleCols.robotsMeta       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Robots meta tag</th>}
+              {visibleCols.xRobotsTag       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">X-Robots-Tag</th>}
+              {visibleCols.dupTitle         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Duplicate title</th>}
+              {visibleCols.description      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[220px]">Description</th>}
+              {visibleCols.dupDesc          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Duplicate description</th>}
+              {visibleCols.hreflangTags     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Hreflang tags</th>}
+              {visibleCols.hreflang         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Hreflang</th>}
+              {visibleCols.h3               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H3</th>}
+              {visibleCols.h4               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H4</th>}
+              {visibleCols.h5               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H5</th>}
+              {visibleCols.h6               && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">H6</th>}
+              {visibleCols.textHtmlRatio    && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Text to HTML ratio</th>}
+              {visibleCols.htmlSize         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">HTML size</th>}
+              {visibleCols.wordCount        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Word count</th>}
+              {visibleCols.pageSize         && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Page size</th>}
+              {visibleCols.refreshRedirect  && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Refresh redirect time</th>}
+              {visibleCols.nofollowDofollow && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Follow type</th>}
+              {visibleCols.inlinks          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Inlinks</th>}
+              {visibleCols.inlinksDofollow  && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Inlinks dofollow</th>}
+              {visibleCols.inlinksNofollow  && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Inlinks nofollow</th>}
+              {visibleCols.redirectInlinks  && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Redirect inlinks</th>}
+              {visibleCols.numRedirects     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Number of redirects</th>}
+              {visibleCols.redirectTarget   && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px]">Redirect target URL</th>}
+              {visibleCols.internalOutlinks && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Internal outlinks</th>}
+              {visibleCols.externalOutlinks && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">External outlinks</th>}
+              {visibleCols.lastModified     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Last modified</th>}
+              {visibleCols.mixedContent     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Mixed content</th>}
+              {visibleCols.metaRefresh      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Meta refresh redirects</th>}
+              {visibleCols.contentHash      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Content hash</th>}
+              {visibleCols.cssSize          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">CSS size</th>}
+              {visibleCols.jsSize           && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">JS size</th>}
+              {visibleCols.imageSize        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Image size</th>}
+              {visibleCols.images           && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Images</th>}
+              {visibleCols.loadingTime      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Loading time</th>}
+              {visibleCols.isAmp            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Is AMP</th>}
             </tr>
           </thead>
           <tbody>
             {paginatedData.map(page => {
               const isSel = selected.includes(page.url)
-              const isExpanded = expandedRow === page.url
-              const pageSel = selectedFindings[page.url] || []
-              const colSpanCount = 3 + Object.values(visibleCols).filter(Boolean).length
-
-              function severityStyle(sev) {
-                if (sev === 'Errors')   return { bg: '#FEF2F2', border: '#FECACA', color: '#DC2626', Icon: AlertTriangle }
-                if (sev === 'Warnings') return { bg: 'var(--warning-100)', border: '#FDE68A', color: '#D97706', Icon: AlertTriangle }
-                return                         { bg: 'var(--primary-50)', border: '#BFDBFE', color: 'var(--primary-600)', Icon: CircleCheck  }
-              }
-
+              const stickyCellBg = isSel ? 'bg-primary-50' : 'bg-white group-hover:bg-gray-50'
               return (
-                <>
-                  <tr key={page.url} className={`border-b border-gray-50 transition-colors hover:bg-gray-50/40 ${isSel ? 'bg-primary-50/30' : ''} ${isExpanded ? 'border-b-0' : ''}`}>
-                    <td className="py-3" style={{ verticalAlign: 'top', width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL, maxWidth: TABLE_EXPAND_COL }}>
-                      <button
-                        onClick={() => setExpandedRow(isExpanded ? null : page.url)}
-                        className="flex items-center justify-center w-6 h-6 mx-auto rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600 mt-0.5"
-                      >
-                        <ChevronDown size={14} className={`transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
-                      </button>
-                    </td>
-                    <td className="py-3" style={{ verticalAlign: 'top', width: TABLE_CHECK_COL, minWidth: TABLE_CHECK_COL, maxWidth: TABLE_CHECK_COL }}>
+                  <tr key={page.url} className={`group border-b border-gray-50 transition-colors hover:bg-gray-50/40 ${isSel ? 'bg-primary-50/30' : ''}`}>
+                    <td
+                      className={`sticky z-20 py-3 ${stickyCellBg}`}
+                      style={{ verticalAlign: 'top', left: 0, width: TABLE_CHECK_COL, minWidth: TABLE_CHECK_COL, maxWidth: TABLE_CHECK_COL }}
+                    >
                       <div className="flex items-center justify-center pt-0.5">
                         <input type="checkbox" checked={isSel} onChange={() => toggleRow(page.url)} style={tableCheckboxStyle} />
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[360px]">{page.url}</a>
+                    <td
+                      className={`sticky z-20 px-4 py-3 ${stickyCellBg}`}
+                      style={{ left: CRAWLED_STICKY_URL_LEFT, width: CRAWLED_URL_COL_W, minWidth: CRAWLED_URL_COL_W, maxWidth: CRAWLED_URL_COL_W }}
+                    >
+                      <a
+                        href={page.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary-600 hover:underline max-w-full"
+                        title="Open page in new tab"
+                      >
+                        <span className="truncate">{page.url}</span>
+                        <ExternalLink size={11} className="shrink-0" />
+                      </a>
+                    </td>
+                    <td
+                      className={`sticky z-20 px-4 py-3 whitespace-nowrap ${stickyCellBg}`}
+                      style={{
+                        left: CRAWLED_STICKY_ISSUES_LEFT,
+                        width: CRAWLED_ISSUES_COL_W,
+                        minWidth: CRAWLED_ISSUES_COL_W,
+                        maxWidth: CRAWLED_ISSUES_COL_W,
+                        boxShadow: '4px 0 8px -4px rgba(16, 24, 40, 0.12)',
+                      }}
+                    >
+                      <button
+                        type="button"
+                        onClick={() => openPageDetail(page.url)}
+                        className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                      >
+                        View
+                      </button>
                     </td>
                     {visibleCols.results && (
                       <td className="px-4 py-3">
-                        <div className="relative group inline-block">
-                          <span className="text-[13px] font-semibold text-gray-900 tabular-nums cursor-default">{page.results.cur}</span>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 z-50 hidden group-hover:block pointer-events-none">
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 border-4 border-transparent border-b-gray-900" style={{ top: -8 }} />
-                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">
-                              <div className="flex flex-col gap-0.5">
-                                <span>Current: {page.results.cur}</span>
-                                <span>New: {page.results.isNew}</span>
-                                <span>Fixed: {page.results.fix}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                        <ResultsCountCell results={page.results} />
                       </td>
                     )}
-                    {visibleCols.traffic     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.traffic.toLocaleString()}</td>}
+                    {visibleCols.traffic     && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.traffic.toLocaleString()}</td>}
                     {visibleCols.httpCode    && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
@@ -4525,23 +4854,23 @@ function CrawledPagesTab() {
                     {visibleCols.indexable   && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.indexable
-                          ? <span className="inline-flex items-center gap-1 text-[12px] font-medium text-success-600"><CircleCheck size={11} />Indexable</span>
-                          : <span className="text-[12px] text-gray-400">Not indexable</span>
+                          ? <span className="inline-flex items-center gap-1 text-[14px] font-medium text-success-600"><CircleCheck size={11} />Indexable</span>
+                          : <span className="text-[14px] text-gray-400">Not indexable</span>
                         }
                       </td>
                     )}
                     {visibleCols.indexStatus && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.indexStatus === 'Ok'
-                          ? <span className="text-[12px] font-medium text-success-600">Ok</span>
-                          : <span className="text-[12px] font-medium text-warning-600">{page.indexStatus}</span>
+                          ? <span className="text-[14px] font-medium text-success-600">Ok</span>
+                          : <span className="text-[14px] font-medium text-warning-600">{page.indexStatus}</span>
                         }
                       </td>
                     )}
-                    {visibleCols.referring   && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.referring}</td>}
-                    {visibleCols.depth       && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.depth}</td>}
-                    {visibleCols.keywords    && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums">{page.keywords.toLocaleString()}</td>}
-                    {visibleCols.urlProtocol      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlProtocol}</td>}
+                    {visibleCols.referring   && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums">{page.referring}</td>}
+                    {visibleCols.depth       && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums">{page.depth}</td>}
+                    {visibleCols.keywords    && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums">{page.keywords.toLocaleString()}</td>}
+                    {visibleCols.urlProtocol      && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlProtocol}</td>}
                     {visibleCols.robots           && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.robots
@@ -4551,33 +4880,23 @@ function CrawledPagesTab() {
                       </td>
                     )}
                     {visibleCols.title            && (
-                      <td className="px-4 py-3 max-w-[220px]">
-                        <div className="relative group">
-                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.title}</span>
-                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.title}</div>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 min-w-[200px] w-[200px] max-w-[200px] overflow-hidden">
+                        <TruncatedCellTip text={page.title} />
                       </td>
                     )}
-                    {visibleCols.titleLen         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.titleLen}</td>}
-                    {visibleCols.descLen          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.descLen}</td>}
+                    {visibleCols.titleLen         && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.titleLen}</td>}
+                    {visibleCols.descLen          && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.descLen}</td>}
                     {visibleCols.canonical        && (
                       <td className="px-4 py-3 max-w-[200px]">
-                        <a href="#" className="text-[13px] text-primary-600 hover:underline truncate block">{page.canonical}</a>
+                        <a href="#" className="text-[14px] text-primary-600 hover:underline truncate block">{page.canonical}</a>
                       </td>
                     )}
                     {visibleCols.h1               && (
-                      <td className="px-4 py-3 max-w-[180px]">
-                        <div className="relative group">
-                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.h1}</span>
-                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.h1}</div>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 min-w-[180px] w-[180px] max-w-[180px] overflow-hidden">
+                        <TruncatedCellTip text={page.h1} />
                       </td>
                     )}
-                    {visibleCols.h1Len            && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h1Len}</td>}
+                    {visibleCols.h1Len            && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h1Len}</td>}
                     {visibleCols.singleH1         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.singleH1 === 'Single'
@@ -4595,16 +4914,11 @@ function CrawledPagesTab() {
                       </td>
                     )}
                     {visibleCols.h2               && (
-                      <td className="px-4 py-3 max-w-[180px]">
-                        <div className="relative group">
-                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.h2}</span>
-                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.h2}</div>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 min-w-[180px] w-[180px] max-w-[180px] overflow-hidden">
+                        <TruncatedCellTip text={page.h2} />
                       </td>
                     )}
-                    {visibleCols.h2Len            && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h2Len}</td>}
+                    {visibleCols.h2Len            && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h2Len}</td>}
                     {visibleCols.singleH2         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.singleH2 === 'Single'
@@ -4613,10 +4927,10 @@ function CrawledPagesTab() {
                         }
                       </td>
                     )}
-                    {visibleCols.errorsCol        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.errorsCol}</td>}
-                    {visibleCols.warningsCol      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.warningsCol}</td>}
-                    {visibleCols.noticesCol       && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.noticesCol}</td>}
-                    {visibleCols.urlLength        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlLength}</td>}
+                    {visibleCols.errorsCol        && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.errorsCol}</td>}
+                    {visibleCols.warningsCol      && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.warningsCol}</td>}
+                    {visibleCols.noticesCol       && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.noticesCol}</td>}
+                    {visibleCols.urlLength        && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.urlLength}</td>}
                     {visibleCols.inSitemap        && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.inSitemap
@@ -4625,9 +4939,9 @@ function CrawledPagesTab() {
                         }
                       </td>
                     )}
-                    {visibleCols.ttfb             && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.ttfb} ms</td>}
-                    {visibleCols.robotsMeta       && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.robotsMeta}</td>}
-                    {visibleCols.xRobotsTag       && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.xRobotsTag}</td>}
+                    {visibleCols.ttfb             && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.ttfb} ms</td>}
+                    {visibleCols.robotsMeta       && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.robotsMeta}</td>}
+                    {visibleCols.xRobotsTag       && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.xRobotsTag}</td>}
                     {visibleCols.dupTitle         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.dupTitle
@@ -4637,13 +4951,8 @@ function CrawledPagesTab() {
                       </td>
                     )}
                     {visibleCols.description      && (
-                      <td className="px-4 py-3 max-w-[220px]">
-                        <div className="relative group">
-                          <span className="text-[13px] text-gray-700 truncate block cursor-default">{page.description}</span>
-                          <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                            <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-normal max-w-[280px] shadow-lg">{page.description}</div>
-                          </div>
-                        </div>
+                      <td className="px-4 py-3 min-w-[200px] w-[200px] max-w-[200px] overflow-hidden">
+                        <TruncatedCellTip text={page.description} />
                       </td>
                     )}
                     {visibleCols.dupDesc          && (
@@ -4654,17 +4963,17 @@ function CrawledPagesTab() {
                         }
                       </td>
                     )}
-                    {visibleCols.hreflangTags     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.hreflangTags}</td>}
-                    {visibleCols.hreflang         && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.hreflang}</td>}
-                    {visibleCols.h3               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h3}</td>}
-                    {visibleCols.h4               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h4}</td>}
-                    {visibleCols.h5               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h5}</td>}
-                    {visibleCols.h6               && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.h6}</td>}
-                    {visibleCols.textHtmlRatio    && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.textHtmlRatio}%</td>}
-                    {visibleCols.htmlSize         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.htmlSize}</td>}
-                    {visibleCols.wordCount        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.wordCount.toLocaleString()}</td>}
-                    {visibleCols.pageSize         && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.pageSize}</td>}
-                    {visibleCols.refreshRedirect  && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.refreshRedirect}</td>}
+                    {visibleCols.hreflangTags     && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.hreflangTags}</td>}
+                    {visibleCols.hreflang         && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.hreflang}</td>}
+                    {visibleCols.h3               && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h3}</td>}
+                    {visibleCols.h4               && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h4}</td>}
+                    {visibleCols.h5               && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h5}</td>}
+                    {visibleCols.h6               && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.h6}</td>}
+                    {visibleCols.textHtmlRatio    && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.textHtmlRatio}%</td>}
+                    {visibleCols.htmlSize         && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.htmlSize}</td>}
+                    {visibleCols.wordCount        && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.wordCount.toLocaleString()}</td>}
+                    {visibleCols.pageSize         && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.pageSize}</td>}
+                    {visibleCols.refreshRedirect  && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.refreshRedirect}</td>}
                     {visibleCols.nofollowDofollow && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.nofollowDofollow === 'DF'
@@ -4673,22 +4982,22 @@ function CrawledPagesTab() {
                         }
                       </td>
                     )}
-                    {visibleCols.inlinks          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.inlinks}</td>}
-                    {visibleCols.inlinksDofollow  && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.inlinksDofollow}</td>}
-                    {visibleCols.inlinksNofollow  && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.inlinksNofollow}</td>}
-                    {visibleCols.redirectInlinks  && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.redirectInlinks}</td>}
-                    {visibleCols.numRedirects     && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.numRedirects}</td>}
+                    {visibleCols.inlinks          && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.inlinks}</td>}
+                    {visibleCols.inlinksDofollow  && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.inlinksDofollow}</td>}
+                    {visibleCols.inlinksNofollow  && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.inlinksNofollow}</td>}
+                    {visibleCols.redirectInlinks  && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.redirectInlinks}</td>}
+                    {visibleCols.numRedirects     && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.numRedirects}</td>}
                     {visibleCols.redirectTarget   && (
                       <td className="px-4 py-3 max-w-[200px]">
                         {page.redirectTarget && page.redirectTarget !== '—'
-                          ? <a href="#" className="text-[13px] text-primary-600 hover:underline truncate block">{page.redirectTarget}</a>
-                          : <span className="text-[13px] text-gray-400">—</span>
+                          ? <a href="#" className="text-[14px] text-primary-600 hover:underline truncate block">{page.redirectTarget}</a>
+                          : <span className="text-[14px] text-gray-400">—</span>
                         }
                       </td>
                     )}
-                    {visibleCols.internalOutlinks && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.internalOutlinks}</td>}
-                    {visibleCols.externalOutlinks && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.externalOutlinks}</td>}
-                    {visibleCols.lastModified     && <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{page.lastModified}</td>}
+                    {visibleCols.internalOutlinks && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.internalOutlinks}</td>}
+                    {visibleCols.externalOutlinks && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.externalOutlinks}</td>}
+                    {visibleCols.lastModified     && <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{page.lastModified}</td>}
                     {visibleCols.mixedContent     && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.mixedContent
@@ -4709,21 +5018,21 @@ function CrawledPagesTab() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.contentHash && page.contentHash !== '—' ? (
                           <div className="relative group inline-block">
-                            <span className="font-mono text-[12px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
+                            <span className="font-mono text-[14px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
                             <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
                               <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg font-mono">{page.contentHash}</div>
                             </div>
                           </div>
                         ) : (
-                          <span className="text-[13px] text-gray-400">—</span>
+                          <span className="text-[14px] text-gray-400">—</span>
                         )}
                       </td>
                     )}
-                    {visibleCols.cssSize          && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.cssSize}</td>}
-                    {visibleCols.jsSize           && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.jsSize}</td>}
-                    {visibleCols.imageSize        && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.imageSize}</td>}
-                    {visibleCols.images           && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.images}</td>}
-                    {visibleCols.loadingTime      && <td className="px-4 py-3 text-[13px] text-gray-700 tabular-nums whitespace-nowrap">{page.loadingTime}</td>}
+                    {visibleCols.cssSize          && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.cssSize}</td>}
+                    {visibleCols.jsSize           && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.jsSize}</td>}
+                    {visibleCols.imageSize        && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.imageSize}</td>}
+                    {visibleCols.images           && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.images}</td>}
+                    {visibleCols.loadingTime      && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.loadingTime}</td>}
                     {visibleCols.isAmp            && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.isAmp
@@ -4733,161 +5042,17 @@ function CrawledPagesTab() {
                       </td>
                     )}
                   </tr>
-
-                  {isExpanded && (
-                    <tr key={`${page.url}-exp`} className="border-b border-gray-100 bg-gray-50/40">
-                      {/* Full-cell grey bg so horizontal overflow past the sticky panel isn't empty white */}
-                      <td colSpan={colSpanCount} className="px-0 py-0" style={{ overflow: 'hidden' }}>
-                        <div
-                          style={{ position: 'sticky', left: 0, width: tableScrollWidth || '100%', maxWidth: '100%' }}
-                        >
-                          {/* Reference nested-table layout: left spacer = expand column, then a white rounded card */}
-                          <div className="flex pb-3 pr-4">
-                            <div className="shrink-0" style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL }} />
-                            <div className="flex-1 min-w-0 rounded-lg border border-gray-100 bg-white overflow-x-auto">
-                              <table className="w-full table-fixed border-collapse text-left">
-                                {/* Fixed column widths so inline-editing a recommendation doesn't shift column widths */}
-                                <colgroup>
-                                  <col style={{ width: TABLE_CHECK_COL }} />
-                                  <col style={{ width: '11%' }} />
-                                  <col style={{ width: '9%' }} />
-                                  <col style={{ width: '17.5%' }} />
-                                  <col style={{ width: '20%' }} />
-                                  <col style={{ width: '16%' }} />
-                                  <col style={{ width: '26.5%' }} />
-                                </colgroup>
-                                <thead>
-                                  <tr className="border-b border-gray-100">
-                                    <th className="py-2.5" style={{ width: TABLE_CHECK_COL }} />
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Severity</th>
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Status</th>
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900">Description</th>
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900">Details</th>
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900">Current value</th>
-                                    <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900">Recommendation</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {page.findings.map(finding => {
-                                    const sev = severityStyle(finding.severity)
-                                    const status       = findingStatus(finding)
-                                    const selectable   = isFindingSelectable(finding)
-                                    const isFindingSel  = pageSel.includes(finding.id)
-                                    const autoFix       = isAutoFix(finding)
-                                    const isEditing     = editingFinding === finding.id
-                                    const recValue      = findingValues[finding.id] ?? finding.aiValue
-                                    return (
-                                      <tr key={finding.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
-                                        <td className="py-2.5" style={{ verticalAlign: 'top', width: TABLE_CHECK_COL }}>
-                                          <div className="flex items-center justify-center pt-0.5">
-                                            <input
-                                              type="checkbox"
-                                              checked={selectable && isFindingSel}
-                                              disabled={!selectable}
-                                              onChange={() => selectable && toggleFinding(page.url, finding.id)}
-                                              style={tableCheckboxStyle}
-                                              className={selectable ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}
-                                            />
-                                          </div>
-                                        </td>
-                                        <td className="px-4 py-2.5" style={{ verticalAlign: 'top' }}>
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium whitespace-nowrap" style={{ background: sev.bg, borderColor: sev.border, color: sev.color }}>
-                                            <sev.Icon size={9} />
-                                            {finding.severity}
-                                          </span>
-                                        </td>
-                                        <td className="px-4 py-2.5 whitespace-nowrap" style={{ verticalAlign: 'top' }}>
-                                          <span className={`text-[12px] font-medium ${
-                                            status === 'Fixed' ? 'text-success-600' :
-                                            status === 'New'   ? 'text-primary-600' :
-                                            status === 'Draft' ? 'text-warning-600' :
-                                                                 'text-gray-500'
-                                          }`}>{status}</span>
-                                        </td>
-                                        <td className="px-4 py-2.5" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
-                                          <p className="text-[12px] text-gray-600 leading-snug m-0">{finding.description}</p>
-                                          <span className={`inline-flex items-center mt-1.5 px-2 py-px rounded-full border text-[12px] font-medium ${
-                                            finding.fixType === 'Auto Fix'
-                                              ? 'bg-success-50 border-success-200 text-success-700'
-                                              : finding.fixType === 'Assisted Fix'
-                                              ? 'bg-primary-50 border-primary-200 text-primary-700'
-                                              : finding.fixType === 'Manual Fix'
-                                              ? 'bg-warning-100 border-warning-200 text-warning-700'
-                                              : 'bg-purple-50 border-purple-200 text-purple-700'
-                                          }`}>{finding.fixType}</span>
-                                        </td>
-                                        <td className="px-4 py-2.5 text-[12px] text-gray-500 leading-snug" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.detail}</td>
-                                        <td className="px-4 py-2.5 text-[12px] text-gray-600 leading-snug" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>{finding.currentValue}</td>
-                                        <td className="px-4 py-2.5" style={{ verticalAlign: 'top', overflowWrap: 'break-word', wordBreak: 'break-word' }}>
-                                          {!recValue ? (
-                                            <span className="text-[13px] text-gray-300">—</span>
-                                          ) : autoFix && isEditing ? (
-                                            /* Auto fix — inline edit (fixed → edit re-opens as Draft) */
-                                            <div className="flex flex-col gap-1.5">
-                                              <textarea
-                                                value={recValue}
-                                                onChange={e => setFindingValues(prev => ({ ...prev, [finding.id]: e.target.value }))}
-                                                rows={2}
-                                                className="w-full text-[12px] font-mono text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all focus:border-primary-600"
-                                              />
-                                              <div className="flex items-center gap-2.5">
-                                                <button
-                                                  onClick={() => setEditingFinding(null)}
-                                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-semibold transition-colors"
-                                                >
-                                                  <Check size={9} /> Save
-                                                </button>
-                                                <button
-                                                  onClick={() => setEditingFinding(null)}
-                                                  className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
-                                                >Cancel</button>
-                                              </div>
-                                            </div>
-                                          ) : autoFix ? (
-                                            /* Auto fix — value + edit */
-                                            <div className="flex items-start gap-2">
-                                              <p className="text-[12px] text-gray-600 leading-snug m-0 flex-1">{recValue}</p>
-                                              <button
-                                                onClick={() => openFindingEdit(finding)}
-                                                className="text-gray-400 hover:text-gray-600 transition-colors shrink-0 mt-px"
-                                                title="Edit recommendation"
-                                              >
-                                                <Pencil size={12} />
-                                              </button>
-                                            </div>
-                                          ) : (
-                                            /* Assisted / Manual / Advisory — value + copy */
-                                            <div className="flex items-start gap-2">
-                                              <p className="text-[12px] text-gray-600 leading-snug m-0 flex-1">{recValue}</p>
-                                              <button
-                                                onClick={() => copyFindingValue(finding)}
-                                                className={`transition-colors shrink-0 mt-px ${copiedFinding === finding.id ? 'text-success-600' : 'text-gray-400 hover:text-gray-600'}`}
-                                                title={copiedFinding === finding.id ? 'Copied' : 'Copy value'}
-                                              >
-                                                {copiedFinding === finding.id ? <Check size={12} /> : <Copy size={12} />}
-                                              </button>
-                                            </div>
-                                          )}
-                                        </td>
-                                      </tr>
-                                    )
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
-                  )}
-                </>
               )
             })}
             {filteredData.length === 0 && (
               <tr>
                 <td colSpan={99}>
                   <FilterEmptyState
-                    onClear={() => setActiveRules([])}
+                    onClear={() => {
+                      setActiveRules([])
+                      setFilter(new Set(['errors', 'warnings', 'notices']))
+                      setPageSearch('')
+                    }}
                     onModify={() => setShowFilterDrawer(true)}
                   />
                 </td>
@@ -4912,12 +5077,110 @@ function CrawledPagesTab() {
         onApply={setActiveRules}
       />
 
+      <IssueDetailDrawer
+        open={Boolean(detailPage)}
+        onClose={() => { setDetailPageUrl(null); setDetailFixFilter('all') }}
+        title={detailPage?.url || ''}
+        subtitle={detailPage ? `${detailFilteredFindings.length} of ${detailPage.findings.length} finding${detailPage.findings.length === 1 ? '' : 's'}` : ''}
+        toolbar={detailPage ? (
+          <div className="flex flex-col gap-2">
+            <p className="text-[12px] font-medium text-gray-500 m-0">Fix type</p>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setDetailFixFilter('all')}
+                className={`h-8 px-3 rounded-lg text-[12px] font-semibold border transition-colors ${
+                  detailFixFilter === 'all'
+                    ? 'bg-primary-600 border-primary-600 text-white'
+                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                All
+              </button>
+              {detailFixTypesPresent.map(type => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setDetailFixFilter(type)}
+                  className={`h-8 px-3 rounded-lg text-[12px] font-semibold border transition-colors ${
+                    detailFixFilter === type
+                      ? 'bg-primary-600 border-primary-600 text-white'
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {FIX_TYPE_LABELS[type] || type}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+        footer={detailPage ? (
+          detailFixFilter === 'Auto Fix' ? (
+            <button
+              type="button"
+              onClick={applyAutoFixesOnDetailPage}
+              disabled={!detailSelectableAuto.length}
+              className={`w-full h-10 rounded-lg text-[13px] font-semibold transition-colors ${
+                detailSelectableAuto.length
+                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Connect to fix{detailSelectableAuto.length ? ` (${detailSelectableAuto.length})` : ''}
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={applySelectedOnDetailPage}
+              disabled={!detailSelectedCount}
+              className={`w-full h-10 rounded-lg text-[13px] font-semibold transition-colors ${
+                detailSelectedCount
+                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Connect to fix{detailSelectedCount ? ` (${detailSelectedCount})` : ''}
+            </button>
+          )
+        ) : null}
+      >
+        {detailPage && (
+          detailFilteredFindings.length === 0 ? (
+            <p className="text-[13px] text-gray-500 m-0">No findings for this fix type.</p>
+          ) : (
+            <PageFindingsPanel
+              findings={detailFilteredFindings}
+              pageUrl={detailPage.url}
+              findingStatus={findingStatus}
+              isFindingSelectable={isFindingSelectable}
+              selectedIds={selectedFindings[detailPage.url] || []}
+              onToggleFinding={toggleFinding}
+              editingFinding={editingFinding}
+              findingValues={findingValues}
+              onOpenEdit={openFindingEdit}
+              onSaveEdit={f => {
+                if (f && (findingStatus(f) === 'Draft' || draftFindings.has(f.id))) {
+                  markFindingsFixed([f.id])
+                } else {
+                  setEditingFinding(null)
+                }
+              }}
+              onCancelEdit={() => setEditingFinding(null)}
+              onChangeValue={(id, value) => setFindingValues(prev => ({ ...prev, [id]: value }))}
+              onCopyValue={copyFindingValue}
+              copiedFinding={copiedFinding}
+              onFixFinding={fixSingleFinding}
+            />
+          )
+        )}
+      </IssueDetailDrawer>
+
       {/* Connect modal (WordPress + Cloudflare variants; demo toggle inside) */}
       {showConnectModal && (
         <ConnectFixesModal
           platform={connectPlatform}
           onPlatformChange={setConnectPlatform}
-          onClose={() => setShowConnectModal(false)}
+          onClose={closeConnectModal}
           onApply={applySelectedFixes}
         />
       )}
@@ -4945,6 +5208,8 @@ const FOUND_LINKS_COLS = [
 function FoundLinksTab() {
   const [filter, setFilter]                     = useState(new Set(['Internal', 'External']))
   const [showLinkDropdown, setShowLinkDropdown] = useState(false)
+  const [page, setPage]                         = useState(1)
+  const [perPage, setPerPage]                   = useState(10)
 
   const LINK_FILTER_OPTIONS = [
     { id: 'Internal', label: 'Internal' },
@@ -4961,12 +5226,13 @@ function FoundLinksTab() {
     Object.fromEntries(FOUND_LINKS_COLS.map(c => [c.id, c.defaultOn]))
   )
 
-  const internalCount = FOUND_LINKS_DATA.filter(l => l.type === 'Internal').length
-  const externalCount = FOUND_LINKS_DATA.filter(l => l.type === 'External').length
-
   const filtered = filter.size >= 2
     ? FOUND_LINKS_DATA
     : FOUND_LINKS_DATA.filter(l => filter.has(l.type))
+
+  const paginated = filtered.slice((page - 1) * perPage, page * perPage)
+
+  useEffect(() => { setPage(1) }, [filter])
 
   const linkTypeChipRef = useRef(null)
   const linkColPickerRef = useRef(null)
@@ -4997,8 +5263,6 @@ function FoundLinksTab() {
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls />
-
       {/* KPI row */}
       <div className="grid grid-cols-4 gap-3">
         <CountCard label="Total links" value="2,847" Icon={Link2} iconColor="var(--purple-600)" />
@@ -5027,7 +5291,7 @@ function FoundLinksTab() {
         <div className="relative" ref={linkColPickerRef}>
           <button
             onClick={() => { setShowColumns(c => !c); setColSearch('') }}
-            className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            className="h-8 inline-flex items-center gap-1.5 px-3 text-[14px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
           >
             <LayoutDashboard size={13} /> {Object.values(linkCols).filter(Boolean).length}/{Object.keys(linkCols).length} Columns
           </button>
@@ -5056,31 +5320,31 @@ function FoundLinksTab() {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
-              {linkCols.destinationUrl && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 min-w-[300px] whitespace-nowrap">Destination URL</th>}
-              {linkCols.statusCode     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Status code</th>}
-              {linkCols.linkType       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Link type</th>}
-              {linkCols.sourceUrl      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 min-w-[240px] whitespace-nowrap">Source URL</th>}
-              {linkCols.anchorText     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Anchor text</th>}
-              {linkCols.anchorType     && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Anchor type</th>}
-              {linkCols.context        && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Context</th>}
-              {linkCols.title          && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Title</th>}
-              {linkCols.alt            && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Alt</th>}
-              {linkCols.nofollow       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Follow type</th>}
-              {linkCols.sourceNoindex  && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Source noindex</th>}
-              {linkCols.linkScope      && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Link scope</th>}
+              {linkCols.destinationUrl && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 min-w-[300px] whitespace-nowrap">Destination URL</th>}
+              {linkCols.statusCode     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Status code</th>}
+              {linkCols.linkType       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Link type</th>}
+              {linkCols.sourceUrl      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 min-w-[240px] whitespace-nowrap">Source URL</th>}
+              {linkCols.anchorText     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Anchor text</th>}
+              {linkCols.anchorType     && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Anchor type</th>}
+              {linkCols.context        && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Context</th>}
+              {linkCols.title          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Title</th>}
+              {linkCols.alt            && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Alt</th>}
+              {linkCols.nofollow       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Follow type</th>}
+              {linkCols.sourceNoindex  && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Source noindex</th>}
+              {linkCols.linkScope      && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Link scope</th>}
             </tr>
           </thead>
           <tbody>
-            {filtered.map(link => (
+            {paginated.map(link => (
               <tr key={link.url} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40 transition-colors">
                 {linkCols.destinationUrl && (
                   <td className="px-4 py-3">
-                    <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[340px]">{link.url}</a>
+                    <a href="#" className="text-[14px] font-medium text-primary-600 hover:underline truncate block max-w-[340px]">{link.url}</a>
                   </td>
                 )}
                 {linkCols.statusCode && (
                   <td className="px-4 py-3">
-                    <span className="text-[13px] font-semibold" style={{ color: httpCodeStyle(link.status).color }}>{link.status}</span>
+                    <span className="text-[14px] font-semibold" style={{ color: httpCodeStyle(link.status).color }}>{link.status}</span>
                   </td>
                 )}
                 {linkCols.linkType && (
@@ -5090,21 +5354,37 @@ function FoundLinksTab() {
                 )}
                 {linkCols.sourceUrl && (
                   <td className="px-4 py-3">
-                    <a href="#" className="text-[13px] text-primary-600 hover:underline truncate block max-w-[280px]">{link.url.replace(/\/[^/]*$/, '/')}</a>
+                    <a href="#" className="text-[14px] text-primary-600 hover:underline truncate block max-w-[280px]">{link.url.replace(/\/[^/]*$/, '/')}</a>
                   </td>
                 )}
-                {linkCols.anchorText     && <td className="px-4 py-3 text-[13px] text-gray-700">{link.anchor}</td>}
-                {linkCols.anchorType     && <td className="px-4 py-3 text-[13px] text-gray-500">Text</td>}
-                {linkCols.context        && <td className="px-4 py-3 text-[13px] text-gray-500 max-w-[200px] truncate">Navigation link</td>}
-                {linkCols.title          && <td className="px-4 py-3 text-[13px] text-gray-400">—</td>}
-                {linkCols.alt            && <td className="px-4 py-3 text-[13px] text-gray-400">—</td>}
-                {linkCols.nofollow       && <td className="px-4 py-3"><span className={`text-[12px] font-medium ${link.follow === 'Do follow' ? 'text-success-700' : 'text-warning-600'}`}>{link.follow}</span></td>}
-                {linkCols.sourceNoindex  && <td className="px-4 py-3 text-[13px] text-gray-400">—</td>}
-                {linkCols.linkScope      && <td className="px-4 py-3 text-[13px] text-gray-500">Global</td>}
+                {linkCols.anchorText     && <td className="px-4 py-3 text-[14px] text-gray-700">{link.anchor}</td>}
+                {linkCols.anchorType     && <td className="px-4 py-3 text-[14px] text-gray-500">Text</td>}
+                {linkCols.context        && <td className="px-4 py-3 text-[14px] text-gray-500 max-w-[200px] truncate">Navigation link</td>}
+                {linkCols.title          && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
+                {linkCols.alt            && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
+                {linkCols.nofollow       && <td className="px-4 py-3"><span className={`text-[14px] font-medium ${link.follow === 'Do follow' ? 'text-success-700' : 'text-warning-600'}`}>{link.follow}</span></td>}
+                {linkCols.sourceNoindex  && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
+                {linkCols.linkScope      && <td className="px-4 py-3 text-[14px] text-gray-500">Global</td>}
               </tr>
             ))}
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={99}>
+                  <FilterEmptyState
+                    onClear={() => setFilter(new Set(['Internal', 'External']))}
+                  />
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
+        <HLPagination
+          page={page}
+          perPage={perPage}
+          total={filtered.length}
+          onPage={setPage}
+          onPerPage={p => { setPerPage(p); setPage(1) }}
+        />
       </SectionCard>
     </div>
   )
@@ -5188,17 +5468,22 @@ function HLPagination({ page, perPage, total, onPage, onPerPage }) {
   )
 }
 
+
 // ─── Found Resources Tab ─────────────────────────────────────────────────────
 
 const CRAWLED_HOST = 'ramada.9hf9h.com'
 
 function FoundResourcesTab() {
   const [filter, setFilter]             = useState('all')
-  const [expandedRow, setExpandedRow]   = useState(null)
+  const [detailResourceUrl, setDetailResourceUrl] = useState(null)
   const [page, setPage]                 = useState(1)
   const [perPage, setPerPage]           = useState(10)
   const [typeFilter, setTypeFilter]     = useState(new Set(['IMG', 'CSS', 'JS']))
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+
+  const detailResource = detailResourceUrl
+    ? RESOURCE_DATA.find(r => r.url === detailResourceUrl) || null
+    : null
 
   const RES_FILTER_OPTIONS = [
     { id: 'IMG', label: 'Image'      },
@@ -5261,7 +5546,11 @@ function FoundResourcesTab() {
     return () => document.removeEventListener('mousedown', handleFrColsOutside)
   }, [showFrCols])
 
-  const hasActiveAdvFilter = appliedAdvFilters.statusCode !== 'all' || appliedAdvFilters.minSize !== '' || appliedAdvFilters.maxSize !== ''
+  const advFilterCount = [
+    appliedAdvFilters.statusCode !== 'all',
+    appliedAdvFilters.minSize !== '',
+    appliedAdvFilters.maxSize !== '',
+  ].filter(Boolean).length
 
   const filtered = RESOURCE_DATA.filter(r => {
     // Type filter
@@ -5276,7 +5565,7 @@ function FoundResourcesTab() {
     }
     // Advanced size filter — parse KB value from size string like "385.0 KB"
     if (appliedAdvFilters.minSize !== '' || appliedAdvFilters.maxSize !== '') {
-      const sizeKb = parseFloat(r.size)
+      const sizeKb = parseResourceSizeKb(r.size)
       if (!isNaN(sizeKb)) {
         if (appliedAdvFilters.minSize !== '' && sizeKb < parseFloat(appliedAdvFilters.minSize)) return false
         if (appliedAdvFilters.maxSize !== '' && sizeKb > parseFloat(appliedAdvFilters.maxSize)) return false
@@ -5286,7 +5575,65 @@ function FoundResourcesTab() {
   })
   const paginated = filtered.slice((page - 1) * perPage, page * perPage)
 
-  useEffect(() => { setPage(1) }, [typeFilter])
+  useEffect(() => { setPage(1) }, [typeFilter, appliedAdvFilters])
+
+  // Size shares computed from RESOURCE_DATA so KPI totals match the table.
+  const imgKb = RESOURCE_DATA.filter(r => r.type === 'IMG').reduce((s, r) => s + parseResourceSizeKb(r.size), 0)
+  const cssKb = RESOURCE_DATA.filter(r => r.type === 'CSS').reduce((s, r) => s + parseResourceSizeKb(r.size), 0)
+  const jsKb  = RESOURCE_DATA.filter(r => r.type === 'JS').reduce((s, r) => s + parseResourceSizeKb(r.size), 0)
+  const totalKb = imgKb + cssKb + jsKb || 1
+  const imgCount = RESOURCE_DATA.filter(r => r.type === 'IMG').length
+  const resourceKpis = [
+    {
+      label: 'Total resources',
+      value: String(RESOURCE_DATA.length),
+      color: 'var(--purple-600)',
+    },
+    {
+      label: 'Images',
+      value: String(imgCount),
+      color: 'var(--primary-600)',
+      footer: (
+        <div className="flex flex-col gap-1">
+          <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-gray-100">
+            <div className="h-full rounded-full bg-purple-600" style={{ width: `${Math.round((imgKb / totalKb) * 100)}%` }} />
+          </div>
+          <p className="text-[12px] text-gray-500 m-0">{formatResourceSize(imgKb)} · {Math.round((imgKb / totalKb) * 100)}%</p>
+        </div>
+      ),
+    },
+    {
+      label: 'CSS size',
+      value: formatResourceSize(cssKb),
+      color: '#60A5FA',
+      footer: (
+        <div className="flex flex-col gap-1">
+          <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-gray-100">
+            <div className="h-full rounded-full" style={{ width: `${Math.round((cssKb / totalKb) * 100)}%`, background: '#60A5FA' }} />
+          </div>
+          <p className="text-[12px] text-gray-500 m-0">{Math.round((cssKb / totalKb) * 100)}% of total</p>
+        </div>
+      ),
+    },
+    {
+      label: 'JS size',
+      value: formatResourceSize(jsKb),
+      color: 'var(--warning-400)',
+      footer: (
+        <div className="flex flex-col gap-1">
+          <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-gray-100">
+            <div className="h-full rounded-full bg-warning-400" style={{ width: `${Math.round((jsKb / totalKb) * 100)}%` }} />
+          </div>
+          <p className="text-[12px] text-gray-500 m-0">{Math.round((jsKb / totalKb) * 100)}% of total</p>
+        </div>
+      ),
+    },
+    {
+      label: 'Total resource size',
+      value: formatResourceSize(totalKb),
+      color: '#0D9488',
+    },
+  ]
 
   const TYPE_STYLE = {
     IMG: { bg: 'var(--primary-50)', color: 'var(--primary-600)' },
@@ -5294,33 +5641,28 @@ function FoundResourcesTab() {
     CSS: { bg: 'var(--primary-50)', color: '#60A5FA' },
   }
 
+  function clearResourceFilters() {
+    setTypeFilter(new Set(['IMG', 'CSS', 'JS']))
+    setAdvFilters({ statusCode: 'all', minSize: '', maxSize: '' })
+    setAppliedAdvFilters({ statusCode: 'all', minSize: '', maxSize: '' })
+  }
+
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      <ReportControls />
-
-      {/* KPI cards */}
-      <div className="grid grid-cols-5 gap-3">
-        {RESOURCE_KPIS_TAB.map(k => (
-          <CountCard key={k.label} label={k.label} value={k.value} Icon={FileText} iconColor={k.color} />
+      {/* KPI cards — Images / CSS / JS include compact size share (replaces separate breakdown) */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 items-stretch">
+        {resourceKpis.map(k => (
+          <CountCard
+            key={k.label}
+            className="h-full"
+            label={k.label}
+            value={k.value}
+            Icon={FileText}
+            iconColor={k.color}
+            footer={k.footer}
+          />
         ))}
       </div>
-
-      {/* Size breakdown */}
-      <SectionCard className="p-5">
-        <p className="text-[14px] font-semibold text-gray-900 mb-4">Resource size breakdown</p>
-        <div className="flex flex-col gap-4">
-          {RESOURCE_BREAKDOWN_TAB.map(r => (
-            <div key={r.label} className="flex items-center gap-4">
-              <div className="w-24 text-[13px] text-gray-600 font-medium shrink-0">{r.label}</div>
-              <div className="flex-1 bg-gray-200 rounded-full h-2 relative overflow-hidden">
-                <div className="absolute inset-y-0 left-0 rounded-full transition-all duration-500" style={{ width: `${r.pct}%`, background: r.color }} />
-              </div>
-              <div className="text-[13px] font-semibold text-gray-700 w-20 text-right shrink-0">{r.size}</div>
-              <div className="text-[12px] text-gray-400 w-10 text-right shrink-0">{r.pct}%</div>
-            </div>
-          ))}
-        </div>
-      </SectionCard>
 
       {/* Filters + table */}
       <div className="flex items-center gap-3 flex-wrap">
@@ -5338,25 +5680,24 @@ function FoundResourcesTab() {
           onClose={() => setShowTypeDropdown(false)}
         />
 
-        {/* Advanced filter button */}
+        {/* Advanced filter — same trigger chrome as Crawled pages */}
         <div className="relative" ref={advFilterRef}>
-          <button
+          <AdvancedFilterTrigger
+            activeCount={advFilterCount}
             onClick={() => setShowAdvFilter(v => !v)}
-            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-            </svg>
-            Advanced filter
-            {hasActiveAdvFilter && <span className="w-2 h-2 rounded-full bg-primary-600" />}
-          </button>
+            onClear={() => {
+              const reset = { statusCode: 'all', minSize: '', maxSize: '' }
+              setAdvFilters(reset)
+              setAppliedAdvFilters(reset)
+            }}
+          />
           {showAdvFilter && (
             <div className="absolute top-full left-0 mt-1.5 z-30 bg-white border border-gray-200 rounded-xl shadow-lg w-72 p-4">
-              <p className="text-[12px] font-semibold text-gray-700 mb-3">Advanced filter</p>
+              <p className="text-[14px] font-semibold text-gray-700 mb-3">Advanced filter</p>
 
               {/* Status code */}
               <div className="mb-4">
-                <p className="text-[12px] font-medium text-gray-500 mb-2">Status code</p>
+                <p className="text-[14px] font-medium text-gray-500 mb-2">Status code</p>
                 <div className="flex flex-col gap-1.5">
                   {[{ label: 'All', value: 'all' }, { label: '200 OK', value: '200' }, { label: '3xx Redirect', value: '3xx' }, { label: '4xx Client error', value: '4xx' }, { label: '5xx Server error', value: '5xx' }].map(opt => (
                     <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
@@ -5368,7 +5709,7 @@ function FoundResourcesTab() {
                         onChange={() => setAdvFilters(v => ({ ...v, statusCode: opt.value }))}
                         style={{ accentColor: '#155EEF' }}
                       />
-                      <span className="text-[13px] text-gray-700">{opt.label}</span>
+                      <span className="text-[14px] text-gray-700">{opt.label}</span>
                     </label>
                   ))}
                 </div>
@@ -5376,22 +5717,22 @@ function FoundResourcesTab() {
 
               {/* Size */}
               <div className="mb-4">
-                <p className="text-[12px] font-medium text-gray-500 mb-2">Size (KB)</p>
+                <p className="text-[14px] font-medium text-gray-500 mb-2">Size (KB)</p>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     placeholder="Min"
                     value={advFilters.minSize}
                     onChange={e => setAdvFilters(v => ({ ...v, minSize: e.target.value }))}
-                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
+                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
                   />
-                  <span className="text-[12px] text-gray-400 shrink-0">to</span>
+                  <span className="text-[14px] text-gray-400 shrink-0">to</span>
                   <input
                     type="number"
                     placeholder="Max"
                     value={advFilters.maxSize}
                     onChange={e => setAdvFilters(v => ({ ...v, maxSize: e.target.value }))}
-                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[13px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
+                    className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
                   />
                 </div>
               </div>
@@ -5400,13 +5741,13 @@ function FoundResourcesTab() {
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => { const reset = { statusCode: 'all', minSize: '', maxSize: '' }; setAdvFilters(reset); setAppliedAdvFilters(reset) }}
-                  className="px-3 py-1.5 text-[13px] font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                  className="px-3 py-1.5 text-[14px] font-medium text-gray-600 hover:text-gray-800 transition-colors"
                 >
                   Reset
                 </button>
                 <button
                   onClick={() => { setAppliedAdvFilters({ ...advFilters }); setShowAdvFilter(false) }}
-                  className="px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+                  className={BTN_PRIMARY}
                 >
                   Apply
                 </button>
@@ -5419,7 +5760,7 @@ function FoundResourcesTab() {
           <div className="relative" ref={frColsRef}>
             <button
               onClick={() => setShowFrCols(v => !v)}
-              className="h-8 inline-flex items-center gap-1.5 px-3 text-[13px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+              className="h-8 inline-flex items-center gap-1.5 px-3 text-[14px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
               <LayoutDashboard size={13} />
               {Object.values(frCols).filter(Boolean).length}/{Object.keys(frCols).length} Columns
@@ -5454,90 +5795,66 @@ function FoundResourcesTab() {
         <table className="w-full border-collapse text-left">
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
-              <th className="py-3" style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL, maxWidth: TABLE_EXPAND_COL }} />
-              <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 min-w-[380px]">URL</th>
-              {frCols.sourceUrls && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Source URLs</th>}
-              {frCols.type       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Type</th>}
-              {frCols.statusCode && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Status code</th>}
-              {frCols.size       && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Size</th>}
-              {frCols.loadTime   && <th className="px-4 py-3 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Loading time</th>}
+              <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 min-w-[380px]">URL</th>
+              <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Sources</th>
+              {frCols.sourceUrls && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Source URLs</th>}
+              {frCols.type       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Type</th>}
+              {frCols.statusCode && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Status code</th>}
+              {frCols.size       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Size</th>}
+              {frCols.loadTime   && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Loading time</th>}
             </tr>
           </thead>
           <tbody>
+            {filtered.length === 0 && (
+              <tr>
+                <td colSpan={99}>
+                  <FilterEmptyState onClear={clearResourceFilters} />
+                </td>
+              </tr>
+            )}
             {paginated.map((r, i) => {
               const ts = TYPE_STYLE[r.type] || { bg: '#F2F4F7', color: '#667085' }
-              const isExpanded = expandedRow === r.url
               return (
-                <div key={i} style={{ display: 'contents' }}>
-                  <tr className={`border-b border-gray-50 transition-colors ${isExpanded ? 'bg-gray-50/60' : 'hover:bg-gray-50/40'}`}>
-                    {/* Expand chevron — own column, before URL */}
-                    <td className="py-3" style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL, maxWidth: TABLE_EXPAND_COL }}>
-                      <button
-                        onClick={() => setExpandedRow(isExpanded ? null : r.url)}
-                        className="flex items-center justify-center w-6 h-6 mx-auto rounded hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600"
-                      >
-                        <ChevronDown size={14} className={`transition-transform duration-150 ${isExpanded ? 'rotate-180' : ''}`} />
-                      </button>
-                    </td>
-                    <td className="px-4 py-3">
-                      <a href="#" className="text-[13px] font-medium text-primary-600 hover:underline truncate block max-w-[460px]">{r.url}</a>
-                    </td>
-                    {frCols.sourceUrls && <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.sources}</td>}
-                    {frCols.type && (
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
-                          {r.type}
-                        </span>
-                      </td>
-                    )}
-                    {frCols.statusCode && (
-                      <td className="px-4 py-3">
-                        <span className="text-[13px] font-semibold" style={{ color: httpCodeStyle(r.status).color }}>{r.status}</span>
-                      </td>
-                    )}
-                    {frCols.size && <td className="px-4 py-3 text-[13px] font-medium text-gray-700">{r.size}</td>}
-                    {frCols.loadTime && <td className="px-4 py-3 text-[13px] text-gray-500">{r.loadTime}</td>}
-                  </tr>
-                  {isExpanded && r.sourceDetails && (
-                    <tr className="border-b border-gray-100 bg-gray-50/40">
-                      <td colSpan={1 + 1 + Object.values(frCols).filter(Boolean).length} className="px-0 py-0">
-                        <div className="flex pb-3 pr-4">
-                          <div className="shrink-0" style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL }} />
-                          <div className="flex-1 min-w-0 rounded-lg border border-gray-100 bg-white overflow-x-auto">
-                            <table className="w-full border-collapse text-left">
-                              <thead>
-                                <tr className="border-b border-gray-100">
-                                  <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 min-w-[260px]">From URL</th>
-                                  <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Follow type</th>
-                                  <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Alt attribute</th>
-                                  <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Title</th>
-                                  <th className="px-4 py-2.5 text-[12px] font-medium text-gray-900 whitespace-nowrap">Unique title</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {r.sourceDetails.map((s, j) => (
-                                  <tr key={j} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40">
-                                    <td className="px-4 py-2.5">
-                                      <a href="#" className="text-[12px] font-medium text-primary-600 hover:underline truncate block max-w-[300px]">{s.fromUrl}</a>
-                                    </td>
-                                    <td className="px-4 py-2.5">
-                                      <span className={`text-[12px] font-medium ${s.followType === 'Do follow' ? 'text-success-700' : 'text-warning-600'}`}>
-                                        {s.followType}
-                                      </span>
-                                    </td>
-                                    <td className="px-4 py-2.5 text-[12px] text-gray-600">{s.altAttr}</td>
-                                    <td className="px-4 py-2.5 text-[12px] text-gray-600">{s.title}</td>
-                                    <td className="px-4 py-2.5 text-[12px] text-gray-600">{s.uniqueTitle}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                      </td>
-                    </tr>
+                <tr key={i} className="border-b border-gray-50 transition-colors hover:bg-gray-50/40">
+                  <td className="px-4 py-3">
+                    <a
+                      href={r.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary-600 hover:underline max-w-[460px]"
+                      title="Open resource in new tab"
+                    >
+                      <span className="truncate">{r.url}</span>
+                      <ExternalLink size={11} className="shrink-0" />
+                    </a>
+                  </td>
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => setDetailResourceUrl(r.url)}
+                      className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                    >
+                      View
+                    </button>
+                  </td>
+                  {frCols.sourceUrls && (
+                    <td className="px-4 py-3 text-[14px] font-medium text-gray-700">{r.sources}</td>
                   )}
-                </div>
+                  {frCols.type && (
+                    <td className="px-4 py-3">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
+                        {r.type}
+                      </span>
+                    </td>
+                  )}
+                  {frCols.statusCode && (
+                    <td className="px-4 py-3">
+                      <span className="text-[14px] font-semibold" style={{ color: httpCodeStyle(r.status).color }}>{r.status}</span>
+                    </td>
+                  )}
+                  {frCols.size && <td className="px-4 py-3 text-[14px] font-medium text-gray-700">{r.size}</td>}
+                  {frCols.loadTime && <td className="px-4 py-3 text-[14px] text-gray-500">{r.loadTime}</td>}
+                </tr>
               )
             })}
           </tbody>
@@ -5550,259 +5867,347 @@ function FoundResourcesTab() {
           onPerPage={p => { setPerPage(p); setPage(1) }}
         />
       </SectionCard>
+
+      <IssueDetailDrawer
+        open={Boolean(detailResource)}
+        onClose={() => setDetailResourceUrl(null)}
+        title={detailResource?.url || ''}
+        subtitle={detailResource
+          ? `${(detailResource.sourceDetails || []).length} source${(detailResource.sourceDetails || []).length === 1 ? '' : 's'}`
+          : ''}
+      >
+        {detailResource && (
+          <ResourceSourcesPanel sources={detailResource.sourceDetails || []} />
+        )}
+      </IssueDetailDrawer>
     </div>
   )
 }
 
-// ─── Crawl Comparison Tab ─────────────────────────────────────────────────────
+// ─── Crawl comparison (scoped per Site health tab) ────────────────────────────
 
-function CrawlComparisonTab() {
+const COMPARE_TH = 'px-5 py-3 text-[14px] font-semibold text-gray-900 border-b border-gray-100 bg-gray-50/60 whitespace-nowrap text-left'
+const COMPARE_TD = 'px-5 py-3.5 text-[14px] border-b border-gray-50 last:border-0'
+
+function deriveCompareRow(row, date1Idx, date2Idx) {
+  const v1 = row.series[date1Idx]
+  const v2 = row.series[date2Idx]
+  const changed = v1 !== v2
+  let fixed = null
+  let newCount = null
+  if (row.lowerBetter && typeof v1 === 'number' && typeof v2 === 'number') {
+    if (v1 < v2) fixed = v2 - v1
+    else if (v1 > v2) newCount = v1 - v2
+  } else if (!row.lowerBetter && typeof v1 === 'number' && typeof v2 === 'number') {
+    // Higher-is-better metrics: gains show in Fixed, losses in New (regressed)
+    if (v1 > v2) fixed = v1 - v2
+    else if (v1 < v2) newCount = v2 - v1
+  }
+  return { ...row, v1, v2, changed, fixed, newCount, fixColor: '#16A34A', newColor: '#D97706' }
+}
+
+function CompareDiffToggle({ showOnlyDiffs, onToggle, disabled = false }) {
+  const tip = disabled
+    ? 'Compare to scans to see the difference.'
+    : 'Hide unchanged rows across the comparison matrix.'
+
+  return (
+    <div className={`flex items-center justify-start gap-2.5 flex-wrap ${disabled ? 'opacity-50' : ''}`}>
+      <button
+        type="button"
+        onClick={() => { if (!disabled) onToggle() }}
+        disabled={disabled}
+        aria-pressed={showOnlyDiffs}
+        aria-disabled={disabled}
+        aria-label="Show only differences"
+        className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${
+          disabled
+            ? 'bg-gray-200 cursor-not-allowed'
+            : showOnlyDiffs
+              ? 'bg-primary-600 cursor-pointer'
+              : 'bg-gray-200 cursor-pointer'
+        }`}
+      >
+        <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${showOnlyDiffs && !disabled ? 'translate-x-4' : 'translate-x-0.5'}`} />
+      </button>
+      <div className="flex items-center gap-1">
+        <span className={`text-[13px] font-medium ${disabled ? 'text-gray-500' : 'text-gray-800'}`}>
+          Show only differences
+        </span>
+        <HLTooltip content={tip} placement="top" variant="dark">
+          <button
+            type="button"
+            className="inline-flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors p-0 border-0 bg-transparent cursor-help"
+            aria-label="About show only differences"
+          >
+            <Info size={14} />
+          </button>
+        </HLTooltip>
+      </div>
+    </div>
+  )
+}
+
+function compareRowIcon(icon) {
+  const base = 'inline-flex items-center justify-center w-5 h-5 rounded-full border shrink-0'
+  if (icon === 'error')   return <span className={base} style={{ borderColor: 'var(--error-600)',   background: 'var(--error-50)'    }}><AlertTriangle size={10} className="text-error-600"   /></span>
+  if (icon === 'warning') return <span className={base} style={{ borderColor: 'var(--warning-600)', background: 'var(--warning-100)' }}><AlertTriangle size={10} className="text-warning-600" /></span>
+  if (icon === 'notice')  return <span className={base} style={{ borderColor: 'var(--primary-600)', background: 'var(--primary-50)'  }}><Info          size={10} className="text-primary-600" /></span>
+  if (icon === 'check')   return <span className={base} style={{ borderColor: 'var(--success-600)', background: 'var(--success-50)'  }}><CircleCheck   size={10} className="text-success-600" /></span>
+  return <BarChart3 size={14} className="text-gray-400 shrink-0" />
+}
+
+function renderCompareVal(row, which) {
+  const val = which === 1 ? row.v1 : row.v2
+  if (!row.changed) return <span className="text-[14px] font-bold text-gray-900">{val}</span>
+  const isNum = typeof row.v1 === 'number' && typeof row.v2 === 'number'
+  let color = '#101828'
+  if (isNum) {
+    const better = row.lowerBetter ? row.v1 < row.v2 : row.v1 > row.v2
+    if (which === 1) color = better ? '#16A34A' : '#DC2626'
+  }
+  return <span className="text-[14px] font-bold" style={{ color }}>{val}</span>
+}
+
+function renderCompareFixed(row) {
+  if (row.fixed != null) return <span className="text-[14px] font-semibold" style={{ color: row.fixColor }}>{row.fixed}</span>
+  return <span className="text-[14px] text-gray-300">—</span>
+}
+
+function renderCompareNew(row) {
+  if (row.newCount != null) return <span className="text-[14px] font-semibold" style={{ color: row.newColor }}>{row.newCount}</span>
+  return <span className="text-[14px] text-gray-300">—</span>
+}
+
+function CompareChangePill({ change }) {
+  const map = {
+    added:     { label: 'Added',     cls: 'bg-primary-50 text-primary-700 border-primary-200' },
+    removed:   { label: 'Removed',   cls: 'bg-gray-100 text-gray-600 border-gray-200' },
+    improved:  { label: 'Improved',  cls: 'bg-success-50 text-success-700 border-success-200' },
+    regressed: { label: 'Regressed', cls: 'bg-error-50 text-error-700 border-error-200' },
+    unchanged: { label: 'Unchanged', cls: 'bg-gray-50 text-gray-500 border-gray-200' },
+  }
+  const m = map[change] || map.unchanged
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${m.cls}`}>
+      {m.label}
+    </span>
+  )
+}
+
+function CompareEmptyState({ message }) {
+  return (
+    <SectionCard>
+      <div className="px-5 py-10 flex flex-col items-center text-center">
+        <div className="w-11 h-11 rounded-full bg-success-50 flex items-center justify-center mb-3">
+          <CircleCheck size={20} className="text-success-600" />
+        </div>
+        <p className="text-[14px] font-semibold text-gray-900">No differences found</p>
+        <p className="text-[12px] text-gray-400 mt-0.5 max-w-[320px]">{message}</p>
+      </div>
+    </SectionCard>
+  )
+}
+
+/**
+ * Crawl comparison tab content. Default `scope="comparison"` shows the full
+ * audit + domain + issue matrices. Other scopes keep per-surface subsets.
+ */
+function CrawlComparisonTab({ scope = 'comparison', date1Idx = 0, date2Idx = 1, comparing = false }) {
   const [showOnlyDiffs, setShowOnlyDiffs] = useState(false)
-  const [date1Idx, setDate1Idx] = useState(0)
-  const [date2Idx, setDate2Idx] = useState(1)
-
+  // Diffs filter only applies while a scan comparison is active
+  const diffsOn = comparing && showOnlyDiffs
   const DATE1 = AUDIT_DATES[date1Idx]
   const DATE2 = AUDIT_DATES[date2Idx]
 
-  /* Rule: ALL table column headers must use text-gray-500 — no severity colors in headers */
-  const TH_CLS = 'px-5 py-3 text-[12px] font-semibold text-gray-900 border-b border-gray-100 bg-gray-50/60 whitespace-nowrap text-left'
-  const TD_CLS = 'px-5 py-3.5 text-[13px] border-b border-gray-50 last:border-0'
-
-  // Pull the two selected snapshot values off a row's series and derive the
-  // Fixed / New deltas. For `lowerBetter` (issue-count) rows a decrease from the
-  // second date to the first counts as Fixed; an increase counts as New.
-  function derive(row) {
-    const v1 = row.series[date1Idx]
-    const v2 = row.series[date2Idx]
-    const changed = v1 !== v2
-    let fixed = null, newCount = null
-    if (row.lowerBetter && typeof v1 === 'number' && typeof v2 === 'number') {
-      if (v1 < v2) fixed = v2 - v1
-      else if (v1 > v2) newCount = v1 - v2
-    }
-    return { ...row, v1, v2, changed, fixed, newCount, fixColor: '#16A34A', newColor: '#D97706' }
-  }
-
-  const auditRows  = COMPARISON_AUDIT.map(derive).filter(r => !showOnlyDiffs || r.changed)
-  const domainRows = COMPARISON_DOMAIN_METRICS.map(derive).filter(r => !showOnlyDiffs || r.changed)
+  const auditRows = COMPARISON_AUDIT.map(r => deriveCompareRow(r, date1Idx, date2Idx)).filter(r => !diffsOn || r.changed)
+  const domainRows = COMPARISON_DOMAIN_METRICS.map(r => deriveCompareRow(r, date1Idx, date2Idx)).filter(r => !diffsOn || r.changed)
   const issueSections = COMPARISON_ISSUE_SECTIONS
-    .map(s => ({ ...s, issues: s.issues.map(derive).filter(r => !showOnlyDiffs || r.changed) }))
+    .map(s => ({
+      ...s,
+      issues: s.issues.map(r => deriveCompareRow(r, date1Idx, date2Idx)).filter(r => !diffsOn || r.changed),
+    }))
     .filter(s => s.issues.length > 0)
+  const pageRows = COMPARISON_CRAWLED_PAGES
+    .map(r => deriveCompareRow(r, date1Idx, date2Idx))
+    .filter(r => !diffsOn || r.changed || r.change === 'added' || r.change === 'removed')
+  const linkRows = COMPARISON_FOUND_LINKS.map(r => deriveCompareRow(r, date1Idx, date2Idx)).filter(r => !diffsOn || r.changed)
+  const resourceRows = COMPARISON_FOUND_RESOURCES.map(r => deriveCompareRow(r, date1Idx, date2Idx)).filter(r => !diffsOn || r.changed)
 
-  const totalDiffs =
-    auditRows.filter(r => r.changed).length +
-    domainRows.filter(r => r.changed).length +
-    issueSections.reduce((n, s) => n + s.issues.filter(r => r.changed).length, 0)
-
-  function rowIcon(icon) {
-    const base = 'inline-flex items-center justify-center w-5 h-5 rounded-full border shrink-0'
-    if (icon === 'error')   return <span className={base} style={{ borderColor: 'var(--error-600)',   background: 'var(--error-50)'    }}><AlertTriangle size={10} className="text-error-600"   /></span>
-    if (icon === 'warning') return <span className={base} style={{ borderColor: 'var(--warning-600)', background: 'var(--warning-100)' }}><AlertTriangle size={10} className="text-warning-600" /></span>
-    if (icon === 'notice')  return <span className={base} style={{ borderColor: 'var(--primary-600)', background: 'var(--primary-50)'  }}><Info          size={10} className="text-primary-600" /></span>
-    if (icon === 'check')   return <span className={base} style={{ borderColor: 'var(--success-600)', background: 'var(--success-50)'  }}><CircleCheck   size={10} className="text-success-600" /></span>
-    if (icon === 'pages')   return <FileText size={14} className="text-gray-400 shrink-0" />
-    return <BarChart3 size={14} className="text-gray-400 shrink-0" />
-  }
-
-  // Highlight the changed value against its baseline so it's clear which date moved.
-  function renderVal(row, which) {
-    const val = which === 1 ? row.v1 : row.v2
-    if (!row.changed) return <span className="text-[14px] font-bold text-gray-900">{val}</span>
-    const isNum = typeof row.v1 === 'number' && typeof row.v2 === 'number'
-    let color = '#101828'
-    if (isNum) {
-      const better = row.lowerBetter ? row.v1 < row.v2 : row.v1 > row.v2
-      const isFirst = which === 1
-      // colour only the newer (first) column when it improved / regressed
-      if (isFirst) color = better ? '#16A34A' : '#DC2626'
-    }
-    return <span className="text-[14px] font-bold" style={{ color }}>{val}</span>
-  }
-
-  function renderFixed(row) {
-    if (row.fixed != null) return <span className="text-[13px] font-semibold" style={{ color: row.fixColor }}>{row.fixed}</span>
-    return <span className="text-[13px] text-gray-300">—</span>
-  }
-
-  function renderNew(row) {
-    if (row.newCount != null) return <span className="text-[13px] font-semibold" style={{ color: row.newColor }}>{row.newCount}</span>
-    return <span className="text-[13px] text-gray-300">—</span>
-  }
+  const metricTable = (title, subtitle, firstCol, rows, labelKey = 'label') => (
+    <SectionCard>
+      <div className="px-5 py-4 border-b border-gray-100">
+        <p className="text-[14px] font-semibold text-gray-900">{title}</p>
+        <p className="text-[12px] text-gray-400 mt-0.5">{subtitle}</p>
+      </div>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr>
+            <th className={`${COMPARE_TH} w-[40%]`}>{firstCol}</th>
+            <th className={COMPARE_TH}>{DATE1}</th>
+            <th className={COMPARE_TH}>{DATE2}</th>
+            <th className={COMPARE_TH}>Fixed</th>
+            <th className={COMPARE_TH}>New</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr>
+              <td className={COMPARE_TD} colSpan={5}>
+                <span className="text-[14px] text-gray-400">No differences between these two audits.</span>
+              </td>
+            </tr>
+          ) : rows.map(row => (
+            <tr key={row[labelKey] || row.metric} className="hover:bg-gray-50/40 transition-colors">
+              <td className={COMPARE_TD}>
+                <div className="flex items-center gap-2 min-w-0">
+                  {row.icon && compareRowIcon(row.icon)}
+                  <span className="text-[14px] font-medium text-gray-700 truncate">{row[labelKey] || row.metric}</span>
+                </div>
+              </td>
+              <td className={COMPARE_TD}>{renderCompareVal(row, 1)}</td>
+              <td className={COMPARE_TD}>{renderCompareVal(row, 2)}</td>
+              <td className={COMPARE_TD}>{renderCompareFixed(row)}</td>
+              <td className={COMPARE_TD}>{renderCompareNew(row)}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </SectionCard>
+  )
 
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
-      {/* Date selectors + toggle */}
-      <div className="flex items-end gap-4 flex-wrap">
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[12px] font-medium text-gray-400">First audit date</p>
-          <div className="relative w-[232px]">
-            <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <select
-              value={date1Idx}
-              onChange={e => setDate1Idx(Number(e.target.value))}
-              className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors"
-            >
-              {AUDIT_DATES.map((d, i) => <option key={d} value={i}>{d}</option>)}
-            </select>
-            <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <p className="text-[12px] font-medium text-gray-400">Second audit date</p>
-          <div className="relative w-[232px]">
-            <Clock size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-            <select
-              value={date2Idx}
-              onChange={e => setDate2Idx(Number(e.target.value))}
-              className="appearance-none w-full h-9 text-[13px] font-medium text-gray-800 border border-gray-200 rounded-lg pl-8 pr-7 bg-white outline-none cursor-pointer hover:border-gray-300 focus:border-primary-600 transition-colors"
-            >
-              {AUDIT_DATES.map((d, i) => <option key={d} value={i}>{d}</option>)}
-            </select>
-            <ChevronDown size={12} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
+      <CompareDiffToggle
+        showOnlyDiffs={diffsOn}
+        disabled={!comparing}
+        onToggle={() => setShowOnlyDiffs(d => !d)}
+      />
 
-        {/* Separator — matches the select field height, bottom-aligned with the fields */}
-        <div className="self-end h-9 w-px bg-gray-200 shrink-0" />
+      {/* Full Crawl comparison tab — audit + domain + issue sections */}
+      {(scope === 'comparison' || scope === 'overview') && (
+        <>
+          {metricTable(
+            'Audit results',
+            'Side-by-side summary of health score and finding counts across the two scans.',
+            'Results',
+            auditRows,
+          )}
+          {metricTable(
+            'Domain metrics',
+            'Reference metrics that help explain why the two crawls may look different.',
+            'Metric',
+            domainRows,
+            'metric',
+          )}
+        </>
+      )}
 
-        {/* Toggle + label */}
-        <div className="flex items-center gap-3 self-end">
-          <button
-            onClick={() => setShowOnlyDiffs(d => !d)}
-            className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors ${showOnlyDiffs ? 'bg-primary-600' : 'bg-gray-200'}`}
-          >
-            <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${showOnlyDiffs ? 'translate-x-4' : 'translate-x-0.5'}`} />
-          </button>
-          <div>
-            <p className="text-[13px] font-medium text-gray-800">Show only differences</p>
-            <p className="text-[12px] text-gray-400">Hide unchanged rows across the comparison matrix.</p>
-          </div>
-        </div>
-      </div>
+      {(scope === 'comparison' || scope === 'scan') && (
+        <>
+          {issueSections.map(section => (
+            <SectionCard key={section.category}>
+              <div className="px-5 py-4 border-b border-gray-100">
+                <p className="text-[14px] font-semibold text-gray-900">{section.category}</p>
+                <p className="text-[12px] text-gray-400 mt-0.5">
+                  {section.issues.length} tracked issue{section.issues.length !== 1 ? 's' : ''} in this comparison section.
+                </p>
+              </div>
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className={`${COMPARE_TH} w-[40%]`}>Issue</th>
+                    <th className={COMPARE_TH}>{DATE1}</th>
+                    <th className={COMPARE_TH}>{DATE2}</th>
+                    <th className={COMPARE_TH}>Fixed</th>
+                    <th className={COMPARE_TH}>New</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.issues.map(row => (
+                    <tr key={row.label} className="hover:bg-gray-50/40 transition-colors">
+                      <td className={COMPARE_TD}>
+                        <div className="flex items-center gap-2">
+                          {compareRowIcon(row.icon)}
+                          <span className="text-[14px] font-medium text-gray-700">{row.label}</span>
+                        </div>
+                      </td>
+                      <td className={COMPARE_TD}>{renderCompareVal(row, 1)}</td>
+                      <td className={COMPARE_TD}>{renderCompareVal(row, 2)}</td>
+                      <td className={COMPARE_TD}>{renderCompareFixed(row)}</td>
+                      <td className={COMPARE_TD}>{renderCompareNew(row)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </SectionCard>
+          ))}
+        </>
+      )}
 
-      {/* Info pills */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary-50 border border-primary-200 text-[12px] font-medium text-primary-700">
-          Comparing {DATE1} vs {DATE2}
-        </span>
-      </div>
+      {scope === 'comparison' && diffsOn && auditRows.length === 0 && domainRows.length === 0 && issueSections.length === 0 && (
+        <CompareEmptyState message="These two audits are identical across every tracked metric and issue." />
+      )}
 
-      {/* Audit results */}
-      <SectionCard>
-        <div className="px-5 py-4 border-b border-gray-100">
-          <p className="text-[14px] font-semibold text-gray-900">Audit results</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">Side-by-side summary of the latest crawl and the selected comparison snapshot.</p>
-        </div>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className={TH_CLS + ' w-[40%]'}>Results</th>
-              <th className={TH_CLS}>{DATE1}</th>
-              <th className={TH_CLS}>{DATE2}</th>
-              <th className={TH_CLS}>Fixed</th>
-              <th className={TH_CLS}>New</th>
-            </tr>
-          </thead>
-          <tbody>
-            {auditRows.length === 0 ? (
-              <tr><td className={TD_CLS} colSpan={5}><span className="text-[13px] text-gray-400">No differences between these two audits.</span></td></tr>
-            ) : auditRows.map(row => (
-              <tr key={row.label} className="hover:bg-gray-50/40 transition-colors">
-                <td className={TD_CLS}>
-                  <div className="flex items-center gap-2">
-                    {rowIcon(row.icon)}
-                    <span className="text-[13px] font-medium text-gray-700">{row.label}</span>
-                  </div>
-                </td>
-                <td className={TD_CLS}>{renderVal(row, 1)}</td>
-                <td className={TD_CLS}>{renderVal(row, 2)}</td>
-                <td className={TD_CLS}>{renderFixed(row)}</td>
-                <td className={TD_CLS}>{renderNew(row)}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </SectionCard>
-
-      {/* Domain metrics */}
-      <SectionCard>
-        <div className="px-5 py-4 border-b border-gray-100">
-          <p className="text-[14px] font-semibold text-gray-900">Domain metrics</p>
-          <p className="text-[12px] text-gray-400 mt-0.5">Reference metrics that help explain why the two crawls may look different.</p>
-        </div>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className={TH_CLS + ' w-[40%]'}>Metric</th>
-              <th className={TH_CLS}>{DATE1}</th>
-              <th className={TH_CLS}>{DATE2}</th>
-              <th className={TH_CLS}>Fixed</th>
-              <th className={TH_CLS}>New</th>
-            </tr>
-          </thead>
-          <tbody>
-            {domainRows.length === 0 ? (
-              <tr><td className={TD_CLS} colSpan={5}><span className="text-[13px] text-gray-400">No differences between these two audits.</span></td></tr>
-            ) : domainRows.map(row => (
-              <tr key={row.metric} className="hover:bg-gray-50/40 transition-colors">
-                <td className={TD_CLS}><span className="text-[13px] font-medium text-gray-700">{row.metric}</span></td>
-                <td className={TD_CLS}><span className={`text-[13px] font-semibold ${row.changed ? 'text-primary-700' : 'text-gray-900'}`}>{row.v1}</span></td>
-                <td className={TD_CLS}><span className="text-[13px] font-semibold text-gray-900">{row.v2}</span></td>
-                <td className={TD_CLS}><span className="text-[13px] text-gray-300">—</span></td>
-                <td className={TD_CLS}><span className="text-[13px] text-gray-300">—</span></td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </SectionCard>
-
-      {/* Issue category sections */}
-      {issueSections.map(section => (
-        <SectionCard key={section.category}>
-          <div className="px-5 py-4 border-b border-gray-100">
-            <p className="text-[14px] font-semibold text-gray-900">{section.category}</p>
-            <p className="text-[12px] text-gray-400 mt-0.5">{section.issues.length} tracked issue{section.issues.length !== 1 ? 's' : ''} in this comparison section.</p>
-          </div>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className={TH_CLS + ' w-[40%]'}>Issue</th>
-                <th className={TH_CLS}>{DATE1}</th>
-                <th className={TH_CLS}>{DATE2}</th>
-                <th className={TH_CLS}>Fixed</th>
-                <th className={TH_CLS}>New</th>
-              </tr>
-            </thead>
-            <tbody>
-              {section.issues.map(row => (
-                <tr key={row.label} className="hover:bg-gray-50/40 transition-colors">
-                  <td className={TD_CLS}>
-                    <div className="flex items-center gap-2">
-                      {rowIcon(row.icon)}
-                      <span className="text-[13px] font-medium text-gray-700">{row.label}</span>
-                    </div>
-                  </td>
-                  <td className={TD_CLS}>{renderVal(row, 1)}</td>
-                  <td className={TD_CLS}>{renderVal(row, 2)}</td>
-                  <td className={TD_CLS}>{renderFixed(row)}</td>
-                  <td className={TD_CLS}>{renderNew(row)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </SectionCard>
-      ))}
-
-      {showOnlyDiffs && issueSections.length === 0 && auditRows.length === 0 && domainRows.length === 0 && (
-        <SectionCard>
-          <div className="px-5 py-10 flex flex-col items-center text-center">
-            <div className="w-11 h-11 rounded-full bg-success-50 flex items-center justify-center mb-3">
-              <CircleCheck size={20} className="text-success-600" />
+      {scope === 'crawled' && (
+        pageRows.length === 0 ? (
+          <CompareEmptyState message="No crawled-page differences between these two audits." />
+        ) : (
+          <SectionCard>
+            <div className="px-5 py-4 border-b border-gray-100">
+              <p className="text-[14px] font-semibold text-gray-900">Crawled pages comparison</p>
+              <p className="text-[12px] text-gray-400 mt-0.5">Pages added, removed, or with issue-count changes between the two scans.</p>
             </div>
-            <p className="text-[14px] font-semibold text-gray-900">No differences found</p>
-            <p className="text-[12px] text-gray-400 mt-0.5 max-w-[300px]">These two audits are identical across every tracked metric and issue.</p>
-          </div>
-        </SectionCard>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr>
+                  <th className={`${COMPARE_TH} w-[36%]`}>Page URL</th>
+                  <th className={COMPARE_TH}>Change</th>
+                  <th className={COMPARE_TH}>{DATE1}</th>
+                  <th className={COMPARE_TH}>{DATE2}</th>
+                  <th className={COMPARE_TH}>Fixed</th>
+                  <th className={COMPARE_TH}>New</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pageRows.map(row => (
+                  <tr key={row.label} className="hover:bg-gray-50/40 transition-colors">
+                    <td className={COMPARE_TD}>
+                      <span className="text-[14px] font-medium text-primary-600 truncate block max-w-[360px]">{row.label}</span>
+                    </td>
+                    <td className={COMPARE_TD}><CompareChangePill change={row.change} /></td>
+                    <td className={COMPARE_TD}>{renderCompareVal(row, 1)}</td>
+                    <td className={COMPARE_TD}>{renderCompareVal(row, 2)}</td>
+                    <td className={COMPARE_TD}>{renderCompareFixed(row)}</td>
+                    <td className={COMPARE_TD}>{renderCompareNew(row)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </SectionCard>
+        )
+      )}
+
+      {scope === 'links' && (
+        linkRows.length > 0
+          ? metricTable(
+            'Found links comparison',
+            'Link inventory totals and broken-link deltas between the two scans.',
+            'Metric',
+            linkRows,
+          )
+          : <CompareEmptyState message="No link metrics changed between these two audits." />
+      )}
+
+      {scope === 'resources' && (
+        resourceRows.length > 0
+          ? metricTable(
+            'Found resources comparison',
+            'Resource inventory and size/broken deltas between the two scans.',
+            'Metric',
+            resourceRows,
+          )
+          : <CompareEmptyState message="No resource metrics changed between these two audits." />
       )}
     </div>
   )
@@ -5816,7 +6221,7 @@ const TABS = [
   { id: 'crawled',    label: 'Crawled pages',   Icon: Globe           },
   { id: 'links',      label: 'Found links',     Icon: Link2           },
   { id: 'resources',  label: 'Found resources', Icon: Package         },
-  { id: 'comparison', label: 'Crawl comparison',Icon: BarChart3       },
+  // Crawl comparison tab temporarily removed — enter via header Compare scans
 ]
 
 // ─── Initial / pre-scan state ────────────────────────────────────────────────
@@ -5845,11 +6250,39 @@ const TRUST_SIGNALS = [
 ]
 
 function InitialCardPreviewHealth() {
+  // HARDCODED: 82/100 demo score — ring must read as 82% filled, not a full circle.
+  const score = 82
+  const radius = 15.5
+  const circumference = 2 * Math.PI * radius
+  const filled = (score / 100) * circumference
+
   return (
     <div className="h-full rounded-lg bg-gray-50 border border-gray-100 p-3 flex items-center gap-3">
       <div className="shrink-0 flex flex-col items-center gap-0.5">
-        <div className="w-11 h-11 rounded-full border-[3px] flex items-center justify-center bg-white" style={{ borderColor: '#16A34A' }}>
-          <span className="text-[13px] font-bold text-gray-900">82</span>
+        <div className="relative w-11 h-11">
+          <svg viewBox="0 0 36 36" className="w-11 h-11 -rotate-90" aria-hidden="true">
+            <circle
+              cx="18"
+              cy="18"
+              r={radius}
+              fill="none"
+              stroke="var(--gray-200)"
+              strokeWidth="3"
+            />
+            <circle
+              cx="18"
+              cy="18"
+              r={radius}
+              fill="none"
+              stroke="#16A34A"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeDasharray={`${filled} ${circumference}`}
+            />
+          </svg>
+          <span className="absolute inset-0 flex items-center justify-center text-[13px] font-bold text-gray-900">
+            {score}
+          </span>
         </div>
         <span className="text-[9px] text-gray-400">/100</span>
       </div>
@@ -5913,7 +6346,7 @@ const DETAIL_CARDS_V2 = [
     Icon: LayoutDashboard, color: 'var(--primary-600)', bg: 'var(--primary-50)',
     chip: 'Score + top issues',
     title: 'Health snapshot',
-    desc: 'Get your overall health score and the issues impacting SEO the most.',
+    desc: 'See your overall health score and the issues impacting SEO most.',
     tabs: ['Overview', 'Scan results'],
     Preview: InitialCardPreviewHealth,
   },
@@ -5921,7 +6354,7 @@ const DETAIL_CARDS_V2 = [
     Icon: Link2, color: '#0D9488', bg: '#F0FDFA',
     chip: 'URLs + internal linking',
     title: 'Page & link map',
-    desc: 'Find out which pages need attention and where broken or weak links are holding you back.',
+    desc: 'See which pages need attention and where broken links hold you back.',
     tabs: ['Crawled pages', 'Found links'],
     Preview: InitialCardPreviewLinks,
   },
@@ -5929,8 +6362,8 @@ const DETAIL_CARDS_V2 = [
     Icon: TrendingUp, color: 'var(--purple-600)', bg: 'var(--purple-50)',
     chip: 'Resources + change tracking',
     title: 'Assets & trends',
-    desc: 'Catch heavy resources, rendering friction, and track improvements over time.',
-    tabs: ['Resources', 'Crawl comparison'],
+    desc: 'Spot heavy resources and track improvements across crawls over time.',
+    tabs: ['Found resources'],
     Preview: InitialCardPreviewTrends,
   },
 ]
@@ -5962,169 +6395,180 @@ function SiteHealthInitialState({ onLaunch }) {
   }
 
   const FEATURES_V2 = [
-    { Icon: Globe,         color: '#0D9488', bg: '#F0FDFA', label: 'Crawl the entire site', sub: 'Pages, links, assets & more'  },
-    { Icon: AlertTriangle, color: '#D97706', bg: 'var(--warning-100)', label: 'Spot what matters',     sub: 'Errors first, save time'       },
-    { Icon: BarChart3,     color: 'var(--purple-600)', bg: 'var(--purple-50)', label: 'Track & improve',       sub: 'Compare every crawl'           },
+    { Icon: Globe,         iconWrap: 'bg-teal-50 text-teal-600',   label: 'Crawl the entire site', sub: 'Pages, links, assets & more' },
+    { Icon: AlertTriangle, iconWrap: 'bg-warning-100 text-warning-600', label: 'Spot what matters', sub: 'Errors first, save time' },
+    { Icon: BarChart3,     iconWrap: 'bg-purple-50 text-purple-600', label: 'Track & improve', sub: 'Compare every crawl' },
   ]
 
   return (
-    <div className="flex-1 min-w-0 min-h-0 h-full bg-gray-50 p-4 flex overflow-hidden">
-      <div
-        className="flex-1 min-w-0 bg-white rounded-xl overflow-hidden"
-        style={{ boxShadow: '0 2px 12px rgba(0,0,0,.08)', display: 'grid', gridTemplateColumns: '1fr minmax(0, 320px)' }}
-      >
+    <div className="flex-1 min-w-0 min-h-0 h-full overflow-hidden bg-gray-50 p-4 sm:p-5 xl:p-6 flex">
+      <div className="relative flex-1 min-w-0 min-h-0 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden flex pt-setup-fade-up">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 55% 40% at 0% 0%, rgba(21,94,239,0.07), transparent 55%), radial-gradient(ellipse 40% 30% at 100% 0%, rgba(105,56,239,0.05), transparent 50%)',
+          }}
+          aria-hidden="true"
+        />
 
-        {/* ── Left: scrolls when squished ── */}
-        <div className="overflow-y-auto min-w-0 border-r border-gray-100 p-6 flex flex-col gap-8" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
+        {/* ── Left: pitch content ── */}
+        <div
+          className="relative flex-1 min-w-0 overflow-y-auto border-r border-gray-100 px-6 py-7 sm:px-8 sm:py-8 flex flex-col gap-9"
+          style={{ scrollbarGutter: 'stable' }}
+        >
+          <section>
+            <h1 className="text-[26px] sm:text-[30px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight max-w-[560px]">
+              Uncover what&apos;s holding back your{' '}
+              <span className="text-primary-600">organic growth</span>
+            </h1>
+            <p className="text-[14px] sm:text-[15px] text-gray-500 m-0 mt-3 leading-relaxed max-w-[520px]">
+              Run a complete crawl to get a clear snapshot of your site&apos;s health and fix what matters most for better SEO performance.
+            </p>
+          </section>
 
-          {/* Group 1: Hero + feature strip + preview cards */}
-          <div className="flex flex-col gap-8">
-            <div>
-              <h1 className="text-[24px] font-bold text-gray-900 leading-tight mb-2">
-                Uncover what's holding back your{' '}
-                <span className="text-primary-600">organic growth</span>{' '}
-                <TrendingUp size={22} className="inline text-primary-600 -mt-1" />
-              </h1>
-              <p className="text-[13px] text-gray-500 leading-relaxed">
-                Run a complete crawl to get a clear snapshot of your site's health and fix what matters most for better SEO performance.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-4">
-            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-              {FEATURES_V2.map(({ Icon, color, bg, label, sub }) => (
-                <div key={label} className="flex items-center gap-2.5">
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
-                    <Icon size={16} style={{ color }} />
-                  </div>
-                  <div>
-                    <p className="text-[13px] font-semibold text-gray-900">{label}</p>
-                    <p className="text-[12px] text-gray-400 mt-0.5">{sub}</p>
-                  </div>
+          <section>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {FEATURES_V2.map(({ Icon, iconWrap, label, sub }, i) => (
+                <div
+                  key={label}
+                  className="rounded-2xl border border-gray-200 bg-gradient-to-b from-primary-50/40 to-white p-4 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                  style={{ animationDelay: `${40 + i * 40}ms` }}
+                >
+                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${iconWrap}`}>
+                    <Icon size={18} />
+                  </span>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 mt-3 leading-snug">{label}</p>
+                  <p className="text-[12px] text-gray-500 m-0 mt-1 leading-relaxed">{sub}</p>
                 </div>
               ))}
             </div>
+          </section>
 
-            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))' }}>
+          <section>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
               {DETAIL_CARDS_V2.map(({ title, desc, tabs, Preview }) => (
-                <div key={title} className="border border-gray-200 rounded-xl p-4 flex flex-col hover:border-gray-300 hover:shadow-sm transition-all">
-                  <p className="text-[13px] font-bold text-gray-900">{title}</p>
-                  <p className="text-[12px] text-gray-400 leading-relaxed mt-1" style={{ minHeight: '2.5rem' }}>{desc}</p>
-                  <div className="h-[82px]">
+                <div
+                  key={title}
+                  className="h-full rounded-2xl border border-gray-200 bg-white p-4 flex flex-col shadow-xs hover:border-primary-200 hover:shadow-sm transition-all duration-200"
+                >
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 shrink-0">{title}</p>
+                  <p className="text-[12px] text-gray-500 leading-snug m-0 mt-1 h-[2.5rem] line-clamp-2 shrink-0">
+                    {desc}
+                  </p>
+                  <div className="h-[82px] mt-2 shrink-0">
                     <Preview />
                   </div>
-                  <div className="flex flex-wrap gap-1 mt-3 pt-3 border-t border-gray-100">
+                  <div className="mt-auto flex flex-nowrap items-center gap-1.5 pt-3 border-t border-gray-100 shrink-0">
                     {tabs.map(t => (
-                      <span key={t} className="text-[12px] font-medium text-gray-600 bg-white border border-gray-200 rounded-full px-2.5 py-0.5">{t}</span>
+                      <span
+                        key={t}
+                        className="text-[11px] font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-lg px-2 py-0.5 whitespace-nowrap"
+                      >
+                        {t}
+                      </span>
                     ))}
                   </div>
                 </div>
               ))}
             </div>
-            </div>
-          </div>
+          </section>
 
-          {/* Group 2: What happens next */}
-          <div className="border-t border-gray-100 pt-8">
-            <p className="text-[13px] font-semibold text-gray-700 mb-3">What happens next</p>
-            <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-              {WORKFLOW_STEPS.map(({ n, Icon, color, bg, label, desc }) => (
-                <div key={n} className="flex flex-col gap-2 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: bg }}>
-                      <Icon size={14} style={{ color }} />
-                    </div>
-                    <div>
-                      <p className="text-[12px] text-gray-400 leading-none">{n}</p>
-                      <p className="text-[13px] font-bold text-gray-900 leading-tight">{label}</p>
-                    </div>
+          <section>
+            <h2 className="text-[14px] font-semibold text-gray-900 m-0 mb-4">What happens next</h2>
+            <ol className="relative m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-3 gap-5">
+              <div
+                className="hidden sm:block absolute top-5 left-[16%] right-[16%] h-px bg-gradient-to-r from-primary-200 via-purple-200 to-primary-200"
+                aria-hidden="true"
+              />
+              {WORKFLOW_STEPS.map(({ n, Icon, color, label, desc }) => (
+                <li key={n} className="relative flex flex-col items-start sm:items-center sm:text-center gap-2.5 min-w-0">
+                  <span
+                    className="relative z-[1] inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-primary-200 shadow-sm"
+                    style={{ color }}
+                  >
+                    <Icon size={16} />
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-medium text-gray-400 m-0 tabular-nums">{n}</p>
+                    <p className="text-[14px] font-semibold text-gray-900 m-0 mt-0.5 leading-snug">{label}</p>
+                    <p className="text-[12px] text-gray-500 m-0 mt-1 leading-relaxed">{desc}</p>
                   </div>
-                  <p className="text-[12px] text-gray-400 leading-snug">{desc}</p>
-                </div>
+                </li>
               ))}
-            </div>
-          </div>
+            </ol>
+          </section>
 
-          {/* Group 3: Trust signals */}
-          <div className="border-t border-gray-100 pt-8">
-            <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
+          <section className="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50/90 to-white px-4 py-4 sm:px-5">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {TRUST_SIGNALS.map(({ Icon, color, bg, label, sub }) => (
-                <div key={label} className="flex items-center gap-2.5">
+                <div key={label} className="flex items-center gap-2.5 min-w-0">
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: bg }}>
                     <Icon size={14} style={{ color }} />
                   </div>
-                  <div>
-                    <p className="text-[12px] font-semibold text-gray-700">{label}</p>
-                    <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{sub}</p>
+                  <div className="min-w-0">
+                    <p className="text-[12px] font-semibold text-gray-800 m-0">{label}</p>
+                    <p className="text-[11px] text-gray-500 m-0 mt-0.5 leading-snug">{sub}</p>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
-
+          </section>
         </div>
 
-        {/* ── Right: config panel ── */}
-        <div className="flex flex-col overflow-hidden">
-
-          {/* Scrollable config */}
-          <div className="flex-1 overflow-y-auto px-6 pt-6 pb-4 flex flex-col gap-5" style={{ scrollbarWidth: 'thin', scrollbarColor: '#D0D5DD transparent' }}>
-
-            {/* Header */}
+        {/* ── Right: start panel ── */}
+        <aside className="relative w-full max-w-[340px] shrink-0 flex flex-col overflow-hidden bg-white/80 backdrop-blur-[2px]">
+          <div className="flex-1 overflow-y-auto px-5 pt-6 pb-4 flex flex-col gap-5" style={{ scrollbarGutter: 'stable' }}>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0">
                 <Zap size={18} className="text-primary-600" />
               </div>
-              <div>
-                <p className="text-[15px] font-bold text-gray-900 leading-none">Start your audit</p>
-                <p className="text-[12px] text-gray-400 mt-0.5">Enter your website and launch the crawl</p>
+              <div className="min-w-0">
+                <p className="text-[14px] font-semibold text-gray-900 m-0 leading-tight">Start your audit</p>
+                <p className="text-[12px] text-gray-500 m-0 mt-0.5">Enter your website and launch the crawl</p>
               </div>
             </div>
 
-            {/* URL input */}
             <div>
-              <label className="text-[12px] font-semibold text-gray-700 mb-1.5 block">Website URL</label>
-              <div className={`flex items-center gap-2 border rounded-lg px-3 py-2.5 transition-all bg-white ${
-                urlError
-                  ? 'border-error-600 focus-within:border-error-600'
-                  : 'border-gray-200 focus-within:border-primary-600 focus-within:shadow-focus-purple-sm'
-              }`}>
-                <Globe size={14} className={`shrink-0 ${urlError ? 'text-error-600' : 'text-gray-400'}`} />
-                <input
-                  value={url}
-                  onChange={e => { setUrl(e.target.value); if (urlError) setUrlError('') }}
-                  onKeyDown={e => { if (e.key === 'Enter') handleLaunchClick() }}
-                  placeholder="https://yourwebsite.com"
-                  aria-invalid={!!urlError}
-                  className="flex-1 text-[13px] text-gray-800 placeholder:text-gray-400 outline-none bg-transparent"
-                />
-              </div>
+              <label htmlFor="sh-setup-url" className="block text-[12px] font-medium text-gray-500 mb-2">Website URL</label>
+              <HLInput
+                id="sh-setup-url"
+                size="sm"
+                prefixIcon={Globe}
+                value={url}
+                onChange={e => { setUrl(e.target.value); if (urlError) setUrlError('') }}
+                onKeyDown={e => { if (e.key === 'Enter') handleLaunchClick() }}
+                placeholder="https://yourwebsite.com"
+                aria-invalid={!!urlError}
+              />
               {urlError && (
-                <p className="flex items-center gap-1 mt-1.5 text-[12px] text-error-600">
+                <p className="flex items-center gap-1 mt-1.5 text-[12px] text-error-600 m-0">
                   <CircleX size={12} className="shrink-0" /> {urlError}
                 </p>
               )}
             </div>
 
-            {/* Advanced settings */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-xs">
               <button
+                type="button"
                 onClick={() => setAdvanced(a => !a)}
-                className="flex items-center justify-between w-full px-4 py-3 bg-white hover:bg-gray-50 transition-colors"
+                className="flex items-center justify-between w-full px-3.5 py-3 bg-white hover:bg-gray-50 transition-colors"
               >
-                <span className="text-[13px] font-semibold text-gray-700">Advanced settings</span>
+                <span className="text-[13px] font-semibold text-gray-800">Advanced settings</span>
                 <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
               </button>
 
               <div style={{ display: 'grid', gridTemplateRows: advanced ? '1fr' : '0fr', transition: 'grid-template-rows 200ms ease' }}>
                 <div style={{ overflow: 'hidden' }}>
-                  <div className="border-t border-gray-100 px-4 py-4 flex flex-col gap-4 bg-gray-50/40">
-                    {/* User agent */}
+                  <div className="border-t border-gray-100 px-3.5 py-3.5 flex flex-col gap-4 bg-gray-50/50">
                     <div>
-                      <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Crawler user agent</p>
+                      <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0">Crawler user agent</p>
                       <div className="relative">
-                        <select value={agent} onChange={e => setAgent(e.target.value)}
-                          className="w-full appearance-none border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600 pr-8 cursor-pointer">
+                        <select
+                          value={agent}
+                          onChange={e => setAgent(e.target.value)}
+                          className="w-full appearance-none h-8 border border-gray-300 rounded-lg px-3 text-[14px] text-gray-900 bg-white outline-none focus:border-primary-600 pr-8 cursor-pointer"
+                        >
                           <option>Custom bot</option>
                           <option>Googlebot</option>
                           <option>Bingbot</option>
@@ -6132,31 +6576,26 @@ function SiteHealthInitialState({ onLaunch }) {
                         <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       </div>
                     </div>
-                    {/* Max pages */}
                     <div>
-                      <p className="text-[12px] font-semibold text-gray-600 mb-1.5">Max pages</p>
-                      <input type="number" value={maxPages} onChange={e => setMaxPages(e.target.value)}
-                        className="w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600" />
+                      <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0">Max pages</p>
+                      <HLInput
+                        size="sm"
+                        type="number"
+                        value={maxPages}
+                        onChange={e => setMaxPages(e.target.value)}
+                      />
                     </div>
-                    {/* JS rendering toggle */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-[13px] font-semibold text-gray-700">JS rendering</p>
-                          <span title="Enables JavaScript execution during crawl. Slower but more accurate for SPA or React sites." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
-                        </div>
-                        <p className="text-[12px] text-gray-400 mt-0.5">Enable for JavaScript-heavy sites</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-gray-800 m-0">JS rendering</p>
+                        <p className="text-[12px] text-gray-500 m-0 mt-0.5">Enable for JavaScript-heavy sites</p>
                       </div>
                       <Toggle on={jsOn} onChange={setJsOn} />
                     </div>
-                    {/* Respect robots.txt toggle */}
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <p className="text-[13px] font-semibold text-gray-700">Respect robots.txt</p>
-                          <span title="When enabled, the crawler follows your site's robots.txt rules — matching how Googlebot and other crawlers behave." style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 14, height: 14, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 9, fontWeight: 700, color: '#98A2B3', cursor: 'help', flexShrink: 0, lineHeight: 1 }}>i</span>
-                        </div>
-                        <p className="text-[12px] text-gray-400 mt-0.5">Follow crawl directives</p>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="text-[13px] font-semibold text-gray-800 m-0">Respect robots.txt</p>
+                        <p className="text-[12px] text-gray-500 m-0 mt-0.5">Follow crawl directives</p>
                       </div>
                       <Toggle on={robotsOn} onChange={setRobotsOn} />
                     </div>
@@ -6164,22 +6603,18 @@ function SiteHealthInitialState({ onLaunch }) {
                 </div>
               </div>
             </div>
-
           </div>
 
-          {/* CTA pinned at bottom */}
-          <div className="px-6 pb-6 pt-4 border-t border-gray-100 bg-white">
+          <div className="px-5 pb-5 pt-4 border-t border-gray-100 bg-white">
             <button
+              type="button"
               onClick={handleLaunchClick}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors shadow-sm"
+              className={`${BTN_PRIMARY} w-full`}
             >
-              <Zap size={15} />
               Crawl and run audit
             </button>
           </div>
-
-        </div>
-
+        </aside>
       </div>
     </div>
   )
@@ -6210,14 +6645,15 @@ function SiteHealthCrawlingState({ config, onComplete }) {
   const displayPct  = Math.min(100, Math.round(progress))
 
   useEffect(() => {
+    // Slower cadence so each stage (and the active sparkle pulse) is readable.
     intervalRef.current = setInterval(() => {
       setProgress(p => {
-        const step = p < 50 ? 1.1 : p < 80 ? 0.65 : 0.28
+        const step = p < 50 ? 0.7 : p < 80 ? 0.4 : 0.22
         const next = p + step
         if (next >= 100) { clearInterval(intervalRef.current); return 100 }
         return next
       })
-    }, 80)
+    }, 120)
     return () => clearInterval(intervalRef.current)
   }, [])
 
@@ -6241,10 +6677,10 @@ function SiteHealthCrawlingState({ config, onComplete }) {
             </div>
             <div>
               <p className="text-[16px] font-bold text-gray-900">Site health</p>
-              <p className="text-[12px] text-gray-400 mt-0.5">Technical SEO, indexing diagnostics, schema gaps, and fix recommendations</p>
+              <p className="text-[12px] text-gray-400 mt-0.5">Last scanned {AUDIT_DATES[0]}</p>
             </div>
           </div>
-          <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary-600 text-white text-[13px] font-semibold cursor-default">
+          <button className={`${BTN_PRIMARY} cursor-default`}>
             <RefreshCw size={13} className="animate-spin" style={{ animationDuration: '1.4s' }} />
             Running audit
           </button>
@@ -6267,7 +6703,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
                   {isDone ? (
                     <CircleCheck size={18} className="text-success-600 shrink-0" />
                   ) : isActive ? (
-                    <Sparkles size={18} className="text-primary-600 shrink-0" />
+                    <Sparkles size={18} className="text-primary-600 shrink-0 sh-crawl-sparkle-pulse" />
                   ) : (
                     <div className="w-[18px] h-[18px] rounded-full border border-gray-200 shrink-0" />
                   )}
@@ -6569,16 +7005,16 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
                 <table className="w-full border-collapse text-left">
                   <thead>
                     <tr style={{ background: '#F2F4F7', borderBottom: '1px solid #EAECF0' }}>
-                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-900">Sitemap</th>
-                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap">URLs</th>
-                      <th className="px-4 py-2.5 text-[12px] font-semibold text-gray-900 w-10"></th>
+                      <th className="px-4 py-2.5 text-[14px] font-semibold text-gray-900">Sitemap</th>
+                      <th className="px-4 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">URLs</th>
+                      <th className="px-4 py-2.5 text-[14px] font-semibold text-gray-900 w-10"></th>
                     </tr>
                   </thead>
                   <tbody>
                     {sitemaps.map(s => (
                       <tr key={s.url} className="border-b border-gray-100 last:border-0" style={{ background: '#fff' }}>
-                        <td className="px-4 py-3 text-[13px] text-gray-800 break-all">{s.url}</td>
-                        <td className="px-4 py-3 text-[13px] text-gray-700 whitespace-nowrap">{s.urlCount}</td>
+                        <td className="px-4 py-3 text-[14px] text-gray-800 break-all">{s.url}</td>
+                        <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{s.urlCount}</td>
                         <td className="px-4 py-3">
                           <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="p-1 text-gray-400 hover:text-error-600 transition-colors rounded">
                             <Trash2 size={13} />
@@ -6606,7 +7042,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
                             >
                               <X size={14} />
                             </button>
-                            <button type="button" onClick={addSitemap} className="h-8 px-3 rounded-md bg-primary-600 text-white text-[12px] font-semibold hover:bg-primary-700 transition-colors whitespace-nowrap shrink-0">Add</button>
+                            <button type="button" onClick={addSitemap} className={`${BTN_PRIMARY} whitespace-nowrap shrink-0`}>Add</button>
                           </div>
                         </td>
                       </tr>
@@ -6846,13 +7282,14 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
             Reset to default
           </button>
           <div className="flex items-center gap-3 ml-auto">
-            <button onClick={onClose} className="px-4 py-2 rounded-lg border border-gray-200 text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+            <button type="button" onClick={onClose} className={BTN_SECONDARY}>
               Cancel
             </button>
             <button
+              type="button"
               onClick={hasChanges ? () => { onApply?.(); onClose() } : undefined}
               disabled={!hasChanges}
-              className={`px-4 py-2 rounded-lg text-white text-[14px] font-semibold transition-colors ${hasChanges ? 'bg-primary-600 hover:bg-primary-700 cursor-pointer' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+              className={BTN_PRIMARY}
             >
               Apply changes
             </button>
@@ -6872,7 +7309,7 @@ function CrawlingProgressView({ progress, message, config }) {
   const urlsFound    = Math.round(progress * 9.6)
   const pagesAudited = Math.round(progress * 6.8)
 
-  const secondsLeft = Math.max(0, Math.round((100 - progress) / 100 * 26))
+  const secondsLeft = Math.max(0, Math.round((100 - progress) / 100 * 28))
   const etaText     = secondsLeft === 0 ? 'Almost done…' : secondsLeft < 60 ? `~${secondsLeft}s remaining` : `~${Math.ceil(secondsLeft / 60)}m remaining`
 
   const stageStatus = (i) => {
@@ -6930,12 +7367,17 @@ function CrawlingProgressView({ progress, message, config }) {
                 {CRAWL_STAGES.map((stage, i) => {
                   const status = stageStatus(i)
                   return (
-                    <div key={i} className={`flex items-start gap-2.5 px-3 py-2 rounded-lg transition-colors ${status === 'active' ? 'bg-primary-50' : ''}`}>
+                    <div
+                      key={i}
+                      className={`flex items-start gap-2.5 px-3 py-2 rounded-lg transition-colors ${
+                        status === 'active' ? 'sh-crawl-chip-pulse' : ''
+                      }`}
+                    >
                       <div className="w-4 h-4 shrink-0 flex items-center justify-center mt-px">
                         {status === 'done' ? (
                           <CircleCheck size={16} className="text-success-600" />
                         ) : status === 'active' ? (
-                          <Sparkles size={16} className="text-primary-600" />
+                          <Sparkles size={16} className="text-primary-600 sh-crawl-sparkle-pulse" />
                         ) : (
                           <span className="w-1.5 h-1.5 rounded-full bg-gray-300 block" />
                         )}
@@ -7005,7 +7447,7 @@ function ScanErrorContent({ config, onRetry }) {
           </p>
           <button
             onClick={onRetry}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[14px] font-semibold transition-colors"
+            className={BTN_PRIMARY}
           >
             <RefreshCw02 size={14} /> Retry scan
           </button>
@@ -7024,6 +7466,11 @@ export default function SiteHealthDashboard() {
   const [showSettings, setShowSettings] = useState(false)
   const [showRescanConfirm, setShowRescanConfirm] = useState(false)
   const [rescanDontAsk, setRescanDontAsk] = useState(false)
+  const [showCompareRemote, setShowCompareRemote] = useState(false)
+  const [showComparisonView, setShowComparisonView] = useState(false)
+  const [compareDate1Idx, setCompareDate1Idx] = useState(0)
+  const [compareDate2Idx, setCompareDate2Idx] = useState(1)
+  const canCompareRemote = AUDIT_DATES.length >= 2
   const [jumpTarget, setJumpTarget]     = useState(null)
   const [isCrawling, setIsCrawling]     = useState(false)
   const [crawlProgress, setCrawlProgress] = useState(0)
@@ -7067,15 +7514,15 @@ export default function SiteHealthDashboard() {
     startRescan()
   }
 
-  // Advance progress — keep the updater pure (StrictMode double-invokes it).
+  // Advance progress slowly so each stage chip + sparkle can pulse for a few seconds.
   useEffect(() => {
     if (!isCrawling) return
     crawlIntervalRef.current = setInterval(() => {
       setCrawlProgress(p => {
-        const step = p < 50 ? 1.6 : p < 80 ? 0.9 : 0.4
+        const step = p < 50 ? 0.7 : p < 80 ? 0.4 : 0.22
         return Math.min(100, p + step)
       })
-    }, 80)
+    }, 120)
     return () => clearInterval(crawlIntervalRef.current)
   }, [isCrawling])
 
@@ -7138,7 +7585,36 @@ export default function SiteHealthDashboard() {
             </div>
             <div>
               <p className="text-[18px] font-bold text-gray-900">Site health</p>
-              <p className="text-[13px] text-gray-500 mt-0.5">Technical SEO, indexing diagnostics, schema gaps, and fix recommendations</p>
+              {showComparisonView ? (
+                <p className="text-[14px] text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+                  <span className="tabular-nums">
+                    Comparing {AUDIT_DATES[compareDate1Idx]} vs {AUDIT_DATES[compareDate2Idx]}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowCompareRemote(true)}
+                    className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  >
+                    Edit
+                  </button>
+                  <span className="text-gray-300" aria-hidden="true">|</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowComparisonView(false)
+                      setCompareDate1Idx(0)
+                      setCompareDate2Idx(1)
+                    }}
+                    className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                  >
+                    Clear
+                  </button>
+                </p>
+              ) : (
+                <p className="text-[14px] text-gray-500 mt-0.5">
+                  Last scanned {AUDIT_DATES[0]}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -7148,18 +7624,29 @@ export default function SiteHealthDashboard() {
             >
               Preview initial state
             </button>
+            {!isBusyPhase && (
+              <button
+                type="button"
+                disabled={!canCompareRemote}
+                onClick={() => canCompareRemote && setShowCompareRemote(true)}
+                title={!canCompareRemote ? 'Need at least two scans to compare' : 'Compare two scan dates'}
+                className={BTN_SECONDARY}
+              >
+                Compare scans
+              </button>
+            )}
             {isCrawlingPhase ? (
-              <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 text-white text-[13px] font-semibold cursor-default select-none">
-                <RefreshCw02 size={13} className="animate-spin" style={{ animationDuration: '1.2s' }} />
+              <button type="button" className={`${BTN_PRIMARY} cursor-default select-none`}>
+                <RefreshCw02 size={14} className="animate-spin" style={{ animationDuration: '1.2s' }} />
                 Running audit
               </button>
             ) : (
-              <button onClick={handleRescanClick} className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
-                <RefreshCw02 size={13} />
+              <button type="button" onClick={handleRescanClick} className={BTN_PRIMARY}>
+                <RefreshCw02 size={14} />
                 Re-scan site
               </button>
             )}
-            <button onClick={() => setShowSettings(true)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
+            <button onClick={() => setShowSettings(true)} className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white shadow-xs text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors">
               <Settings size={15} />
             </button>
           </div>
@@ -7168,14 +7655,14 @@ export default function SiteHealthDashboard() {
         {/* Tab nav — dimmed and non-interactive while crawling or on a failed scan */}
         <div className={`flex items-center gap-1 -mx-1 overflow-x-auto transition-opacity ${isBusyPhase ? 'opacity-30 pointer-events-none' : 'opacity-100'}`} style={{ scrollbarWidth: 'none' }}>
           {TABS.map(({ id, label, Icon }) => {
-            const isActive = activeTab === id
+            const isActive = !showComparisonView && activeTab === id
             return (
               <button
                 key={id}
-                onClick={() => setActiveTab(id)}
+                onClick={() => { setShowComparisonView(false); setActiveTab(id) }}
                 className={`px-1 border-b-2 -mb-px transition-colors ${isActive ? 'border-primary-600' : 'border-transparent'}`}
               >
-                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium transition-colors ${
+                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[14px] font-medium transition-colors ${
                   isActive ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}>
                   <Icon size={14} />
@@ -7194,13 +7681,50 @@ export default function SiteHealthDashboard() {
         <ScanErrorContent config={crawlConfig} onRetry={handleRetryScan} />
       ) : (
         <div className="flex-1 overflow-y-auto min-h-0 p-5" style={{ scrollbarGutter: 'stable' }}>
-          {activeTab === 'overview'   && <OverviewTab onFindingClick={handleFindingClick} onTabSwitch={setActiveTab} onRescan={handleRescanClick} />}
-          {activeTab === 'scan'       && <ScanResultsTab jumpTarget={jumpTarget} onJumpConsumed={() => setJumpTarget(null)} />}
-          {activeTab === 'crawled'    && <CrawledPagesTab />}
-          {activeTab === 'links'      && <FoundLinksTab />}
-          {activeTab === 'resources'  && <FoundResourcesTab />}
-          {activeTab === 'comparison' && <CrawlComparisonTab />}
+          {showComparisonView ? (
+            <CrawlComparisonTab
+              scope="comparison"
+              date1Idx={compareDate1Idx}
+              date2Idx={compareDate2Idx}
+              comparing
+            />
+          ) : (
+            <>
+              {activeTab === 'overview' && (
+                <OverviewTab
+                  onFindingClick={handleFindingClick}
+                  onTabSwitch={setActiveTab}
+                />
+              )}
+              {activeTab === 'scan'       && <ScanResultsTab jumpTarget={jumpTarget} onJumpConsumed={() => setJumpTarget(null)} />}
+              {activeTab === 'crawled'    && <CrawledPagesTab />}
+              {activeTab === 'links'      && <FoundLinksTab />}
+              {activeTab === 'resources'  && <FoundResourcesTab />}
+            </>
+          )}
         </div>
+      )}
+
+      {showCompareRemote && (
+        <CompareRemoteModal
+          scans={AUDIT_DATES}
+          initialPrimary={compareDate1Idx}
+          initialSecondary={compareDate2Idx}
+          canReset={showComparisonView}
+          onClose={() => setShowCompareRemote(false)}
+          onConfirm={({ primaryIdx, secondaryIdx }) => {
+            setCompareDate1Idx(primaryIdx)
+            setCompareDate2Idx(secondaryIdx)
+            setShowCompareRemote(false)
+            setShowComparisonView(true)
+          }}
+          onReset={() => {
+            setShowComparisonView(false)
+            setCompareDate1Idx(0)
+            setCompareDate2Idx(1)
+            setShowCompareRemote(false)
+          }}
+        />
       )}
 
       {showSettings && (
@@ -7219,7 +7743,13 @@ export default function SiteHealthDashboard() {
           id="rescan-confirm"
           width={560}
           onClose={() => setShowRescanConfirm(false)}
-          header={<p id="rescan-confirm-title" className="text-[16px] font-semibold text-gray-900">Launch website audit</p>}
+          header={
+            <div className="px-6 pt-5 pb-1">
+              <p id="rescan-confirm-title" className="text-[16px] font-semibold text-gray-900 m-0">Launch website audit</p>
+            </div>
+          }
+          contentClassName="px-6 py-5"
+          footerClassName="px-6 py-5"
           footer={
             <div className="flex items-center justify-between gap-3">
               <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -7234,13 +7764,13 @@ export default function SiteHealthDashboard() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setShowRescanConfirm(false)}
-                  className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+                  className={BTN_SECONDARY}
                 >
                   Cancel
                 </button>
                 <button
                   onClick={confirmRescan}
-                  className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+                  className={BTN_PRIMARY}
                 >
                   Launch audit
                 </button>
@@ -7248,11 +7778,9 @@ export default function SiteHealthDashboard() {
             </div>
           }
         >
-          <div className="px-4 pt-2 pb-4">
-            <p className="text-[14px] text-gray-500 leading-[21px]">
-              Are you sure you want to run the audit? This will not impact the scanning frequency. To change the scanning frequency, go to the module's settings.
-            </p>
-          </div>
+          <p className="text-[14px] font-normal text-gray-500 leading-[21px] m-0">
+            Are you sure you want to run the audit? This will not impact the scanning frequency. To change the scanning frequency, go to the module's settings.
+          </p>
         </HLModal>
       )}
     </div>

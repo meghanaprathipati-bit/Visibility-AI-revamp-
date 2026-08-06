@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import {
-  Search, Globe, ChevronDown, X, ExternalLink,
+  Search, Globe, ChevronDown, X,
   Check, Link2, FileText, Info,
   TrendingUp, Users, ChevronRight, ArrowLeft, Calendar,
 } from '../../icons/index.js'
@@ -11,11 +11,13 @@ import SectionInfoTip from '../SectionInfoTip.jsx'
 import HLTooltip from '../HLTooltip.jsx'
 import HLInput from '../HLInput.jsx'
 import DateRangePicker, { formatRange } from '../DateRangePicker.jsx'
-import FullResponseModal, { TABLE_TH_CLASS, responseFromDetailRow } from '../FullResponseModal.jsx'
 import AdvancedFilterDrawer from '../AdvancedFilterDrawer.jsx'
+import AdvancedFilterTrigger from '../AdvancedFilterTrigger.jsx'
+import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 
-// Canonical parent-table header — matches Competitors / Site Health top-level tables.
-const TABLE_TH = `px-5 py-2.5 text-left ${TABLE_TH_CLASS} whitespace-nowrap bg-gray-50 sticky top-0 z-[1]`
+// Source inventory table type scale — never go below 12px.
+const SI_TH_CLASS = 'text-[14px] font-semibold text-gray-900'
+const TABLE_TH = `px-5 py-2.5 text-left ${SI_TH_CLASS} whitespace-nowrap bg-gray-50 sticky top-0 z-[1]`
 
 // Table header label + compact info tip (keeps column alignment).
 function ThLabel({ children, tip, id, align = 'left' }) {
@@ -40,10 +42,24 @@ const SI_COL_TIPS = {
   promptCoverage: 'Share of AI answers for those prompts that cited this source. Higher means more consistent use across prompts.',
   mentionRate: 'How often your brand is mentioned when this domain is cited. Higher means stronger brand presence on this source.',
   coverage: 'How often your brand is covered when this page is cited. Higher is better for brand presence on this page.',
+  domainTraffic: 'Estimated monthly traffic for the source domain.',
   domainTrust: 'Estimated trust score for the domain. Higher-trust sources usually carry more weight in AI answers.',
-  brand: 'Whether your brand was mentioned when this page was cited in AI answers.',
+  pageTraffic: 'Estimated monthly traffic for this specific page.',
+  linksAvailable: 'Whether this page offers a link opportunity back to your website.',
+  brand: 'Whether your brand was mentioned when this source was cited in AI answers.',
   backlink: 'Whether this source links back to your website. Mentions with backlinks usually drive more authority and traffic.',
+  countBacklinks: 'Estimated number of backlinks from this source to your website.',
+  competitorMention: 'Competitor brands mentioned alongside yours when this source is cited.',
+  otherBrands: 'Other brands mentioned in the same AI answers that cite this source.',
 }
+
+/** Frozen identity + View action cols (left sticky); metrics scroll horizontally.
+ *  Matches Site Health crawled-pages URL + View spacing. */
+const SI_ID_COL_W = 380
+const SI_VIEW_COL_W = 88
+const SI_STICKY_VIEW_LEFT = SI_ID_COL_W
+const SI_STICKY_SHADOW = '4px 0 8px -4px rgba(16, 24, 40, 0.12)'
+const SI_TABLE_CLASS = 'min-w-max w-max border-separate border-spacing-0 text-left [&_th]:border-b [&_th]:border-gray-200 [&_td]:border-b [&_td]:border-gray-100'
 
 // ── Advanced filter columns (HLAdvanceFilter columnOptions) ───────────────────
 
@@ -882,15 +898,21 @@ function formatDetailDate(d) {
 function buildDetailRows(source) {
   const count = Math.max(source.aiAnswers || 0, source.prompts || 0)
   const engines = ['ChatGPT', 'Google AI Overview', 'Perplexity']
+  const sourceKey = source.id || 'source'
   return Array.from({ length: count }, (_, i) => {
     const dateValue = detailDateValue(i)
+    // HARDCODED: cache id for prototype route /ai-answer-cache/:id
+    const cacheId = `${sourceKey}-${i}`
     return {
-      id: i,
+      id: cacheId,
       prompt: DETAIL_PROMPT_POOL[i % DETAIL_PROMPT_POOL.length],
       engine: engines[i % engines.length],
       dateValue,
       date: formatDetailDate(dateValue),
-      cacheUrl: '#',
+      cacheUrl: `/ai-answer-cache/${cacheId}`,
+      sourceDomain: source.domain || '',
+      sourceTitle: source.title || source.domain || '',
+      sourceUrl: source.url || (source.domain ? `https://${source.domain}` : ''),
     }
   })
 }
@@ -916,7 +938,7 @@ function AiEngineTag({ engine }) {
     'Claude':             'bg-gray-100 text-gray-600 border-gray-200',
   }[engine] || 'bg-gray-100 text-gray-600 border-gray-200'
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[11px] font-medium whitespace-nowrap ${cfg}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium whitespace-nowrap ${cfg}`}>
       {engine}
     </span>
   )
@@ -925,7 +947,7 @@ function AiEngineTag({ engine }) {
 function TypeBadge({ type }) {
   const isOwned = type === 'Owned domain' || type === 'Owned page'
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium mt-0.5 ${
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-medium mt-0.5 ${
       isOwned ? 'bg-success-50 text-success-700' : 'bg-gray-100 text-gray-500'
     }`}>
       {type}
@@ -937,12 +959,12 @@ function TypeBadge({ type }) {
 // Brand and Backlink columns so both read identically.
 function YesNoBadge({ value }) {
   return value ? (
-    <span className="inline-flex items-center gap-1 text-[12px] font-semibold text-success-600">
-      <Check size={11} strokeWidth={2.5} />Yes
+    <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-success-600">
+      <Check size={12} strokeWidth={2.5} />Yes
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 text-[12px] font-medium text-gray-400">
-      <X size={11} strokeWidth={2.5} />No
+    <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-400">
+      <X size={12} strokeWidth={2.5} />No
     </span>
   )
 }
@@ -958,29 +980,42 @@ function BrandMentionBadge({ mentioned }) {
 function LinksAvailableBadge({ value }) {
   if (value === 'owned') {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-success-50 text-success-700">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-success-50 text-success-700">
         Owned page
       </span>
     )
   }
   if (value === 'yes') {
-    return <span className="text-[12px] font-semibold text-success-600">Yes</span>
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-success-50 text-success-700">
+        Yes
+      </span>
+    )
   }
-  return <span className="text-[12px] font-semibold text-error-600">No</span>
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-error-50 text-error-600">
+      No
+    </span>
+  )
+}
+
+function BrandsCell({ brands }) {
+  if (!brands?.length) return <span className="text-[14px] text-gray-400">—</span>
+  return <span className="text-[14px] text-gray-700 whitespace-nowrap">{brands.join(', ')}</span>
 }
 
 function TrustScore({ score }) {
   const color = score >= 80 ? 'text-success-600' : score >= 60 ? 'text-warning-600' : 'text-error-600'
   return (
-    <span className={`text-[13px] font-semibold ${color}`}>
-      {score}<span className="text-gray-400 font-normal text-[11px]">/100</span>
+    <span className={`text-[14px] font-semibold ${color}`}>
+      {score}<span className="text-gray-400 font-normal text-[12px]">/100</span>
     </span>
   )
 }
 
 // Prompt coverage: percentage only (no progress bar), medium weight.
 function CoverageBar({ value }) {
-  return <span className="text-[13px] font-medium text-gray-900 tabular-nums">{value}%</span>
+  return <span className="text-[14px] font-medium text-gray-900 tabular-nums">{value}%</span>
 }
 
 // ── Count Button with Portal Tooltip ─────────────────────────────────────────
@@ -1016,11 +1051,11 @@ function CountButton({ count, type, id, onDetailOpen }) {
           onMouseLeave={hide}
           className="bg-white border border-gray-200 rounded-xl p-3.5 w-[230px]"
         >
-          <p className="text-[10px] font-semibold text-gray-400 tracking-wider uppercase mb-1">
+          <p className="text-[12px] font-semibold text-gray-400 tracking-wider uppercase mb-1">
             {type === 'ai' ? 'AI Answers' : 'Prompts'}
           </p>
           <p className="text-[22px] font-bold text-gray-900 leading-none mb-0.5">{count}</p>
-          <p className="text-[11px] text-gray-400 mb-3">Total in current set · Jul 4–7, 2026</p>
+          <p className="text-[12px] text-gray-400 mb-3">Total in current set · Jul 4–7, 2026</p>
           <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5">
             {Object.entries(breakdown).map(([eng, n]) => (
               <div key={eng} className="flex items-center justify-between gap-2">
@@ -1031,9 +1066,9 @@ function CountButton({ count, type, id, onDetailOpen }) {
           </div>
           <button
             onMouseDown={e => { e.preventDefault(); hide(); onDetailOpen(type === 'ai' ? 'AI Answers' : 'Prompts') }}
-            className="mt-3 text-[11px] font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-0.5"
+            className="mt-3 text-[12px] font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-0.5"
           >
-            View all <ChevronRight size={10} />
+            View all <ChevronRight size={12} />
           </button>
         </div>,
         document.body
@@ -1069,10 +1104,10 @@ function SourceFilterChip({ value, onChange }) {
     <div ref={ref} className="relative shrink-0">
       <button
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-2 h-8 pl-3 pr-2 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-2 h-8 pl-3 pr-2 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <span>Source</span>
-        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[12px]">{current.badge}</span>
+        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[14px]">{current.badge}</span>
         {value !== 'all' ? (
           <span
             role="button"
@@ -1155,10 +1190,10 @@ function EngineFilterChip({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-2 h-8 pl-3 pr-2 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-2 h-8 pl-3 pr-2 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <span>AI engine</span>
-        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[12px]">{current.badge}</span>
+        <span className="px-1.5 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[14px]">{current.badge}</span>
         {value !== 'all' ? (
           <span
             role="button"
@@ -1218,7 +1253,7 @@ function DetailDateFilterChip({ value, customRange, onChange, onCustomRange }) {
       <button
         type="button"
         onClick={() => { setOpen(o => !o); setMode('list') }}
-        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
         <Calendar size={14} className="text-gray-400 shrink-0" />
         <span className="whitespace-nowrap">{label}</span>
@@ -1238,7 +1273,7 @@ function DetailDateFilterChip({ value, customRange, onChange, onCustomRange }) {
                   onChange(opt)
                   setOpen(false)
                 }}
-                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[14px] transition-colors text-left ${
                   isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'
                 }`}
               >
@@ -1274,12 +1309,10 @@ function SourceAnswersDetailView({ source, onBack }) {
   const [engine, setEngine] = useState('all')
   const [promptQuery, setPromptQuery] = useState('')
   const [page, setPage] = useState(1)
-  const [viewingRow, setViewingRow] = useState(null)
 
   const isPage = Boolean(source.title)
   const title = isPage ? source.title : source.domain
   const subtitle = isPage ? source.url?.replace(/^https?:\/\//, '') : null
-  const sourceDomain = source.domain || ''
 
   const allRows = buildDetailRows(source)
   const { start, end } = rangeForPeriod(period, customRange)
@@ -1342,11 +1375,11 @@ function SourceAnswersDetailView({ source, onBack }) {
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-[16px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
+              <h2 className="text-[14px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
               <TypeBadge type={source.type} />
             </div>
             {subtitle && (
-              <p className="text-[13px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
+              <p className="text-[12px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
             )}
           </div>
         </div>
@@ -1391,7 +1424,7 @@ function SourceAnswersDetailView({ source, onBack }) {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="px-5 py-4 border-b border-gray-200">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">AI answers & prompts</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">AI answers & prompts</h3>
             <SectionInfoTip
               id="source-answers-detail-info"
               content="Every AI answer that cited this source, with the prompt and engine. Filter by date, engine, or prompt text."
@@ -1428,7 +1461,7 @@ function SourceAnswersDetailView({ source, onBack }) {
               <button
                 type="button"
                 onClick={clearFilters}
-                className="h-8 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+                className={BTN_PRIMARY}
               >
                 Clear filters
               </button>
@@ -1449,18 +1482,20 @@ function SourceAnswersDetailView({ source, onBack }) {
                 <tbody>
                   {paged.map(row => (
                     <tr key={row.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50/40">
-                      <td className="px-5 py-2.5 text-[12px] text-gray-500 whitespace-nowrap">{row.date}</td>
+                      <td className="px-5 py-2.5 text-[14px] text-gray-500 whitespace-nowrap">{row.date}</td>
                       <td className="px-5 py-2.5"><AiEngineTag engine={row.engine} /></td>
-                      <td className="px-5 py-2.5 text-[12px] text-gray-700">
+                      <td className="px-5 py-2.5 text-[14px] text-gray-700">
                         <span className="line-clamp-2">{row.prompt}</span>
                       </td>
                       <td className="px-5 py-2.5 text-right">
                         <button
                           type="button"
-                          onClick={() => setViewingRow(row)}
-                          className="text-[12px] font-medium text-primary-600 hover:underline whitespace-nowrap"
+                          onClick={() => {
+                            window.open(row.cacheUrl, '_blank', 'noopener,noreferrer')
+                          }}
+                          className="text-[14px] font-medium text-primary-600 hover:underline whitespace-nowrap"
                         >
-                          View response
+                          View cached copy
                         </button>
                       </td>
                     </tr>
@@ -1474,15 +1509,6 @@ function SourceAnswersDetailView({ source, onBack }) {
           </>
         )}
       </div>
-
-      {viewingRow && (
-        <FullResponseModal
-          response={responseFromDetailRow(viewingRow, sourceDomain)}
-          promptText={viewingRow.prompt}
-          sourceHint={isPage ? source.url : source.domain}
-          onClose={() => setViewingRow(null)}
-        />
-      )}
     </div>
   )
 }
@@ -1500,98 +1526,163 @@ function DomainTable({ domains, onOpenDetail }) {
     )
   }
 
+  const stickyIdTh = `sticky left-0 top-0 z-30 bg-gray-50 px-4 py-2.5 text-left whitespace-nowrap ${SI_TH_CLASS}`
+  const stickyViewTh = `sticky top-0 z-30 bg-gray-50 px-4 py-2.5 whitespace-nowrap ${SI_TH_CLASS}`
+  const stickyIdTd = 'sticky left-0 z-20 bg-white group-hover:bg-gray-50 px-4 py-3 align-top'
+  const stickyViewTd = 'sticky z-20 bg-white group-hover:bg-gray-50 px-4 py-3 whitespace-nowrap align-middle'
+  const metricTh = `sticky top-0 z-10 bg-gray-50 px-3 py-2.5 whitespace-nowrap ${SI_TH_CLASS}`
+  const metricTd = 'px-3 py-3 align-middle whitespace-nowrap'
+
   return (
-    <table className="w-full table-fixed" style={{ minWidth: 760 }}>
-        <thead>
-          <tr className="border-b border-gray-200">
-            <th className={TABLE_TH} style={{ width: '28%' }}>
-              <ThLabel id="si-th-domain" tip={SI_COL_TIPS.domain}>Domain</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-center`} style={{ width: '11%' }}>
-              <ThLabel id="si-th-domain-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
-              <ThLabel id="si-th-domain-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '14%' }}>
-              <ThLabel id="si-th-domain-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '11%' }}>
-              <ThLabel id="si-th-domain-mr" tip={SI_COL_TIPS.mentionRate} align="right">Mention rate</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '12%' }}>
-              <ThLabel id="si-th-domain-trust" tip={SI_COL_TIPS.domainTrust} align="right">Domain trust</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '10%' }}>
-              <ThLabel id="si-th-domain-backlink" tip={SI_COL_TIPS.backlink} align="right">Backlink</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} text-right`} style={{ width: '88px' }} />
-          </tr>
-        </thead>
-        <tbody>
-          {domains.map(domain => (
-            <tr
-              key={domain.id}
-              className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+    <table className={SI_TABLE_CLASS}>
+      <colgroup>
+        <col style={{ width: SI_ID_COL_W }} />
+        <col style={{ width: SI_VIEW_COL_W }} />
+        <col /><col /><col /><col /><col /><col /><col /><col /><col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th
+            className={stickyIdTh}
+            style={{ left: 0, width: SI_ID_COL_W, minWidth: SI_ID_COL_W, maxWidth: SI_ID_COL_W }}
+          >
+            <ThLabel id="si-th-domain" tip={SI_COL_TIPS.domain}>Domain</ThLabel>
+          </th>
+          {/* Action column — no header label; padding matches Site Health Issues/View col */}
+          <th
+            className={stickyViewTh}
+            style={{
+              left: SI_STICKY_VIEW_LEFT,
+              width: SI_VIEW_COL_W,
+              minWidth: SI_VIEW_COL_W,
+              maxWidth: SI_VIEW_COL_W,
+              boxShadow: SI_STICKY_SHADOW,
+            }}
+            aria-label="Actions"
+          />
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-domain-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
+          </th>
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-domain-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-mr" tip={SI_COL_TIPS.mentionRate} align="right">Mention rate</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-traffic" tip={SI_COL_TIPS.domainTraffic} align="right">Domain traffic</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-trust" tip={SI_COL_TIPS.domainTrust} align="right">Domain trust</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-backlink" tip={SI_COL_TIPS.backlink} align="right">Has backlink to your domain</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-domain-bl-count" tip={SI_COL_TIPS.countBacklinks} align="right">Count of backlinks</ThLabel>
+          </th>
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-domain-brand" tip={SI_COL_TIPS.brand} align="center">Brand mentioned</ThLabel>
+          </th>
+          <th className={`${metricTh} text-left`}>
+            <ThLabel id="si-th-domain-comp" tip={SI_COL_TIPS.competitorMention}>Competitor mention</ThLabel>
+          </th>
+          <th className={`${metricTh} text-left px-5`}>
+            <ThLabel id="si-th-domain-other" tip={SI_COL_TIPS.otherBrands}>Other brands mentioned</ThLabel>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {domains.map(domain => (
+          <tr key={domain.id} className="group hover:bg-gray-50 transition-colors">
+            <td
+              className={stickyIdTd}
+              style={{ left: 0, width: SI_ID_COL_W, minWidth: SI_ID_COL_W, maxWidth: SI_ID_COL_W }}
             >
-              <td className="px-5 py-3">
-                <div className="flex items-start gap-2.5 min-w-0">
-                  <CompanyLogo
-                    domain={domain.domain}
-                    size={28}
-                    className="mt-0.5"
-                    fallback={
-                      <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                        <Globe size={13} className="text-gray-400" />
-                      </div>
-                    }
-                  />
-                  <div className="min-w-0">
-                    <a
-                      href={`https://${domain.domain}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[13px] font-semibold text-primary-600 hover:underline truncate block"
-                    >
-                      {domain.domain}
-                    </a>
-                    <TypeBadge type={domain.type} />
-                  </div>
+              <div className="flex items-start gap-2.5 min-w-0">
+                <CompanyLogo
+                  domain={domain.domain}
+                  size={28}
+                  className="mt-0.5"
+                  fallback={
+                    <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+                      <Globe size={13} className="text-gray-400" />
+                    </div>
+                  }
+                />
+                <div className="min-w-0">
+                  <a
+                    href={`https://${domain.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[14px] font-semibold text-primary-600 hover:underline truncate block"
+                  >
+                    {domain.domain}
+                  </a>
+                  <TypeBadge type={domain.type} />
                 </div>
-              </td>
-              <td className="px-5 py-3 text-center">
-                <CountButton count={domain.aiAnswers} type="ai" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
-              </td>
-              <td className="px-5 py-3 text-center">
-                <CountButton count={domain.prompts} type="prompts" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <CoverageBar value={domain.promptCoverage} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <span className={`text-[13px] font-semibold ${domain.mentionRate >= 20 ? 'text-success-600' : domain.mentionRate >= 10 ? 'text-gray-700' : 'text-gray-500'}`}>
-                  {domain.mentionRate}%
-                </span>
-              </td>
-              <td className="px-5 py-3 text-right">
-                <TrustScore score={domain.domainTrust} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <BacklinkBadge hasBacklink={domain.hasBacklink} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <button
-                  type="button"
-                  onClick={() => onOpenDetail(domain)}
-                  className="text-[12px] font-medium text-primary-600 hover:underline"
-                >
-                  View
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </td>
+            <td
+              className={stickyViewTd}
+              style={{
+                left: SI_STICKY_VIEW_LEFT,
+                width: SI_VIEW_COL_W,
+                minWidth: SI_VIEW_COL_W,
+                maxWidth: SI_VIEW_COL_W,
+                boxShadow: SI_STICKY_SHADOW,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => onOpenDetail(domain)}
+                className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+              >
+                View
+              </button>
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <CountButton count={domain.aiAnswers} type="ai" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <CountButton count={domain.prompts} type="prompts" id={domain.id} onDetailOpen={() => onOpenDetail(domain)} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <CoverageBar value={domain.promptCoverage} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className={`text-[14px] font-semibold ${domain.mentionRate >= 20 ? 'text-success-600' : domain.mentionRate >= 10 ? 'text-gray-700' : 'text-gray-500'}`}>
+                {domain.mentionRate}%
+              </span>
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-medium text-gray-900 tabular-nums">{domain.domainTraffic}</span>
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <TrustScore score={domain.domainTrust} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <BacklinkBadge hasBacklink={domain.hasBacklink} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-medium text-gray-900 tabular-nums">{domain.countBacklinks ?? '—'}</span>
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <BrandMentionBadge mentioned={Boolean(domain.brandMentioned)} />
+            </td>
+            <td className={metricTd}>
+              <BrandsCell brands={domain.competitorMention} />
+            </td>
+            <td className={`${metricTd} px-5`}>
+              <BrandsCell brands={domain.otherBrands} />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
@@ -1608,93 +1699,174 @@ function PageTable({ pages, onOpenDetail }) {
     )
   }
 
+  const stickyIdTh = `sticky left-0 top-0 z-30 bg-gray-50 px-4 py-2.5 text-left whitespace-nowrap ${SI_TH_CLASS}`
+  const stickyViewTh = `sticky top-0 z-30 bg-gray-50 px-4 py-2.5 whitespace-nowrap ${SI_TH_CLASS}`
+  const stickyIdTd = 'sticky left-0 z-20 bg-white group-hover:bg-gray-50 px-4 py-3 align-top'
+  const stickyViewTd = 'sticky z-20 bg-white group-hover:bg-gray-50 px-4 py-3 whitespace-nowrap align-middle'
+  const metricTh = `sticky top-0 z-10 bg-gray-50 px-3 py-2.5 whitespace-nowrap ${SI_TH_CLASS}`
+  const metricTd = 'px-3 py-3 align-middle whitespace-nowrap'
+
   return (
-    <table className="w-full table-fixed" style={{ minWidth: 820 }}>
-        <thead>
-          <tr className="border-b border-gray-200">
-            <th className={TABLE_TH} style={{ width: '34%' }}>
-              <ThLabel id="si-th-page" tip={SI_COL_TIPS.page}>Page</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
-              <ThLabel id="si-th-page-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-center`} style={{ width: '9%' }}>
-              <ThLabel id="si-th-page-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '14%' }}>
-              <ThLabel id="si-th-page-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '10%' }}>
-              <ThLabel id="si-th-page-coverage" tip={SI_COL_TIPS.coverage} align="right">Coverage</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-center`} style={{ width: '10%' }}>
-              <ThLabel id="si-th-page-brand" tip={SI_COL_TIPS.brand} align="center">Brand</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} !text-right`} style={{ width: '9%' }}>
-              <ThLabel id="si-th-page-backlink" tip={SI_COL_TIPS.backlink} align="right">Backlink</ThLabel>
-            </th>
-            <th className={`${TABLE_TH} text-right`} style={{ width: '88px' }} />
-          </tr>
-        </thead>
-        <tbody>
-          {pages.map(page => (
-            <tr
-              key={page.id}
-              className="border-b border-gray-100 hover:bg-gray-50 transition-colors"
+    <table className={SI_TABLE_CLASS}>
+      <colgroup>
+        <col style={{ width: SI_ID_COL_W }} />
+        <col style={{ width: SI_VIEW_COL_W }} />
+        <col /><col /><col /><col /><col /><col /><col /><col /><col /><col /><col /><col /><col />
+      </colgroup>
+      <thead>
+        <tr>
+          <th
+            className={stickyIdTh}
+            style={{ left: 0, width: SI_ID_COL_W, minWidth: SI_ID_COL_W, maxWidth: SI_ID_COL_W }}
+          >
+            <ThLabel id="si-th-page" tip={SI_COL_TIPS.page}>Page</ThLabel>
+          </th>
+          {/* Action column — no header label; padding matches Site Health Issues/View col */}
+          <th
+            className={stickyViewTh}
+            style={{
+              left: SI_STICKY_VIEW_LEFT,
+              width: SI_VIEW_COL_W,
+              minWidth: SI_VIEW_COL_W,
+              maxWidth: SI_VIEW_COL_W,
+              boxShadow: SI_STICKY_SHADOW,
+            }}
+            aria-label="Actions"
+          />
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-page-ai" tip={SI_COL_TIPS.aiAnswers} align="center">AI answers</ThLabel>
+          </th>
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-page-prompts" tip={SI_COL_TIPS.prompts} align="center">Prompts</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-pc" tip={SI_COL_TIPS.promptCoverage} align="right">Prompt coverage</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-coverage" tip={SI_COL_TIPS.coverage} align="right">Coverage</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-dtraffic" tip={SI_COL_TIPS.domainTraffic} align="right">Domain traffic</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-trust" tip={SI_COL_TIPS.domainTrust} align="right">Domain trust</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-ptraffic" tip={SI_COL_TIPS.pageTraffic} align="right">Page traffic</ThLabel>
+          </th>
+          <th className={`${metricTh} text-left`}>
+            <ThLabel id="si-th-page-links" tip={SI_COL_TIPS.linksAvailable}>Links available to your website</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-backlink" tip={SI_COL_TIPS.backlink} align="right">Has backlink to your domain</ThLabel>
+          </th>
+          <th className={`${metricTh} text-right`}>
+            <ThLabel id="si-th-page-bl-count" tip={SI_COL_TIPS.countBacklinks} align="right">Count of backlinks</ThLabel>
+          </th>
+          <th className={`${metricTh} text-center`}>
+            <ThLabel id="si-th-page-brand" tip={SI_COL_TIPS.brand} align="center">Brand mentioned</ThLabel>
+          </th>
+          <th className={`${metricTh} text-left`}>
+            <ThLabel id="si-th-page-comp" tip={SI_COL_TIPS.competitorMention}>Competitor mention</ThLabel>
+          </th>
+          <th className={`${metricTh} text-left px-5`}>
+            <ThLabel id="si-th-page-other" tip={SI_COL_TIPS.otherBrands}>Other brands mentioned</ThLabel>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {pages.map(page => (
+          <tr key={page.id} className="group hover:bg-gray-50 transition-colors">
+            <td
+              className={stickyIdTd}
+              style={{ left: 0, width: SI_ID_COL_W, minWidth: SI_ID_COL_W, maxWidth: SI_ID_COL_W }}
             >
-              <td className="px-5 py-3">
-                <div className="flex items-start gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                    <FileText size={13} className="text-gray-400" />
-                  </div>
-                  <div className="min-w-0">
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
+                  <FileText size={13} className="text-gray-400" />
+                </div>
+                <div className="min-w-0 flex-1 overflow-hidden">
+                  <HLTooltip
+                    content={page.title}
+                    variant="dark"
+                    placement="top"
+                    wrap
+                    triggerClassName="block w-full max-w-full min-w-0"
+                  >
                     <a
                       href={page.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-[13px] font-semibold text-primary-600 hover:underline line-clamp-1 block"
+                      className="text-[14px] font-semibold text-primary-600 hover:underline truncate block w-full"
                     >
                       {page.title}
                     </a>
-                    <p className="text-[11px] text-gray-400 truncate mt-0.5 flex items-center gap-1">
-                      <span className="truncate">{page.url.replace('https://', '')}</span>
-                      <ExternalLink size={9} className="text-gray-300 shrink-0" />
-                    </p>
-                    <TypeBadge type={page.type} />
-                  </div>
+                  </HLTooltip>
+                  <TypeBadge type={page.type} />
                 </div>
-              </td>
-              <td className="px-5 py-3 text-center">
-                <CountButton count={page.aiAnswers} type="ai" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
-              </td>
-              <td className="px-5 py-3 text-center">
-                <CountButton count={page.prompts} type="prompts" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <CoverageBar value={page.promptCoverage} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <span className="text-[13px] font-semibold text-gray-900">{page.coverage}%</span>
-              </td>
-              <td className="px-5 py-3 text-center">
-                <BrandMentionBadge mentioned={page.brandMentioned} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <BacklinkBadge hasBacklink={page.hasBacklink} />
-              </td>
-              <td className="px-5 py-3 text-right">
-                <button
-                  type="button"
-                  onClick={() => onOpenDetail(page)}
-                  className="text-[12px] font-medium text-primary-600 hover:underline"
-                >
-                  View
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+              </div>
+            </td>
+            <td
+              className={stickyViewTd}
+              style={{
+                left: SI_STICKY_VIEW_LEFT,
+                width: SI_VIEW_COL_W,
+                minWidth: SI_VIEW_COL_W,
+                maxWidth: SI_VIEW_COL_W,
+                boxShadow: SI_STICKY_SHADOW,
+              }}
+            >
+              <button
+                type="button"
+                onClick={() => onOpenDetail(page)}
+                className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+              >
+                View
+              </button>
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <CountButton count={page.aiAnswers} type="ai" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <CountButton count={page.prompts} type="prompts" id={page.id} onDetailOpen={() => onOpenDetail(page)} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <CoverageBar value={page.promptCoverage} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-semibold text-gray-900">{page.coverage}%</span>
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-medium text-gray-900 tabular-nums">{page.domainTraffic}</span>
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <TrustScore score={page.domainTrust} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-medium text-gray-900 tabular-nums">{page.pageTraffic}</span>
+            </td>
+            <td className={metricTd}>
+              <LinksAvailableBadge value={page.linksAvailable} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <BacklinkBadge hasBacklink={page.hasBacklink} />
+            </td>
+            <td className={`${metricTd} text-right`}>
+              <span className="text-[14px] font-medium text-gray-900 tabular-nums">{page.countBacklinks ?? '—'}</span>
+            </td>
+            <td className={`${metricTd} text-center`}>
+              <BrandMentionBadge mentioned={page.brandMentioned} />
+            </td>
+            <td className={metricTd}>
+              <BrandsCell brands={page.competitorMention} />
+            </td>
+            <td className={`${metricTd} px-5`}>
+              <BrandsCell brands={page.otherBrands} />
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   )
 }
 
@@ -1919,7 +2091,7 @@ export default function SourceInventoryContent() {
         {/* Card header */}
         <div className="shrink-0 flex items-center justify-between px-5 py-4 border-b border-gray-200 flex-wrap gap-3">
           <div className="flex items-center gap-1.5">
-            <span className="text-[15px] font-semibold text-gray-900">Source inventory</span>
+            <span className="text-[14px] font-semibold text-gray-900">Source inventory</span>
             <SectionInfoTip
               id="source-inventory-info"
               content={
@@ -1936,7 +2108,7 @@ export default function SourceInventoryContent() {
                 <button
                   key={v}
                   onClick={() => handleViewChange(v)}
-                  className={`px-3 py-1.5 rounded-md text-[12px] font-medium transition-all ${
+                  className={`px-3 py-1.5 rounded-md text-[14px] font-medium transition-all ${
                     view === v
                       ? 'bg-white shadow-sm border border-gray-200 text-gray-900'
                       : 'text-gray-500 hover:text-gray-700'
@@ -1954,25 +2126,11 @@ export default function SourceInventoryContent() {
           {/* Source mention filter chip */}
           <SourceFilterChip value={sourceFilter} onChange={id => { setSourceFilter(id); setPage(1) }} />
 
-          <button
-            type="button"
+          <AdvancedFilterTrigger
+            activeCount={activeRules.length}
             onClick={() => setShowFilterDrawer(true)}
-            className={`inline-flex items-center gap-1.5 h-8 px-3.5 rounded-full border text-[13px] font-medium transition-colors whitespace-nowrap shrink-0 ${
-              activeRules.length
-                ? 'bg-primary-50 border-primary-300 text-primary-700'
-                : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-            }`}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <line x1="4" y1="6" x2="20" y2="6" /><line x1="8" y1="12" x2="16" y2="12" /><line x1="11" y1="18" x2="13" y2="18" />
-            </svg>
-            Advanced filter
-            {activeRules.length > 0 && (
-              <span className="inline-flex items-center justify-center min-w-4 h-4 px-1 rounded-full bg-primary-600 text-white text-[11px] font-medium">
-                {activeRules.length}
-              </span>
-            )}
-          </button>
+            onClear={() => { setActiveRules([]); setPage(1) }}
+          />
 
           {/* Search — right-aligned */}
           <div className="ml-auto relative shrink-0" style={{ width: 280 }}>

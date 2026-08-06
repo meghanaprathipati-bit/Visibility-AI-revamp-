@@ -1,7 +1,27 @@
 /**
  * React mirror of HighRise HLButton — https://highrise.gohighlevel.com/components/common/button
  * DOM + CSS variables match highrise215.mjs (HLButton) + highrise819.mjs (naive button styles).
+ *
+ * Canonical primary / secondary Tailwind classes (padding 8×14, radius 8, shadow-xs):
+ * use these on raw <button>s when HLButton cannot be used. See .cursor/rules/button-styles.mdc.
  */
+
+/**
+ * Shared layout for primary + secondary CTAs.
+ * Total height is locked at 36px (h-9) with box-border so the 1px border
+ * sits inside the box. Padding is always 8×14 (py-2 px-3.5). Without h-9,
+ * py-2 + 14px text + border borders measures ~39px.
+ */
+export const BTN_BASE =
+  'inline-flex items-center justify-center gap-2 box-border h-9 py-2 px-3.5 rounded-lg shadow-xs text-[14px] font-semibold leading-none transition-colors'
+
+/** Primary CTA — primary-600 fill + border. */
+export const BTN_PRIMARY =
+  `${BTN_BASE} border border-primary-600 bg-primary-600 text-white hover:bg-primary-700 hover:border-primary-700 disabled:opacity-50 disabled:cursor-not-allowed`
+
+/** Secondary CTA — white fill, gray-300 border. */
+export const BTN_SECONDARY =
+  `${BTN_BASE} border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:border-gray-100 disabled:bg-gray-50 disabled:text-gray-300 disabled:cursor-not-allowed`
 
 const COLOR_MAP = {
   blue: 'primary',
@@ -120,7 +140,7 @@ function getButtonThemeVars(color, variant, size) {
     fontWeight: '600',
     fontSize: 'var(--hr-font-size-lg)',
     width: 'initial',
-    boxShadow: '0px 1px 2px 0px color-mix(in srgb, var(--gray-900) 5.1%, transparent)',
+    boxShadow: '0 1px 2px 0 rgba(16, 24, 40, 0.05)',
     ...createButtonVariantStyle(color, variant),
     ...sizeStyle,
   })

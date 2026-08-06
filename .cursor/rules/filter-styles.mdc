@@ -1,0 +1,36 @@
+---
+description: Toolbar and advanced filter controls use 14px text
+alwaysApply: true
+---
+
+# Filter styles
+
+Every **filter** control in the app — toolbar filter chips, segmented source
+filters, engine/date chips, dropdown menus inside those chips, Advanced filter
+trigger + Clear, and Advanced filter drawer field/operator selects and footer
+actions — uses **14px** text.
+
+## Fixed typography — never change
+
+- Filter chip labels: `text-[14px] font-medium`
+- Filter chip value badges (e.g. `All`, `ChatGPT`): `text-[14px]`
+- Filter dropdown menu items: `text-[14px]`
+- Advanced filter trigger label + Clear: `text-[14px]`
+- Advanced filter drawer selects / actions: `text-[14px]`
+
+## Exceptions
+
+- The **numeric count badge** on the active Advanced filter trigger stays
+  `text-[12px]` (compact circular badge).
+- Table body status pills (HTTP codes, Yes/No, etc.) are not filters — keep the
+  12px badge floor.
+
+## Shared pieces
+
+- Advanced filter trigger: `src/components/AdvancedFilterTrigger.jsx`
+- Advanced filter drawer: `src/components/AdvancedFilterDrawer.jsx`
+
+## Do not
+
+- Use `text-[13px]` or `text-[12px]` for filter chip labels, menus, or Clear.
+- Fork a smaller type scale per dashboard toolbar.

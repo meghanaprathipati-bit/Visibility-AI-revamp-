@@ -70,7 +70,7 @@ function SubscriptionStep({ onContinue }) {
             <Star size={18} className="text-warning-600" />
           </div>
           <div>
-            <p className="text-[15px] font-semibold text-gray-900 m-0">{plan.name}</p>
+            <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name}</p>
             <p className="text-[12px] text-gray-500 mt-0.5 m-0">{plan.subtitle}</p>
           </div>
         </div>
@@ -92,7 +92,7 @@ function SubscriptionStep({ onContinue }) {
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-0.5">Selected plan</p>
           <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name} · Monthly · ${plan.monthlyPrice} due today</p>
         </div>
-        <button type="button" onClick={onContinue} className={`inline-flex items-center justify-center h-9 px-4 rounded-lg ${modalBtnPrimary}`}>
+        <button type="button" onClick={onContinue} className={modalBtnPrimary}>
           Continue
         </button>
       </div>
@@ -128,7 +128,7 @@ function PaymentStep({ onBack, onSubscribe }) {
           <div className="flex items-start gap-2.5 mb-4">
             <VaLogo size="sm" />
             <div>
-              <p className="text-[15px] font-semibold text-gray-900 m-0">Visibility AI subscription</p>
+              <p className="text-[14px] font-semibold text-gray-900 m-0">Visibility AI subscription</p>
               <p className="text-[13px] text-gray-500 mt-0.5 m-0">Choose how you want to pay for this subscription.</p>
             </div>
           </div>
@@ -161,7 +161,7 @@ function PaymentStep({ onBack, onSubscribe }) {
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <button type="button" onClick={onBack} className={modalBtnSecondary}>Cancel</button>
-          <button type="button" onClick={onSubscribe} className={`inline-flex items-center justify-center ${modalBtnPrimary}`}>
+          <button type="button" onClick={onSubscribe} className={modalBtnPrimary}>
             Pay $ {plan.monthlyPrice} and subscribe
           </button>
         </div>

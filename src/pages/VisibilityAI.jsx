@@ -1201,7 +1201,7 @@ function ChatPanel({
               key={tab}
               type="button"
               onClick={() => onPanelChange(tab)}
-              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-all duration-150 ${
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-[14px] font-medium transition-all duration-150 ${
                 activePanel === tab
                   ? 'bg-white text-primary-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'

@@ -26,11 +26,11 @@ export default function ActionItemDetailTable({
         <thead>
           <tr className="bg-gray-50 border-b border-gray-100">
             {selectable && <th className="px-3.5 py-2" aria-hidden="true" />}
-            <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.page}</th>
+            <th className="px-3.5 py-2 text-left text-[14px] font-semibold text-gray-900">{columns.page}</th>
             {showCurrent && (
-              <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.current}</th>
+              <th className="px-3.5 py-2 text-left text-[14px] font-semibold text-gray-900">{columns.current}</th>
             )}
-            <th className="px-3.5 py-2 text-left text-[12px] font-semibold text-gray-900">{columns.recommendation}</th>
+            <th className="px-3.5 py-2 text-left text-[14px] font-semibold text-gray-900">{columns.recommendation}</th>
           </tr>
         </thead>
         <tbody>
@@ -50,14 +50,14 @@ export default function ActionItemDetailTable({
                     />
                   </td>
                 )}
-                <td className="px-3.5 py-2.5 align-top text-[12px] text-primary-600">
+                <td className="px-3.5 py-2.5 align-top text-[14px] text-primary-600">
                   <span className="flex items-start gap-1 break-all">
                     <ExternalLink size={12} className="shrink-0 mt-0.5" />
                     {row.page}
                   </span>
                 </td>
                 {showCurrent && (
-                  <td className="px-3.5 py-2.5 align-top text-[12px] text-gray-400 italic">{row.currentValue}</td>
+                  <td className="px-3.5 py-2.5 align-top text-[14px] text-gray-400 italic">{row.currentValue}</td>
                 )}
                 <td className="px-3.5 py-2.5 align-top">
                   <RecField

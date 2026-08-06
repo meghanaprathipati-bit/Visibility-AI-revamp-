@@ -1,0 +1,30 @@
+---
+description: All tabs and segmented view controls use 14px font
+alwaysApply: true
+---
+
+# Tabs — 14px font
+
+Every tab label in the app uses **14px** (`text-[14px]`). Do not mix 12px or
+13px on tab chrome.
+
+## Applies to
+
+- Top bar section / sub tabs (`TopBar` — already `text-[14px]`)
+- Page-level tab bars (Site Health, Prompt Tracking, AI Search Performance)
+- Segmented controls that switch views (Domain/Page, URL/Domain, Visibility /
+  Mentions / Citations, 7D / 28D / 3M, Leaderboard views, Chats/Dashboards)
+- Drawer / modal tab strips (Notifications, Connect fixes, finding detail tabs)
+- `HLTabs` / `HLTabPane` (all sizes use `14px`)
+- Vertical side tabs (`VerticalTabs` — already `text-[14px]`)
+
+## Canonical class
+
+```jsx
+className={`… text-[14px] font-medium … ${active ? '…' : '…'}`}
+```
+
+## Do not
+
+- Do not use `text-[12px]` or `text-[13px]` on tab labels.
+- Count badges *inside* tabs may stay `text-[12px]` (the badge, not the label).

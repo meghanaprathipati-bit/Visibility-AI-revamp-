@@ -13,7 +13,7 @@ import {
   MAX_CUSTOM_COMPETITORS,
 } from '../data/onboardingData.js'
 
-const TABLE_HEADER_CLASS = 'text-[12px] font-medium text-gray-500'
+const TABLE_HEADER_CLASS = 'text-[14px] font-semibold text-gray-900'
 const KEYWORD_ROW_LAYOUT = 'flex items-center gap-x-6 w-full'
 const KEYWORD_LEFT_SECTION = 'flex flex-1 min-w-0 items-center gap-x-6'
 const KEYWORD_CHECKBOX_SLOT = 'w-[14px] shrink-0 flex items-center justify-center'
