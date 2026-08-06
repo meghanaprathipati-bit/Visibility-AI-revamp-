@@ -4160,7 +4160,7 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl z-30 p-1" style={{ minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
+        <div className="absolute top-full left-0 mt-1.5 bg-white border border-gray-200 rounded-xl z-[100] p-1" style={{ minWidth: 200, boxShadow: '0 4px 16px rgba(0,0,0,0.10)' }}>
           {options.length > 10 && (
             <div className="mb-1 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
@@ -4171,7 +4171,8 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
           )}
           <div className="flex flex-col gap-1">
             <button
-              onClick={onSelectAll}
+              type="button"
+              onClick={() => { onSelectAll(); onClose() }}
               className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] text-gray-700 hover:bg-gray-50 transition-colors"
             >
               All
@@ -4299,9 +4300,12 @@ function CrawledPagesTab() {
   const [visibleCols, setVisibleCols]     = useState(DEFAULT_VISIBLE_COLS)
   const [activePreset, setActivePreset]   = useState('seo-overview')
   const [detailPageUrl, setDetailPageUrl] = useState(null)
-  const [detailFixFilter, setDetailFixFilter] = useState('all') // 'all' | 'Auto Fix' | 'Assisted Fix' | ...
+  // Multi-select fix-type filter — same FilterChipDropdown pattern as Type on the table toolbar.
+  const [detailFixFilter, setDetailFixFilter] = useState(() => new Set(['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']))
+  const [showDetailFixDropdown, setShowDetailFixDropdown] = useState(false)
+  const detailFixDropdownRef = useRef(null)
   // When Connect modal opens from the issue panel, remember where to return on Cancel.
-  const [reopenDetailAfterConnect, setReopenDetailAfterConnect] = useState(null) // { url, fixFilter } | null
+  const [reopenDetailAfterConnect, setReopenDetailAfterConnect] = useState(null) // { url, fixFilter: string[] } | null
   const [selectedFindings, setSelectedFindings] = useState({})
   const [fixedFindings, setFixedFindings] = useState(new Set())   // finding ids applied this session
   const [draftFindings, setDraftFindings] = useState(new Set())   // fixed → edited again (re-enabled)
@@ -4421,7 +4425,14 @@ function CrawledPagesTab() {
     setShowConnectModal(false)
     if (reopenDetailAfterConnect?.url) {
       setDetailPageUrl(reopenDetailAfterConnect.url)
-      setDetailFixFilter(reopenDetailAfterConnect.fixFilter || 'all')
+      const restored = reopenDetailAfterConnect.fixFilter
+      if (Array.isArray(restored) && restored.length) {
+        setDetailFixFilter(new Set(restored))
+      } else if (typeof restored === 'string' && restored !== 'all') {
+        setDetailFixFilter(new Set([restored]))
+      } else {
+        setDetailFixFilter(new Set(['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']))
+      }
       setReopenDetailAfterConnect(null)
     }
   }
@@ -4498,10 +4509,13 @@ function CrawledPagesTab() {
   const detailFixTypesPresent = detailPage
     ? FIX_TYPE_ORDER.filter(t => detailPage.findings.some(f => f.fixType === t))
     : []
+  const detailFixOptions = detailFixTypesPresent.map(t => ({ id: t, label: FIX_TYPE_LABELS[t] || t }))
+  const detailFixAllSelected = detailFixTypesPresent.length > 0
+    && detailFixTypesPresent.every(t => detailFixFilter.has(t))
   const detailFilteredFindings = detailPage
-    ? (detailFixFilter === 'all'
+    ? (detailFixAllSelected || detailFixFilter.size === 0
       ? detailPage.findings
-      : detailPage.findings.filter(f => f.fixType === detailFixFilter))
+      : detailPage.findings.filter(f => detailFixFilter.has(f.fixType)))
     : []
   const detailSelectableAuto = detailPage
     ? detailPage.findings.filter(f => isAutoFix(f) && isFindingSelectable(f))
@@ -4511,16 +4525,34 @@ function CrawledPagesTab() {
       detailFilteredFindings.some(f => f.id === id && isFindingSelectable(f))
     ).length
     : 0
+  const detailAutoOnly = detailFixFilter.size === 1 && detailFixFilter.has('Auto Fix')
+
+  function toggleDetailFix(id) {
+    setDetailFixFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        if (next.size === 1) return prev
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   function openPageDetail(url) {
+    const page = CRAWLED_PAGE_DATA.find(p => p.url === url)
+    const present = FIX_TYPE_ORDER.filter(t => page?.findings.some(f => f.fixType === t))
     setDetailPageUrl(url)
-    setDetailFixFilter('all')
+    setDetailFixFilter(new Set(present.length ? present : FIX_TYPE_ORDER))
+    setShowDetailFixDropdown(false)
   }
 
   function openConnectFromDetail() {
     if (!detailPage) return
-    setReopenDetailAfterConnect({ url: detailPage.url, fixFilter: detailFixFilter })
+    setReopenDetailAfterConnect({ url: detailPage.url, fixFilter: [...detailFixFilter] })
     setDetailPageUrl(null)
+    setShowDetailFixDropdown(false)
     setShowConnectModal(true)
   }
 
@@ -5079,43 +5111,28 @@ function CrawledPagesTab() {
 
       <IssueDetailDrawer
         open={Boolean(detailPage)}
-        onClose={() => { setDetailPageUrl(null); setDetailFixFilter('all') }}
+        onClose={() => {
+          setDetailPageUrl(null)
+          setDetailFixFilter(new Set(FIX_TYPE_ORDER))
+          setShowDetailFixDropdown(false)
+        }}
         title={detailPage?.url || ''}
         subtitle={detailPage ? `${detailFilteredFindings.length} of ${detailPage.findings.length} finding${detailPage.findings.length === 1 ? '' : 's'}` : ''}
-        toolbar={detailPage ? (
-          <div className="flex flex-col gap-2">
-            <p className="text-[12px] font-medium text-gray-500 m-0">Fix type</p>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <button
-                type="button"
-                onClick={() => setDetailFixFilter('all')}
-                className={`h-8 px-3 rounded-lg text-[12px] font-semibold border transition-colors ${
-                  detailFixFilter === 'all'
-                    ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                All
-              </button>
-              {detailFixTypesPresent.map(type => (
-                <button
-                  key={type}
-                  type="button"
-                  onClick={() => setDetailFixFilter(type)}
-                  className={`h-8 px-3 rounded-lg text-[12px] font-semibold border transition-colors ${
-                    detailFixFilter === type
-                      ? 'bg-primary-600 border-primary-600 text-white'
-                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  {FIX_TYPE_LABELS[type] || type}
-                </button>
-              ))}
-            </div>
-          </div>
+        toolbar={detailPage && detailFixOptions.length > 0 ? (
+          <FilterChipDropdown
+            label="Fix type"
+            options={detailFixOptions}
+            selected={detailFixFilter}
+            onToggle={toggleDetailFix}
+            onSelectAll={() => setDetailFixFilter(new Set(detailFixTypesPresent))}
+            dropdownRef={detailFixDropdownRef}
+            open={showDetailFixDropdown}
+            onOpen={() => setShowDetailFixDropdown(v => !v)}
+            onClose={() => setShowDetailFixDropdown(false)}
+          />
         ) : null}
         footer={detailPage ? (
-          detailFixFilter === 'Auto Fix' ? (
+          detailAutoOnly ? (
             <button
               type="button"
               onClick={applyAutoFixesOnDetailPage}
