@@ -998,7 +998,7 @@ function PromptDetailContent({ prompt, onBack }) {
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <p className="text-[14px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
-                      <button type="button" className="text-[12px] text-primary-600 hover:underline">
+                      <button type="button" className="text-[14px] text-primary-600 hover:underline">
                         Open full response
                       </button>
                     </td>

@@ -1307,7 +1307,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                       <button
                         type="button"
                         onClick={() => setFullResponse(row)}
-                        className="text-[12px] text-primary-600 hover:underline"
+                        className="text-[14px] text-primary-600 hover:underline"
                       >
                         Open full response
                       </button>
