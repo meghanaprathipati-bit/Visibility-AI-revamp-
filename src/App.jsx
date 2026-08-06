@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Overview from './pages/Overview'
 import VisibilityAI from './pages/VisibilityAI'
+import AiAnswerCachedCopy from './pages/AiAnswerCachedCopy'
 
 import Demo_MainNav_Simple from './pages/Demo_MainNav_Simple'
 import Demo_MainNav_Tabbed from './pages/Demo_MainNav_Tabbed'
@@ -20,6 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Overview />} />
         <Route path="/visibility-ai" element={<VisibilityAI />} />
+        <Route path="/ai-answer-cache/:id" element={<AiAnswerCachedCopy />} />
 
         {/* Shell variant reference — not linked in the UI */}
         <Route path="/ref/main-nav-simple" element={<Demo_MainNav_Simple />} />

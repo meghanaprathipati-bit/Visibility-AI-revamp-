@@ -5,7 +5,7 @@ import CompanyLogo from './CompanyLogo.jsx'
 import EngineLogo from './EngineLogo.jsx'
 
 /** Canonical parent-table header classes — use everywhere for top-level `<th>`. */
-export const TABLE_TH_CLASS = 'text-[12px] font-semibold text-gray-900'
+export const TABLE_TH_CLASS = 'text-[14px] font-semibold text-gray-900'
 
 // HARDCODED: per-engine visual theme for the response viewer (prototyping).
 const ENGINE_THEME = {
@@ -191,8 +191,8 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                       <div className="grid grid-cols-2 gap-2">
                         {sources.map((s, i) => (
                           <a key={i} href={s.url} onClick={e => e.preventDefault()} className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 hover:border-gray-300 transition-colors">
-                            <p className="text-[12px] font-medium text-gray-900 truncate m-0">{s.domain}</p>
-                            <p className="text-[11px] text-gray-400 truncate m-0 mt-0.5">{i + 1} · {s.coverage} coverage</p>
+                            <p className="text-[14px] font-medium text-gray-900 truncate m-0">{s.domain}</p>
+                            <p className="text-[12px] text-gray-400 truncate m-0 mt-0.5">{i + 1} · {s.coverage} coverage</p>
                           </a>
                         ))}
                       </div>
@@ -227,7 +227,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                           size={28}
                           rounded="rounded-full"
                           fallback={
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[11px] font-semibold text-gray-600 shrink-0">
+                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[12px] font-semibold text-gray-600 shrink-0">
                               {b.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
                             </span>
                           }
@@ -236,7 +236,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                           <p className="text-[13px] font-medium text-gray-900 truncate m-0">{b}</p>
                           <p className="text-[12px] text-gray-400 m-0">#{i + 1}.0 · {sentiment}</p>
                         </div>
-                        {you && <span className="text-[11px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
+                        {you && <span className="text-[12px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
                       </div>
                     )
                   })}
@@ -255,10 +255,10 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                       </div>
                       <p className="text-[12px] text-gray-400 truncate m-0 mt-0.5">{s.url.replace(/^https?:\/\//, '')}</p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span className={`text-[11px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`text-[12px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
                           {s.brandMentioned ? 'Brand mentioned' : 'Brand not mentioned'}
                         </span>
-                        {s.otherBrands && <span className="text-[11px] font-medium rounded-full px-2 py-0.5 bg-warning-100 text-warning-600">Competitor present</span>}
+                        {s.otherBrands && <span className="text-[12px] font-medium rounded-full px-2 py-0.5 bg-warning-100 text-warning-600">Competitor present</span>}
                       </div>
                     </div>
                   ))}

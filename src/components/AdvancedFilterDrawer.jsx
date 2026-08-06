@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronDown, Plus, X } from '../icons/index.js'
+import { BTN_PRIMARY, BTN_SECONDARY } from './HLButton.jsx'
 
 export const STRING_OPS = [
   { label: 'Contains', value: 'contains' },
@@ -46,7 +47,7 @@ function clone(d) {
 }
 
 const SELECT_CLASS =
-  'w-full appearance-none border border-gray-300 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600 pr-7 disabled:bg-white disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed'
+  'w-full appearance-none border border-gray-300 rounded-lg px-3 py-2 text-[14px] text-gray-800 bg-white outline-none focus:border-primary-600 pr-7 disabled:bg-white disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed'
 
 /**
  * HighRise-aligned advanced filter drawer (HLAdvanceFilter + HLDrawer pattern).
@@ -142,13 +143,13 @@ export default function AdvancedFilterDrawer({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200 shrink-0">
-          <p className="text-[15px] font-semibold text-gray-900 m-0">All filters</p>
+          <p className="text-[14px] font-semibold text-gray-900 m-0">All filters</p>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={clearFilters}
               disabled={!hasActiveRules}
-              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-gray-600 hover:text-gray-800 transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
+              className="inline-flex items-center gap-1.5 text-[14px] font-medium text-gray-600 hover:text-gray-800 transition-colors disabled:text-gray-400 disabled:cursor-not-allowed"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <line x1="2" y1="2" x2="22" y2="22" />
@@ -222,7 +223,7 @@ export default function AdvancedFilterDrawer({
                           value={rule.value}
                           onChange={e => updateRule(groupIdx, ruleIdx, 'value', e.target.value)}
                           placeholder={col?.type === 'number' ? 'Enter number' : 'Enter value'}
-                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[13px] text-gray-800 bg-white outline-none focus:border-primary-600 placeholder:text-gray-400"
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-[14px] text-gray-800 bg-white outline-none focus:border-primary-600 placeholder:text-gray-400"
                         />
                       )}
                     </div>
@@ -236,7 +237,7 @@ export default function AdvancedFilterDrawer({
                 <button
                   type="button"
                   onClick={() => addNestedRule(groupIdx)}
-                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-primary-300 text-[12px] font-medium text-primary-600 hover:bg-primary-100/40 transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 py-2 rounded-lg border border-dashed border-primary-300 text-[14px] font-medium text-primary-600 hover:bg-primary-100/40 transition-colors"
                 >
                   <Plus size={12} /> Add nested filter
                 </button>
@@ -252,7 +253,7 @@ export default function AdvancedFilterDrawer({
             <button
               type="button"
               onClick={addOrGroup}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+              className={BTN_SECONDARY}
             >
               <Plus size={13} /> Add filter
             </button>
@@ -264,14 +265,14 @@ export default function AdvancedFilterDrawer({
           <button
             type="button"
             onClick={handleCancel}
-            className="px-4 py-2 rounded-lg border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            className={BTN_SECONDARY}
           >
             Cancel
           </button>
           <button
             type="button"
             onClick={applyAndClose}
-            className="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+            className={BTN_PRIMARY}
           >
             Apply
           </button>

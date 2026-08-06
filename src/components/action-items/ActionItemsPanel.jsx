@@ -113,7 +113,7 @@ function FilterPill({ active, onClick, children }) {
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`text-[12px] px-3 py-1 rounded-full border transition-colors shrink-0 ${
+      className={`text-[14px] px-3 py-1 rounded-full border transition-colors shrink-0 ${
         active ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-gray-200 text-gray-500 bg-transparent hover:bg-gray-50'
       }`}
     >
@@ -457,7 +457,7 @@ export default function ActionItemsPanel({
   const scrollableContent = (
     <>
       <div ref={filterBarRef} className="flex items-center gap-2 flex-wrap my-4">
-        <span className="text-[12px] text-gray-500 shrink-0">Filter by:</span>
+        <span className="text-[14px] text-gray-500 shrink-0">Filter by:</span>
         {FILTER_OPTIONS.map(f => {
           const count = filterCounts[f.value]
           if (f.value === 'notice' && count === 0) return null

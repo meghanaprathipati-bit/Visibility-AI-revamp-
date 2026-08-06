@@ -1,0 +1,68 @@
+---
+description: Canonical Advanced filter trigger design (Crawled pages reference)
+alwaysApply: true
+---
+
+# Advanced filter trigger
+
+Every **Advanced filter** control in table toolbars must match the Crawled pages
+reference. Consistency across tables matters more than per-screen creativity.
+
+## Shared component — always use
+
+```
+src/components/AdvancedFilterTrigger.jsx
+```
+
+```jsx
+import AdvancedFilterTrigger from '../AdvancedFilterTrigger.jsx' // adjust relative depth
+
+<AdvancedFilterTrigger
+  activeCount={activeRules.length}
+  onClick={() => setShowFilterDrawer(true)}
+  onClear={() => setActiveRules([])}
+/>
+```
+
+Do not hand-roll a new Advanced filter pill, badge, or Clear link.
+
+## Fixed design — never change
+
+### Inactive (no filters applied)
+- Pill: `h-8`, `rounded-full`, `bg-white`, `border-gray-200`
+- Text: `text-[14px] font-medium text-gray-600`
+- Leading filter-lines icon (same SVG as the shared component)
+- Hover: `hover:border-gray-300 hover:bg-gray-50`
+- No count badge, no Clear link
+
+### Active (1+ filters applied)
+- Pill: `bg-primary-50 border-primary-300 text-primary-700`
+- Count badge: solid circle `bg-primary-600 text-white text-[12px]` with the
+  **number of applied rules** (never a bare blue dot)
+- **Clear** text link immediately to the right:
+  `text-[14px] text-gray-400 hover:text-gray-600 underline`
+
+### Do not
+- Use `rounded-lg` instead of `rounded-full` for this trigger
+- Use a blue status **dot** instead of a numeric badge
+- Put Clear inside the pill or omit it when filters are active
+- Relabel to “Add filter” / “Filters” for this control
+- Fork styles per dashboard (Found resources, Source inventory, etc.)
+
+## Placement
+
+Lives in the **left** toolbar group with other filter chips (see
+`highrise-table` rule). Search / Columns / primary actions stay on the right
+(`ml-auto`).
+
+## Panel behind the trigger
+
+Opening Advanced filter may use `AdvancedFilterDrawer` or an equivalent panel,
+but the **toolbar trigger chrome** must always be `AdvancedFilterTrigger`.
+
+## Before finishing Advanced filter work
+
+- [ ] Used `AdvancedFilterTrigger` (not a bespoke button)
+- [ ] Inactive = white pill; active = primary tint + numeric badge
+- [ ] Clear link shows only when `activeCount > 0`
+- [ ] Trigger is on the left side of the table toolbar

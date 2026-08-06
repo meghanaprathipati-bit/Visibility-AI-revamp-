@@ -7,7 +7,7 @@ import {
   Users, ArrowLeft, Check, CircleCheck, Bot, Star, X,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
-import HLButton from '../HLButton.jsx'
+import HLButton, { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 import VisibilityMeter from '../VisibilityMeter.jsx'
 import SectionInfoTip from '../SectionInfoTip.jsx'
 import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
@@ -889,12 +889,12 @@ function PromptDetailContent({ prompt, onBack }) {
       {/* Filter bar */}
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <button className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
+          <button className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
             <Bot size={14} className="text-gray-400" />
             All AI engines
             <ChevronDown size={14} className="text-gray-400" />
           </button>
-          <button className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
+          <button className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-colors">
             <Calendar size={14} className="text-gray-400" />
             Last 30 days
             <ChevronDown size={14} className="text-gray-400" />
@@ -914,8 +914,8 @@ function PromptDetailContent({ prompt, onBack }) {
       {/* Hero: prompt headline + KPI cards */}
       <div className="border border-gray-200 rounded-lg bg-white p-5">
         <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">AI Visibility</span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">Winning</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200">AI Visibility</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-success-50 text-success-600 text-[14px] font-medium border border-success-200">Winning</span>
           <span className="text-[12px] text-gray-400">Last 30 days</span>
           <span className="text-[12px] text-gray-400">US</span>
         </div>
@@ -935,14 +935,14 @@ function PromptDetailContent({ prompt, onBack }) {
       <div className="border border-gray-200 rounded-lg bg-white p-5">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Prompt visibility trend</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Prompt visibility trend</h3>
             <p className="text-[13px] text-gray-500 mt-0.5">Prompt-level visibility by AI engine across the selected window</p>
           </div>
           <div className="flex items-center gap-2">
             <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
               {['Visibility', 'Mentions', 'Citations'].map(m => (
                 <button key={m} onClick={() => setTrendMetric(m)}
-                  className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  className={`px-3 py-1.5 text-[14px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                   {m}
                 </button>
               ))}
@@ -950,7 +950,7 @@ function PromptDetailContent({ prompt, onBack }) {
             <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
               {['7D', '28D', '3M'].map(p => (
                 <button key={p} onClick={() => setTrendPeriod(p)}
-                  className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  className={`px-3 py-1.5 text-[14px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                   {p}
                 </button>
               ))}
@@ -972,7 +972,7 @@ function PromptDetailContent({ prompt, onBack }) {
       {/* AI Responses */}
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
-          <h3 className="text-[15px] font-semibold text-gray-900">AI Responses</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900">AI Responses</h3>
           <p className="text-[13px] text-gray-500 mt-0.5">Latest prompt responses from tracked engines with drill-in answer analysis</p>
         </div>
         <div className="px-5 pb-5">
@@ -980,11 +980,11 @@ function PromptDetailContent({ prompt, onBack }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[120px] border-r border-gray-200">AI</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[180px] border-r border-gray-200">Brands</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[72px] border-r border-gray-200">Sources</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[120px] border-r border-gray-200">AI</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[180px] border-r border-gray-200">Brands</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[72px] border-r border-gray-200">Sources</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -993,11 +993,11 @@ function PromptDetailContent({ prompt, onBack }) {
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
                       <div className="flex items-center gap-2">
                         <EngineLogo name={row.engine} size={16} className="w-7 h-7" />
-                        <p className="text-[13px] font-semibold text-gray-900 m-0">{row.engine}</p>
+                        <p className="text-[14px] font-semibold text-gray-900 m-0">{row.engine}</p>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
-                      <p className="text-[13px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
+                      <p className="text-[14px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
                       <button type="button" className="text-[12px] text-primary-600 hover:underline">
                         Open full response
                       </button>
@@ -1007,8 +1007,8 @@ function PromptDetailContent({ prompt, onBack }) {
                         {row.brands.map(b => <BrandPill key={b} name={b} highlight={b === 'GoHighLevel'} />)}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100 align-top">{row.sources}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500 align-top">{row.created}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100 align-top">{row.sources}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500 align-top">{row.created}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1021,14 +1021,14 @@ function PromptDetailContent({ prompt, onBack }) {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5 flex items-start justify-between">
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Prompt Sources</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Prompt Sources</h3>
             <p className="text-[13px] text-gray-500 mt-0.5">All detected sources for this prompt with a compact matrix of position, coverage, and mention signals</p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
               {['Domain', 'URL'].map(v => (
                 <button key={v} onClick={() => setSourcesView(v)}
-                  className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${sourcesView === v ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                  className={`px-3 py-1.5 text-[14px] font-medium transition-colors ${sourcesView === v ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                   {v}
                 </button>
               ))}
@@ -1041,14 +1041,14 @@ function PromptDetailContent({ prompt, onBack }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[280px]">URL</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Open</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[150px]">Other brands mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[280px]">URL</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Open</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[150px]">Other brands mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
                 </tr>
               </thead>
               <tbody>
@@ -1058,30 +1058,30 @@ function PromptDetailContent({ prompt, onBack }) {
                       <TruncatedLink href={row.url}>{row.url}</TruncatedLink>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <button className="flex items-center gap-1 text-[13px] text-primary-600 hover:underline whitespace-nowrap">
+                      <button className="flex items-center gap-1 text-[14px] text-primary-600 hover:underline whitespace-nowrap">
                         Open <ExternalLink size={11} />
                       </button>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.avgPos}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.coverage}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.seenInChats}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.avgPos}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.coverage}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.seenInChats}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       {row.brandMentioned ? (
-                        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-success-600">
+                        <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-success-600">
                           <Check size={12} strokeWidth={2.5} />Yes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-gray-400">
+                        <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-400">
                           <X size={12} strokeWidth={2.5} />No
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <span className={`text-[13px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-400'}`}>
+                      <span className={`text-[14px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-400'}`}>
                         {row.otherBrands ? 'Yes' : 'No'}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500">{row.lastSeen}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500">{row.lastSeen}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1137,13 +1137,13 @@ function PromptTrackingContent() {
       </div>
 
       {/* Row 3: Visibility Trend + Competitor Ranking */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 63fr) minmax(0, 37fr)' }}>
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 59fr) minmax(0, 41fr)' }}>
 
         {/* Visibility Trend card */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Visibility trend</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0">Visibility trend</h3>
               <SectionInfoTip
                 id="asp-visibility-trend-info"
                 content="Track how your brand's visibility, mentions, or citations change over time and compare performance against competitors."
@@ -1153,7 +1153,7 @@ function PromptTrackingContent() {
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['Visibility', 'Mentions', 'Citations'].map(m => (
                   <button key={m} onClick={() => setTrendMetric(m)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {m}
                   </button>
                 ))}
@@ -1161,7 +1161,7 @@ function PromptTrackingContent() {
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['7D', '28D', '3M'].map(p => (
                   <button key={p} onClick={() => setTrendPeriod(p)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {p}
                   </button>
                 ))}
@@ -1191,7 +1191,7 @@ function PromptTrackingContent() {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine coverage</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">Engine coverage</h3>
             <SectionInfoTip
               id="asp-engine-coverage-info"
               content="See how your brand performs across different AI search engines."
@@ -1203,12 +1203,12 @@ function PromptTrackingContent() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px]">Engine</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Visibility</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Presence</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Citation rate</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap">Insight</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px]">Engine</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Visibility</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Presence</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Citation rate</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap">Insight</th>
                 </tr>
               </thead>
               <tbody>
@@ -1220,20 +1220,20 @@ function PromptTrackingContent() {
                           {eng.abbr}
                         </span>
                         <div>
-                          <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
+                          <p className="text-[14px] font-semibold text-gray-900">{eng.name}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <VisibilityMeter value={eng.vis} barWidth="120px" />
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <p className="text-[13px] font-semibold text-gray-900">{eng.avgPos}</p>
+                      <p className="text-[14px] font-semibold text-gray-900">{eng.avgPos}</p>
                       <p className="text-[12px] text-gray-400">{eng.urlsAnswer}</p>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500">{eng.insight}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500">{eng.insight}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1245,7 +1245,7 @@ function PromptTrackingContent() {
       {/* Row 5: How AI is describing GoHighLevel */}
       <div className="border border-gray-200 rounded-lg bg-white p-4">
         <div className="flex items-center gap-1.5 mb-3">
-          <h3 className="text-[15px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
           <SectionInfoTip
             id="asp-ai-describing-info"
             content="See how AI platforms describe your brand across detected mentions, from strong recommendations to negative or dismissive responses."
@@ -1283,13 +1283,13 @@ function PromptTrackingContent() {
       <div className="border border-gray-200 rounded-lg bg-white p-4">
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Organic-AI overlap</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">Organic-AI overlap</h3>
             <SectionInfoTip
               id="asp-organic-ai-overlap-info"
               content="See how much of your Google AI Overview visibility comes from pages that already rank in organic search."
             />
           </div>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 text-[12px] font-medium border border-primary-200 whitespace-nowrap">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 text-[14px] font-medium border border-primary-200 whitespace-nowrap">
             5 shared URLs
           </span>
         </div>
@@ -1333,7 +1333,7 @@ function PromptTrackingContent() {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-3">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Top performing prompts</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">Top performing prompts</h3>
             <SectionInfoTip
               id="asp-top-prompts-info"
               content="See the prompts where your brand achieved the highest AI visibility during the selected date range."
@@ -1346,10 +1346,10 @@ function PromptTrackingContent() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-12 normal-case">#</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 normal-case">Prompt</th>
-                  <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 border-r border-gray-200 w-[110px] normal-case">Visibility</th>
-                  <th className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 w-[130px] normal-case">
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-12 normal-case">#</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 normal-case">Prompt</th>
+                  <th className="px-3 py-2.5 text-right text-[14px] font-semibold text-gray-900 border-r border-gray-200 w-[110px] normal-case">Visibility</th>
+                  <th className="px-3 py-2.5 text-right text-[14px] font-semibold text-gray-900 w-[130px] normal-case">
                     <span className="inline-flex items-center gap-1">
                       Trend score
                       <SectionInfoTip id="asp-trend-score-info" content="Change in visibility score over the selected period." />
@@ -1361,7 +1361,7 @@ function PromptTrackingContent() {
                 {TOP_PROMPTS_DATA.map(item => (
                   <tr key={item.rank} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
                     <td className="px-3 py-3 border-r border-gray-100 align-middle">
-                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[13px] font-semibold text-gray-600">
+                      <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-gray-100 text-[14px] font-semibold text-gray-600">
                         {item.rank}
                       </span>
                     </td>
@@ -1409,7 +1409,7 @@ function OverviewContent() {
       <div className="border border-gray-200 rounded-xl bg-white flex overflow-hidden" style={{ height: '208px' }}>
         {/* Left — headline metric */}
         <div className="px-7 py-6 flex flex-col justify-between shrink-0 w-[320px]">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200 whitespace-nowrap self-start">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200 whitespace-nowrap self-start">
             <Sparkles size={11} />
             AI Presence
           </span>
@@ -1437,7 +1437,7 @@ function OverviewContent() {
               <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />
               <p className="text-[13px] font-medium text-gray-700">12-month trend</p>
             </div>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 text-gray-500 text-[12px] font-medium border border-gray-200 whitespace-nowrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 text-gray-500 text-[14px] font-medium border border-gray-200 whitespace-nowrap">
               <BarChart3 size={11} className="text-gray-400" />
               4 of 6 engines
             </span>
@@ -1469,7 +1469,7 @@ function OverviewContent() {
       <div className="border border-gray-200 rounded-lg bg-white p-5">
         <div className="flex items-start justify-between mb-5">
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">AI Presence Comparison</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">AI Presence Comparison</h3>
             <p className="text-[13px] text-gray-500 mt-0.5">Switch between competitor and engine views using the global presence mode selected above.</p>
           </div>
           <div className="flex items-center gap-0.5 border border-gray-200 rounded p-0.5 bg-gray-50 shrink-0">
@@ -1477,7 +1477,7 @@ function OverviewContent() {
               <button
                 key={v}
                 onClick={() => setComparisonView(v)}
-                className={`px-3 py-1.5 rounded text-[13px] font-medium transition-all ${
+                className={`px-3 py-1.5 rounded text-[14px] font-medium transition-all ${
                   comparisonView === v ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -1523,7 +1523,7 @@ function OverviewContent() {
       <div className="border border-gray-200 rounded-lg bg-white p-5">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Topic Presence</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Topic Presence</h3>
             <p className="text-[13px] text-gray-500 mt-0.5">Top topic clusters comparing the primary brand against tracked competitors across the analyzed answer set.</p>
           </div>
           <button className="px-3 py-1.5 rounded border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shrink-0">
@@ -1536,9 +1536,9 @@ function OverviewContent() {
             <table className="w-full border-collapse table-fixed" style={{ minWidth: 760 }}>
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-4 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[260px]">Topic</th>
+                  <th className="px-4 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[260px]">Topic</th>
                   {COMPETITORS.map(c => (
-                    <th key={c.name} className="px-3 py-2.5 text-right text-[12px] font-semibold text-gray-900 whitespace-nowrap min-w-[96px]">
+                    <th key={c.name} className="px-3 py-2.5 text-right text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[96px]">
                       {c.name}
                     </th>
                   ))}
@@ -1547,9 +1547,9 @@ function OverviewContent() {
               <tbody>
                 {TOPIC_PRESENCE.map(row => (
                   <tr key={row.topic} className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3 text-[13px] font-medium text-gray-800">{row.topic}</td>
+                    <td className="px-4 py-3 text-[14px] font-medium text-gray-800">{row.topic}</td>
                     {row.scores.map((score, i) => (
-                      <td key={i} className="px-3 py-3 text-[13px] text-gray-700 text-right tabular-nums">{score.toFixed(2)}%</td>
+                      <td key={i} className="px-3 py-3 text-[14px] text-gray-700 text-right tabular-nums">{score.toFixed(2)}%</td>
                     ))}
                   </tr>
                 ))}
@@ -1591,10 +1591,10 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
       <button
         type="button"
         onClick={onOpen}
-        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
+        className="inline-flex items-center h-8 gap-1 pl-3 pr-1.5 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:border-gray-400 hover:bg-gray-50 transition-all select-none"
       >
         {label}
-        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[12px] font-medium text-gray-600 max-w-[120px] truncate">
+        <span className="mx-0.5 inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-[14px] font-medium text-gray-600 max-w-[120px] truncate">
           {chipLabel}
         </span>
         <span
@@ -1610,12 +1610,12 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
             <div className="mb-1 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
                 <Search size={12} className="text-gray-400 shrink-0" />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[12px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[14px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
               </div>
             </div>
           )}
           <div className="flex flex-col gap-0.5">
-            <button onClick={onSelectAll} className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] text-gray-700 hover:bg-gray-50 transition-colors">
+            <button onClick={onSelectAll} className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] text-gray-700 hover:bg-gray-50 transition-colors">
               All
             </button>
             {options
@@ -1624,7 +1624,7 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
                 const checked = selected.has(opt.id)
                 return (
                   <button key={opt.id} onClick={() => onToggle(opt.id)}
-                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[13px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-[14px] transition-colors ${checked ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
                   >
                     <span className={checked ? 'text-primary-700 font-semibold' : 'text-gray-700'}>{opt.label}</span>
                     {checked && <Check size={13} className="text-primary-600 shrink-0" />}
@@ -1769,7 +1769,7 @@ function TrackPromptModal({ onClose, onSave }) {
                 </div>
                 <div className="border border-gray-200 rounded-lg px-3.5 py-3 min-h-[48px] flex items-center">
                   {topic ? (
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-[12px] font-medium border border-primary-200">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-primary-50 text-primary-700 text-[14px] font-medium border border-primary-200">
                       {topic}
                     </span>
                   ) : (
@@ -1821,7 +1821,7 @@ function TrackPromptModal({ onClose, onSave }) {
           <button
             type="button"
             onClick={onClose}
-            className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors"
+            className={BTN_SECONDARY}
           >
             Cancel
           </button>
@@ -1829,11 +1829,7 @@ function TrackPromptModal({ onClose, onSave }) {
             type="button"
             disabled={!canSave}
             onClick={handleSave}
-            className={`h-9 px-4 rounded-lg text-[13px] font-semibold transition-colors ${
-              canSave
-                ? 'bg-primary-600 hover:bg-primary-700 text-white'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-            }`}
+            className={BTN_PRIMARY}
           >
             Save prompt
           </button>
@@ -1954,8 +1950,8 @@ function PromptsContent() {
     return matchSearch && matchType && matchBrand
   })
 
-  const thClass = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
-  const tdClass = "px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle"
+  const thClass = "relative px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
+  const tdClass = "px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle"
   const { widths: colW, onResizeStart } = useColumnResize([28, 260, 72, 96, 106, 168, 120])
 
   if (detailPrompt !== null) {
@@ -1993,13 +1989,13 @@ function PromptsContent() {
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
           <div>
-            <h3 className="text-[15px] font-semibold text-gray-900">Prompt universe</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Prompt universe</h3>
             <p className="text-[13px] text-gray-500 mt-0.5">Topic-grouped prompts with drill-downs for answer visibility, citations, and competing brands.</p>
           </div>
           <button
             type="button"
             onClick={() => setShowTrackModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shrink-0"
+            className={`${BTN_PRIMARY} shrink-0`}
           >
             <TrendingUp size={14} />
             Track prompts
@@ -2007,11 +2003,11 @@ function PromptsContent() {
         </div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
+            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
               <Plus size={13} className="text-gray-500" />
               Add filter
             </button>
-            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
+            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
               <span className="text-gray-400 text-[12px] font-normal mr-0.5">Grouping:</span>
               Topic
               <ChevronDown size={12} className="text-gray-400 ml-0.5" />
@@ -2082,7 +2078,7 @@ function PromptsContent() {
                       </button>
                     </td>
                     <td className={tdClass}>
-                      <p className="text-[13px] font-semibold text-gray-900 break-words">{row.topic}</p>
+                      <p className="text-[14px] font-semibold text-gray-900 break-words">{row.topic}</p>
                       <p className="text-[12px] text-gray-400 mt-0.5">{row.prompts} prompts</p>
                     </td>
                     <td className={tdClass}>{row.size}</td>
@@ -2096,7 +2092,7 @@ function PromptsContent() {
                     <tr key={child.id} className="bg-gray-50 hover:bg-white transition-colors">
                       <td className="border-b border-r border-gray-200" />
                       <td className="px-3 py-3 border-b border-r border-gray-200 align-top">
-                        <p className="text-[13px] text-gray-800 leading-relaxed break-words">{child.prompt}</p>
+                        <p className="text-[14px] text-gray-800 leading-relaxed break-words">{child.prompt}</p>
                         <button
                           type="button"
                           onClick={() => setDetailPrompt(child.prompt)}
@@ -2130,7 +2126,7 @@ function CitationsContent() {
   const [expanded, setExpanded] = useState(new Set([1]))
   const [searchQuery, setSearchQuery] = useState('')
   const { widths: citW, onResizeStart: citResize } = useColumnResize([28, 280, 80, 108, 88, 44, 68, 140])
-  const citTh = "relative px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
+  const citTh = "relative px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
 
   const [citTypeFilter,  setCitTypeFilter]  = useState(new Set(['Mention', 'Link']))
   const [citTopicFilter, setCitTopicFilter] = useState(new Set(CITING_TOPIC_OPTIONS.map(o => o.id)))
@@ -2175,16 +2171,16 @@ function CitationsContent() {
     <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
       <div className="p-5">
         <div className="mb-4">
-          <h3 className="text-[15px] font-semibold text-gray-900">Citing domains</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900">Citing domains</h3>
           <p className="text-[13px] text-gray-500 mt-0.5">Domain-level citation visibility plus expandable page detail for in-scope prompt coverage.</p>
         </div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
+            <button className="flex items-center gap-1.5 px-3 h-8 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors whitespace-nowrap">
               <Plus size={13} className="text-gray-500" />
               Add filter
             </button>
-            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
+            <button className="inline-flex items-center h-8 gap-1 pl-3 pr-2.5 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors whitespace-nowrap">
               <span className="text-gray-400 text-[12px] font-normal mr-0.5">Grouping:</span>
               Domain
               <ChevronDown size={12} className="text-gray-400 ml-0.5" />
@@ -2255,15 +2251,15 @@ function CitationsContent() {
                       </button>
                     </td>
                     <td className="px-3 py-3 border-b border-r border-gray-200 align-middle overflow-hidden">
-                      <TruncatedCell className="text-[13px] font-semibold text-gray-900">{row.domain}</TruncatedCell>
+                      <TruncatedCell className="text-[14px] font-semibold text-gray-900">{row.domain}</TruncatedCell>
                       <p className="text-[12px] text-gray-400 mt-0.5">{row.pages.toLocaleString()} pages</p>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.citations}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.citations}</td>
                     <td className="px-3 py-3 border-b border-r border-gray-200 align-middle"><div className="flex items-center gap-1 flex-wrap">{row.types.map(t => <TypeBadge key={t} type={t} />)}</div></td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.coMention}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.dt}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.orgTraffic}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500 border-b border-gray-200 align-middle overflow-hidden">
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.coMention}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.dt}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{row.orgTraffic}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500 border-b border-gray-200 align-middle overflow-hidden">
                       <TruncatedCell>{row.topics}</TruncatedCell>
                     </td>
                   </tr>
@@ -2274,12 +2270,12 @@ function CitationsContent() {
                       <td className="px-3 py-3 border-b border-r border-gray-200 align-middle overflow-hidden">
                         <TruncatedLink href={child.page}>{child.page}</TruncatedLink>
                       </td>
-                      <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.pageCitations}</td>
+                      <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.pageCitations}</td>
                       <td className="px-3 py-3 border-b border-r border-gray-200 align-middle"><TypeBadge type={child.type} /></td>
-                      <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.coMention}</td>
-                      <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.pt}</td>
-                      <td className="px-3 py-3 text-[13px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.orgTraffic}</td>
-                      <td className="px-3 py-3 text-[13px] text-gray-500 border-b border-gray-200 align-middle overflow-hidden">
+                      <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.coMention}</td>
+                      <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.pt}</td>
+                      <td className="px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle">{child.orgTraffic}</td>
+                      <td className="px-3 py-3 text-[14px] text-gray-500 border-b border-gray-200 align-middle overflow-hidden">
                         <TruncatedCell>{child.topic}</TruncatedCell>
                       </td>
                     </tr>
@@ -2321,7 +2317,7 @@ export default function AiSearchPerformanceDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
+            <button className={BTN_PRIMARY}>
               <Plus size={14} />
               Add competitors
             </button>
@@ -2338,7 +2334,7 @@ export default function AiSearchPerformanceDashboard() {
                 onClick={() => setActiveTab(id)}
                 className={`px-1 border-b-2 -mb-px transition-colors ${isActive ? 'border-primary-600' : 'border-transparent'}`}
               >
-                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium transition-colors ${
+                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[14px] font-medium transition-colors ${
                   isActive ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}>
                   <Icon size={14} />

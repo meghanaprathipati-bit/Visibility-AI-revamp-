@@ -4,6 +4,7 @@
 export { CircleX } from './CircleX.jsx';
 export { Info } from './Info.jsx';
 export { ArrowLeft } from './ArrowLeft.jsx';
+export { ArrowLeftRight } from './ArrowLeftRight.jsx';
 export { MoreHorizontal } from './MoreHorizontal.jsx';
 export { ChevronRight } from './ChevronRight.jsx';
 export { ChevronLeft } from './ChevronLeft.jsx';

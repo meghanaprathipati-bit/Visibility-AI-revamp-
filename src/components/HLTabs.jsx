@@ -21,7 +21,7 @@ function toNaiveVars(theme) {
 /** Mirrors themeOverrides() from highrise428.mjs */
 const TAB_SIZE_STYLE = {
   sm: {
-    tabFontSize: 'var(--hr-font-size-md)',
+    tabFontSize: '14px',
     tabHeight: '24px',
     tabLineHeight: 'var(--hr-line-height-md)',
     tabPadding: '3px 8px',
@@ -29,7 +29,7 @@ const TAB_SIZE_STYLE = {
     customSlotPadding: '0px 4px',
   },
   md: {
-    tabFontSize: 'var(--hr-font-size-lg)',
+    tabFontSize: '14px',
     tabHeight: '32px',
     tabLineHeight: 'var(--hr-line-height-lg)',
     tabPadding: '6px 8px',
@@ -37,7 +37,7 @@ const TAB_SIZE_STYLE = {
     customSlotPadding: '0px 6px',
   },
   lg: {
-    tabFontSize: 'var(--hr-font-size-lg)',
+    tabFontSize: '14px',
     tabHeight: '40px',
     tabLineHeight: 'var(--hr-line-height-lg)',
     tabPadding: '10px 8px',

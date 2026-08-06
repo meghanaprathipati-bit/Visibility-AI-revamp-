@@ -49,32 +49,42 @@ function EyeToggle({ visible, onClick }) {
 
 function StepCard({ n, Icon, iconWrap, iconColor, title, desc, children }) {
   return (
-    <div className="border border-gray-200 rounded-lg p-4 flex flex-col gap-3">
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${iconWrap}`}>
+    <div className="border border-gray-200 rounded-lg p-4 flex flex-col gap-3 min-w-0">
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconWrap}`}>
         <Icon size={16} className={iconColor} />
       </div>
-      <div>
-        <p className="text-[13px] font-semibold text-gray-900 mb-1">{n}. {title}</p>
-        <p className="text-[14px] text-gray-500 leading-[20px]">{desc}</p>
+      <div className="min-w-0">
+        <p className="text-[14px] font-semibold text-gray-900 mb-1 leading-snug">{n}. {title}</p>
+        <p className="text-[13px] font-normal text-gray-500 leading-[18px]">{desc}</p>
       </div>
-      {children && <div className="mt-auto">{children}</div>}
+      {children && <div className="mt-auto min-w-0">{children}</div>}
     </div>
   )
 }
 
-function StepButton({ children, ...props }) {
+/** Primary action link — colored (e.g. Download plugin, Create API token) */
+function StepLink({ children, className = '', ...props }) {
   return (
-    <HLButton variant="primary" color="blue" size="sm" className="w-full" {...props}>
-      <span className="inline-flex items-center justify-center gap-1.5 w-full">{children}</span>
-    </HLButton>
+    <button
+      type="button"
+      className={`inline-flex items-center gap-1.5 text-[13px] font-medium text-primary-600 hover:text-primary-700 transition-colors ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
   )
 }
 
-function StepButtonSecondary({ children, ...props }) {
+/** Secondary action link — gray (e.g. Open token settings) */
+function StepLinkMuted({ children, className = '', ...props }) {
   return (
-    <HLButton variant="secondary" color="gray" size="sm" className="w-full" {...props}>
-      <span className="inline-flex items-center justify-center gap-1.5 w-full">{children}</span>
-    </HLButton>
+    <button
+      type="button"
+      className={`inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors ${className}`}
+      {...props}
+    >
+      {children}
+    </button>
   )
 }
 
@@ -108,7 +118,7 @@ export default function ConnectFixesModal({ platform, onPlatformChange, onClose,
             key={p.id}
             type="button"
             onClick={() => onPlatformChange(p.id)}
-            className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-md text-[14px] font-medium transition-all ${
               platform === p.id ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
@@ -139,7 +149,7 @@ export default function ConnectFixesModal({ platform, onPlatformChange, onClose,
   return (
     <HLModal
       id="connect-fixes"
-      width={700}
+      width={840}
       headerDivider
       header={header}
       footer={footer}
@@ -152,31 +162,32 @@ export default function ConnectFixesModal({ platform, onPlatformChange, onClose,
           <div className="grid grid-cols-3 gap-3">
             <StepCard n="1" Icon={Download} iconWrap="bg-primary-50" iconColor="text-primary-600"
               title="Download plugin" desc="Download the Visibility AI SEO plugin package for your WordPress site.">
-              <StepButton onClick={() => setPluginDownloaded(true)}>
+              <StepLink onClick={() => setPluginDownloaded(true)}>
                 <Download size={14} className="shrink-0" />
                 Download plugin
-              </StepButton>
+              </StepLink>
             </StepCard>
 
             <StepCard n="2" Icon={Plus} iconWrap="bg-purple-50" iconColor="text-purple-600"
               title="Install in WordPress" desc="Open WordPress admin, go to Plugins, Add New, Upload Plugin, then activate it.">
               {pluginDownloaded ? (
-                <StepButton>
+                <StepLink>
+                  <ExternalLink size={14} className="shrink-0" />
                   Open WordPress admin
-                </StepButton>
+                </StepLink>
               ) : (
-                <StepButtonSecondary disabled>
+                <span className="text-[13px] font-medium text-gray-400">
                   Download the plugin first
-                </StepButtonSecondary>
+                </span>
               )}
             </StepCard>
 
             <StepCard n="3" Icon={ExternalLink} iconWrap="bg-success-50" iconColor="text-success-600"
               title="Copy API token" desc="Open the plugin settings page in WordPress and copy the API token shown there.">
-              <StepButtonSecondary>
+              <StepLinkMuted>
                 <ExternalLink size={14} className="shrink-0" />
                 Open token settings
-              </StepButtonSecondary>
+              </StepLinkMuted>
             </StepCard>
           </div>
 
@@ -201,22 +212,22 @@ export default function ConnectFixesModal({ platform, onPlatformChange, onClose,
           <div className="grid grid-cols-3 gap-3">
             <StepCard n="1" Icon={ExternalLink} iconWrap="bg-primary-50" iconColor="text-primary-600"
               title="Create API token" desc="Open the token template in Cloudflare so the required permissions are pre-filled.">
-              <StepButton>
+              <StepLink>
                 <ExternalLink size={14} className="shrink-0" />
                 Create API token
-              </StepButton>
+              </StepLink>
             </StepCard>
 
             <StepCard n="2" Icon={Plus} iconWrap="bg-purple-50" iconColor="text-purple-600"
               title="Grant permissions" desc="The token template pre-fills the permissions we need to apply edge fixes.">
-              <span className="inline-flex items-center justify-center w-full h-9 px-3 rounded-lg bg-purple-50 text-purple-700 text-[12px] font-medium">
+              <span className="inline-flex items-center text-[13px] font-medium text-purple-700">
                 Permissions pre-filled
               </span>
             </StepCard>
 
             <StepCard n="3" Icon={Globe} iconWrap="bg-success-50" iconColor="text-success-600"
               title="Copy account ID" desc="Find the 32-character account ID on your Cloudflare dashboard overview page.">
-              <span className="inline-flex items-center justify-center w-full h-9 px-3 rounded-lg bg-success-50 text-success-700 text-[12px] font-medium">
+              <span className="inline-flex items-center text-[13px] font-medium text-success-700">
                 On the overview page
               </span>
             </StepCard>
