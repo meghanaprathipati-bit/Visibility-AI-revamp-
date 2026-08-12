@@ -16,6 +16,7 @@ import ConnectFixesModal from '../implement/ConnectFixesModal.jsx'
 import HLModal from '../HLModal.jsx'
 import HLInput from '../HLInput.jsx'
 import HLTooltip from '../HLTooltip.jsx'
+import ScheduleSettingsPanel from '../settings/ScheduleSettingsPanel.jsx'
 
 // HighRise-style expandable table: expand + checkbox columns stay one vertical line
 // across parent rows and expanded nested content (HLDataTable expanded-row pattern).
@@ -1610,7 +1611,7 @@ function TechnicalDiagnostics() {
 function SectionLabel({ title }) {
   return (
     <div className="flex items-center gap-3 pt-1">
-      <span className="text-[12px] font-semibold tracking-widest text-gray-400 uppercase whitespace-nowrap">{title}</span>
+      <span className="text-[12px] font-semibold text-gray-400 whitespace-nowrap">{title}</span>
       <div className="flex-1 h-px bg-gray-100" />
     </div>
   )
@@ -6798,12 +6799,10 @@ const AUDIT_SETTINGS_NAV = [
   { id: 'limits',   label: 'Limits and restrictions' },
 ]
 
-const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-
 function WebsiteAuditSettingsModal({ onClose, onApply }) {
   const [activeSection, setActiveSection] = useState('schedule')
 
-  // Schedule state
+  // Schedule state — Daily / Weekly / Monthly (default weekly)
   const [frequency, setFrequency]       = useState('weekly')
   const [repeatEvery, setRepeatEvery]   = useState(false)
   const [intervalVal, setIntervalVal]   = useState(2)
@@ -6839,11 +6838,6 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
   const [maxRedirects, setMaxRedirects]     = useState(5)
   const [maxPageSize, setMaxPageSize]       = useState(3000)
 
-  function toggleDay(d) {
-    const k = d.toLowerCase()
-    setSelectedDays(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k])
-  }
-
   function addSitemap() {
     const t = sitemapInput.trim()
     if (t && !sitemaps.find(s => s.url === t)) { setSitemaps(p => [...p, { url: t, urlCount: 0 }]); setSitemapInput(''); setAddingSitemap(false) }
@@ -6878,132 +6872,20 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
 
   function renderSchedule() {
     return (
-      <div className="flex flex-col gap-5 pb-4">
-        <p className="text-[18px] font-bold text-gray-900">Schedule</p>
-        <div className="border border-gray-200 rounded-lg p-5 flex flex-col gap-6">
-
-          {/* Scanning frequency */}
-          <div className="flex flex-col gap-2">
-            <p className="text-[14px] font-medium text-gray-900">Scanning frequency</p>
-            <div className="flex items-center gap-5 mt-1">
-              {['Weekly', 'Monthly', 'Manual'].map(f => {
-                const checked = frequency === f.toLowerCase()
-                return (
-                  <label key={f} className="flex items-center gap-2 cursor-pointer select-none">
-                    <span className={`flex items-center justify-center w-4 h-4 rounded-full border-2 transition-colors shrink-0 ${checked ? 'border-primary-600' : 'border-gray-300'}`}>
-                      {checked && <span className="w-2 h-2 rounded-full bg-primary-600" />}
-                    </span>
-                    <input type="radio" className="sr-only" checked={checked} readOnly onChange={() => setFrequency(f.toLowerCase())} />
-                    <span className="text-[14px] text-gray-700 font-medium">{f}</span>
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Manual: informational message, hide all scheduling controls */}
-          {frequency === 'manual' && (
-            <div className="px-4 py-3 rounded-lg border border-gray-200" style={{ background: '#F2F4F7' }}>
-              <p className="text-[13px] text-gray-600 leading-relaxed">Audits will only run when started manually. No schedule will be created.</p>
-            </div>
-          )}
-
-          {/* Repeat interval — weekly & monthly only */}
-          {frequency !== 'manual' && (
-            <div className="flex flex-col gap-3">
-              <SettingsToggle
-                label="Repeat interval"
-                description={
-                  frequency === 'weekly'
-                    ? (repeatEvery ? 'Runs every 2+ weeks.' : 'Runs every week by default. Enable to run every 2+ weeks.')
-                    : (repeatEvery ? 'Runs every 2+ months.' : 'Runs every month by default. Enable to run every 2+ months.')
-                }
-                value={repeatEvery}
-                onChange={setRepeatEvery}
-              />
-              {repeatEvery && (
-                <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-medium text-gray-700">Run every</span>
-                  <div className="flex items-center h-9 border border-gray-200 rounded-lg overflow-hidden focus-within:border-primary-600 transition-colors">
-                    <input
-                      type="text"
-                      value={intervalVal}
-                      onChange={e => { const n = parseInt(e.target.value, 10); if (!isNaN(n) && n >= 1) setIntervalVal(n) }}
-                      className="w-12 h-full px-3 text-[14px] text-gray-900 outline-none bg-transparent text-center"
-                    />
-                    <div className="flex items-center h-full shrink-0">
-                      <button onClick={() => setIntervalVal(v => Math.max(1, v - 1))} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
-                        <Minus size={11} />
-                      </button>
-                      <button onClick={() => setIntervalVal(v => v + 1)} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
-                        <Plus size={11} />
-                      </button>
-                    </div>
-                  </div>
-                  <span className="text-[14px] font-medium text-gray-700">{frequency === 'weekly' ? 'weeks' : 'months'}</span>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Days — weekly only */}
-          {frequency === 'weekly' && (
-            <SettingsField label="Days">
-              <div className="flex items-center gap-2 flex-wrap">
-                {WEEKDAYS.map(d => {
-                  const active = selectedDays.includes(d.toLowerCase())
-                  return (
-                    <button key={d} onClick={() => toggleDay(d)}
-                      className={`w-12 h-9 rounded-full text-[13px] font-medium border transition-colors ${
-                        active ? 'bg-primary-600 border-primary-600 text-white' : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50'
-                      }`}
-                    >{d}</button>
-                  )
-                })}
-              </div>
-            </SettingsField>
-          )}
-
-          {/* Day of month + Time — side by side for monthly; Time full-width for weekly */}
-          {frequency === 'monthly' && (
-            <div className="grid grid-cols-2 gap-5">
-              <SettingsField label="Day of month">
-                <div className="relative">
-                  <select value={dayOfMonth} onChange={e => setDayOfMonth(Number(e.target.value))}
-                    className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
-                  >
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map(n => <option key={n} value={n}>{n}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                </div>
-              </SettingsField>
-              <SettingsField label="Time (Asia/Calcutta)">
-                <div className="relative">
-                  <select value={auditTime} onChange={e => setAuditTime(e.target.value)}
-                    className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
-                  >
-                    {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => <option key={t} value={t}>{t}</option>)}
-                  </select>
-                  <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-                </div>
-              </SettingsField>
-            </div>
-          )}
-
-          {frequency === 'weekly' && (
-            <SettingsField label="Time (Asia/Calcutta)">
-              <div className="relative">
-                <select value={auditTime} onChange={e => setAuditTime(e.target.value)}
-                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
-                >
-                  {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => <option key={t} value={t}>{t}</option>)}
-                </select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
-            </SettingsField>
-          )}
-        </div>
-      </div>
+      <ScheduleSettingsPanel
+        frequency={frequency}
+        onFrequencyChange={setFrequency}
+        repeatEvery={repeatEvery}
+        onRepeatEveryChange={setRepeatEvery}
+        intervalVal={intervalVal}
+        onIntervalValChange={setIntervalVal}
+        selectedDays={selectedDays}
+        onSelectedDaysChange={setSelectedDays}
+        dayOfMonth={dayOfMonth}
+        onDayOfMonthChange={setDayOfMonth}
+        auditTime={auditTime}
+        onAuditTimeChange={setAuditTime}
+      />
     )
   }
 

@@ -113,7 +113,7 @@ function PlaceholderDetailContent() {
         ))}
       </div>
       <div>
-        <p className="text-[12px] font-semibold uppercase tracking-wider text-gray-400 mb-4">Sentiment analysis</p>
+        <p className="text-[12px] font-semibold text-gray-400 mb-4">Sentiment analysis</p>
         <div className="grid grid-cols-3 gap-4">
           <div className="border border-gray-200 rounded-lg p-4 h-48 flex items-center justify-center">
             <span className="text-[13px] text-gray-400">Sentiment donut</span>
@@ -124,7 +124,7 @@ function PlaceholderDetailContent() {
         </div>
       </div>
       <div>
-        <p className="text-[12px] font-semibold uppercase tracking-wider text-gray-400 mb-4">Platform intelligence</p>
+        <p className="text-[12px] font-semibold text-gray-400 mb-4">Platform intelligence</p>
         <div className="grid grid-cols-2 gap-4">
           {['Mentions by platform', 'Platform trends over time'].map(label => (
             <div key={label} className="border border-gray-200 rounded-lg p-4 h-48 flex items-center justify-center">

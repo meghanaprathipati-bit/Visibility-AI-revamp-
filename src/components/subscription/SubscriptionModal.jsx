@@ -89,7 +89,7 @@ function SubscriptionStep({ onContinue }) {
       </div>
       <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-0.5">Selected plan</p>
+          <p className="text-[10px] font-semibold text-gray-400 m-0 mb-0.5">Selected plan</p>
           <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name} · Monthly · ${plan.monthlyPrice} due today</p>
         </div>
         <button type="button" onClick={onContinue} className={modalBtnPrimary}>
@@ -108,7 +108,7 @@ function PaymentStep({ onBack, onSubscribe }) {
     <div className="px-4 py-4">
       <div className="flex gap-4">
         <aside className="w-[220px] shrink-0 border border-gray-200 rounded-xl p-4 bg-white">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-3">{plan.name} plan</p>
+          <p className="text-[10px] font-semibold text-gray-400 m-0 mb-3">{plan.name} plan</p>
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
             <div className="flex items-start gap-2 mb-2">
               <div className="w-7 h-7 rounded-md bg-warning-100 flex items-center justify-center shrink-0">

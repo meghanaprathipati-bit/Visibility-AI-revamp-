@@ -91,7 +91,7 @@ function NavItemSettings({ icon: Icon, label, active, collapsed }) {
  *
  * variant="settings"  (Messaging Limits / Phone System pattern)
  *   sections: [{ label: 'My Business', items: [{ icon, label, active }] }, ...]
- *   Categorized with uppercase section labels. Includes a back ribbon.
+ *   Categorized with section labels. Includes a back ribbon.
  *   onBack: callback for the back ribbon
  *
  * Click the green chevron at bottom-right to collapse/expand.
@@ -199,7 +199,7 @@ export default function Sidebar({
                 <div key={i} className="flex flex-col gap-1">
                   {!collapsed && (
                     <div className="px-2 pb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">
+                      <span className="text-[11px] font-semibold text-gray-500">
                         {section.label}
                       </span>
                     </div>
