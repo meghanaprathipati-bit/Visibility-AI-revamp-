@@ -460,7 +460,7 @@ export default function ImplementSummaryCard({ summary: initialSummary, onItemRe
       {!isRescan && failed.length > 0 && (
         <div className="border-t border-gray-200 bg-error-50">
           <div className="px-3 pt-3 pb-1">
-            <p className="text-[11px] font-semibold uppercase tracking-wide text-error-600 m-0 mb-1">
+            <p className="text-[11px] font-semibold text-error-600 m-0 mb-1">
               Failed ({failed.length})
             </p>
           </div>

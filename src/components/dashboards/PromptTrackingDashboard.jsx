@@ -5,7 +5,7 @@ import {
   Award, ArrowUp, Users, Bot, Clock, MapPin,
   MessageCircle, Check, BarChart3, Search, Plus,
   ArrowLeft, ExternalLink, Calendar, AlertTriangle,
-  X, CircleCheck, Sparkles, RefreshCw02, Trash2, Building2, FileText,
+  X, CircleCheck, Sparkles, RefreshCw02, Trash2, Building2, FileText, Settings,
 } from '../../icons/index.js'
 import SourceInventoryContent from './SourceInventoryContent'
 import CountCard from '../CountCard.jsx'
@@ -23,6 +23,7 @@ import EngineLogo, {
   PerplexityLogo,
 } from '../EngineLogo.jsx'
 import FullResponseModal from '../FullResponseModal.jsx'
+import PromptTrackingSettingsModal from '../PromptTrackingSettingsModal.jsx'
 const MODAL_TABLE_TD = 'px-4 py-2.5 text-left text-[14px]'
 const MODAL_TABLE_TD_MUTED = `${MODAL_TABLE_TD} text-gray-600 tabular-nums whitespace-nowrap`
 const MODAL_TABLE_TD_STRONG = `${MODAL_TABLE_TD} font-medium text-gray-900 tabular-nums whitespace-nowrap`
@@ -523,11 +524,6 @@ function competitorSentimentTone(v) {
   if (v >= 50) return { text: 'text-warning-600', bg: 'bg-warning-50' }
   return { text: 'text-error-600', bg: 'bg-error-50' }
 }
-
-const ADD_COMPETITOR_COUNTRIES = [
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'India',
-  'Germany', 'France', 'Netherlands', 'Singapore', 'Brazil',
-]
 
 const ENGINE_COVERAGE_DATA = [
   { name: 'Perplexity',  abbr: 'P',  color: 'var(--primary-800)', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
@@ -1466,7 +1462,7 @@ function OverviewContent({ contentScrollRef }) {
           {OVERVIEW_METRICS.map((m, i) => (
             <div key={m.label} className={`px-4 py-3 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}>
               <div className="flex items-center gap-1 mb-1.5">
-                <p className="text-[12px] font-medium text-gray-500 m-0 normal-case">{m.label}</p>
+                <p className="text-[14px] font-medium text-gray-500 m-0 normal-case">{m.label}</p>
                 <SectionInfoTip id={`pt-overview-metric-${i}`} content={m.help} />
               </div>
               <p className="text-[18px] font-semibold text-gray-900 leading-none m-0">{m.value}</p>
@@ -1476,7 +1472,7 @@ function OverviewContent({ contentScrollRef }) {
       </div>
 
       {/* Row 3: Visibility trend + Competitor ranking */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 59fr) minmax(0, 41fr)' }}>
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 65fr) minmax(0, 35fr)' }}>
         {/* Visibility trend */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4">
@@ -1936,7 +1932,7 @@ const MANAGE_EXTRA_SUGGESTIONS = [
   { prompt: 'What tool is best for landing pages, funnels, and automated lead capture?', topic: 'Funnels', volume: '1.8K' },
 ]
 
-function ManagePromptsModal({ onClose, onSave }) {
+export function ManagePromptsModal({ onClose, onSave, embedded = false, hideEngines = false }) {
   // HARDCODED: seed under the track limit so add / suggestions stay usable (prototyping)
   const [trackedPrompts, setTrackedPrompts] = useState(() =>
     PROMPTS_DATA.slice(0, 6).map(p => ({ ...p })),
@@ -1992,7 +1988,7 @@ function ManagePromptsModal({ onClose, onSave }) {
   }
 
   function handleSave() {
-    if (selectedEngines.size === 0 || overCapacity) return
+    if ((!hideEngines && selectedEngines.size === 0) || overCapacity) return
     onSave({ tracked: trackedPrompts, pending: pendingAdds, engines: selectedEngines })
   }
 
@@ -2010,77 +2006,42 @@ function ManagePromptsModal({ onClose, onSave }) {
   ]
 
   const canAddCustom = Boolean(customPrompt.trim()) && !atCapacity
-  const canSave = selectedEngines.size > 0 && !overCapacity
+  const canSave = (hideEngines || selectedEngines.size > 0) && !overCapacity
 
   const selectionRows = [
     ...pendingAdds.map(p => ({ ...p, _kind: 'pending' })),
     ...trackedPrompts.map(p => ({ ...p, _kind: 'tracked' })),
   ]
 
-  return (
-    <HLModal
-      id="manage-prompts"
-      width={880}
-      height={MODAL_MANAGE_HEIGHT}
-      headerDivider
-      onClose={onClose}
-      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
-      footerClassName="px-6 py-3.5"
-      header={(
-        <div className="px-6 pt-5 pb-3.5">
-          <div className="flex items-center gap-2">
-            <h2 id="manage-prompts-title" className={`${modalTitle} m-0`}>Manage prompts</h2>
-            <SectionInfoTip content="Track up to ten prompts. Your selection is the source of truth — suggestions and custom adds fill open slots." />
-          </div>
-          <p className={`${modalSubtext} m-0 mt-1`}>
-            Review what you’re tracking, add prompts you care about, and optionally use suggestions to fill open slots.
-          </p>
-        </div>
-      )}
-      footer={(
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
-            {overCapacity
-              ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
-              : pendingAdds.length > 0
-                ? `${pendingAdds.length} new prompt${pendingAdds.length === 1 ? '' : 's'} will start tracking on save.`
-                : 'Changes will be applied to the next scan when you save.'}
-          </p>
-          <div className="flex items-center gap-2">
-            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
-              Cancel
-            </HLButton>
-            <HLButton
-              variant="primary"
-              color="blue"
-              size="sm"
-              disabled={!canSave}
-              onClick={handleSave}
-            >
-              Save and refresh results
-            </HLButton>
-          </div>
-        </div>
-      )}
-    >
+  const body = (
       <div className="flex-1 min-h-0 flex flex-col gap-3">
-        {/* AI engines — prompts-only control; same modal chrome as competitors */}
-        <section className="shrink-0">
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-[14px] font-semibold text-gray-900 m-0">AI engines</p>
-            <SectionInfoTip content="Engine selection applies globally to every tracked prompt." />
+        {embedded && (
+          <div className="shrink-0 mb-1">
+            <p className="text-[18px] font-bold text-gray-900 m-0">Prompts</p>
+            <p className="text-[13px] text-gray-500 m-0 mt-1">
+              Track up to ten prompts. Your selection is the source of truth for AI answer tracking.
+            </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {ADD_PROMPT_ENGINES.map(engine => (
-              <EngineCheckboxCard
-                key={engine.id}
-                engine={engine}
-                checked={selectedEngines.has(engine.id)}
-                onToggle={() => toggleEngine(engine.id)}
-              />
-            ))}
-          </div>
-        </section>
+        )}
+        {/* AI engines — hidden when managed from the dedicated settings tab */}
+        {!hideEngines && (
+          <section className="shrink-0">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[14px] font-semibold text-gray-900 m-0">AI engines</p>
+              <SectionInfoTip content="Engine selection applies globally to every tracked prompt." />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              {ADD_PROMPT_ENGINES.map(engine => (
+                <EngineCheckboxCard
+                  key={engine.id}
+                  engine={engine}
+                  checked={selectedEngines.has(engine.id)}
+                  onToggle={() => toggleEngine(engine.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Primary: compact selection roster — capped so suggestions keep usable height */}
         <section className="shrink-0 rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -2218,6 +2179,57 @@ function ManagePromptsModal({ onClose, onSave }) {
           </div>
         </section>
       </div>
+  )
+
+  if (embedded) return body
+
+  return (
+    <HLModal
+      id="manage-prompts"
+      width={880}
+      height={MODAL_MANAGE_HEIGHT}
+      headerDivider
+      onClose={onClose}
+      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
+      footerClassName="px-6 py-3.5"
+      header={(
+        <div className="px-6 pt-5 pb-3.5">
+          <div className="flex items-center gap-2">
+            <h2 id="manage-prompts-title" className={`${modalTitle} m-0`}>Manage prompts</h2>
+            <SectionInfoTip content="Track up to ten prompts. Your selection is the source of truth — suggestions and custom adds fill open slots." />
+          </div>
+          <p className={`${modalSubtext} m-0 mt-1`}>
+            Review what you’re tracking, add prompts you care about, and optionally use suggestions to fill open slots.
+          </p>
+        </div>
+      )}
+      footer={(
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[12px] text-gray-400 m-0">
+            {overCapacity
+              ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
+              : pendingAdds.length > 0
+                ? `${pendingAdds.length} new prompt${pendingAdds.length === 1 ? '' : 's'} will start tracking on save.`
+                : 'Changes will be applied to the next scan when you save.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
+              Cancel
+            </HLButton>
+            <HLButton
+              variant="primary"
+              color="blue"
+              size="sm"
+              disabled={!canSave}
+              onClick={handleSave}
+            >
+              Save and refresh results
+            </HLButton>
+          </div>
+        </div>
+      )}
+    >
+      {body}
     </HLModal>
   )
 }
@@ -2407,319 +2419,6 @@ function CompetitorsTabContent() {
   )
 }
 
-const MAX_TRACKED_COMPETITORS = 5
-
-// HARDCODED: AI-suggested competitors for the manage modal (prototyping)
-const ADD_COMPETITOR_SUGGESTIONS = [
-  { name: 'Keap', domain: 'keap.com', description: 'CRM and marketing automation frequently compared in AI answers.', visibility: 35, sov: 9 },
-  { name: 'Monday CRM', domain: 'monday.com', description: 'Work management platform cited in small-business software roundups.', visibility: 28, sov: 6 },
-  { name: 'Zoho CRM', domain: 'zoho.com', description: 'Often cited alongside mid-market CRM platforms in AI roundups.', visibility: 24, sov: 7 },
-  { name: 'Pipedrive', domain: 'pipedrive.com', description: 'Sales CRM frequently compared for pipeline and deal tracking.', visibility: 41, sov: 11 },
-]
-
-function ManageCompetitorsModal({ onClose, onSave }) {
-  const [trackedCompetitors, setTrackedCompetitors] = useState(() =>
-    COMPETITOR_LEADERBOARD.slice(0, 3).map(c => ({ ...c })),
-  )
-  const [pendingCompetitors, setPendingCompetitors] = useState([])
-  const [customBrand, setCustomBrand] = useState('')
-  const [customWebsite, setCustomWebsite] = useState('')
-  const [customCountry, setCustomCountry] = useState('United States')
-  const [showAddForm, setShowAddForm] = useState(false)
-  const { listRef: selectionListRef, markAdded, animateRemove, rowMotionClass } = useSelectionRowMotion()
-
-  const totalSelected = trackedCompetitors.length + pendingCompetitors.length
-  const atCapacity = totalSelected >= MAX_TRACKED_COMPETITORS
-
-  function deleteTracked(domain) {
-    animateRemove(domain, () => {
-      setTrackedCompetitors(prev => prev.filter(c => c.domain !== domain))
-    })
-  }
-
-  function stageCompetitor(item) {
-    if (atCapacity) return
-    if (trackedCompetitors.some(c => c.domain === item.domain)) return
-    if (pendingCompetitors.some(c => c.domain === item.domain)) return
-    const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-    // Newest first — appears at top of Your selection
-    setPendingCompetitors(prev => [{ ...item, id }, ...prev])
-    markAdded(id)
-  }
-
-  function removePending(id) {
-    animateRemove(id, () => {
-      setPendingCompetitors(prev => prev.filter(c => c.id !== id))
-    })
-  }
-
-  function addCustomCompetitor() {
-    const name = customBrand.trim()
-    const website = customWebsite.trim().replace(/^https?:\/\//i, '')
-    if (!name || !website || atCapacity) return
-    stageCompetitor({
-      name,
-      domain: website.split('/')[0],
-      description: 'Custom competitor added for tracking.',
-      visibility: 0,
-      sov: 0,
-      country: customCountry,
-    })
-    setCustomBrand('')
-    setCustomWebsite('')
-    setShowAddForm(false)
-  }
-
-  function handleSave() {
-    onSave({ tracked: trackedCompetitors, pending: pendingCompetitors })
-  }
-
-  const stagedDomains = new Set([
-    ...trackedCompetitors.map(c => c.domain),
-    ...pendingCompetitors.map(c => c.domain),
-  ])
-  const availableSuggestions = ADD_COMPETITOR_SUGGESTIONS.filter(item => !stagedDomains.has(item.domain))
-  const canAddCustom = Boolean(customBrand.trim() && customWebsite.trim()) && !atCapacity
-
-  const selectionRows = [
-    ...pendingCompetitors.map(c => ({ ...c, _kind: 'pending' })),
-    ...trackedCompetitors.map(c => ({ ...c, _kind: 'tracked' })),
-  ]
-
-  return (
-    <HLModal
-      id="manage-competitors"
-      width={880}
-      height={MODAL_MANAGE_HEIGHT}
-      headerDivider
-      onClose={onClose}
-      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
-      footerClassName="px-6 py-3.5"
-      header={(
-        <div className="px-6 pt-5 pb-3.5">
-          <div className="flex items-center gap-2">
-            <h2 id="manage-competitors-title" className={`${modalTitle} m-0`}>Manage competitors</h2>
-            <SectionInfoTip content="Track up to five brands. Your selection is the source of truth — suggestions and custom adds fill open slots." />
-          </div>
-          <p className={`${modalSubtext} m-0 mt-1`}>
-            Review what you’re tracking, add brands you care about, and optionally use suggestions to fill open slots.
-          </p>
-        </div>
-      )}
-      footer={(
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
-            {pendingCompetitors.length > 0
-              ? `${pendingCompetitors.length} new competitor${pendingCompetitors.length === 1 ? '' : 's'} will start tracking on save.`
-              : 'Changes will be applied to the next scan when you save.'}
-          </p>
-          <div className="flex items-center gap-2">
-            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
-              Cancel
-            </HLButton>
-            <HLButton variant="primary" color="blue" size="sm" onClick={handleSave}>
-              Save and refresh results
-            </HLButton>
-          </div>
-        </div>
-      )}
-    >
-      <div className="flex-1 min-h-0 flex flex-col gap-4">
-        {/* Primary: selection roster + add */}
-        <section className="shrink-0 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-gray-100">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-gray-900 m-0">Your selection</p>
-                <p className="text-[12px] text-gray-500 m-0 mt-1">
-                  Brands in your competitive set for AI answers
-                </p>
-              </div>
-              <span className="shrink-0 text-[13px] font-semibold text-gray-700 tabular-nums">
-                {totalSelected}
-                <span className="text-gray-300 font-medium">/{MAX_TRACKED_COMPETITORS}</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="p-4 flex flex-col gap-2">
-            {selectionRows.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center">
-                <p className="text-[13px] font-medium text-gray-700 m-0">No competitors yet</p>
-                <p className="text-[12px] text-gray-500 m-0 mt-1">Add a brand you already know — or grab one from suggestions below.</p>
-              </div>
-            ) : (
-              <div
-                ref={selectionListRef}
-                className="max-h-[220px] overflow-y-auto flex flex-col gap-2 pr-0.5"
-                style={{ scrollbarWidth: 'thin' }}
-              >
-                {selectionRows.map((c) => {
-                  const isPending = c._kind === 'pending'
-                  const rowId = isPending ? c.id : c.domain
-                  return (
-                    <div
-                      key={rowId}
-                      className={`group flex items-center gap-3 rounded-xl border px-3.5 py-3 ${rowMotionClass(rowId)}`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <p className="text-[14px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
-                          {c.isMe && (
-                            <span className="shrink-0 text-[10px] font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded-md px-1.5 py-0.5">
-                              You
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">
-                          {c.domain}
-                          {c.visibility != null && c.visibility > 0 ? (
-                            <span className="text-gray-400"> · Mentioned in {c.visibility}% of AI answers</span>
-                          ) : null}
-                        </p>
-                      </div>
-                      {(isPending || !c.isMe) && (
-                        <ModalTableRemoveButton
-                          label={isPending ? 'Remove competitor' : 'Delete competitor'}
-                          onClick={() => (isPending ? removePending(c.id) : deleteTracked(c.domain))}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {!showAddForm ? (
-              <button
-                type="button"
-                disabled={atCapacity}
-                onClick={() => setShowAddForm(true)}
-                className={`mt-1 w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition-all ${
-                  atCapacity
-                    ? 'bg-white text-gray-300 border border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-800 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <Plus size={15} strokeWidth={2.25} />
-                Add a competitor
-              </button>
-            ) : (
-              <div className="mt-1 rounded-xl border border-primary-300 bg-white p-4 flex flex-col gap-3">
-                <div>
-                  <p className="text-[14px] font-semibold text-gray-900 m-0">Add a competitor</p>
-                  <p className="text-[12px] text-gray-500 m-0 mt-0.5">Brand name, website, and country.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label htmlFor="manage-competitor-brand" className="block text-[12px] font-medium text-gray-500 mb-1.5">Brand name</label>
-                    <HLInput
-                      id="manage-competitor-brand"
-                      size="sm"
-                      value={customBrand}
-                      onChange={e => setCustomBrand(e.target.value)}
-                      placeholder="e.g. HubSpot"
-                      disabled={atCapacity}
-                      autoFocus
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="manage-competitor-website" className="block text-[12px] font-medium text-gray-500 mb-1.5">Website</label>
-                    <HLInput
-                      id="manage-competitor-website"
-                      size="sm"
-                      prefixIcon={Globe}
-                      value={customWebsite}
-                      onChange={e => setCustomWebsite(e.target.value)}
-                      placeholder="e.g. hubspot.com"
-                      disabled={atCapacity}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="manage-competitor-country" className="block text-[12px] font-medium text-gray-500 mb-1.5">Country</label>
-                    <div className="relative">
-                      <select
-                        id="manage-competitor-country"
-                        value={customCountry}
-                        onChange={e => setCustomCountry(e.target.value)}
-                        disabled={atCapacity}
-                        className="w-full h-8 px-3 pr-8 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
-                      >
-                        {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <ChevronDown size={14} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  <HLButton
-                    variant="secondary"
-                    color="gray"
-                    size="sm"
-                    onClick={() => { setShowAddForm(false); setCustomBrand(''); setCustomWebsite('') }}
-                  >
-                    Cancel
-                  </HLButton>
-                  <HLButton
-                    variant="primary"
-                    color="blue"
-                    size="sm"
-                    disabled={!canAddCustom}
-                    onClick={addCustomCompetitor}
-                  >
-                    Add
-                  </HLButton>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Secondary: optional suggestions — fuller layout */}
-        <section className="flex-1 min-h-0 flex flex-col">
-          <div className="flex items-baseline gap-2 mb-3 shrink-0">
-            <p className="text-[14px] font-semibold text-gray-900 m-0">Suggested competitors</p>
-          </div>
-          <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-            {availableSuggestions.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 content-start">
-                {availableSuggestions.map(item => (
-                  <button
-                    key={item.domain}
-                    type="button"
-                    disabled={atCapacity}
-                    onClick={() => stageCompetitor(item)}
-                    className={`flex items-center gap-3 text-left rounded-xl border border-dashed px-3.5 py-3 transition-all outline-none focus:outline-none ${
-                      atCapacity
-                        ? 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
-                        : 'border-gray-300 bg-white hover:border-primary-300'
-                    }`}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-[13px] font-semibold m-0 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-900'}`}>
-                        {item.name}
-                      </p>
-                      <p className={`text-[11px] m-0 mt-0.5 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-500'}`}>
-                        {item.domain}
-                        {item.visibility > 0 ? ` · Mentioned in ${item.visibility}% of AI answers` : ''}
-                      </p>
-                    </div>
-                    <span className={`text-[12px] font-semibold shrink-0 ${atCapacity ? 'text-gray-300' : 'text-primary-600'}`}>
-                      Add
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    </HLModal>
-  )
-}
-
 // ── First-run lifecycle (setup → tracking → error → ready) ─────────────────
 
 const MAX_SETUP_COMPETITORS = 5
@@ -2753,13 +2452,6 @@ const SETUP_STEPS = [
 
 const SETUP_SELECT_CLASS =
   'w-full h-8 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
-
-const PITCH_ENGINES = [
-  { name: 'ChatGPT', Logo: ChatGptLogo },
-  { name: 'Claude', Logo: ClaudeLogo },
-  { name: 'Gemini', Logo: GeminiLogo },
-  { name: 'Perplexity', Logo: PerplexityLogo },
-]
 
 const PITCH_DISCOVER_ITEMS = [
   {
@@ -2798,16 +2490,6 @@ const PITCH_REPORT_INCLUDES = [
   'Recommended improvements',
 ]
 
-function competitorInitials(name) {
-  return String(name || '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(w => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || '?'
-}
-
 function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
   return (
     <div
@@ -2844,7 +2526,11 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
               <div className="min-w-0 text-left">
                 <p
                   className={`text-[13px] font-semibold m-0 leading-tight truncate ${
-                    isCurrent || isComplete ? 'text-gray-900' : 'text-gray-400'
+                    isCurrent
+                      ? 'text-primary-600'
+                      : isComplete
+                        ? 'text-gray-900'
+                        : 'text-gray-400'
                   }`}
                 >
                   {step.short}
@@ -2919,26 +2605,6 @@ function PromptTrackingPitchPage({ onGetStarted }) {
         >
           {/* Hero */}
           <section>
-            <div
-              className="flex items-center mb-4"
-              role="list"
-              aria-label="Monitored AI engines"
-            >
-              {PITCH_ENGINES.map(({ name, Logo }, i) => (
-                <span
-                  key={name}
-                  role="listitem"
-                  title={name}
-                  className={`relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-200 shadow-xs ring-2 ring-white ${
-                    i === 0 ? '' : '-ml-2.5'
-                  }`}
-                  style={{ zIndex: PITCH_ENGINES.length - i }}
-                >
-                  <Logo size={18} />
-                  <span className="sr-only">{name}</span>
-                </span>
-              ))}
-            </div>
             <div className="max-w-[720px]">
               <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight">
                 <span className="block whitespace-nowrap">
@@ -3028,10 +2694,18 @@ function PromptTrackingPitchPage({ onGetStarted }) {
   )
 }
 
+const SETUP_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Hindi']
+const SETUP_COUNTRIES = [
+  'United States', 'United Kingdom', 'Canada', 'Australia', 'India',
+  'Germany', 'France', 'Netherlands', 'Singapore', 'Brazil',
+]
+
 function PromptTrackingInitialState({ onStart }) {
   const [setupStarted, setSetupStarted] = useState(false)
   const [brandName, setBrandName] = useState('Go High Level')
   const [brandWebsite, setBrandWebsite] = useState('https://gohighlevel.com')
+  const [language, setLanguage] = useState('English')
+  const [country, setCountry] = useState('United States')
   const [region, setRegion] = useState('United States')
   const [competitors, setCompetitors] = useState([])
   const [compName, setCompName] = useState('')
@@ -3046,7 +2720,12 @@ function PromptTrackingInitialState({ onStart }) {
   const [step2Confirmed, setStep2Confirmed] = useState(false)
   const selectedPromptsListRef = useRef(null)
 
-  const brandReady = brandName.trim().length > 0 && brandWebsite.trim().length > 0
+  const brandReady =
+    brandName.trim().length > 0
+    && brandWebsite.trim().length > 0
+    && Boolean(language)
+    && Boolean(country)
+    && Boolean(region)
   const competitorsReady = competitors.length > 0
   const promptsReady = prompts.length > 0
   const canTrack = brandReady && step1Confirmed && competitorsReady && step2Confirmed && promptsReady
@@ -3141,6 +2820,8 @@ function PromptTrackingInitialState({ onStart }) {
     onStart({
       brandName: brandName.trim(),
       brandWebsite: brandWebsite.trim(),
+      language,
+      country,
       region,
       competitors,
       prompts,
@@ -3157,61 +2838,85 @@ function PromptTrackingInitialState({ onStart }) {
   const brandStep = (
     <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-1">
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Confirm brand and region</h2>
+        <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Confirm your brand</h2>
         <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed max-w-[520px]">
-          We match AI answers to your brand name and market so visibility scores reflect where you actually sell.
+          Add your brand name, market, and language so visibility scores reflect where you actually sell.
         </p>
 
-        <div className="mt-4 rounded-xl border border-primary-100 bg-gradient-to-r from-primary-50/80 to-purple-50/40 px-3.5 py-3 flex items-start gap-2.5">
-          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-white border border-primary-100 text-primary-600 shrink-0 mt-0.5">
-            <Check size={14} strokeWidth={2.5} />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-gray-900 m-0">Prefill ready</p>
-            <p className="text-[12px] text-gray-500 m-0 mt-0.5 leading-relaxed">
-              Review the details below, then click Continue. You can edit anything before tracking.
-            </p>
-          </div>
-        </div>
-
         <div className="mt-5 rounded-2xl border border-gray-200 bg-white shadow-xs p-4 sm:p-5 flex flex-col gap-4">
-          <div>
-            <label htmlFor="pt-setup-brand" className="block text-[12px] font-medium text-gray-500 mb-2">Brand name</label>
-            <HLInput
-              id="pt-setup-brand"
-              size="sm"
-              prefixIcon={Sparkles}
-              value={brandName}
-              onChange={e => setBrandName(e.target.value)}
-              placeholder="e.g. Go High Level"
-            />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="pt-setup-brand" className="block text-[12px] font-medium text-gray-500 mb-2">Brand name</label>
+              <HLInput
+                id="pt-setup-brand"
+                size="sm"
+                value={brandName}
+                onChange={e => setBrandName(e.target.value)}
+                placeholder="e.g. Go High Level"
+              />
+            </div>
+            <div>
+              <label htmlFor="pt-setup-website" className="block text-[12px] font-medium text-gray-500 mb-2">Brand website</label>
+              <HLInput
+                id="pt-setup-website"
+                size="sm"
+                prefixIcon={Globe}
+                value={brandWebsite}
+                onChange={e => setBrandWebsite(e.target.value)}
+                placeholder="https://example.com"
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="pt-setup-website" className="block text-[12px] font-medium text-gray-500 mb-2">Brand website</label>
-            <HLInput
-              id="pt-setup-website"
-              size="sm"
-              prefixIcon={Globe}
-              value={brandWebsite}
-              onChange={e => setBrandWebsite(e.target.value)}
-              placeholder="https://example.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
-            <div className="relative">
-              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-              <select
-                id="pt-setup-region"
-                value={region}
-                onChange={e => setRegion(e.target.value)}
-                className={SETUP_SELECT_CLASS}
-              >
-                {ADD_PROMPT_REGIONS.map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label htmlFor="pt-setup-language" className="block text-[12px] font-medium text-gray-500 mb-2">Language</label>
+              <div className="relative">
+                <select
+                  id="pt-setup-language"
+                  value={language}
+                  onChange={e => setLanguage(e.target.value)}
+                  className="w-full h-8 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                >
+                  {SETUP_LANGUAGES.map(l => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="pt-setup-country" className="block text-[12px] font-medium text-gray-500 mb-2">Country</label>
+              <div className="relative">
+                <select
+                  id="pt-setup-country"
+                  value={country}
+                  onChange={e => setCountry(e.target.value)}
+                  className="w-full h-8 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                >
+                  {SETUP_COUNTRIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
+              <div className="relative">
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+                <select
+                  id="pt-setup-region"
+                  value={region}
+                  onChange={e => setRegion(e.target.value)}
+                  className={SETUP_SELECT_CLASS}
+                >
+                  {ADD_PROMPT_REGIONS.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+              </div>
             </div>
           </div>
         </div>
@@ -3267,9 +2972,6 @@ function PromptTrackingInitialState({ onStart }) {
                 }`}
                 style={{ animationDelay: `${60 + i * 40}ms` }}
               >
-                <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-gray-50 border border-gray-100 text-[11px] font-semibold text-gray-600 shrink-0">
-                  {competitorInitials(s.name)}
-                </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{s.name}</p>
                   <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">{s.category}</p>
@@ -3431,10 +3133,10 @@ function PromptTrackingInitialState({ onStart }) {
               {prompts.map((p, i) => (
                 <div
                   key={p.prompt}
-                  className="flex items-start gap-2 rounded-lg border border-primary-100 bg-white px-3 py-2 pt-setup-scale-in"
+                  className="flex items-center gap-2 rounded-lg border border-primary-100 bg-white px-3 py-2 pt-setup-scale-in"
                   style={{ animationDelay: `${i * 40}ms` }}
                 >
-                  <span className="text-[11px] font-semibold text-primary-600 tabular-nums shrink-0 mt-0.5 w-4">
+                  <span className="text-[11px] font-semibold text-gray-500 tabular-nums shrink-0 w-4">
                     {i + 1}
                   </span>
                   <p className="text-[12px] text-gray-800 leading-snug m-0 flex-1 min-w-0 line-clamp-2">{p.prompt}</p>
@@ -3619,35 +3321,30 @@ function PromptTrackingProgressView({ progress, setup }) {
     <div className={TRACKING_STATUS_SHELL} style={{ scrollbarGutter: 'stable' }}>
       <div className={TRACKING_STATUS_COLUMN}>
         <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="min-w-0 flex-1">
-                <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
-                  Refreshing AI rank tracking for {brand}
-                </h1>
-                <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2 max-w-[480px]">
-                  We are pulling fresh prompt answers, competitor visibility, citation coverage, and engine-level ranking data before reopening the dashboard.
-                </p>
-              </div>
+          <div className="p-6 border-b border-gray-100 flex flex-col gap-5">
+            <div className="min-w-0">
+              <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
+                Refreshing AI rank tracking for {brand}
+              </h1>
+              <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2">
+                We are pulling fresh prompt answers, competitor visibility, citation coverage, and engine-level ranking data before reopening the dashboard.
+              </p>
+            </div>
 
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5 shrink-0 min-w-[180px]">
-                <p className="text-[11px] font-semibold text-gray-400 m-0 mb-2.5">Refresh setup</p>
-                <div className="flex flex-col gap-1.5">
-                  {[
-                    { label: 'Prompts', value: promptCount },
-                    { label: 'Competitors', value: competitorCount },
-                    { label: 'AI engines', value: engineCount },
-                    { label: 'Change type', value: 'First setup', strong: true },
-                  ].map(row => (
-                    <div key={row.label} className="flex items-center justify-between gap-4">
-                      <span className="text-[12px] text-gray-500">{row.label}</span>
-                      <span className={`text-[12px] tabular-nums ${row.strong ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}`}>
-                        {row.value}
-                      </span>
-                    </div>
-                  ))}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Prompts', value: promptCount },
+                { label: 'Competitors', value: competitorCount },
+                { label: 'AI engines', value: engineCount },
+              ].map(stat => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 flex flex-col gap-1 min-w-0"
+                >
+                  <span className="text-[12px] font-medium text-gray-500">{stat.label}</span>
+                  <span className="text-[20px] font-bold text-gray-900 tabular-nums leading-none">{stat.value}</span>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -3709,6 +3406,7 @@ function PromptTrackingErrorContent({ onRetry }) {
             onClick={onRetry}
             className={BTN_PRIMARY}
           >
+            <RefreshCw02 size={14} />
             Retry scan
           </button>
         </div>
@@ -3726,13 +3424,16 @@ const PAGE_TABS = [
   { id: 'Competitors', label: 'Competitors', Icon: BarChart3     },
 ]
 
+function SettingsPromptsPanel() {
+  return <ManagePromptsModal embedded hideEngines />
+}
+
 export default function PromptTrackingDashboard() {
   const [phase, setPhase] = useState(() => sessionStorage.getItem('pt_hasTracking') === '1' ? 'ready' : 'setup')
   const [activeTab, setActiveTab]       = useState('Overview')
   const [engineFilter, setEngineFilter] = useState('All AI engines')
   const [periodFilter, setPeriodFilter] = useState('Last 30 days')
-  const [showManagePrompts, setShowManagePrompts] = useState(false)
-  const [showManageCompetitors, setShowManageCompetitors] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [successToast, setSuccessToast] = useState(null)
   const [promptFromOverview, setPromptFromOverview] = useState(null)
   const [isTracking, setIsTracking] = useState(false)
@@ -3803,13 +3504,8 @@ export default function PromptTrackingDashboard() {
     toastTimer.current = setTimeout(() => setSuccessToast(null), 5000)
   }
 
-  function handleSavePrompt() {
-    setShowManagePrompts(false)
-    fireToast('Changes have been saved and will be applied to the next scan.')
-  }
-
-  function handleSaveCompetitor() {
-    setShowManageCompetitors(false)
+  function handleApplySettings() {
+    setShowSettings(false)
     fireToast('Changes have been saved and will be applied to the next scan.')
   }
 
@@ -3872,6 +3568,14 @@ export default function PromptTrackingDashboard() {
             >
               Preview initial state
             </button>
+            <button
+              type="button"
+              onClick={() => setShowSettings(true)}
+              aria-label="Prompt tracking settings"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white shadow-xs text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <Settings size={15} />
+            </button>
           </div>
         </div>
 
@@ -3895,33 +3599,12 @@ export default function PromptTrackingDashboard() {
           })}
         </div>
 
-        {/* Fixed 52px = py-2 + 36px primary CTA so tabs without a right action don't jump. */}
-        <div className="px-6 h-[52px] border-t border-gray-100 bg-white flex items-center justify-between gap-3">
+        <div className="px-6 h-[52px] border-t border-gray-100 bg-white flex items-center gap-3">
           <div className="flex items-center gap-2 min-w-0">
             {activeTab !== 'Overview' && (
               <DarkDropdown value={engineFilter} onChange={setEngineFilter} options={ENGINE_OPTIONS} icon={Bot} variant="default" />
             )}
             <DarkDropdown value={periodFilter} onChange={setPeriodFilter} options={PERIOD_OPTIONS} icon={Clock} variant="active" dateRangeOption="Custom date range" />
-          </div>
-          <div className="shrink-0 h-9 flex items-center justify-end">
-            {activeTab === 'Prompts' && (
-              <button
-                type="button"
-                onClick={() => setShowManagePrompts(true)}
-                className={BTN_PRIMARY}
-              >
-                Manage prompts
-              </button>
-            )}
-            {activeTab === 'Competitors' && (
-              <button
-                type="button"
-                onClick={() => setShowManageCompetitors(true)}
-                className={BTN_PRIMARY}
-              >
-                Manage competitors
-              </button>
-            )}
           </div>
         </div>
       </div>
@@ -3947,17 +3630,11 @@ export default function PromptTrackingDashboard() {
         {activeTab === 'Competitors' && <CompetitorsTabContent />}
       </div>
 
-      {showManagePrompts && (
-        <ManagePromptsModal
-          onClose={() => setShowManagePrompts(false)}
-          onSave={handleSavePrompt}
-        />
-      )}
-
-      {showManageCompetitors && (
-        <ManageCompetitorsModal
-          onClose={() => setShowManageCompetitors(false)}
-          onSave={handleSaveCompetitor}
+      {showSettings && (
+        <PromptTrackingSettingsModal
+          onClose={() => setShowSettings(false)}
+          onApply={handleApplySettings}
+          PromptsPanel={SettingsPromptsPanel}
         />
       )}
 

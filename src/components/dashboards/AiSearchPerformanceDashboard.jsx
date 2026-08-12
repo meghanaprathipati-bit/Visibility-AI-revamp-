@@ -12,6 +12,7 @@ import VisibilityMeter from '../VisibilityMeter.jsx'
 import SectionInfoTip from '../SectionInfoTip.jsx'
 import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
 import EngineLogo from '../EngineLogo.jsx'
+import ManageCompetitorsModal from '../ManageCompetitorsModal.jsx'
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
 
@@ -1128,7 +1129,7 @@ function PromptTrackingContent() {
               key={m.label}
               className={`px-4 py-3 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}
             >
-              <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0 normal-case">{m.label}</p>
+              <p className="text-[14px] font-medium text-gray-500 mb-1.5 m-0 normal-case">{m.label}</p>
               <p className="text-[20px] font-semibold text-gray-900 leading-none mb-1.5 m-0">{m.value}</p>
               <p className="text-[12px] font-normal text-gray-500 leading-snug m-0">{m.desc}</p>
             </div>
@@ -1137,7 +1138,7 @@ function PromptTrackingContent() {
       </div>
 
       {/* Row 3: Visibility Trend + Competitor Ranking */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 59fr) minmax(0, 41fr)' }}>
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 65fr) minmax(0, 35fr)' }}>
 
         {/* Visibility Trend card */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
@@ -2300,6 +2301,7 @@ const SUB_TABS = [
 
 export default function AiSearchPerformanceDashboard() {
   const [activeTab, setActiveTab] = useState('overview')
+  const [showManageCompetitors, setShowManageCompetitors] = useState(false)
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
@@ -2317,9 +2319,12 @@ export default function AiSearchPerformanceDashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <button className={BTN_PRIMARY}>
-              <Plus size={14} />
-              Add competitors
+            <button
+              type="button"
+              className={BTN_PRIMARY}
+              onClick={() => setShowManageCompetitors(true)}
+            >
+              Manage competitors
             </button>
           </div>
         </div>
@@ -2352,6 +2357,13 @@ export default function AiSearchPerformanceDashboard() {
         {activeTab === 'prompts'   && <PromptsContent />}
         {activeTab === 'citations' && <CitationsContent />}
       </div>
+
+      {showManageCompetitors && (
+        <ManageCompetitorsModal
+          onClose={() => setShowManageCompetitors(false)}
+          onSave={() => setShowManageCompetitors(false)}
+        />
+      )}
     </div>
   )
 }

@@ -24,13 +24,15 @@ Keep established acronyms and product names in their conventional form:
 
 ## Do not
 
-- Do not use Tailwind `uppercase`, `tracking-wide`, or CSS `text-transform: uppercase` on labels, table headers, or section titles.
+- Do not use Tailwind `uppercase`, `tracking-wide`, `tracking-wider`, `tracking-widest`, or CSS `text-transform: uppercase` on any user-facing label — including tooltip/popover eyebrows, section dividers, metric chips, and modal headers.
 - Prefer `font-medium text-gray-500` (or the shared table `th` pattern) for column headers — never all-caps styling.
 - Do not title-case every word in UI chrome (`Open Dashboard` → `Open dashboard`).
 - Do not leave decorative symbols in column headers unless they are part of the metric name (e.g. remove `Δ` from `Trend score`).
+- Wrong: `AI ANSWERS` (via `uppercase` class). Right: `AI answers`.
 
 ## When adding or editing copy
 
 1. Default to sentence case.
 2. If Figma shows all-caps for a label, still implement sentence case.
-3. When editing dashboard cards (Prompt Tracking, AI Search Performance, Overview), scan the whole section for remaining `uppercase` classes and ALL-CAPS string literals before finishing.
+3. Before finishing any UI task, search the touched files for `uppercase`, `tracking-wider`, `tracking-widest`, and ALL-CAPS string literals and remove them.
+4. Scope is the whole product UI — dashboards, modals, drawers, setup flows, and tooltips — not just the file you edited.

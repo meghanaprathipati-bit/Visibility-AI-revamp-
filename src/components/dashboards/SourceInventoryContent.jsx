@@ -752,7 +752,7 @@ const PAGE_DATA = [
   },
   {
     id: 'linkedin-aio',
-    title: 'How Brands Win Mentions in AI Answers',
+    title: 'How brands win mentions in AI answers',
     url: 'https://www.linkedin.com/pulse/how-brands-win-mentions-ai-answers/',
     domain: 'linkedin.com',
     type: 'Third-party source',
@@ -1038,7 +1038,7 @@ function CountButton({ count, type, id, onDetailOpen }) {
         ref={btnRef}
         onMouseEnter={show}
         onMouseLeave={hide}
-        onClick={e => { e.stopPropagation(); hide(); onDetailOpen(type === 'ai' ? 'AI Answers' : 'Prompts') }}
+        onClick={e => { e.stopPropagation(); hide(); onDetailOpen(type === 'ai' ? 'AI answers' : 'Prompts') }}
         className="inline-flex items-center justify-center min-w-[40px] px-2.5 py-1 rounded-lg border border-gray-200 bg-white hover:border-primary-300 hover:bg-primary-50 text-[12px] font-semibold text-gray-700 transition-all group"
       >
         {count}
@@ -1051,8 +1051,8 @@ function CountButton({ count, type, id, onDetailOpen }) {
           onMouseLeave={hide}
           className="bg-white border border-gray-200 rounded-xl p-3.5 w-[230px]"
         >
-          <p className="text-[12px] font-semibold text-gray-400 tracking-wider uppercase mb-1">
-            {type === 'ai' ? 'AI Answers' : 'Prompts'}
+          <p className="text-[12px] font-semibold text-gray-400 mb-1">
+            {type === 'ai' ? 'AI answers' : 'Prompts'}
           </p>
           <p className="text-[22px] font-bold text-gray-900 leading-none mb-0.5">{count}</p>
           <p className="text-[12px] text-gray-400 mb-3">Total in current set · Jul 4–7, 2026</p>
@@ -1065,7 +1065,7 @@ function CountButton({ count, type, id, onDetailOpen }) {
             ))}
           </div>
           <button
-            onMouseDown={e => { e.preventDefault(); hide(); onDetailOpen(type === 'ai' ? 'AI Answers' : 'Prompts') }}
+            onMouseDown={e => { e.preventDefault(); hide(); onDetailOpen(type === 'ai' ? 'AI answers' : 'Prompts') }}
             className="mt-3 text-[12px] font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-0.5"
           >
             View all <ChevronRight size={12} />

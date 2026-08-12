@@ -63,13 +63,15 @@ export default function IssueDetailDrawer({
             <X size={16} />
           </button>
         </div>
-        {toolbar && (
-          <div className="px-5 py-3 border-b border-gray-200 shrink-0 bg-gray-50/60">
-            {toolbar}
+        <div className="flex-1 min-h-0 flex flex-col bg-white">
+          {toolbar && (
+            <div className="px-5 py-3 border-b border-gray-200 shrink-0 bg-white">
+              {toolbar}
+            </div>
+          )}
+          <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4 bg-white">
+            {children}
           </div>
-        )}
-        <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
-          {children}
         </div>
         {footer && (
           <div className="px-5 py-3 border-t border-gray-200 shrink-0 bg-white">
@@ -192,7 +194,8 @@ export function PageFindingsPanel({
               <p className="text-[12px] text-gray-500 m-0 mt-1 leading-snug">{finding.detail}</p>
             </div>
 
-            <div className="rounded-lg bg-gray-50 border border-gray-100 px-3 py-2">
+            {/* Current value always sits on a gray surface — do not flatten to white. */}
+            <div className="rounded-lg bg-gray-100 border border-gray-200 px-3 py-2">
               <p className="text-[12px] font-medium text-gray-500 m-0 mb-0.5">Current value</p>
               <p className={`text-[14px] m-0 leading-snug break-words font-mono ${isFixed ? 'text-gray-400' : 'text-error-700'}`}>
                 {finding.currentValue || '—'}
