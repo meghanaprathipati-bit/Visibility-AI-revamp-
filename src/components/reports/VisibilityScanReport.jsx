@@ -13,7 +13,7 @@ function MetricTile({ label, value, sub }) {
     <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 min-w-0">
       <p className="text-[12px] text-gray-500 leading-tight">{label}</p>
       <p className="text-[14px] font-semibold text-gray-900 mt-0.5 leading-tight">{value}</p>
-      {sub && <p className="text-[12px] text-gray-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[12px] text-gray-500 mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -107,7 +107,7 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
             <div className="flex-1 min-w-0">
               <p className="text-[14px] font-semibold text-gray-900 leading-snug">{profile.businessName}</p>
               <p className="text-[13px] text-gray-500 mt-1 flex items-center gap-1">
-                <MapPin size={13} className="shrink-0 text-gray-400" />
+                <MapPin size={13} className="shrink-0 text-gray-500" />
                 {profile.location}
               </p>
               {profile.rating != null && (

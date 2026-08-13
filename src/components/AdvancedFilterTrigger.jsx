@@ -62,7 +62,7 @@ export default function AdvancedFilterTrigger({
         <button
           type="button"
           onClick={onClear}
-          className="text-[14px] text-gray-400 hover:text-gray-600 underline transition-colors bg-transparent border-0 p-0 cursor-pointer"
+          className="text-[14px] text-gray-500 hover:text-gray-600 underline transition-colors bg-transparent border-0 p-0 cursor-pointer"
         >
           Clear
         </button>

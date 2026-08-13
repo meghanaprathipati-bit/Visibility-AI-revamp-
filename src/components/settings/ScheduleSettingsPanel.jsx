@@ -6,7 +6,7 @@ const FREQUENCIES = ['Daily', 'Weekly', 'Monthly']
 
 function InfoTooltip({ text }) {
   const icon = (
-    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-300 text-[12px] font-semibold text-gray-400 cursor-help shrink-0">i</span>
+    <span className="inline-flex items-center justify-center w-4 h-4 rounded-full border border-gray-300 text-[12px] font-semibold text-gray-500 cursor-help shrink-0">i</span>
   )
   if (!text) return icon
   return (
@@ -141,10 +141,10 @@ export default function ScheduleSettingsPanel({
                   className="w-12 h-full px-3 text-[14px] text-gray-900 outline-none bg-transparent text-center"
                 />
                 <div className="flex items-center h-full shrink-0">
-                  <button type="button" onClick={() => onIntervalValChange(Math.max(1, intervalVal - 1))} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+                  <button type="button" onClick={() => onIntervalValChange(Math.max(1, intervalVal - 1))} className="h-full w-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">
                     <Minus size={11} />
                   </button>
-                  <button type="button" onClick={() => onIntervalValChange(intervalVal + 1)} className="h-full w-8 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors">
+                  <button type="button" onClick={() => onIntervalValChange(intervalVal + 1)} className="h-full w-8 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors">
                     <Plus size={11} />
                   </button>
                 </div>
@@ -189,7 +189,7 @@ export default function ScheduleSettingsPanel({
                     <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
               </div>
             </SettingsField>
             <SettingsField label={timeLabel}>
@@ -203,7 +203,7 @@ export default function ScheduleSettingsPanel({
                     <option key={t} value={t}>{t}</option>
                   ))}
                 </select>
-                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+                <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
               </div>
             </SettingsField>
           </div>
@@ -221,7 +221,7 @@ export default function ScheduleSettingsPanel({
                   <option key={t} value={t}>{t}</option>
                 ))}
               </select>
-              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
             </div>
           </SettingsField>
         )}

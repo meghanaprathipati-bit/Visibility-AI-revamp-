@@ -116,11 +116,11 @@ export default function DesktopAccessModal({ open, onClose, onOpenFile }) {
           <div className="flex items-center gap-1">
             <button type="button" className="flex items-center gap-1 h-7 px-2 rounded-md bg-white/80 border border-gray-300/80 text-[12px] text-gray-700">
               <LayoutList size={13} className="text-gray-500" />
-              <ChevronDown size={11} className="text-gray-400" />
+              <ChevronDown size={11} className="text-gray-500" />
             </button>
             <button type="button" className="flex items-center gap-1 h-7 px-2 rounded-md bg-white/80 border border-gray-300/80 text-[12px] text-gray-700">
               <LayoutGrid size={13} className="text-gray-500" />
-              <ChevronDown size={11} className="text-gray-400" />
+              <ChevronDown size={11} className="text-gray-500" />
             </button>
           </div>
 
@@ -130,11 +130,11 @@ export default function DesktopAccessModal({ open, onClose, onOpenFile }) {
           >
             <Tablet size={14} className="text-primary-600" />
             {locationLabel === 'meghanaprathipati...' ? 'Desktop' : locationLabel}
-            <ChevronDown size={12} className="text-gray-400" />
+            <ChevronDown size={12} className="text-gray-500" />
           </button>
 
           <div className="flex items-center gap-1.5 h-7 px-2.5 rounded-lg bg-white/80 border border-gray-300/80 min-w-[140px] ml-auto">
-            <Search size={13} className="text-gray-400 shrink-0" />
+            <Search size={13} className="text-gray-500 shrink-0" />
             <input
               type="text"
               value={searchQuery}
@@ -211,7 +211,7 @@ export default function DesktopAccessModal({ open, onClose, onOpenFile }) {
                       isSelected ? 'bg-primary-600 text-white' : 'text-gray-800 hover:bg-gray-100'
                     }`}
                   >
-                    <ImageIcon size={14} className={`shrink-0 ${isSelected ? 'text-white' : 'text-gray-400'}`} />
+                    <ImageIcon size={14} className={`shrink-0 ${isSelected ? 'text-white' : 'text-gray-500'}`} />
                     <span className="truncate">{file.name}</span>
                   </button>
                 )
@@ -229,7 +229,7 @@ export default function DesktopAccessModal({ open, onClose, onOpenFile }) {
                   <p className="text-[11px] text-gray-500">PNG image</p>
                 </div>
               ) : (
-                <p className="text-[13px] text-gray-400">Select a file to preview</p>
+                <p className="text-[13px] text-gray-500">Select a file to preview</p>
               )}
             </div>
           </div>

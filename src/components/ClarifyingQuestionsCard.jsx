@@ -67,7 +67,7 @@ export default function ClarifyingQuestionsCard({
               type="button"
               onClick={() => setCurrentIdx(i => Math.max(0, i - 1))}
               disabled={currentIdx === 0}
-              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous question"
             >
               <ChevronUp size={13} />
@@ -79,7 +79,7 @@ export default function ClarifyingQuestionsCard({
               type="button"
               onClick={() => setCurrentIdx(i => Math.min(questions.length - 1, i + 1))}
               disabled={currentIdx === questions.length - 1}
-              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Next question"
             >
               <ChevronDown size={13} />
@@ -104,7 +104,7 @@ export default function ClarifyingQuestionsCard({
                 className={`flex items-center gap-1 text-[14px] leading-snug transition-colors ${
                   isActive
                     ? 'font-semibold text-gray-900'
-                    : 'font-medium text-gray-400 cursor-pointer'
+                    : 'font-medium text-gray-500 cursor-pointer'
                 }`}
               >
                 {showQuestionNumbers ? `${idx + 1}.\u00A0` : ''}
@@ -121,7 +121,7 @@ export default function ClarifyingQuestionsCard({
                     <span
                       role="button"
                       tabIndex={0}
-                      className="inline-flex shrink-0 text-gray-400"
+                      className="inline-flex shrink-0 text-gray-500"
                       aria-label={q.helperText}
                       onClick={e => e.stopPropagation()}
                       onKeyDown={e => {
@@ -142,7 +142,7 @@ export default function ClarifyingQuestionsCard({
                       : 'border-gray-100 opacity-50 pointer-events-none'
                   }`}
                 >
-                  {q.icon && <q.icon size={14} className="text-gray-400 shrink-0" />}
+                  {q.icon && <q.icon size={14} className="text-gray-500 shrink-0" />}
                   <input
                     type="text"
                     value={answer}
@@ -164,7 +164,7 @@ export default function ClarifyingQuestionsCard({
                       : 'border-gray-100 opacity-50 pointer-events-none'
                   }`}
                 >
-                  {q.icon && <q.icon size={14} className="text-gray-400 shrink-0" />}
+                  {q.icon && <q.icon size={14} className="text-gray-500 shrink-0" />}
                   <input
                     type="password"
                     value={answer}

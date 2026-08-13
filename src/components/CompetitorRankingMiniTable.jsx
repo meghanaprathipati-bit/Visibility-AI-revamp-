@@ -4,7 +4,7 @@ function RankingBrand({ c }) {
   return (
     <div className="min-w-0 overflow-hidden">
       <p className={`text-[14px] font-medium truncate m-0 ${c.isMe ? 'text-purple-700' : 'text-gray-900'}`}>{c.name}</p>
-      <p className="text-[12px] text-gray-400 truncate m-0">{c.domain}</p>
+      <p className="text-[12px] text-gray-500 truncate m-0">{c.domain}</p>
     </div>
   )
 }

@@ -75,7 +75,7 @@ export default function RecField({ value, display = 'inline', editable = false, 
         type="button"
         aria-label="Edit recommendation"
         onClick={startEdit}
-        className="shrink-0 p-0.5 rounded text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-colors mt-0.5"
+        className="shrink-0 p-0.5 rounded text-gray-500 hover:text-purple-600 hover:bg-purple-50 transition-colors mt-0.5"
       >
         <Pencil size={13} />
       </button>

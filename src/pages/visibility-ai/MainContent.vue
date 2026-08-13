@@ -420,7 +420,7 @@ function handleSend() {
           @send="handleSend"
           @stop="handleStopScan"
         />
-        <p class="text-center text-[11px] text-gray-400 mt-2 mb-2">
+        <p class="text-center text-[11px] text-gray-500 mt-2 mb-2">
           Review important AI-assisted changes before publishing.
         </p>
       </div>

@@ -21,7 +21,7 @@ export default function DetailSidePanel({ type = 'action-items', title, subtitle
           <button
             type="button"
             onClick={onClose}
-            className="w-7 h-7 rounded-md flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+            className="w-7 h-7 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-600 hover:bg-gray-50 transition-colors"
             aria-label="Close panel"
           >
             <X size={16} />

@@ -244,7 +244,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
                         <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">
                           {c.domain}
                           {c.visibility != null && c.visibility > 0 ? (
-                            <span className="text-gray-400"> · Mentioned in {c.visibility}% of AI answers</span>
+                            <span className="text-gray-500"> · Mentioned in {c.visibility}% of AI answers</span>
                           ) : null}
                         </p>
                       </div>
@@ -317,7 +317,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
                       >
                         {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>
-                      <ChevronDown size={14} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                      <ChevronDown size={14} className="text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                     </div>
                   </div>
                 </div>
@@ -351,7 +351,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
             {availableSuggestions.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
+              <p className="text-[12px] text-gray-500 m-0 py-2">No more suggestions.</p>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 content-start">
                 {availableSuggestions.map(item => (
@@ -411,7 +411,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
       )}
       footer={(
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
+          <p className="text-[12px] text-gray-500 m-0">
             {pendingCompetitors.length > 0
               ? `${pendingCompetitors.length} new competitor${pendingCompetitors.length === 1 ? '' : 's'} will start tracking on save.`
               : 'Changes will be applied to the next scan when you save.'}

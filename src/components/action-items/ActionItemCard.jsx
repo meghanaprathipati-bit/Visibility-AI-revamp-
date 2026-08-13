@@ -218,7 +218,7 @@ export default function ActionItemCard({
           </div>
         </button>
         {item.affectedPages != null && (
-          <span className="text-[11px] text-gray-400 shrink-0">
+          <span className="text-[11px] text-gray-500 shrink-0">
             {item.affectedPages === 'site-wide' ? 'Site-wide' : `${item.affectedPages} pages`}
           </span>
         )}
@@ -228,7 +228,7 @@ export default function ActionItemCard({
           className="shrink-0 bg-transparent border-0 p-0 cursor-pointer"
           onClick={() => setOpen(v => !v)}
         >
-          <ChevronDown size={14} className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown size={14} className={`text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
       </div>
 

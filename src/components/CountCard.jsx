@@ -23,6 +23,7 @@ import HLTooltip from './HLTooltip.jsx'
  *   changeText   string                  — descriptive change line (e.g. "+6 vs prior period")
  *   changeUp     boolean                 — direction/colour for changeText
  *   description  node                    — muted sub-line under the value (prefer helpContent)
+ *   valueAside   node                    — sits beside the value (e.g. Good / Average rating)
  *   Icon         component               — optional icon → top-right tinted box
  *   iconColor    string (css colour)     — icon colour (default primary-600)
  *   help         boolean                 — show an Info icon beside the label
@@ -38,6 +39,7 @@ export default function CountCard({
   changeText,
   changeUp = true,
   description,
+  valueAside,
   Icon,
   iconColor = 'var(--primary-600)',
   help = false,
@@ -49,10 +51,10 @@ export default function CountCard({
   const helpIcon = showHelp && (
     helpContent ? (
       <HLTooltip content={helpContent} variant="dark" placement="top" wrap>
-        <Info size={12} className="text-gray-400 shrink-0 cursor-help" aria-label="More information" />
+        <Info size={12} className="text-gray-500 shrink-0 cursor-help" aria-label="More information" />
       </HLTooltip>
     ) : (
-      <Info size={12} className="text-gray-400 shrink-0" aria-hidden="true" />
+      <Info size={12} className="text-gray-500 shrink-0" aria-hidden="true" />
     )
   )
 
@@ -76,10 +78,11 @@ export default function CountCard({
         )}
       </div>
 
-      {/* Value + optional delta pill — skipped when value is omitted (e.g. chart-only cards) */}
+      {/* Value + optional aside / delta pill — skipped when value is omitted (e.g. chart-only cards) */}
       {value != null && value !== '' && (
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-[24px] font-bold text-gray-900 leading-none tabular-nums">{value}</span>
+          {valueAside}
           {delta != null && delta !== '' && (
             <span
               className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[12px] font-medium leading-none"
@@ -108,7 +111,7 @@ export default function CountCard({
       )}
 
       {/* Muted description */}
-      {description && <p className="text-[12px] text-gray-400 leading-snug m-0">{description}</p>}
+      {description && <p className="text-[12px] text-gray-500 leading-snug m-0">{description}</p>}
 
       {/* Footer (e.g. sparkline) */}
       {footer && <div className="mt-0.5 w-full">{footer}</div>}

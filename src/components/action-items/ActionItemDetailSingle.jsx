@@ -13,20 +13,20 @@ export default function ActionItemDetailSingle({
       <div className="flex gap-4 mb-2.5">
         {fieldName && (
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-medium text-gray-400 mb-1">Field</div>
+            <div className="text-[11px] font-medium text-gray-500 mb-1">Field</div>
             <div className="text-[13px] text-gray-900">{fieldName}</div>
           </div>
         )}
         {currentValue && (
           <div className="flex-1 min-w-0">
-            <div className="text-[11px] font-medium text-gray-400 mb-1">Current value</div>
-            <div className={`text-[13px] ${currentValue === '(missing)' ? 'text-gray-400 italic' : 'text-gray-900'}`}>
+            <div className="text-[11px] font-medium text-gray-500 mb-1">Current value</div>
+            <div className={`text-[13px] ${currentValue === '(missing)' ? 'text-gray-500 italic' : 'text-gray-900'}`}>
               {currentValue}
             </div>
           </div>
         )}
       </div>
-      <div className="text-[11px] font-medium text-gray-400 mb-1">{recommendationLabel}</div>
+      <div className="text-[11px] font-medium text-gray-500 mb-1">{recommendationLabel}</div>
       <RecField value={recommendation} display="block" editable={editable} onSave={onUpdateRec} />
     </div>
   )

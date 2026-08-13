@@ -63,7 +63,7 @@ function PreviewRow({ item }) {
           )}
         </div>
       </div>
-      {pagesLabel && <span className="text-[11px] text-gray-400 shrink-0">{pagesLabel}</span>}
+      {pagesLabel && <span className="text-[11px] text-gray-500 shrink-0">{pagesLabel}</span>}
     </div>
   )
 }
