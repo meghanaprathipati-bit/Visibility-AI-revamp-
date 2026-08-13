@@ -258,7 +258,7 @@ function SetupProgressSteps({ steps, setupComplete }) {
                   ? 'bg-success-600 border-success-600 text-white'
                   : current
                     ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-400'
+                    : 'bg-white border-gray-300 text-gray-500'
               }`}
               style={{ width: CIRCLE, height: CIRCLE }}
               aria-current={current ? 'step' : undefined}
@@ -270,7 +270,7 @@ function SetupProgressSteps({ steps, setupComplete }) {
 
             <p
               className={`mt-2 text-[12px] font-medium text-center m-0 leading-snug w-full px-1 ${
-                complete ? 'text-success-700' : current ? 'text-primary-600' : 'text-gray-400'
+                complete ? 'text-success-700' : current ? 'text-primary-600' : 'text-gray-500'
               }`}
             >
               {step.title}
@@ -297,7 +297,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
             Ramada International · ramada.9hf9h.com · Hotel &amp; Hospitality
           </p>
         </div>
-        <p className="text-[13px] font-medium text-gray-400 m-0 shrink-0">
+        <p className="text-[13px] font-medium text-gray-500 m-0 shrink-0">
           {setupComplete
             ? 'All steps completed'
             : `Step ${completedCount + 1} of ${SETUP_CONNECTIONS.length}`}
@@ -333,7 +333,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
                 }`}>
                   {complete
                     ? <CircleCheck size={16} className="text-success-600" />
-                    : <item.Icon size={16} className={current ? 'text-primary-600' : 'text-gray-400'} />
+                    : <item.Icon size={16} className={current ? 'text-primary-600' : 'text-gray-500'} />
                   }
                 </div>
 
@@ -349,7 +349,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
                       </span>
                     )}
                     {!complete && !current && (
-                      <span className="text-[12px] font-normal text-gray-400">{item.meta}</span>
+                      <span className="text-[12px] font-normal text-gray-500">{item.meta}</span>
                     )}
                   </div>
                   <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">
@@ -411,7 +411,7 @@ function ModuleReadinessStrip() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{s.title}</p>
-                <p className="text-[12px] font-normal text-gray-400 m-0 tabular-nums">{s.ready}/{s.total}</p>
+                <p className="text-[12px] font-normal text-gray-500 m-0 tabular-nums">{s.ready}/{s.total}</p>
               </div>
             </div>
             <ProgressBar pct={s.pct} colorClass={s.bar} />
@@ -520,7 +520,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
-        <label style={LABEL_STYLE}>GBP profile link <span style={{ color: '#98A2B3', fontWeight: 400 }}>(optional)</span></label>
+        <label style={LABEL_STYLE}>GBP profile link <span style={{ color: '#667085', fontWeight: 400 }}>(optional)</span></label>
         <input value={gbpLink} onChange={e => setGbpLink(e.target.value)} placeholder="https://www.google.com/maps/place/..." style={INPUT_STYLE} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -545,11 +545,11 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
                 <option>Canada</option>
                 <option>Australia</option>
               </select>
-              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#98A2B3', pointerEvents: 'none' }} />
+              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#667085', pointerEvents: 'none' }} />
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>State / region <span style={{ color: '#98A2B3' }}>(optional)</span></label>
+            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>State / region <span style={{ color: '#667085' }}>(optional)</span></label>
             <div style={{ position: 'relative' }}>
               <select value={region} onChange={e => setRegion(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option value="">Select state or region</option>
@@ -558,7 +558,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
                 <option>Texas</option>
                 <option>Florida</option>
               </select>
-              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#98A2B3', pointerEvents: 'none' }} />
+              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#667085', pointerEvents: 'none' }} />
             </div>
           </div>
         </div>
@@ -784,10 +784,10 @@ function SetupModal({ onClose, onComplete }) {
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 border ${
                     done ? 'bg-success-600 border-success-600' : active ? 'bg-primary-50 border-primary-600' : 'bg-gray-100 border-gray-300'
                   }`}>
-                    {done ? <Check size={12} className="text-white" strokeWidth={3} /> : <SIcon size={12} className={active ? 'text-primary-600' : 'text-gray-400'} />}
+                    {done ? <Check size={12} className="text-white" strokeWidth={3} /> : <SIcon size={12} className={active ? 'text-primary-600' : 'text-gray-500'} />}
                   </div>
                   <div>
-                    <p className={`text-[10px] font-medium tracking-wide m-0 ${done ? 'text-success-700' : active ? 'text-primary-600' : 'text-gray-400'}`}>{label}</p>
+                    <p className={`text-[10px] font-medium tracking-wide m-0 ${done ? 'text-success-700' : active ? 'text-primary-600' : 'text-gray-500'}`}>{label}</p>
                     <p className={`text-[13px] font-semibold m-0 ${done ? 'text-success-700' : active ? 'text-gray-900' : 'text-gray-500'}`}>{title}</p>
                   </div>
                 </div>

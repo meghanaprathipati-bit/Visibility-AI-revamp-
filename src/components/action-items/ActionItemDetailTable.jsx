@@ -57,7 +57,7 @@ export default function ActionItemDetailTable({
                   </span>
                 </td>
                 {showCurrent && (
-                  <td className="px-3.5 py-2.5 align-top text-[14px] text-gray-400 italic">{row.currentValue}</td>
+                  <td className="px-3.5 py-2.5 align-top text-[14px] text-gray-500 italic">{row.currentValue}</td>
                 )}
                 <td className="px-3.5 py-2.5 align-top">
                   <RecField

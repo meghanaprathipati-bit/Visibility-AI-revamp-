@@ -127,7 +127,7 @@ export default function CompareRemoteModal({
           <div className="flex items-center justify-between gap-3 flex-wrap">
             <p className="text-[14px] font-semibold text-gray-900 m-0">Select scan dates</p>
             <p className="inline-flex items-center gap-1.5 text-[12px] text-gray-500 m-0">
-              <Info size={12} className="text-gray-400 shrink-0" />
+              <Info size={12} className="text-gray-500 shrink-0" />
               Pick two different dates to continue
             </p>
           </div>
@@ -168,7 +168,7 @@ function SummarySlot({ label, value, empty }) {
         <p className="text-[11px] font-medium text-gray-500 m-0">{label}</p>
         {empty ? (
           <>
-            <p className="text-[13px] font-semibold text-gray-400 m-0">Not selected</p>
+            <p className="text-[13px] font-semibold text-gray-500 m-0">Not selected</p>
             <p className="text-[12px] text-gray-300 m-0">—</p>
           </>
         ) : (
@@ -202,7 +202,7 @@ function ScanPickerColumn({
       <HLInput
         size="sm"
         prefixIcon={Search}
-        suffix={<Calendar size={14} className="text-gray-400" />}
+        suffix={<Calendar size={14} className="text-gray-500" />}
         value={search}
         onChange={e => onSearchChange(e.target.value)}
         placeholder="Search scan date"

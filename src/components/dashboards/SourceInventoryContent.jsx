@@ -27,7 +27,7 @@ function ThLabel({ children, tip, id, align = 'left' }) {
       <span>{children}</span>
       {tip ? (
         <HLTooltip id={id} content={tip} variant="dark" placement="top" wrap triggerClassName="inline-flex items-center">
-          <Info size={12} className="text-gray-400 shrink-0 cursor-help" aria-label="More information" />
+          <Info size={12} className="text-gray-500 shrink-0 cursor-help" aria-label="More information" />
         </HLTooltip>
       ) : null}
     </span>
@@ -59,7 +59,7 @@ const SI_ID_COL_W = 380
 const SI_VIEW_COL_W = 88
 const SI_STICKY_VIEW_LEFT = SI_ID_COL_W
 const SI_STICKY_SHADOW = '4px 0 8px -4px rgba(16, 24, 40, 0.12)'
-const SI_TABLE_CLASS = 'min-w-max w-max border-separate border-spacing-0 text-left [&_th]:border-b [&_th]:border-gray-200 [&_td]:border-b [&_td]:border-gray-100'
+const SI_TABLE_CLASS = 'min-w-max w-max border-separate border-spacing-0 text-left [&_th]:border-b [&_th]:border-b-gray-200 [&_th]:border-r [&_th]:border-r-gray-200 [&_td]:border-b [&_td]:border-b-gray-100 [&_td]:border-r [&_td]:border-r-gray-200 [&_th:last-child]:border-r-0 [&_td:last-child]:border-r-0'
 
 // ── Advanced filter columns (HLAdvanceFilter columnOptions) ───────────────────
 
@@ -963,7 +963,7 @@ function YesNoBadge({ value }) {
       <Check size={12} strokeWidth={2.5} />Yes
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-400">
+    <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-500">
       <X size={12} strokeWidth={2.5} />No
     </span>
   )
@@ -1000,7 +1000,7 @@ function LinksAvailableBadge({ value }) {
 }
 
 function BrandsCell({ brands }) {
-  if (!brands?.length) return <span className="text-[14px] text-gray-400">—</span>
+  if (!brands?.length) return <span className="text-[14px] text-gray-500">—</span>
   return <span className="text-[14px] text-gray-700 whitespace-nowrap">{brands.join(', ')}</span>
 }
 
@@ -1008,7 +1008,7 @@ function TrustScore({ score }) {
   const color = score >= 80 ? 'text-success-600' : score >= 60 ? 'text-warning-600' : 'text-error-600'
   return (
     <span className={`text-[14px] font-semibold ${color}`}>
-      {score}<span className="text-gray-400 font-normal text-[12px]">/100</span>
+      {score}<span className="text-gray-500 font-normal text-[12px]">/100</span>
     </span>
   )
 }
@@ -1051,11 +1051,11 @@ function CountButton({ count, type, id, onDetailOpen }) {
           onMouseLeave={hide}
           className="bg-white border border-gray-200 rounded-xl p-3.5 w-[230px]"
         >
-          <p className="text-[12px] font-semibold text-gray-400 mb-1">
+          <p className="text-[12px] font-semibold text-gray-500 mb-1">
             {type === 'ai' ? 'AI answers' : 'Prompts'}
           </p>
           <p className="text-[22px] font-bold text-gray-900 leading-none mb-0.5">{count}</p>
-          <p className="text-[12px] text-gray-400 mb-3">Total in current set · Jul 4–7, 2026</p>
+          <p className="text-[12px] text-gray-500 mb-3">Total in current set · Jul 4–7, 2026</p>
           <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5">
             {Object.entries(breakdown).map(([eng, n]) => (
               <div key={eng} className="flex items-center justify-between gap-2">
@@ -1114,10 +1114,10 @@ function SourceFilterChip({ value, onChange }) {
             onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }}
             className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
           >
-            <X size={11} className="text-gray-400" />
+            <X size={11} className="text-gray-500" />
           </span>
         ) : (
-          <ChevronDown size={13} className="text-gray-400" />
+          <ChevronDown size={13} className="text-gray-500" />
         )}
       </button>
 
@@ -1200,10 +1200,10 @@ function EngineFilterChip({ value, onChange }) {
             onClick={e => { e.stopPropagation(); onChange('all'); setOpen(false) }}
             className="w-4 h-4 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors"
           >
-            <X size={11} className="text-gray-400" />
+            <X size={11} className="text-gray-500" />
           </span>
         ) : (
-          <ChevronDown size={13} className="text-gray-400" />
+          <ChevronDown size={13} className="text-gray-500" />
         )}
       </button>
 
@@ -1255,9 +1255,9 @@ function DetailDateFilterChip({ value, customRange, onChange, onCustomRange }) {
         onClick={() => { setOpen(o => !o); setMode('list') }}
         className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50 transition-colors"
       >
-        <Calendar size={14} className="text-gray-400 shrink-0" />
+        <Calendar size={14} className="text-gray-500 shrink-0" />
         <span className="whitespace-nowrap">{label}</span>
-        <ChevronDown size={13} className="text-gray-400" />
+        <ChevronDown size={13} className="text-gray-500" />
       </button>
 
       {open && mode === 'list' && (
@@ -1349,7 +1349,7 @@ function SourceAnswersDetailView({ source, onBack }) {
       <button
         type="button"
         onClick={onBack}
-        className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit"
+        className="flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit"
       >
         <ArrowLeft size={14} />
         Back to source inventory
@@ -1360,7 +1360,7 @@ function SourceAnswersDetailView({ source, onBack }) {
         <div className="flex items-start gap-3 min-w-0">
           {isPage ? (
             <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-              <FileText size={18} className="text-gray-400" />
+              <FileText size={18} className="text-gray-500" />
             </div>
           ) : (
             <CompanyLogo
@@ -1368,18 +1368,18 @@ function SourceAnswersDetailView({ source, onBack }) {
               size={40}
               fallback={
                 <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <Globe size={18} className="text-gray-400" />
+                  <Globe size={18} className="text-gray-500" />
                 </div>
               }
             />
           )}
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-[14px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
+              <h2 className="text-[16px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
               <TypeBadge type={source.type} />
             </div>
             {subtitle && (
-              <p className="text-[12px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
+              <p className="text-[13px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
             )}
           </div>
         </div>
@@ -1456,7 +1456,7 @@ function SourceAnswersDetailView({ source, onBack }) {
           <div className="flex flex-col items-center justify-center py-16 text-center px-8">
             <Search size={32} className="text-gray-200 mb-3" />
             <p className="text-[14px] font-semibold text-gray-700 mb-1">No answers match</p>
-            <p className="text-[12px] text-gray-400 m-0 mb-4">Try adjusting the date range, engine, or prompt search.</p>
+            <p className="text-[12px] text-gray-500 m-0 mb-4">Try adjusting the date range, engine, or prompt search.</p>
             {filtersActive && (
               <button
                 type="button"
@@ -1521,7 +1521,7 @@ function DomainTable({ domains, onOpenDetail }) {
       <div className="flex flex-col items-center justify-center py-16 text-center px-8">
         <Search size={32} className="text-gray-200 mb-3" />
         <p className="text-[14px] font-semibold text-gray-700 mb-1">No domains found</p>
-        <p className="text-[12px] text-gray-400">Try adjusting your filters or search query.</p>
+        <p className="text-[12px] text-gray-500">Try adjusting your filters or search query.</p>
       </div>
     )
   }
@@ -1609,7 +1609,7 @@ function DomainTable({ domains, onOpenDetail }) {
                   className="mt-0.5"
                   fallback={
                     <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                      <Globe size={13} className="text-gray-400" />
+                      <Globe size={13} className="text-gray-500" />
                     </div>
                   }
                 />
@@ -1694,7 +1694,7 @@ function PageTable({ pages, onOpenDetail }) {
       <div className="flex flex-col items-center justify-center py-16 text-center px-8">
         <Search size={32} className="text-gray-200 mb-3" />
         <p className="text-[14px] font-semibold text-gray-700 mb-1">No pages found</p>
-        <p className="text-[12px] text-gray-400">Try adjusting your filters or search query.</p>
+        <p className="text-[12px] text-gray-500">Try adjusting your filters or search query.</p>
       </div>
     )
   }
@@ -1783,7 +1783,7 @@ function PageTable({ pages, onOpenDetail }) {
             >
               <div className="flex items-start gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-gray-100 flex items-center justify-center shrink-0 mt-0.5">
-                  <FileText size={13} className="text-gray-400" />
+                  <FileText size={13} className="text-gray-500" />
                 </div>
                 <div className="min-w-0 flex-1 overflow-hidden">
                   <HLTooltip
@@ -1944,7 +1944,7 @@ function HLPagination({ page, perPage, total, onPage, onPerPage }) {
         >
           {PER_PAGE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
       </div>
 
       <span className="text-[13px] text-gray-500 shrink-0 min-w-[90px]">{start} – {end} of {total}</span>
@@ -1961,7 +1961,7 @@ function HLPagination({ page, perPage, total, onPage, onPerPage }) {
       <div className="flex items-center gap-1">
         {getPageNumbers().map((p, i) =>
           p === '…' ? (
-            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-gray-400">...</span>
+            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-gray-500">...</span>
           ) : (
             <button
               key={p}
@@ -2134,7 +2134,7 @@ export default function SourceInventoryContent() {
 
           {/* Search — right-aligned */}
           <div className="ml-auto relative shrink-0" style={{ width: 280 }}>
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
             <input
               value={search}
               onChange={e => { setSearch(e.target.value); setPage(1) }}

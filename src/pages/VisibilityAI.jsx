@@ -765,10 +765,10 @@ function ProjectMetadataLine({ project }) {
   if (website && gbp) {
     return (
       <div className={metaClass}>
-        <Globe size={12} className="text-gray-400 shrink-0" />
+        <Globe size={12} className="text-gray-500 shrink-0" />
         <span className="truncate">{formatProjectWebsiteDisplay(website)}</span>
-        <span className="text-gray-400 shrink-0">·</span>
-        <MapPin size={12} className="text-gray-400 shrink-0" />
+        <span className="text-gray-500 shrink-0">·</span>
+        <MapPin size={12} className="text-gray-500 shrink-0" />
         <span className="truncate">Google Business</span>
       </div>
     )
@@ -777,7 +777,7 @@ function ProjectMetadataLine({ project }) {
   if (website) {
     return (
       <div className={metaClass}>
-        <Globe size={12} className="text-gray-400 shrink-0" />
+        <Globe size={12} className="text-gray-500 shrink-0" />
         <span className="truncate">{formatProjectWebsiteDisplay(website)}</span>
       </div>
     )
@@ -786,7 +786,7 @@ function ProjectMetadataLine({ project }) {
   if (gbp) {
     return (
       <div className={metaClass}>
-        <MapPin size={12} className="text-gray-400 shrink-0" />
+        <MapPin size={12} className="text-gray-500 shrink-0" />
         <span className="truncate">Google Business Profile</span>
       </div>
     )
@@ -795,7 +795,7 @@ function ProjectMetadataLine({ project }) {
   if (project.createdAt) {
     return (
       <div className={metaClass}>
-        <Calendar size={12} className="text-gray-400 shrink-0" />
+        <Calendar size={12} className="text-gray-500 shrink-0" />
         <span className="truncate">{formatProjectCreatedDate(project.createdAt)}</span>
       </div>
     )
@@ -1087,7 +1087,7 @@ function ChatPanel({
                         onClick={() =>
                           activePanel === 'Chats' ? setSearchQuery('') : setDashboardSearchQuery('')
                         }
-                        className="text-gray-400 hover:text-gray-500"
+                        className="text-gray-500 hover:text-gray-500"
                         aria-label="Clear search"
                       >
                         <X size={12} />
@@ -1157,7 +1157,7 @@ function ChatPanel({
             </span>
             <ChevronDown
               size={13}
-              className={`text-gray-400 shrink-0 transition-transform duration-200 ${projectDropdownOpen ? 'rotate-180' : ''}`}
+              className={`text-gray-500 shrink-0 transition-transform duration-200 ${projectDropdownOpen ? 'rotate-180' : ''}`}
             />
           </button>
 
@@ -1243,7 +1243,7 @@ function ChatPanel({
                 <button
                   type="button"
                   onClick={() => setSearchQuery('')}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-500 hover:text-gray-500"
                   aria-label="Clear search"
                 >
                   <X size={12} />
@@ -1263,7 +1263,7 @@ function ChatPanel({
                 <button
                   type="button"
                   onClick={() => setDashboardSearchQuery('')}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-500 hover:text-gray-500"
                   aria-label="Clear search"
                 >
                   <X size={12} />
@@ -1324,7 +1324,7 @@ function ChatPanel({
                     <div className="shrink-0 items-center gap-0.5 hidden group-hover:flex">
                       <button
                         onClick={e => handleEdit(e, chat)}
-                        className="p-1 text-gray-400 hover:text-gray-700 transition-colors rounded"
+                        className="p-1 text-gray-500 hover:text-gray-700 transition-colors rounded"
                         aria-label="Edit"
                       >
                         <Pencil size={12} />
@@ -1402,7 +1402,7 @@ function ChatPanel({
                       </span>
                       <ChevronDown
                         size={13}
-                        className={`text-gray-400 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+                        className={`text-gray-500 shrink-0 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                       />
                     </button>
 
@@ -1430,13 +1430,13 @@ function ChatPanel({
                                 isActive
                                   ? 'font-semibold text-primary-600'
                                   : isDisabled
-                                    ? 'text-gray-400'
+                                    ? 'text-gray-500'
                                     : 'text-gray-600'
                               }`}>
                                 {child.label}
                               </span>
                               {child.comingSoon && (
-                                <span className="shrink-0 text-[10px] font-medium text-gray-400 bg-gray-100 rounded-full px-2 py-0.5 leading-none">
+                                <span className="shrink-0 text-[10px] font-medium text-gray-500 bg-gray-100 rounded-full px-2 py-0.5 leading-none">
                                   Soon
                                 </span>
                               )}
@@ -1478,13 +1478,13 @@ function ChatPanel({
 function MessageFeedback() {
   return (
     <div className="flex items-center gap-3 mt-3">
-      <button type="button" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Good response">
+      <button type="button" className="text-gray-500 hover:text-gray-600 transition-colors" aria-label="Good response">
         <ThumbsUpIcon size={15} />
       </button>
-      <button type="button" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Bad response">
+      <button type="button" className="text-gray-500 hover:text-gray-600 transition-colors" aria-label="Bad response">
         <ThumbsDownIcon size={15} />
       </button>
-      <button type="button" className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Copy response">
+      <button type="button" className="text-gray-500 hover:text-gray-600 transition-colors" aria-label="Copy response">
         <Copy size={15} />
       </button>
     </div>
@@ -1539,7 +1539,7 @@ function ScanProgressList({ scanKind = 'seo', onComplete, completed = false }) {
             <span className={`text-[13px] leading-snug ${
               isPartialFail ? 'font-medium text-error-600' :
               isActive ? 'font-medium text-gray-900' :
-              isDone ? 'text-gray-700' : 'text-gray-400'
+              isDone ? 'text-gray-700' : 'text-gray-500'
             }`}>
               {label}
             </span>
@@ -1660,7 +1660,7 @@ function PromptComposer({
           <button
             type="button"
             onClick={() => setFilePickerOpen(true)}
-            className="size-8 rounded-full flex items-center justify-center shrink-0 text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="size-8 rounded-full flex items-center justify-center shrink-0 text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label="Add attachment"
           >
             <Plus size={16} strokeWidth={2} />
@@ -1720,27 +1720,27 @@ function AiFeedbackRow({ ts }) {
       <div className="flex items-center gap-1">
         <button
           onClick={() => setVote(v => (v === 'up' ? null : 'up'))}
-          className={`p-1.5 rounded-md transition-colors ${vote === 'up' ? 'text-primary-600 bg-primary-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+          className={`p-1.5 rounded-md transition-colors ${vote === 'up' ? 'text-primary-600 bg-primary-50' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'}`}
           aria-label="Helpful"
         >
           <ThumbsUpIcon size={15} />
         </button>
         <button
           onClick={() => setVote(v => (v === 'down' ? null : 'down'))}
-          className={`p-1.5 rounded-md transition-colors ${vote === 'down' ? 'text-error-600 bg-error-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+          className={`p-1.5 rounded-md transition-colors ${vote === 'down' ? 'text-error-600 bg-error-50' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'}`}
           aria-label="Not helpful"
         >
           <ThumbsDownIcon size={15} />
         </button>
         <button
           onClick={handleCopy}
-          className={`p-1.5 rounded-md transition-colors ${copied ? 'text-success-600 bg-success-50' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'}`}
+          className={`p-1.5 rounded-md transition-colors ${copied ? 'text-success-600 bg-success-50' : 'text-gray-500 hover:text-gray-600 hover:bg-gray-100'}`}
           aria-label="Copy response"
         >
           <Copy size={15} />
         </button>
       </div>
-      {ts && <span className="text-[11px] text-gray-400 pl-0.5">{ts}</span>}
+      {ts && <span className="text-[11px] text-gray-500 pl-0.5">{ts}</span>}
     </div>
   )
 }
@@ -2480,7 +2480,7 @@ function MainContent({
             placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
           />
         )}
-        <p className="text-center text-[11px] text-gray-400 mt-2 mb-2">
+        <p className="text-center text-[11px] text-gray-500 mt-2 mb-2">
           Review important AI-assisted changes before publishing.
         </p>
       </div>
@@ -2888,7 +2888,7 @@ function MainContent({
                         <p className="text-[13px] font-semibold text-gray-900">Detailed report</p>
                         <p className="text-[12px] text-gray-500 mt-0.5">Open full AI visibility analysis in the side panel</p>
                       </div>
-                      <ChevronRight size={16} className="text-gray-400 shrink-0" />
+                      <ChevronRight size={16} className="text-gray-500 shrink-0" />
                     </button>
                     {/* Action items with subscribe/configure/implement flow */}
                     <ActionItemsSummaryCard
@@ -3053,7 +3053,7 @@ function MainContent({
                       <p className="text-[13px] font-semibold text-gray-900">Detailed report</p>
                       <p className="text-[12px] text-gray-500 mt-0.5">Click to open the detailed report.</p>
                     </div>
-                    <ChevronRight size={16} className="text-gray-400 shrink-0" />
+                    <ChevronRight size={16} className="text-gray-500 shrink-0" />
                   </button>
                   <ActionItemsSummaryCard
                     items={msg.actionItems}
@@ -3221,7 +3221,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
           <div>
             <label htmlFor="new-project-website" className={labelBase}>
               Website URL
-              <span className="text-[12px] font-normal text-gray-400">(optional)</span>
+              <span className="text-[12px] font-normal text-gray-500">(optional)</span>
             </label>
             <HLInput
               id="new-project-website"
@@ -3236,7 +3236,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
           <div>
             <label htmlFor="new-project-gbp" className={labelBase}>
               Google Business Profile URL
-              <span className="text-[12px] font-normal text-gray-400">(optional)</span>
+              <span className="text-[12px] font-normal text-gray-500">(optional)</span>
             </label>
             <HLInput
               id="new-project-gbp"
@@ -3251,7 +3251,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
           <div>
             <label className={labelBase}>
               Target country
-              <span className="text-[12px] font-normal text-gray-400">(optional)</span>
+              <span className="text-[12px] font-normal text-gray-500">(optional)</span>
             </label>
             <div className="relative">
               <select
@@ -3286,7 +3286,7 @@ function ToolsPanel({ collapsed, onToggleCollapse }) {
           className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-50 transition-colors"
           aria-label="Expand panel"
         >
-          <PanelRightIcon size={16} className="text-gray-400" />
+          <PanelRightIcon size={16} className="text-gray-500" />
         </button>
         {TOOLS.map(({ icon: Icon, label }) => (
           <button
@@ -3305,13 +3305,13 @@ function ToolsPanel({ collapsed, onToggleCollapse }) {
   return (
     <aside className="w-full min-w-0 shrink-0 border-l border-gray-200 bg-white flex flex-col overflow-hidden">
       <div className="flex items-center justify-between px-4 pt-4 pb-4 shrink-0">
-        <span className="text-[13px] font-medium text-gray-400 whitespace-nowrap">Tools</span>
+        <span className="text-[13px] font-medium text-gray-500 whitespace-nowrap">Tools</span>
         <button
           onClick={onToggleCollapse}
           className="shrink-0 w-7 h-7 -mr-1 rounded-md flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
           aria-label="Collapse panel"
         >
-          <PanelRightIcon size={16} className="text-gray-400" />
+          <PanelRightIcon size={16} className="text-gray-500" />
         </button>
       </div>
       <div className="flex flex-col gap-0.5 px-2 min-w-0">

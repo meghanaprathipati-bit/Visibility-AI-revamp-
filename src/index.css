@@ -75,6 +75,10 @@
 }
 
 @theme {
+  /* ── Typography — Inter only (HighRise / product default) ── */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'Inter', system-ui, -apple-system, sans-serif;
+
   /* ── Primary blue — maps to HighRise primary-600 ── */
   --color-primary-50:  var(--primary-50);
   --color-primary-100: var(--primary-100);
@@ -181,10 +185,18 @@
 
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-sans);
   background: var(--gray-50);
   color: var(--gray-900);
   -webkit-font-smoothing: antialiased;
+}
+
+/* Keep form controls on Inter — browsers often reset these to system UI fonts */
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
 }
 
 /* HLCheckbox — mirrors @platform-ui/highrise naive checkbox styles (highrise852.mjs) */

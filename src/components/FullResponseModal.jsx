@@ -108,7 +108,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
   const isClaude = engineKey === 'Claude'
   const headingCls = 'text-gray-900'
   const bodyCls = 'text-gray-700'
-  const mutedCls = 'text-gray-400'
+  const mutedCls = 'text-gray-500'
   const logoName = engineKey
 
   const kpis = [
@@ -151,10 +151,10 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
             <EngineLogo name={logoName} size={18} className="w-8 h-8" />
             <div className="min-w-0">
               <p className="text-[14px] font-semibold text-gray-900 m-0 leading-tight">{theme.wordmark}</p>
-              <p className="text-[12px] text-gray-400 m-0 leading-tight">{response.created}</p>
+              <p className="text-[12px] text-gray-500 m-0 leading-tight">{response.created}</p>
             </div>
           </div>
-          <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors" aria-label="Close">
+          <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-gray-500 hover:text-gray-600 hover:bg-gray-100 transition-colors" aria-label="Close">
             <X size={18} />
           </button>
         </div>
@@ -192,7 +192,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                         {sources.map((s, i) => (
                           <a key={i} href={s.url} onClick={e => e.preventDefault()} className="rounded-lg border border-gray-200 bg-white px-2.5 py-2 hover:border-gray-300 transition-colors">
                             <p className="text-[14px] font-medium text-gray-900 truncate m-0">{s.domain}</p>
-                            <p className="text-[12px] text-gray-400 truncate m-0 mt-0.5">{i + 1} · {s.coverage} coverage</p>
+                            <p className="text-[12px] text-gray-500 truncate m-0 mt-0.5">{i + 1} · {s.coverage} coverage</p>
                           </a>
                         ))}
                       </div>
@@ -234,7 +234,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                         />
                         <div className="min-w-0 flex-1">
                           <p className="text-[13px] font-medium text-gray-900 truncate m-0">{b}</p>
-                          <p className="text-[12px] text-gray-400 m-0">#{i + 1}.0 · {sentiment}</p>
+                          <p className="text-[12px] text-gray-500 m-0">#{i + 1}.0 · {sentiment}</p>
                         </div>
                         {you && <span className="text-[12px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
                       </div>
@@ -245,7 +245,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
 
               <div className="rounded-xl border border-gray-200 bg-white p-3.5 flex-1 flex flex-col min-h-0">
                 <p className="text-[13px] font-semibold text-gray-900 m-0 mb-0.5 shrink-0">Sources</p>
-                <p className="text-[12px] text-gray-400 m-0 mb-2.5 shrink-0">Prompt-scoped cited URLs from this answer.</p>
+                <p className="text-[12px] text-gray-500 m-0 mb-2.5 shrink-0">Prompt-scoped cited URLs from this answer.</p>
                 <div className="flex flex-col gap-2 flex-1 min-h-0 overflow-y-auto">
                   {sources.map((s, i) => (
                     <div key={i} className="rounded-lg border border-gray-200 p-2.5">
@@ -253,7 +253,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                         <p className="text-[13px] font-medium text-gray-900 leading-snug m-0">{s.domain}</p>
                         <span className="text-[12px] font-medium text-primary-600 shrink-0">#{i + 1}</span>
                       </div>
-                      <p className="text-[12px] text-gray-400 truncate m-0 mt-0.5">{s.url.replace(/^https?:\/\//, '')}</p>
+                      <p className="text-[12px] text-gray-500 truncate m-0 mt-0.5">{s.url.replace(/^https?:\/\//, '')}</p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                         <span className={`text-[12px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
                           {s.brandMentioned ? 'Brand mentioned' : 'Brand not mentioned'}
@@ -273,7 +273,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                 <div key={k.label} className="rounded-xl border border-gray-200 bg-white px-3 py-2.5">
                   <p className="text-[12px] font-medium text-gray-500 m-0">{k.label}</p>
                   <p className="text-[18px] font-bold text-gray-900 m-0 mt-0.5">{k.value}</p>
-                  <p className="text-[12px] text-gray-400 m-0 mt-0.5 leading-snug">{k.desc}</p>
+                  <p className="text-[12px] text-gray-500 m-0 mt-0.5 leading-snug">{k.desc}</p>
                 </div>
               ))}
             </div>

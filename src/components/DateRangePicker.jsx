@@ -45,7 +45,7 @@ function MonthGrid({ view, start, end, hover, onPick, onHover }) {
     <div className="w-[236px]">
       <div className="grid grid-cols-7 mb-1">
         {WEEKDAYS.map(w => (
-          <div key={w} className="h-7 flex items-center justify-center text-[11px] font-medium text-gray-400">{w}</div>
+          <div key={w} className="h-7 flex items-center justify-center text-[11px] font-medium text-gray-500">{w}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-y-0.5">
@@ -157,7 +157,7 @@ function RangeInput({ label, value, onClear }) {
         className="w-full h-8 rounded-lg border border-gray-300 bg-white px-3 pr-7 text-[14px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600"
       />
       {onClear && (
-        <button type="button" onClick={onClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={onClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
           <X size={13} />
         </button>
       )}

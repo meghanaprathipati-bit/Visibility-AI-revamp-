@@ -57,7 +57,7 @@ export default function IssueDetailDrawer({
           <button
             type="button"
             onClick={onClose}
-            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+            className="shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:text-gray-600 hover:bg-gray-50 transition-colors"
             aria-label="Close"
           >
             <X size={16} />
@@ -197,7 +197,7 @@ export function PageFindingsPanel({
             {/* Current value always sits on a gray surface — do not flatten to white. */}
             <div className="rounded-lg bg-gray-100 border border-gray-200 px-3 py-2">
               <p className="text-[12px] font-medium text-gray-500 m-0 mb-0.5">Current value</p>
-              <p className={`text-[14px] m-0 leading-snug break-words font-mono ${isFixed ? 'text-gray-400' : 'text-error-700'}`}>
+              <p className={`text-[14px] m-0 leading-snug break-words ${isFixed ? 'text-gray-500' : 'text-error-700'}`}>
                 {finding.currentValue || '—'}
               </p>
             </div>
@@ -220,11 +220,11 @@ export function PageFindingsPanel({
                   <span className="text-[14px] text-gray-300">—</span>
                 ) : (
                   <div className="flex items-start gap-2">
-                    <p className="text-[14px] font-mono text-success-700 leading-snug m-0 flex-1 break-words">{recValue}</p>
+                    <p className="text-[14px] text-success-700 leading-snug m-0 flex-1 break-words">{recValue}</p>
                     <button
                       type="button"
                       onClick={() => onCopyValue?.(finding)}
-                      className={`transition-colors shrink-0 ${copiedFinding === finding.id ? 'text-success-600' : 'text-gray-400 hover:text-gray-600'}`}
+                      className={`transition-colors shrink-0 ${copiedFinding === finding.id ? 'text-success-600' : 'text-gray-500 hover:text-gray-600'}`}
                       title={copiedFinding === finding.id ? 'Copied' : 'Copy value'}
                     >
                       {copiedFinding === finding.id ? <Check size={12} /> : <Copy size={12} />}
@@ -236,7 +236,7 @@ export function PageFindingsPanel({
               {/* Assisted fix — always-editable pre-filled value */}
               {assistedFix && (
                 isFixed ? (
-                  <p className="text-[14px] font-mono text-gray-400 m-0 break-words">{assistedVal || '—'}</p>
+                  <p className="text-[14px] text-gray-500 m-0 break-words">{assistedVal || '—'}</p>
                 ) : (
                   <div>
                     <textarea
@@ -251,7 +251,7 @@ export function PageFindingsPanel({
                       }}
                       rows={3}
                       placeholder="Enter value to apply..."
-                      className={`w-full text-[12px] font-mono text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
+                      className={`w-full text-[12px] text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
                         valError ? 'border-error-600 bg-error-50/40 focus:border-error-600' : 'border-gray-200 focus:border-primary-600'
                       }`}
                     />
@@ -275,7 +275,7 @@ export function PageFindingsPanel({
                       value={recValue}
                       onChange={e => onChangeValue?.(finding.id, e.target.value)}
                       rows={3}
-                      className="w-full text-[12px] font-mono text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none focus:border-primary-600"
+                      className="w-full text-[12px] text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none focus:border-primary-600"
                     />
                     <div className="flex items-center gap-2.5">
                       <button
@@ -288,7 +288,7 @@ export function PageFindingsPanel({
                       <button
                         type="button"
                         onClick={() => onCancelEdit?.()}
-                        className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                        className="text-[12px] text-gray-500 hover:text-gray-600 transition-colors"
                       >
                         Cancel
                       </button>
@@ -296,13 +296,13 @@ export function PageFindingsPanel({
                   </div>
                 ) : (
                   <div className="flex items-start gap-2">
-                    <p className={`text-[14px] font-mono leading-snug m-0 flex-1 break-words ${isFixed ? 'text-gray-400' : 'text-success-700'}`}>
+                    <p className={`text-[14px] leading-snug m-0 flex-1 break-words ${isFixed ? 'text-gray-500' : 'text-success-700'}`}>
                       {recValue}
                     </p>
                     <button
                       type="button"
                       onClick={() => onOpenEdit?.(finding)}
-                      className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+                      className="text-gray-500 hover:text-gray-600 transition-colors shrink-0"
                       title="Edit recommendation"
                     >
                       <Pencil size={12} />

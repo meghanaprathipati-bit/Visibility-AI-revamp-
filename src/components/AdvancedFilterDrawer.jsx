@@ -157,7 +157,7 @@ export default function AdvancedFilterDrawer({
               </svg>
               Clear filters
             </button>
-            <button type="button" onClick={handleCancel} className="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close">
+            <button type="button" onClick={handleCancel} className="text-gray-500 hover:text-gray-600 transition-colors" aria-label="Close">
               <X size={16} />
             </button>
           </div>
@@ -186,7 +186,7 @@ export default function AdvancedFilterDrawer({
                               <option key={c.value} value={c.value}>{c.label}</option>
                             ))}
                           </select>
-                          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                          <ChevronDown size={11} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
                         </div>
                         <button
                           type="button"
@@ -213,7 +213,7 @@ export default function AdvancedFilterDrawer({
                         </select>
                         <ChevronDown
                           size={11}
-                          className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${rule.field ? 'text-gray-400' : 'text-gray-400'}`}
+                          className={`absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${rule.field ? 'text-gray-500' : 'text-gray-500'}`}
                         />
                       </div>
 

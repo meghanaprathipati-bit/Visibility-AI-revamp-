@@ -3,13 +3,12 @@ import { createPortal } from 'react-dom'
 import {
   Globe, RefreshCw, RefreshCw02, Download, AlertTriangle, ChevronRight, ChevronDown,
   Link2, Code2, BarChart3, ArrowUp, CircleCheck, CircleX, Info, X, FileText, Clock,
-  ImageIcon, TrendingUp, Award, Check, Star, Calendar, ExternalLink,
+  ImageIcon, TrendingUp, Award, Check, Star, Calendar, ExternalLink, ArrowLeft,
   Plus, Minus, Search, Zap, LayoutDashboard, Package, Sparkles, Settings, Pencil, Trash2, Copy,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import AdvancedFilterDrawer from '../AdvancedFilterDrawer.jsx'
 import AdvancedFilterTrigger from '../AdvancedFilterTrigger.jsx'
-import IssueDetailDrawer, { PageFindingsPanel, ResourceSourcesPanel } from '../IssueDetailDrawer.jsx'
 import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 import CompareRemoteModal from '../CompareRemoteModal.jsx'
 import ConnectFixesModal from '../implement/ConnectFixesModal.jsx'
@@ -22,9 +21,9 @@ import ScheduleSettingsPanel from '../settings/ScheduleSettingsPanel.jsx'
 // across parent rows and expanded nested content (HLDataTable expanded-row pattern).
 const TABLE_EXPAND_COL = 40
 const TABLE_CHECK_COL = 40
-/** Frozen Crawled pages cols (checkbox + URL + Issues); other cols scroll horizontally. */
+/** Frozen Crawled pages cols (checkbox + URL + Action); other cols scroll horizontally. */
 const CRAWLED_URL_COL_W = 300
-const CRAWLED_ISSUES_COL_W = 88
+const CRAWLED_ISSUES_COL_W = 96
 const CRAWLED_STICKY_URL_LEFT = TABLE_CHECK_COL
 const CRAWLED_STICKY_ISSUES_LEFT = TABLE_CHECK_COL + CRAWLED_URL_COL_W
 const TABLE_CHECKBOX_PX = 15
@@ -196,7 +195,7 @@ function WidgetErrorState({ onRetry, retryLabel = 'Re-scan', title = "We couldn'
       </div>
       <div className="max-w-[260px]">
         <p className="text-[14px] font-semibold text-gray-900 mb-1">{title}</p>
-        <p className="text-[13px] text-gray-400 leading-relaxed">{message}</p>
+        <p className="text-[13px] text-gray-500 leading-relaxed">{message}</p>
       </div>
       {onRetry && (
         <button
@@ -248,14 +247,14 @@ function RadialGauge({ score, delta }) {
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-[36px] font-extrabold text-gray-900 leading-none">{score}</span>
-          <span className="text-[12px] text-gray-400 mt-1">/ 100</span>
+          <span className="text-[12px] text-gray-500 mt-1">/ 100</span>
         </div>
       </div>
       <span style={{ display:'inline-flex', padding:'2px 10px', borderRadius:999, background:bandBg, fontSize:12, fontWeight:600, color:bandColor }}>{bandLabel}</span>
       {delta != null && delta !== 0 && (
         <div className="flex items-center gap-1">
           <Delta value={delta} />
-          <span className="text-[12px] text-gray-400">from last scan</span>
+          <span className="text-[12px] text-gray-500">from last scan</span>
         </div>
       )}
     </div>
@@ -316,7 +315,7 @@ function SemiGauge({ score, delta }) {
       </svg>
       <div className="flex items-center gap-2 flex-wrap justify-center">
         <span style={{ display:'inline-flex', padding:'2px 10px', borderRadius:999, background:bandBg, fontSize:12, fontWeight:600, color:bandColor }}>{bandLabel}</span>
-        <span className="text-[12px] text-gray-400">Recommended: 90</span>
+        <span className="text-[12px] text-gray-500">Recommended: 90</span>
         {delta != null && delta !== 0 && (
           <div className="flex items-center gap-0.5">
             <Delta value={delta} />
@@ -587,7 +586,7 @@ function DonutChart({ segments, totalLabel, totalSub, size = 112, sw = 13 }) {
       </svg>
       <div className="flex flex-col items-center justify-center z-10 pointer-events-none">
         <span className="text-[17px] font-bold text-gray-900 leading-none">{totalLabel}</span>
-        {totalSub && <span className="text-[10px] text-gray-400 mt-0.5">{totalSub}</span>}
+        {totalSub && <span className="text-[10px] text-gray-500 mt-0.5">{totalSub}</span>}
       </div>
     </div>
   )
@@ -633,7 +632,7 @@ function ColumnChart({ data }) {
           <div key={d.code} className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
             <span className="text-[12px] font-bold text-gray-700 leading-none">{d.count}</span>
             <div className="w-full rounded-t-md" style={{ height: h, background: d.color }} />
-            <span className="text-[10px] font-medium text-gray-400 truncate w-full text-center">{d.label}</span>
+            <span className="text-[10px] font-medium text-gray-500 truncate w-full text-center">{d.label}</span>
           </div>
         )
       })}
@@ -706,9 +705,9 @@ function CWVSlider({ metrics }) {
             </div>
             {/* Scale labels */}
             <div className="flex items-center justify-between">
-              <span className="text-[10px] text-gray-400">0</span>
-              <span className="text-[10px] text-gray-400">{m.threshold} <span className="text-gray-300">good</span></span>
-              <span className="text-[10px] text-gray-400">{maxVal}{m.label === 'INP' ? ' ms' : m.label === 'LCP' ? ' s' : ''}</span>
+              <span className="text-[10px] text-gray-500">0</span>
+              <span className="text-[10px] text-gray-500">{m.threshold} <span className="text-gray-300">good</span></span>
+              <span className="text-[10px] text-gray-500">{maxVal}{m.label === 'INP' ? ' ms' : m.label === 'LCP' ? ' s' : ''}</span>
             </div>
           </div>
         )
@@ -738,7 +737,7 @@ function CWVRing({ metric }) {
       </div>
       <span className="text-[12px] font-bold text-gray-900 leading-none">{metric.value}</span>
       <span className="text-[12px] font-semibold text-gray-500">{metric.label}</span>
-      <span className="text-[9px] text-gray-400">{metric.threshold}</span>
+      <span className="text-[9px] text-gray-500">{metric.threshold}</span>
     </div>
   )
 }
@@ -828,7 +827,7 @@ function TrendBarChart() {
                 </div>
               ))}
               <div className="border-t border-gray-700 mt-1.5 pt-1.5 flex justify-between">
-                <span className="text-[10px] text-gray-400">Total</span>
+                <span className="text-[10px] text-gray-500">Total</span>
                 <span className="text-[10px] font-bold text-white">
                   {scanData[hovered.idx].errors + scanData[hovered.idx].warnings + scanData[hovered.idx].notices}
                 </span>
@@ -839,8 +838,8 @@ function TrendBarChart() {
       </div>
       {/* X-axis date labels — HTML so they use card typography, not SVG scaling */}
       <div className="flex justify-between">
-        <span className="text-[10px] text-gray-400">{scanData[0].label.replace(', 2026', '')}</span>
-        <span className="text-[10px] text-gray-400">{scanData[scanData.length - 1].label.replace(', 2026', '')}</span>
+        <span className="text-[10px] text-gray-500">{scanData[0].label.replace(', 2026', '')}</span>
+        <span className="text-[10px] text-gray-500">{scanData[scanData.length - 1].label.replace(', 2026', '')}</span>
       </div>
     </div>
   )
@@ -925,12 +924,12 @@ function HealthScoreCard({ compare }) {
       {/* Trend + gap-to-target */}
       <div className="flex flex-col gap-2 border-t border-gray-100 pt-4">
         <div className="flex items-center justify-between">
-          <span className="text-[12px] text-gray-400">Score trend</span>
-          <span className="text-[12px] text-gray-400">{gap} pts to Excellent</span>
+          <span className="text-[12px] text-gray-500">Score trend</span>
+          <span className="text-[12px] text-gray-500">{gap} pts to Excellent</span>
         </div>
         <Sparkline data={sparkData} color={zone.color} height={36} />
         <div className="flex items-center justify-between">
-          <span className="text-[12px] text-gray-400">Mar — May</span>
+          <span className="text-[12px] text-gray-500">Mar — May</span>
           <span className="text-[12px] text-gray-500">Target: <span className="font-bold text-gray-700">{target}</span></span>
         </div>
       </div>
@@ -962,11 +961,11 @@ function HealthSummarySection({ compare, onTabSwitch }) {
         <div className="flex items-end justify-between gap-2">
           <div>
             <span className="text-[40px] font-extrabold text-gray-900 leading-none tabular-nums">{resultsTotal}</span>
-            <p className="text-[12px] text-gray-400 mt-1.5">total findings</p>
+            <p className="text-[12px] text-gray-500 mt-1.5">total findings</p>
           </div>
           <div className="flex flex-col items-end gap-0.5 pb-0.5">
             <span className="text-[12px] font-semibold text-success-700">↓{SCAN_OPTIONS[1].findings - resultsTotal}</span>
-            <span className="text-[12px] text-gray-400">since last scan</span>
+            <span className="text-[12px] text-gray-500">since last scan</span>
           </div>
         </div>
         <ResultsBarList />
@@ -1017,7 +1016,7 @@ function FixAndIndexSection({ onTabSwitch }) {
           <div className="flex flex-col gap-1.5 flex-1 min-w-0">
             <div className="flex items-baseline gap-1.5 mb-1">
               <span className="text-[24px] font-extrabold text-gray-900 leading-none">{total}</span>
-              <span className="text-[12px] text-gray-400">issues by fix type</span>
+              <span className="text-[12px] text-gray-500">issues by fix type</span>
             </div>
             {FIX_COVERAGE.map(f => {
               const pct = Math.round((f.value / total) * 100)
@@ -1029,14 +1028,14 @@ function FixAndIndexSection({ onTabSwitch }) {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span className="text-[13px] font-bold text-gray-900">{f.value}</span>
-                    <span className="text-[12px] text-gray-400">{pct}%</span>
+                    <span className="text-[12px] text-gray-500">{pct}%</span>
                   </div>
                 </div>
               )
             })}
           </div>
         </div>
-        <p className="text-[13px] text-gray-400 border-t border-gray-100 pt-3">{autoPct}% of issues can be auto-fixed.</p>
+        <p className="text-[13px] text-gray-500 border-t border-gray-100 pt-3">{autoPct}% of issues can be auto-fixed.</p>
       </SectionCard>
 
       {/* Indexability Snapshot */}
@@ -1059,7 +1058,7 @@ function FixAndIndexSection({ onTabSwitch }) {
 
         {/* Overall indexability + inline bar */}
         <div className="flex flex-col gap-1.5">
-          <p className="text-[12px] text-gray-400 font-medium">Overall indexability</p>
+          <p className="text-[12px] text-gray-500 font-medium">Overall indexability</p>
           <div className="flex items-center gap-3">
             <span className="text-[24px] font-extrabold leading-none shrink-0" style={{ color: '#16A34A' }}>
               {indexPct}%
@@ -1074,7 +1073,7 @@ function FixAndIndexSection({ onTabSwitch }) {
         </div>
 
         {/* Insight */}
-        <p className="text-[13px] text-gray-400 border-t border-gray-100 pt-3">
+        <p className="text-[13px] text-gray-500 border-t border-gray-100 pt-3">
           <span className="text-success-700 font-semibold">+12</span> indexable pages since last crawl
         </p>
 
@@ -1133,7 +1132,7 @@ function PriorityIssuesSection({ onFindingClick, onTabSwitch }) {
               </div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-[24px] font-extrabold leading-none" style={{ color: sc.border }}>{f.pages}</span>
-                <span className="text-[12px] text-gray-400">pages affected</span>
+                <span className="text-[12px] text-gray-500">pages affected</span>
               </div>
             </button>
           )
@@ -1224,7 +1223,7 @@ function HttpStatusCard() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[24px] font-extrabold leading-none tabular-nums text-success-600">{successPct}%</span>
-            <span className="text-[12px] text-gray-400 mt-1">success rate</span>
+            <span className="text-[12px] text-gray-500 mt-1">success rate</span>
           </div>
         </div>
       </div>
@@ -1244,7 +1243,7 @@ function HttpStatusCard() {
                   <span className="text-[13px] text-gray-500">{info.label}</span>
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[12px] text-gray-400">{pct}%</span>
+                  <span className="text-[12px] text-gray-500">{pct}%</span>
                   <span className="text-[13px] font-semibold tabular-nums text-gray-900">{c.count}</span>
                 </div>
               </div>
@@ -1305,7 +1304,7 @@ function DomainMetricsCard() {
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <span className="text-[28px] font-extrabold leading-none tabular-nums" style={{ color: gaugeColor }}>{trust}</span>
-            <span className="text-[12px] text-gray-400 mt-1">/ 100</span>
+            <span className="text-[12px] text-gray-500 mt-1">/ 100</span>
           </div>
         </div>
         <p className="text-[13px] text-gray-500">
@@ -1363,7 +1362,7 @@ function LinkRing({ dofollow, nofollow, total, pct, size = 96 }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-[16px] font-extrabold leading-none tabular-nums text-primary-600">{pct}%</span>
-        <span className="text-[12px] text-gray-400 mt-0.5">dofollow</span>
+        <span className="text-[12px] text-gray-500 mt-0.5">dofollow</span>
       </div>
     </div>
   )
@@ -1394,7 +1393,7 @@ function LinkAttributesCard() {
           <div className="flex items-start gap-1">
             <div>
               <p className="text-[13px] font-semibold text-gray-800">{g.label}</p>
-              <p className="text-[12px] text-gray-400 mt-0.5">{g.total.toLocaleString()} links</p>
+              <p className="text-[12px] text-gray-500 mt-0.5">{g.total.toLocaleString()} links</p>
             </div>
           </div>
 
@@ -1477,8 +1476,8 @@ function RobotsMetaCard() {
               : r.label.split(' & ').map((p, i) => i === 0 ? p : '& ' + p)
             return (
               <div key={r.label} className="flex-1 text-center">
-                <span className="text-[12px] text-gray-400 leading-tight block">{line1}</span>
-                <span className="text-[12px] text-gray-400 leading-tight block">{line2}</span>
+                <span className="text-[12px] text-gray-500 leading-tight block">{line1}</span>
+                <span className="text-[12px] text-gray-500 leading-tight block">{line2}</span>
               </div>
             )
           })}
@@ -1498,7 +1497,7 @@ function RobotsMetaCard() {
                 <span className="text-[13px] text-gray-500 truncate">{r.label}</span>
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                <span className="text-[12px] text-gray-400">{pct}%</span>
+                <span className="text-[12px] text-gray-500">{pct}%</span>
                 <span className="text-[13px] font-semibold tabular-nums text-gray-900">{r.count}</span>
               </div>
             </div>
@@ -1532,7 +1531,7 @@ function RedirectProfileCard() {
           <span className="text-[40px] font-extrabold text-gray-900 leading-none tabular-nums">{directPct}%</span>
           <HealthBadge status={health} />
         </div>
-        <p className="text-[13px] text-gray-400 mt-1">pages load direct — no redirect</p>
+        <p className="text-[13px] text-gray-500 mt-1">pages load direct — no redirect</p>
       </div>
 
       {/* Exception rows in a contained block */}
@@ -1554,7 +1553,7 @@ function RedirectProfileCard() {
       </div>
 
       {/* Insight */}
-      <p className="text-[13px] text-gray-400 leading-snug">
+      <p className="text-[13px] text-gray-500 leading-snug">
         {oneHop > 0 ? `${oneHop} page${oneHop > 1 ? 's' : ''} could skip a redirect hop.` : 'No redirect chains detected — all pages load direct.'}
       </p>
     </div>
@@ -1611,7 +1610,7 @@ function TechnicalDiagnostics() {
 function SectionLabel({ title }) {
   return (
     <div className="flex items-center gap-3 pt-1">
-      <span className="text-[12px] font-semibold text-gray-400 whitespace-nowrap">{title}</span>
+      <span className="text-[12px] font-semibold text-gray-500 whitespace-nowrap">{title}</span>
       <div className="flex-1 h-px bg-gray-100" />
     </div>
   )
@@ -1665,7 +1664,7 @@ function IndexabilityCard({ onTabSwitch }) {
         ))}
       </div>
 
-      <p className="text-[12px] text-gray-400 border-t border-gray-100 pt-3 mt-auto">
+      <p className="text-[12px] text-gray-500 border-t border-gray-100 pt-3 mt-auto">
         <span className="text-success-700 font-semibold">+12</span> indexable pages since last crawl
       </p>
     </SectionCard>
@@ -1684,12 +1683,9 @@ function PageHealthCard({ onTabSwitch }) {
   return (
     <div className="flex flex-col gap-5 w-full">
       {/* Hero */}
-      <div>
-        <div className="flex items-baseline gap-2">
-          <span className="text-[40px] font-extrabold leading-none tabular-nums text-success-600">{healthPct}%</span>
-          <span className="text-[13px] text-gray-400">of pages healthy</span>
-        </div>
-        <p className="text-[12px] text-gray-400 mt-1">{total.toLocaleString()} pages scanned</p>
+      <div className="flex items-baseline gap-2">
+        <span className="text-[40px] font-extrabold leading-none tabular-nums text-success-600">{healthPct}%</span>
+        <span className="text-[13px] text-gray-500">pages are healthy</span>
       </div>
 
       {/* Proportion bar */}
@@ -1704,7 +1700,7 @@ function PageHealthCard({ onTabSwitch }) {
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'var(--success-500)' }} />
           <div>
             <span className="text-[20px] font-extrabold text-gray-900 leading-none tabular-nums">{healthy.toLocaleString()}</span>
-            <p className="text-[12px] text-gray-400 mt-0.5">Healthy</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">Healthy</p>
           </div>
         </div>
         <div className="w-px h-8 bg-gray-100 shrink-0" />
@@ -1712,7 +1708,7 @@ function PageHealthCard({ onTabSwitch }) {
           <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ background: 'var(--warning-400)' }} />
           <div>
             <span className="text-[20px] font-extrabold text-gray-900 leading-none tabular-nums">{affected}</span>
-            <p className="text-[12px] text-gray-400 mt-0.5">Need attention</p>
+            <p className="text-[12px] text-gray-500 mt-0.5">Need attention</p>
           </div>
         </div>
       </div>
@@ -1767,8 +1763,8 @@ function TopFindingsWidget({ onFindingClick, onTabSwitch }) {
         <WidgetErrorState onRetry={handleRescan} retryLabel="Re-scan" />
       ) : status === 'loading' ? (
         <div className="flex flex-col items-center justify-center gap-3 py-10 min-h-[180px]">
-          <RefreshCw size={20} className="text-gray-400 animate-spin" />
-          <p className="text-[13px] text-gray-400">Loading findings…</p>
+          <RefreshCw size={20} className="text-gray-500 animate-spin" />
+          <p className="text-[13px] text-gray-500">Loading findings…</p>
         </div>
       ) : (
         /* Finding rows — each is a clearly clickable card row */
@@ -1843,7 +1839,7 @@ function ActionCenterSection({ onFindingClick, onTabSwitch }) {
               {/* Y-axis labels — absolutely positioned to match gridlines exactly */}
               <div className="relative shrink-0 pr-2" style={{ width: 28, height: chartH }}>
                 {yTicks.map(t => (
-                  <span key={t} className="absolute right-2 text-[12px] text-gray-400 tabular-nums leading-none"
+                  <span key={t} className="absolute right-2 text-[12px] text-gray-500 tabular-nums leading-none"
                     style={{ bottom: `${(t / maxY) * 100}%`, transform: 'translateY(50%)' }}>
                     {t}
                   </span>
@@ -1888,13 +1884,13 @@ function ActionCenterSection({ onFindingClick, onTabSwitch }) {
           <div className="flex-1">
             <p className="text-[12px] text-gray-500 mb-1">Fixed from baseline</p>
             <span className="text-[22px] font-extrabold text-gray-900 leading-none tabular-nums block">{fixedBaseline}</span>
-            <p className="text-[12px] text-gray-400 mt-1">Recurred since initial audit</p>
+            <p className="text-[12px] text-gray-500 mt-1">Recurred since initial audit</p>
           </div>
           <div className="w-px bg-gray-100 shrink-0 mx-4" />
           <div className="flex-1">
             <p className="text-[12px] text-gray-500 mb-1">Fixed since last scan</p>
             <span className="text-[22px] font-extrabold leading-none tabular-nums block" style={{ color: 'var(--success-700)' }}>{fixedSinceScan}</span>
-            <p className="text-[12px] text-gray-400 mt-1">New fixes after previous scan</p>
+            <p className="text-[12px] text-gray-500 mt-1">New fixes after previous scan</p>
           </div>
         </div>
       </SectionCard>
@@ -2537,7 +2533,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
           className="shrink-0 flex items-center justify-center pt-0.5"
           style={{ width: TABLE_EXPAND_COL, minWidth: TABLE_EXPAND_COL }}
         >
-          <ChevronRight size={13} className={`text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+          <ChevronRight size={13} className={`text-gray-500 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
         </div>
 
         {/* Category-level checkbox (auto-fix batch selection) — disabled once fully fixed */}
@@ -2570,7 +2566,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
             {finding.isNew && <span className="text-[12px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
             {finding.isRegression && <span className="text-[12px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
           </div>
-          <p className="text-[12px] text-gray-400 mt-0.5 leading-snug">{finding.description}</p>
+          <p className="text-[12px] text-gray-500 mt-0.5 leading-snug">{finding.description}</p>
         </div>
 
         {/* Right metadata */}
@@ -2602,7 +2598,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                   className={`px-3 py-2.5 text-[14px] font-medium border-b-2 transition-all whitespace-nowrap -mb-px ${
                     activeTab === t.id
                       ? 'border-primary-600 text-primary-700 font-semibold'
-                      : 'border-transparent text-gray-400 hover:text-gray-700'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
                   }`}
                 >
                   {t.label}
@@ -2629,7 +2625,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                     Affected pages ({filteredPages.length} of {finding.totalAffected} shown)
                   </p>
                   <div className="relative flex items-center">
-                    <Search size={12} className="absolute left-2.5 text-gray-400 pointer-events-none" />
+                    <Search size={12} className="absolute left-2.5 text-gray-500 pointer-events-none" />
                     <input
                       type="text"
                       value={searchTerm}
@@ -2706,7 +2702,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
 
                             {/* Current state */}
                             <td className="px-3 py-2.5" style={{ verticalAlign: 'top' }}>
-                              <span className={`text-[14px] font-mono ${isFixed && !isReEdit ? 'text-gray-400' : 'text-error-700'}`}>{page.current}</span>
+                              <span className={`text-[14px] ${isFixed && !isReEdit ? 'text-gray-500' : 'text-error-700'}`}>{page.current}</span>
                             </td>
 
                             {/* Recommended / Value to be applied / Recommendation / How to fix */}
@@ -2715,10 +2711,10 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                 manualFix ? (
                                   /* Manual fix — a value to apply yourself (styled like the auto-fix value), copy icon inline */
                                   <div className="inline-flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                    <span className="text-[14px] font-mono text-success-700">{page.recommended}</span>
+                                    <span className="text-[14px] text-success-700">{page.recommended}</span>
                                     <button
                                       onClick={e => { e.stopPropagation(); copyRecommended(page) }}
-                                      className={`transition-colors shrink-0 ${copiedUrl === page.url ? 'text-success-600' : 'text-gray-400 hover:text-gray-600'}`}
+                                      className={`transition-colors shrink-0 ${copiedUrl === page.url ? 'text-success-600' : 'text-gray-500 hover:text-gray-600'}`}
                                       title={copiedUrl === page.url ? 'Copied' : 'Copy value'}
                                     >
                                       {copiedUrl === page.url ? <Check size={12} /> : <Copy size={12} />}
@@ -2740,7 +2736,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                     }}
                                     rows={2}
                                     placeholder="Enter value to apply..."
-                                    className={`w-full text-[12px] font-mono text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
+                                    className={`w-full text-[12px] text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
                                       valError ? 'border-error-600 bg-error-50/40 focus:border-error-600' : 'border-gray-200 focus:border-primary-600'
                                     }`}
                                   />
@@ -2756,7 +2752,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                     value={autoEditVal}
                                     onChange={e => setEditValues(prev => ({ ...prev, [page.url]: e.target.value }))}
                                     rows={2}
-                                    className="w-full text-[12px] font-mono text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all"
+                                    className="w-full text-[12px] text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all"
                                     onFocus={e => { e.target.style.borderColor = 'var(--primary-600)' }}
                                     onBlur={e => { e.target.style.borderColor = '' }}
                                   />
@@ -2772,16 +2768,16 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                         e.stopPropagation()
                                         isReEdit ? setReEditSet(prev => { const n = new Set(prev); n.delete(page.url); return n }) : setEditingUrl(null)
                                       }}
-                                      className="text-[12px] text-gray-400 hover:text-gray-600 transition-colors"
+                                      className="text-[12px] text-gray-500 hover:text-gray-600 transition-colors"
                                     >Cancel</button>
                                   </div>
                                 </div>
                               ) : (
                                 <div className="flex items-center gap-2" onClick={e => e.stopPropagation()}>
-                                  <span className="text-[14px] font-mono text-success-700">{autoEditVal}</span>
+                                  <span className="text-[14px] text-success-700">{autoEditVal}</span>
                                   <button
                                     onClick={e => { e.stopPropagation(); isFixed ? openReEdit() : openEdit() }}
-                                    className="text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+                                    className="text-gray-500 hover:text-gray-600 transition-colors shrink-0"
                                     title="Edit fix"
                                   >
                                     <Pencil size={11} />
@@ -2837,7 +2833,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                   {/* Pagination — only if >6 pages */}
                   {totalTablePages > 1 && (
                     <div className="flex items-center justify-between px-3 py-2.5 border-t border-gray-100 bg-gray-50/50">
-                      <span className="text-[12px] text-gray-400">
+                      <span className="text-[12px] text-gray-500">
                         {(tablePage - 1) * TABLE_PER_PAGE + 1}–{Math.min(tablePage * TABLE_PER_PAGE, filteredPages.length)} of {filteredPages.length}
                       </span>
                       <div className="flex items-center gap-1">
@@ -2865,7 +2861,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
               <p className="text-[13px] text-gray-600 leading-relaxed">{finding.whyItMatters}</p>
             )}
             {activeTab === 'technical' && (
-              <p className="text-[13px] text-gray-600 leading-relaxed font-mono bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">{finding.technicalDetails}</p>
+              <p className="text-[13px] text-gray-600 leading-relaxed bg-gray-50 border border-gray-200 rounded-lg px-4 py-3">{finding.technicalDetails}</p>
             )}
           </div>
           </div>
@@ -2906,7 +2902,7 @@ function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onT
       >
         <ChevronRight
           size={13}
-          className={`text-gray-400 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
+          className={`text-gray-500 shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-90' : ''}`}
         />
 
         {/* Name */}
@@ -2914,7 +2910,7 @@ function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onT
 
         {/* Counts */}
         <div className="flex items-center gap-2 flex-1 min-w-0">
-          <span className="text-[12px] text-gray-400">{totalAll} issue{totalAll !== 1 ? 's' : ''}</span>
+          <span className="text-[12px] text-gray-500">{totalAll} issue{totalAll !== 1 ? 's' : ''}</span>
           {totalFixed > 0 && (
             <span className="text-[12px] text-success-600 font-medium">· {totalFixed} resolved</span>
           )}
@@ -2923,7 +2919,7 @@ function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onT
         {/* Right: pages + apply button */}
         <div className="flex items-center gap-3 shrink-0" onClick={e => e.stopPropagation()}>
           {totalPagesAffected > 0 && (
-            <span className="text-[12px] text-gray-400 hidden sm:inline whitespace-nowrap">{totalPagesAffected.toLocaleString()} pages</span>
+            <span className="text-[12px] text-gray-500 hidden sm:inline whitespace-nowrap">{totalPagesAffected.toLocaleString()} pages</span>
           )}
           {autoCount > 0 && !isOpen && (
             <div className="relative group/applycat">
@@ -3063,7 +3059,7 @@ function CategoryNavBar({ activeCategoryId, openCategoryId, activeSevs, onJump }
                 }`}
               >
                 {CATEGORY_SHORTS[cat.id] || cat.label}
-                <span className={`text-[12px] font-bold ${isActive ? 'text-primary-500' : 'text-gray-400'}`}>
+                <span className={`text-[12px] font-bold ${isActive ? 'text-primary-500' : 'text-gray-500'}`}>
                   {visibleCount}
                 </span>
               </button>
@@ -3551,7 +3547,7 @@ const CRAWLED_PAGE_DATA = [
     ],
   },
   {
-    url: 'https://www.gohighlevel.com/pricing', results: { cur: 4, isNew: 2, fix: 1 }, traffic: 7747, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 6, depth: 1, keywords: 5782,
+    url: 'https://www.gohighlevel.com/pricing', results: { cur: 12, isNew: 3, fix: 2 }, traffic: 7747, httpCode: 200, indexable: true, indexStatus: 'Ok', referring: 6, depth: 1, keywords: 5782,
     urlProtocol: 'HTTPS', robots: false, title: 'HighLevel Pricing', titleLen: 17, descLen: 87,
     canonical: 'https://www.gohighlevel.com/pricing', h1: 'Learn more about our plans', h1Len: 27, singleH1: 'Single', dupH1: false,
     h2: '$97 / Month', h2Len: 11, singleH2: 'Multiple', ttfb: 390, robotsMeta: 'index,follow', xRobotsTag: '—',
@@ -3564,10 +3560,19 @@ const CRAWLED_PAGE_DATA = [
     cssSize: '7KB', jsSize: '126.6KB', imageSize: '551.2KB', images: 46, loadingTime: '0.96s', isAmp: false,
     errorsCol: 1, warningsCol: 2, noticesCol: 1, urlLength: 36, inSitemap: true,
     findings: [
+      // HARDCODED: denser finding set so page details can demo scrolling + filters (prototyping)
       { id: 'f3', description: 'Missing meta description', detail: 'The pricing page has no meta description tag, reducing click-through rates from search results.', currentValue: 'No meta description found', aiValue: 'Add a 150–160 character meta description highlighting pricing plans and value.', severity: 'Errors', status: 'Current', fixType: 'Auto Fix' },
       { id: 'f4', description: 'Title tag too long', detail: 'The page title exceeds the recommended 60-character limit and may be truncated in SERPs.', currentValue: '73 characters', aiValue: 'Shorten to under 60 characters', severity: 'Warnings', status: 'Current', fixType: 'Assisted Fix' },
       { id: 'f5', description: 'Multiple H1 tags', detail: 'Two H1 elements were detected on this page, which can confuse search engines about the primary topic.', currentValue: '2 H1 tags found', aiValue: 'Consolidate to a single H1 tag', severity: 'Warnings', status: 'Current', fixType: 'Assisted Fix' },
       { id: 'f6', description: 'Images missing alt text', detail: '3 images on the pricing page are missing descriptive alt attributes.', currentValue: '3 images without alt text', aiValue: 'Add descriptive alt text to all images', severity: 'Notices', status: 'Current', fixType: 'Manual Fix' },
+      { id: 'f6b', description: 'Thin content block', detail: 'Above-the-fold pricing copy is shorter than recommended for commercial intent pages.', currentValue: '142 words above the fold', aiValue: 'Expand plan comparison copy to at least 300 words', severity: 'Notices', status: 'Current', fixType: 'Advisory' },
+      { id: 'f6c', description: 'Canonical self-reference missing', detail: 'No self-referencing canonical tag was detected on the pricing URL.', currentValue: 'Canonical missing', aiValue: 'Add <link rel="canonical" href="https://www.gohighlevel.com/pricing">', severity: 'Errors', status: 'Current', fixType: 'Auto Fix' },
+      { id: 'f6d', description: 'Open Graph title mismatch', detail: 'og:title does not match the HTML title, which can confuse social previews.', currentValue: 'og:title = HighLevel Plans', aiValue: 'Align og:title with the page title', severity: 'Warnings', status: 'New', fixType: 'Assisted Fix' },
+      { id: 'f6e', description: 'Missing FAQ schema', detail: 'Pricing FAQ accordion content is not marked up with FAQPage schema.', currentValue: 'No FAQ schema', aiValue: 'Add FAQPage JSON-LD for visible FAQ items', severity: 'Notices', status: 'Current', fixType: 'Assisted Fix' },
+      { id: 'f6f', description: 'Large unoptimized hero image', detail: 'Hero asset exceeds recommended weight for LCP.', currentValue: '1.8MB PNG', aiValue: 'Compress and serve WebP under 200KB', severity: 'Warnings', status: 'Current', fixType: 'Manual Fix' },
+      { id: 'f6g', description: 'Internal links without descriptive anchors', detail: 'Several CTA links use generic anchor text like “Learn more”.', currentValue: '4 generic anchors', aiValue: 'Use descriptive anchors tied to destination intent', severity: 'Notices', status: 'Current', fixType: 'Advisory' },
+      { id: 'f6h', description: 'Hreflang incomplete', detail: 'Alternate language versions are linked inconsistently from pricing.', currentValue: '2 of 5 locales linked', aiValue: 'Complete reciprocal hreflang set', severity: 'Warnings', status: 'Current', fixType: 'Assisted Fix' },
+      { id: 'f6i', description: 'Render-blocking scripts in head', detail: 'Two third-party scripts delay first paint on pricing.', currentValue: '2 blocking scripts', aiValue: 'Defer non-critical scripts', severity: 'Errors', status: 'Fixed', fixType: 'Auto Fix' },
     ],
   },
   {
@@ -3693,11 +3698,21 @@ function formatResourceSize(kb) {
 }
 
 const RESOURCE_DATA = [
-  { url: 'https://images.leadconnectorhq.com/image/f_webp,q_80/hero-banner.webp',                               sources: 3, type: 'IMG', status: 200, size: '385.0 KB', loadTime: '37ms',
+  { url: 'https://images.leadconnectorhq.com/image/f_webp,q_80/hero-banner.webp',                               sources: 12, type: 'IMG', status: 200, size: '385.0 KB', loadTime: '37ms',
+    // HARDCODED: denser source list so resource details can demo table pagination
     sourceDetails: [
       { fromUrl: 'https://ramada.9hf9h.com/65382b4',          followType: 'Do follow', altAttr: 'Fastest growing CRM',  title: 'Homepage hero image',   uniqueTitle: 'Hero image above the fold'       },
       { fromUrl: 'https://ramada.9hf9h.com/65382b4',          followType: 'No follow', altAttr: 'Fastest growing CRM',  title: 'Homepage hero image',   uniqueTitle: 'Homepage split-test hero image'   },
       { fromUrl: 'https://ramada.9hf9h.com/highlevel-vs-hubspot', followType: 'Do follow', altAttr: 'CRM comparison hero', title: 'Comparison hero image', uniqueTitle: 'Comparison landing hero'       },
+      { fromUrl: 'https://ramada.9hf9h.com/pricing',           followType: 'Do follow', altAttr: 'Pricing hero',         title: 'Pricing hero image',    uniqueTitle: 'Pricing page hero banner'        },
+      { fromUrl: 'https://ramada.9hf9h.com/features',          followType: 'Do follow', altAttr: 'Features hero',        title: 'Features hero image',   uniqueTitle: 'Features page hero banner'       },
+      { fromUrl: 'https://ramada.9hf9h.com/blog',              followType: 'No follow', altAttr: 'Blog promo',           title: 'Blog promo image',      uniqueTitle: 'Blog index promo tile'           },
+      { fromUrl: 'https://ramada.9hf9h.com/about',             followType: 'Do follow', altAttr: 'About hero',           title: 'About hero image',      uniqueTitle: 'About page hero banner'          },
+      { fromUrl: 'https://ramada.9hf9h.com/careers',           followType: 'Do follow', altAttr: 'Careers hero',         title: 'Careers hero image',    uniqueTitle: 'Careers page hero banner'        },
+      { fromUrl: 'https://ramada.9hf9h.com/contact',           followType: 'Do follow', altAttr: 'Contact hero',         title: 'Contact hero image',    uniqueTitle: 'Contact page hero banner'        },
+      { fromUrl: 'https://ramada.9hf9h.com/crm',               followType: 'Do follow', altAttr: 'CRM hero',             title: 'CRM hero image',        uniqueTitle: 'CRM product page hero'           },
+      { fromUrl: 'https://ramada.9hf9h.com/partners',          followType: 'No follow', altAttr: 'Partners hero',        title: 'Partners hero image',   uniqueTitle: 'Partners page hero banner'       },
+      { fromUrl: 'https://ramada.9hf9h.com/resources',         followType: 'Do follow', altAttr: 'Resources hero',       title: 'Resources hero image',  uniqueTitle: 'Resources hub hero banner'       },
     ]},
   { url: 'https://images.leadconnectorhq.com/image/f_webp,q_80/partner-logo.webp',                              sources: 2, type: 'IMG', status: 200, size: '385.0 KB', loadTime: '31ms',
     sourceDetails: [
@@ -4089,11 +4104,11 @@ function FilterEmptyState({
   return (
     <div className="flex flex-col items-center justify-center py-16 gap-5">
       <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center">
-        <Search size={22} className="text-gray-400" />
+        <Search size={22} className="text-gray-500" />
       </div>
       <div className="text-center max-w-xs">
         <p className="text-[14px] font-semibold text-gray-900 mb-1.5">{title}</p>
-        <p className="text-[13px] text-gray-400 leading-relaxed">{description}</p>
+        <p className="text-[13px] text-gray-500 leading-relaxed">{description}</p>
       </div>
       <div className="flex items-center gap-3">
         <button
@@ -4154,7 +4169,7 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
         </span>
         <span
           onClick={e => { e.stopPropagation(); onSelectAll(); onClose() }}
-          className="w-5 h-5 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-200 transition-colors"
+          className="w-5 h-5 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-200 transition-colors"
         >
           <X size={11} />
         </span>
@@ -4165,7 +4180,7 @@ function FilterChipDropdown({ label, options, selected, onToggle, onSelectAll, d
           {options.length > 10 && (
             <div className="mb-1 pb-1 border-b border-gray-100">
               <div className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-primary-600 bg-white">
-                <Search size={12} className="text-gray-400 shrink-0" />
+                <Search size={12} className="text-gray-500 shrink-0" />
                 <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search" className="flex-1 text-[14px] text-gray-700 placeholder:text-gray-400 outline-none bg-transparent" autoFocus />
               </div>
             </div>
@@ -4260,9 +4275,9 @@ function ResultsCountCell({ results }) {
           onMouseLeave={hide}
           className="bg-white border border-gray-200 rounded-xl p-3.5 w-[200px]"
         >
-          <p className="text-[12px] font-semibold text-gray-400 mb-1 m-0">Results</p>
+          <p className="text-[12px] font-semibold text-gray-500 mb-1 m-0">Results</p>
           <p className="text-[22px] font-bold text-gray-900 leading-none mb-0.5 m-0">{count}</p>
-          <p className="text-[12px] text-gray-400 mb-3 m-0">Total in current set</p>
+          <p className="text-[12px] text-gray-500 mb-3 m-0">Total in current set</p>
           <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5">
             <div className="flex items-center justify-between gap-2">
               <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-[12px] font-medium text-gray-600">
@@ -4300,13 +4315,17 @@ function CrawledPagesTab() {
   const [activeRules, setActiveRules]     = useState([])
   const [visibleCols, setVisibleCols]     = useState(DEFAULT_VISIBLE_COLS)
   const [activePreset, setActivePreset]   = useState('seo-overview')
+  const [showPresetDropdown, setShowPresetDropdown] = useState(false)
   const [detailPageUrl, setDetailPageUrl] = useState(null)
-  // Multi-select fix-type filter — same FilterChipDropdown pattern as Type on the table toolbar.
-  const [detailFixFilter, setDetailFixFilter] = useState(() => new Set(['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']))
+  // Same Issue type + Fix type filters as Scan results (multi-select chip dropdowns).
+  const [detailSevFilter, setDetailSevFilter] = useState(() => new Set(['error', 'warning', 'notice']))
+  const [detailFixFilter, setDetailFixFilter] = useState(() => new Set(['auto', 'assisted', 'manual', 'advisory']))
+  const [showDetailSevDropdown, setShowDetailSevDropdown] = useState(false)
   const [showDetailFixDropdown, setShowDetailFixDropdown] = useState(false)
+  const [detailFindingsPage, setDetailFindingsPage] = useState(1)
+  const [detailFindingsPerPage, setDetailFindingsPerPage] = useState(10)
+  const detailSevDropdownRef = useRef(null)
   const detailFixDropdownRef = useRef(null)
-  // When Connect modal opens from the issue panel, remember where to return on Cancel.
-  const [reopenDetailAfterConnect, setReopenDetailAfterConnect] = useState(null) // { url, fixFilter: string[] } | null
   const [selectedFindings, setSelectedFindings] = useState({})
   const [fixedFindings, setFixedFindings] = useState(new Set())   // finding ids applied this session
   const [draftFindings, setDraftFindings] = useState(new Set())   // fixed → edited again (re-enabled)
@@ -4315,6 +4334,8 @@ function CrawledPagesTab() {
   const [copiedFinding, setCopiedFinding] = useState(null)        // finding id showing "copied" feedback
   const [showConnectModal, setShowConnectModal] = useState(false)
   const [connectPlatform, setConnectPlatform] = useState('wordpress') // demo: toggled in-modal
+  const [successAlert, setSuccessAlert] = useState(null) // same fix toast pattern as Scan results
+  const alertTimer = useRef(null)
   const [page, setPage]                   = useState(1)
   const [perPage, setPerPage]             = useState(10)
   const [showStatusDropdown, setShowStatusDropdown] = useState(false)
@@ -4391,7 +4412,21 @@ function CrawledPagesTab() {
     setTimeout(() => setCopiedFinding(c => (c === f.id ? null : c)), 1500)
   }
 
-  function markFindingsFixed(ids) {
+  function showFixToast(count) {
+    if (!count) return
+    if (alertTimer.current) clearTimeout(alertTimer.current)
+    setSuccessAlert(
+      count === 1
+        ? '1 finding fixed successfully.'
+        : `${count} findings fixed successfully.`,
+    )
+    alertTimer.current = setTimeout(() => setSuccessAlert(null), 5000)
+  }
+
+  useEffect(() => () => { if (alertTimer.current) clearTimeout(alertTimer.current) }, [])
+
+  function markFindingsFixed(ids, { toast = true } = {}) {
+    if (!ids?.length) return
     setFixedFindings(prev => { const n = new Set(prev); ids.forEach(id => n.add(id)); return n })
     setDraftFindings(prev => { const n = new Set(prev); ids.forEach(id => n.delete(id)); return n })
     setEditingFinding(null)
@@ -4403,6 +4438,7 @@ function CrawledPagesTab() {
       })
       return next
     })
+    if (toast) showFixToast(ids.length)
   }
 
   function fixSingleFinding(f) {
@@ -4418,24 +4454,11 @@ function CrawledPagesTab() {
     markFindingsFixed(ids)
     setSelected([])
     setSelectedFindings({})
-    setReopenDetailAfterConnect(null)
     setShowConnectModal(false)
   }
 
   function closeConnectModal() {
     setShowConnectModal(false)
-    if (reopenDetailAfterConnect?.url) {
-      setDetailPageUrl(reopenDetailAfterConnect.url)
-      const restored = reopenDetailAfterConnect.fixFilter
-      if (Array.isArray(restored) && restored.length) {
-        setDetailFixFilter(new Set(restored))
-      } else if (typeof restored === 'string' && restored !== 'all') {
-        setDetailFixFilter(new Set([restored]))
-      } else {
-        setDetailFixFilter(new Set(['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']))
-      }
-      setReopenDetailAfterConnect(null)
-    }
   }
 
   const baseData = activeRules.length
@@ -4456,6 +4479,7 @@ function CrawledPagesTab() {
   useEffect(() => { setPage(1) }, [filter, activeRules, pageSearch])
 
   const colPickerRef = useRef(null)
+  const presetDropdownRef = useRef(null)
 
   useEffect(() => {
     if (!showColumns) return
@@ -4467,6 +4491,17 @@ function CrawledPagesTab() {
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showColumns])
+
+  useEffect(() => {
+    if (!showPresetDropdown) return
+    function handleOutside(e) {
+      if (presetDropdownRef.current && !presetDropdownRef.current.contains(e.target)) {
+        setShowPresetDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [showPresetDropdown])
 
   useEffect(() => {
     if (!showStatusDropdown) return
@@ -4500,23 +4535,34 @@ function CrawledPagesTab() {
     ? CRAWLED_PAGE_DATA.find(p => p.url === detailPageUrl) || null
     : null
 
-  const FIX_TYPE_ORDER = ['Auto Fix', 'Assisted Fix', 'Manual Fix', 'Advisory']
-  const FIX_TYPE_LABELS = {
-    'Auto Fix': 'Auto fix',
-    'Assisted Fix': 'Assisted fix',
-    'Manual Fix': 'Manual fix',
-    Advisory: 'Advisory',
+  // Map crawled finding fields ↔ Scan results filter chip ids
+  const SEV_ID_BY_LABEL = { Errors: 'error', Warnings: 'warning', Notices: 'notice' }
+  const FIX_ID_BY_LABEL = {
+    'Auto Fix': 'auto',
+    'Assisted Fix': 'assisted',
+    'Manual Fix': 'manual',
+    Advisory: 'advisory',
   }
-  const detailFixTypesPresent = detailPage
-    ? FIX_TYPE_ORDER.filter(t => detailPage.findings.some(f => f.fixType === t))
-    : []
-  const detailFixOptions = detailFixTypesPresent.map(t => ({ id: t, label: FIX_TYPE_LABELS[t] || t }))
-  const detailFixAllSelected = detailFixTypesPresent.length > 0
-    && detailFixTypesPresent.every(t => detailFixFilter.has(t))
+  const DETAIL_SEV_OPTIONS = [
+    { id: 'error', label: 'Errors' },
+    { id: 'warning', label: 'Warnings' },
+    { id: 'notice', label: 'Notices' },
+  ]
+  const DETAIL_FIX_OPTIONS = [
+    { id: 'auto', label: 'Auto fix' },
+    { id: 'assisted', label: 'Assisted fix' },
+    { id: 'manual', label: 'Manual fix' },
+    { id: 'advisory', label: 'Advisory' },
+  ]
+
+  const detailSevAll = detailSevFilter.size === 0 || detailSevFilter.size >= DETAIL_SEV_OPTIONS.length
+  const detailFixAll = detailFixFilter.size === 0 || detailFixFilter.size >= DETAIL_FIX_OPTIONS.length
   const detailFilteredFindings = detailPage
-    ? (detailFixAllSelected || detailFixFilter.size === 0
-      ? detailPage.findings
-      : detailPage.findings.filter(f => detailFixFilter.has(f.fixType)))
+    ? detailPage.findings.filter(f => {
+      const sevOk = detailSevAll || detailSevFilter.has(SEV_ID_BY_LABEL[f.severity])
+      const fixOk = detailFixAll || detailFixFilter.has(FIX_ID_BY_LABEL[f.fixType])
+      return sevOk && fixOk
+    })
     : []
   const detailSelectableAuto = detailPage
     ? detailPage.findings.filter(f => isAutoFix(f) && isFindingSelectable(f))
@@ -4526,7 +4572,30 @@ function CrawledPagesTab() {
       detailFilteredFindings.some(f => f.id === id && isFindingSelectable(f))
     ).length
     : 0
-  const detailAutoOnly = detailFixFilter.size === 1 && detailFixFilter.has('Auto Fix')
+  const detailAutoOnly = detailFixFilter.size === 1 && detailFixFilter.has('auto')
+  const detailFindingsTotalPages = Math.max(1, Math.ceil(detailFilteredFindings.length / detailFindingsPerPage))
+  const detailFindingsSafePage = Math.min(detailFindingsPage, detailFindingsTotalPages)
+  const detailPaginatedFindings = detailFilteredFindings.slice(
+    (detailFindingsSafePage - 1) * detailFindingsPerPage,
+    detailFindingsSafePage * detailFindingsPerPage,
+  )
+
+  useEffect(() => {
+    setDetailFindingsPage(1)
+  }, [detailPageUrl, detailSevFilter, detailFixFilter])
+
+  function toggleDetailSev(id) {
+    setDetailSevFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        if (next.size === 1) return prev
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
 
   function toggleDetailFix(id) {
     setDetailFixFilter(prev => {
@@ -4542,17 +4611,24 @@ function CrawledPagesTab() {
   }
 
   function openPageDetail(url) {
-    const page = CRAWLED_PAGE_DATA.find(p => p.url === url)
-    const present = FIX_TYPE_ORDER.filter(t => page?.findings.some(f => f.fixType === t))
     setDetailPageUrl(url)
-    setDetailFixFilter(new Set(present.length ? present : FIX_TYPE_ORDER))
+    setDetailSevFilter(new Set(DETAIL_SEV_OPTIONS.map(o => o.id)))
+    setDetailFixFilter(new Set(DETAIL_FIX_OPTIONS.map(o => o.id)))
+    setShowDetailSevDropdown(false)
     setShowDetailFixDropdown(false)
+    setDetailFindingsPage(1)
+  }
+
+  function closePageDetail() {
+    setDetailPageUrl(null)
+    setShowDetailSevDropdown(false)
+    setShowDetailFixDropdown(false)
+    setDetailFindingsPage(1)
   }
 
   function openConnectFromDetail() {
     if (!detailPage) return
-    setReopenDetailAfterConnect({ url: detailPage.url, fixFilter: [...detailFixFilter] })
-    setDetailPageUrl(null)
+    setShowDetailSevDropdown(false)
     setShowDetailFixDropdown(false)
     setShowConnectModal(true)
   }
@@ -4596,8 +4672,430 @@ function CrawledPagesTab() {
     setSelectedFindings(map)
   }
 
+  // Dedicated page details — investigate / prioritize / fix all findings for one URL.
+  if (detailPage) {
+    const connectDisabled = detailAutoOnly ? !detailSelectableAuto.length : !detailSelectedCount
+    const connectCount = detailAutoOnly ? detailSelectableAuto.length : detailSelectedCount
+    // Same summary model as Scan results — scoped to this page's findings.
+    const pageOpenFindings = detailPage.findings.filter(f => findingStatus(f) !== 'Fixed')
+    const pageFixedCount = detailPage.findings.filter(f => findingStatus(f) === 'Fixed').length
+    const pageOpenCount = pageOpenFindings.length
+    const pageTotalIssues = detailPage.findings.length
+    const pageFixedPct = pageTotalIssues > 0 ? Math.round((pageFixedCount / pageTotalIssues) * 100) : 0
+    const pageAutoFixesAvail = pageOpenFindings.filter(f => f.fixType === 'Auto Fix').length
+    const pageErrOpen = pageOpenFindings.filter(f => f.severity === 'Errors').length
+    const pageWarnOpen = pageOpenFindings.filter(f => f.severity === 'Warnings').length
+    const pageNoticeOpen = pageOpenFindings.filter(f => f.severity === 'Notices').length
+    const pageSeverityTotal = pageErrOpen + pageWarnOpen + pageNoticeOpen
+    const pageSeverityBreakdown = [
+      { key: 'error', label: 'Errors', count: pageErrOpen, color: 'var(--error-600)' },
+      { key: 'warning', label: 'Warnings', count: pageWarnOpen, color: 'var(--warning-600)' },
+      { key: 'notice', label: 'Notices', count: pageNoticeOpen, color: 'var(--primary-600)' },
+    ]
+    const pageAllResolved = pageOpenCount === 0
+
+    return (
+      <div className="flex flex-col gap-4 min-w-0 pb-8">
+        {successAlert && (
+          <div
+            className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 bg-success-50 rounded-lg shadow-lg min-w-[340px] max-w-[560px]"
+            style={{ border: '1px solid #16A34A' }}
+          >
+            <CircleCheck size={15} className="text-success-600 shrink-0" />
+            <p className="text-[13px] font-medium text-success-700 flex-1">{successAlert}</p>
+            <button
+              type="button"
+              onClick={() => { setSuccessAlert(null); clearTimeout(alertTimer.current) }}
+              className="shrink-0 text-success-500 hover:text-success-700 transition-colors p-0.5"
+            >
+              <X size={13} />
+            </button>
+          </div>
+        )}
+
+        <button
+          type="button"
+          onClick={closePageDetail}
+          className="flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit"
+        >
+          <ArrowLeft size={14} />
+          Back to crawled pages
+        </button>
+
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[16px] font-semibold text-gray-900 m-0 break-all leading-snug">{detailPage.url}</h2>
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(detailPage.httpCode)}`}>
+                {detailPage.httpCode}
+              </span>
+              {detailPage.indexable
+                ? <span className="inline-flex items-center gap-1 text-[12px] font-medium text-success-600"><CircleCheck size={11} />Indexable</span>
+                : <span className="text-[12px] text-gray-500">Not indexable</span>}
+            </div>
+          </div>
+          <a
+            href={detailPage.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${BTN_SECONDARY} inline-flex items-center gap-1.5 shrink-0`}
+          >
+            Open page
+            <ExternalLink size={13} />
+          </a>
+        </div>
+
+        {/* Same issues summary cards as Scan results — scoped to this page */}
+        {!pageAllResolved && (
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 min-w-0 items-stretch">
+            <CountCard
+              className="h-full"
+              label="Open issues"
+              value={pageOpenCount.toLocaleString()}
+              Icon={AlertTriangle}
+              iconColor="var(--primary-600)"
+              helpContent="Open findings still affecting this page. Lower is better."
+            />
+            <CountCard
+              className="h-full"
+              label="Fixed"
+              value={pageFixedCount.toLocaleString()}
+              delta={`${pageFixedPct}%`}
+              deltaUp
+              Icon={CircleCheck}
+              iconColor="var(--success-600)"
+              helpContent="Findings marked fixed as a share of all issues on this page."
+            />
+            <CountCard
+              className="h-full"
+              label="Auto fixes available"
+              value={pageAutoFixesAvail.toLocaleString()}
+              Icon={Zap}
+              iconColor="var(--warning-600)"
+              helpContent="Open issues on this page that can be applied automatically with one click."
+            />
+            <CountCard
+              className="h-full"
+              label="By severity"
+              Icon={BarChart3}
+              iconColor="var(--primary-600)"
+              helpContent="Open findings on this page grouped by severity. Fix errors first, then warnings, then notices."
+              footer={(
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex h-1.5 w-full rounded-full overflow-hidden bg-gray-100 gap-0.5">
+                    {pageSeverityBreakdown.map(s => {
+                      if (s.count <= 0 || pageSeverityTotal <= 0) return null
+                      const pct = Math.max(8, (s.count / pageSeverityTotal) * 100)
+                      return (
+                        <div
+                          key={s.key}
+                          className="h-full first:rounded-l-full last:rounded-r-full"
+                          style={{ width: `${pct}%`, background: s.color }}
+                          title={`${s.count} ${s.label.toLowerCase()}`}
+                        />
+                      )
+                    })}
+                  </div>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    {pageSeverityBreakdown.map(s => (
+                      <div key={s.key} className="flex items-center gap-1 min-w-0">
+                        <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: s.color }} />
+                        <span className="text-[12px] font-semibold tabular-nums text-gray-900">{s.count}</span>
+                        <span className="text-[12px] text-gray-500">{s.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            />
+          </div>
+        )}
+
+        {/* Findings table — Issue type + Fix type filters match Scan results */}
+        <SectionCard>
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+            <FilterChipDropdown
+              label="Issue type"
+              options={DETAIL_SEV_OPTIONS}
+              selected={detailSevFilter}
+              onToggle={toggleDetailSev}
+              onSelectAll={() => setDetailSevFilter(new Set(DETAIL_SEV_OPTIONS.map(o => o.id)))}
+              dropdownRef={detailSevDropdownRef}
+              open={showDetailSevDropdown}
+              onOpen={() => { setShowDetailFixDropdown(false); setShowDetailSevDropdown(v => !v) }}
+              onClose={() => setShowDetailSevDropdown(false)}
+            />
+            <FilterChipDropdown
+              label="Fix type"
+              options={DETAIL_FIX_OPTIONS}
+              selected={detailFixFilter}
+              onToggle={toggleDetailFix}
+              onSelectAll={() => setDetailFixFilter(new Set(DETAIL_FIX_OPTIONS.map(o => o.id)))}
+              dropdownRef={detailFixDropdownRef}
+              open={showDetailFixDropdown}
+              onOpen={() => { setShowDetailSevDropdown(false); setShowDetailFixDropdown(v => !v) }}
+              onClose={() => setShowDetailFixDropdown(false)}
+            />
+            <div className="ml-auto">
+              <button
+                type="button"
+                onClick={detailAutoOnly ? applyAutoFixesOnDetailPage : applySelectedOnDetailPage}
+                disabled={connectDisabled}
+                className={connectDisabled ? `${BTN_PRIMARY} opacity-50 cursor-not-allowed` : BTN_PRIMARY}
+              >
+                Connect to fix{connectCount ? ` (${connectCount})` : ''}
+              </button>
+            </div>
+          </div>
+
+          {detailFilteredFindings.length === 0 ? (
+            <div className="py-12 px-4 text-center">
+              <p className="text-[14px] font-medium text-gray-700 m-0">No findings match these filters</p>
+              <p className="text-[13px] text-gray-500 m-0 mt-1">Try adjusting Issue type or Fix type.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setDetailSevFilter(new Set(DETAIL_SEV_OPTIONS.map(o => o.id)))
+                  setDetailFixFilter(new Set(DETAIL_FIX_OPTIONS.map(o => o.id)))
+                }}
+                className="mt-3 text-[13px] font-medium text-primary-600 hover:text-primary-700"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left min-w-[960px]">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="w-10 px-3 py-2.5" aria-label="Select" />
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Issue</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Issue type</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Fix type</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Status</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">Current value</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[200px]">Recommended</th>
+                    <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[88px]">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detailPaginatedFindings.map(finding => {
+                    const status = findingStatus(finding)
+                    const isFixed = status === 'Fixed'
+                    const autoFix = finding.fixType === 'Auto Fix'
+                    const assistedFix = finding.fixType === 'Assisted Fix'
+                    const manualFix = finding.fixType === 'Manual Fix'
+                    const showCheckbox = autoFix || assistedFix
+                    const selectable = isFindingSelectable(finding)
+                    const isFindingSel = (selectedFindings[detailPage.url] || []).includes(finding.id)
+                    const isEditing = editingFinding === finding.id
+                    const recValue = findingValues[finding.id] ?? finding.aiValue ?? ''
+                    const assistedVal = String(recValue)
+                    const valError = assistedFix
+                      && assistedVal.trim() !== ''
+                      && assistedVal.trim() === String(finding.currentValue || '').trim()
+                      ? 'Value matches current state — no change will be applied'
+                      : null
+                    const canFixAssisted = assistedFix && !isFixed && assistedVal.trim() !== '' && !valError
+                    const canFixAuto = autoFix && !isFixed && !isEditing
+
+                    return (
+                      <tr key={finding.id} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40 align-top">
+                        <td className="px-3 py-3">
+                          {showCheckbox ? (
+                            <input
+                              type="checkbox"
+                              checked={selectable && isFindingSel}
+                              disabled={!selectable}
+                              onChange={() => selectable && toggleFinding(detailPage.url, finding.id)}
+                              style={tableCheckboxStyle}
+                              className={selectable ? 'cursor-pointer' : 'opacity-40 cursor-not-allowed'}
+                            />
+                          ) : (
+                            <span className="inline-block w-[15px]" />
+                          )}
+                        </td>
+                        <td className="px-3 py-3 min-w-[220px] max-w-[280px]">
+                          <p className="text-[14px] font-medium text-gray-900 m-0 leading-snug">{finding.description}</p>
+                          <p className="text-[14px] text-gray-500 m-0 mt-1 leading-snug line-clamp-2">{finding.detail}</p>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <SevBadge severity={SEV_ID_BY_LABEL[finding.severity] || 'notice'} />
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <FixBadge fixType={FIX_ID_BY_LABEL[finding.fixType] || 'advisory'} />
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <span className={`text-[14px] font-medium ${
+                            status === 'Fixed' ? 'text-success-600'
+                              : status === 'New' ? 'text-primary-600'
+                                : status === 'Draft' ? 'text-warning-600'
+                                  : 'text-gray-500'
+                          }`}>
+                            {status === 'Current' ? 'Open' : status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 max-w-[220px]">
+                          <p className={`text-[14px] m-0 leading-snug break-words ${isFixed ? 'text-gray-500' : 'text-error-700'}`}>
+                            {finding.currentValue || '—'}
+                          </p>
+                        </td>
+                        <td className="px-3 py-3 max-w-[260px]">
+                          {assistedFix && !isFixed ? (
+                            <div>
+                              <textarea
+                                value={assistedVal}
+                                onChange={e => {
+                                  const val = e.target.value
+                                  setFindingValues(prev => ({ ...prev, [finding.id]: val }))
+                                  if (isFindingSel && (!val.trim() || val.trim() === String(finding.currentValue || '').trim())) {
+                                    toggleFinding(detailPage.url, finding.id)
+                                  }
+                                }}
+                                rows={2}
+                                placeholder="Enter value to apply..."
+                                className={`w-full text-[14px] text-gray-800 border rounded-lg px-2.5 py-1.5 resize-none outline-none transition-all placeholder:text-gray-400 ${
+                                  valError ? 'border-error-600 bg-error-50/40 focus:border-error-600' : 'border-gray-200 focus:border-primary-600'
+                                }`}
+                              />
+                              {valError && (
+                                <p className="flex items-center gap-1 mt-1 text-[14px] text-error-600 m-0">
+                                  <CircleX size={11} className="shrink-0" />
+                                  {valError}
+                                </p>
+                              )}
+                            </div>
+                          ) : autoFix && isEditing ? (
+                            <div className="flex flex-col gap-1.5">
+                              <textarea
+                                value={recValue}
+                                onChange={e => setFindingValues(prev => ({ ...prev, [finding.id]: e.target.value }))}
+                                rows={2}
+                                className="w-full text-[14px] text-gray-800 border border-gray-200 rounded-lg px-2.5 py-1.5 resize-none outline-none focus:border-primary-600"
+                              />
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    if (status === 'Draft' || draftFindings.has(finding.id)) markFindingsFixed([finding.id])
+                                    else setEditingFinding(null)
+                                  }}
+                                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-success-700 hover:bg-success-800 text-white text-[14px] font-semibold"
+                                >
+                                  <Check size={9} /> Save
+                                </button>
+                                <button type="button" onClick={() => setEditingFinding(null)} className="text-[14px] text-gray-500 hover:text-gray-600">
+                                  Cancel
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex items-start gap-2">
+                              <p className={`text-[14px] m-0 leading-snug break-words flex-1 ${isFixed ? 'text-gray-500' : 'text-success-700'}`}>
+                                {recValue || '—'}
+                              </p>
+                              {autoFix && !isFixed && (
+                                <button
+                                  type="button"
+                                  onClick={() => openFindingEdit(finding)}
+                                  className="text-gray-500 hover:text-gray-600 shrink-0"
+                                  title="Edit recommendation"
+                                >
+                                  <Pencil size={12} />
+                                </button>
+                              )}
+                              {manualFix && recValue && (
+                                <button
+                                  type="button"
+                                  onClick={() => copyFindingValue(finding)}
+                                  className={`shrink-0 ${copiedFinding === finding.id ? 'text-success-600' : 'text-gray-500 hover:text-gray-600'}`}
+                                  title={copiedFinding === finding.id ? 'Copied' : 'Copy value'}
+                                >
+                                  {copiedFinding === finding.id ? <Check size={12} /> : <Copy size={12} />}
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          {isFixed && !isEditing ? (
+                            <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-success-600">
+                              <CircleCheck size={11} /> Fixed
+                            </span>
+                          ) : assistedFix ? (
+                            <button
+                              type="button"
+                              onClick={() => canFixAssisted && fixSingleFinding(finding)}
+                              disabled={!canFixAssisted}
+                              className={`inline-flex items-center px-2.5 py-1 rounded-lg border text-[14px] font-medium transition-colors ${
+                                canFixAssisted
+                                  ? 'border-gray-200 bg-white text-gray-600 hover:border-primary-600 hover:text-primary-600'
+                                  : 'border-gray-200 bg-gray-50 text-gray-300 cursor-not-allowed'
+                              }`}
+                            >
+                              Fix
+                            </button>
+                          ) : canFixAuto ? (
+                            <button
+                              type="button"
+                              onClick={() => fixSingleFinding(finding)}
+                              className="inline-flex items-center px-2.5 py-1 rounded-lg border border-gray-200 bg-white text-[14px] font-medium text-gray-600 hover:border-primary-600 hover:text-primary-600 transition-colors"
+                            >
+                              Fix
+                            </button>
+                          ) : (
+                            <span className="text-[14px] text-gray-300">—</span>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {detailFilteredFindings.length > 0 && (
+            <HLPagination
+              page={detailFindingsSafePage}
+              perPage={detailFindingsPerPage}
+              total={detailFilteredFindings.length}
+              onPage={setDetailFindingsPage}
+              onPerPage={p => { setDetailFindingsPerPage(p); setDetailFindingsPage(1) }}
+            />
+          )}
+        </SectionCard>
+
+        {showConnectModal && (
+          <ConnectFixesModal
+            platform={connectPlatform}
+            onPlatformChange={setConnectPlatform}
+            onClose={closeConnectModal}
+            onApply={applySelectedFixes}
+          />
+        )}
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
+      {successAlert && (
+        <div
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 bg-success-50 rounded-lg shadow-lg min-w-[340px] max-w-[560px]"
+          style={{ border: '1px solid #16A34A' }}
+        >
+          <CircleCheck size={15} className="text-success-600 shrink-0" />
+          <p className="text-[13px] font-medium text-success-700 flex-1">{successAlert}</p>
+          <button
+            type="button"
+            onClick={() => { setSuccessAlert(null); clearTimeout(alertTimer.current) }}
+            className="shrink-0 text-success-500 hover:text-success-700 transition-colors p-0.5"
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
+
       {/* Filter + action bar */}
       <div className="flex items-center gap-3 flex-wrap">
         {/* Type filter chip */}
@@ -4622,7 +5120,7 @@ function CrawledPagesTab() {
         <div className="ml-auto flex items-center gap-2">
           {/* Search — right-aligned, filters stay on the left */}
           <div className="relative" style={{ width: 240 }}>
-            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
             <input
               value={pageSearch}
               onChange={e => setPageSearch(e.target.value)}
@@ -4633,7 +5131,7 @@ function CrawledPagesTab() {
           <div className="relative" ref={colPickerRef}>
             {/* Column count trigger */}
             <button
-              onClick={() => { setShowColumns(c => !c); setColSearch('') }}
+              onClick={() => { setShowColumns(c => !c); setColSearch(''); setShowPresetDropdown(false) }}
               className="h-8 inline-flex items-center gap-1.5 px-3 text-[14px] font-medium rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
             >
               <LayoutDashboard size={13} />
@@ -4642,32 +5140,45 @@ function CrawledPagesTab() {
 
             {showColumns && (
               <div className="absolute right-0 top-10 z-50 bg-white border border-gray-200 rounded-lg overflow-hidden w-80" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
-                {/* Presets */}
+                {/* Preset dropdown — collapsed trigger, expands to list all presets */}
                 <div className="p-2 border-b border-gray-100">
                   <p className="text-[12px] font-medium text-gray-500 px-1 mb-1.5 m-0">Column preset</p>
-                  <div className="flex flex-col">
-                    {COLUMN_PRESETS.map(preset => (
-                      <label
-                        key={preset.id}
-                        className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-gray-50 cursor-pointer"
-                      >
-                        <input
-                          type="radio"
-                          name="column-preset"
-                          checked={activePreset === preset.id}
-                          onChange={() => applyPreset(preset.id)}
-                          style={{ accentColor: '#155EEF', width: 14, height: 14 }}
-                        />
-                        <span className="text-[13px] text-gray-700">{preset.label}</span>
-                      </label>
-                    ))}
+                  <div className="relative" ref={presetDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setShowPresetDropdown(v => !v)}
+                      className="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border border-gray-200 bg-white hover:bg-gray-50 transition-colors"
+                    >
+                      <span className="text-[13px] font-medium text-gray-700">
+                        {COLUMN_PRESETS.find(p => p.id === activePreset)?.label || 'Custom'}
+                      </span>
+                      <ChevronDown size={13} className={`text-gray-500 transition-transform ${showPresetDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showPresetDropdown && (
+                      <div className="absolute left-0 right-0 top-full mt-1 z-10 bg-white border border-gray-200 rounded-lg p-1" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
+                        {COLUMN_PRESETS.map(preset => (
+                          <button
+                            key={preset.id}
+                            type="button"
+                            onClick={() => { applyPreset(preset.id); setShowPresetDropdown(false) }}
+                            className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md text-left transition-colors ${
+                              activePreset === preset.id ? 'bg-primary-50' : 'hover:bg-gray-50'
+                            }`}
+                          >
+                            <span className={`text-[13px] ${activePreset === preset.id ? 'font-semibold text-primary-700' : 'text-gray-700'}`}>{preset.label}</span>
+                            {activePreset === preset.id && <Check size={13} className="text-primary-600 shrink-0" />}
+                          </button>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Search */}
                 <div className="p-2 border-b border-gray-100 flex flex-col gap-1.5">
                   <div className="relative flex items-center">
-                    <Search size={13} className="absolute left-2.5 text-gray-400 pointer-events-none" />
+                    <Search size={13} className="absolute left-2.5 text-gray-500 pointer-events-none" />
                     <input
                       value={colSearch}
                       onChange={e => setColSearch(e.target.value)}
@@ -4689,7 +5200,7 @@ function CrawledPagesTab() {
                   </div>
                   <div className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition-colors" style={{ height: 34 }}>
                     <input type="checkbox" checked disabled style={{ accentColor: '#155EEF', width: 15, height: 15, flexShrink: 0 }} />
-                    <span className="text-[13px] text-gray-700 flex-1">Issues</span>
+                    <span className="text-[13px] text-gray-700 flex-1">Action</span>
                   </div>
 
                   {orderedColsForPicker.map(col => {
@@ -4760,7 +5271,7 @@ function CrawledPagesTab() {
                   boxShadow: '4px 0 8px -4px rgba(16, 24, 40, 0.12)',
                 }}
               >
-                Issues
+                Action
               </th>
               {visibleCols.results          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Results</th>}
               {visibleCols.traffic          && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Total traffic</th>}
@@ -4844,16 +5355,27 @@ function CrawledPagesTab() {
                       className={`sticky z-20 px-4 py-3 ${stickyCellBg}`}
                       style={{ left: CRAWLED_STICKY_URL_LEFT, width: CRAWLED_URL_COL_W, minWidth: CRAWLED_URL_COL_W, maxWidth: CRAWLED_URL_COL_W }}
                     >
-                      <a
-                        href={page.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary-600 hover:underline max-w-full"
-                        title="Open page in new tab"
-                      >
-                        <span className="truncate">{page.url}</span>
-                        <ExternalLink size={11} className="shrink-0" />
-                      </a>
+                      <div className="flex items-center gap-1.5 min-w-0 max-w-full">
+                        <button
+                          type="button"
+                          onClick={() => openPageDetail(page.url)}
+                          className="min-w-0 truncate text-left text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                          title="Open page details"
+                        >
+                          {page.url}
+                        </button>
+                        <a
+                          href={page.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={e => e.stopPropagation()}
+                          className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                          title="Open page in new tab"
+                          aria-label="Open page in new tab"
+                        >
+                          <ExternalLink size={12} />
+                        </a>
+                      </div>
                     </td>
                     <td
                       className={`sticky z-20 px-4 py-3 whitespace-nowrap ${stickyCellBg}`}
@@ -4888,7 +5410,7 @@ function CrawledPagesTab() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.indexable
                           ? <span className="inline-flex items-center gap-1 text-[14px] font-medium text-success-600"><CircleCheck size={11} />Indexable</span>
-                          : <span className="text-[14px] text-gray-400">Not indexable</span>
+                          : <span className="text-[14px] text-gray-500">Not indexable</span>
                         }
                       </td>
                     )}
@@ -5024,7 +5546,7 @@ function CrawledPagesTab() {
                       <td className="px-4 py-3 max-w-[200px]">
                         {page.redirectTarget && page.redirectTarget !== '—'
                           ? <a href="#" className="text-[14px] text-primary-600 hover:underline truncate block">{page.redirectTarget}</a>
-                          : <span className="text-[14px] text-gray-400">—</span>
+                          : <span className="text-[14px] text-gray-500">—</span>
                         }
                       </td>
                     )}
@@ -5051,13 +5573,13 @@ function CrawledPagesTab() {
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.contentHash && page.contentHash !== '—' ? (
                           <div className="relative group inline-block">
-                            <span className="font-mono text-[14px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
+                            <span className=" text-[14px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
                             <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                              <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg font-mono">{page.contentHash}</div>
+                              <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">{page.contentHash}</div>
                             </div>
                           </div>
                         ) : (
-                          <span className="text-[14px] text-gray-400">—</span>
+                          <span className="text-[14px] text-gray-500">—</span>
                         )}
                       </td>
                     )}
@@ -5109,89 +5631,6 @@ function CrawledPagesTab() {
         columnOptions={FILTER_COLS}
         onApply={setActiveRules}
       />
-
-      <IssueDetailDrawer
-        open={Boolean(detailPage)}
-        onClose={() => {
-          setDetailPageUrl(null)
-          setDetailFixFilter(new Set(FIX_TYPE_ORDER))
-          setShowDetailFixDropdown(false)
-        }}
-        title={detailPage?.url || ''}
-        subtitle={detailPage ? `${detailFilteredFindings.length} of ${detailPage.findings.length} finding${detailPage.findings.length === 1 ? '' : 's'}` : ''}
-        toolbar={detailPage && detailFixOptions.length > 0 ? (
-          <FilterChipDropdown
-            label="Fix type"
-            options={detailFixOptions}
-            selected={detailFixFilter}
-            onToggle={toggleDetailFix}
-            onSelectAll={() => setDetailFixFilter(new Set(detailFixTypesPresent))}
-            dropdownRef={detailFixDropdownRef}
-            open={showDetailFixDropdown}
-            onOpen={() => setShowDetailFixDropdown(v => !v)}
-            onClose={() => setShowDetailFixDropdown(false)}
-          />
-        ) : null}
-        footer={detailPage ? (
-          detailAutoOnly ? (
-            <button
-              type="button"
-              onClick={applyAutoFixesOnDetailPage}
-              disabled={!detailSelectableAuto.length}
-              className={`w-full h-10 rounded-lg text-[13px] font-semibold transition-colors ${
-                detailSelectableAuto.length
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Connect to fix{detailSelectableAuto.length ? ` (${detailSelectableAuto.length})` : ''}
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={applySelectedOnDetailPage}
-              disabled={!detailSelectedCount}
-              className={`w-full h-10 rounded-lg text-[13px] font-semibold transition-colors ${
-                detailSelectedCount
-                  ? 'bg-primary-600 hover:bg-primary-700 text-white'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
-            >
-              Connect to fix{detailSelectedCount ? ` (${detailSelectedCount})` : ''}
-            </button>
-          )
-        ) : null}
-      >
-        {detailPage && (
-          detailFilteredFindings.length === 0 ? (
-            <p className="text-[13px] text-gray-500 m-0">No findings for this fix type.</p>
-          ) : (
-            <PageFindingsPanel
-              findings={detailFilteredFindings}
-              pageUrl={detailPage.url}
-              findingStatus={findingStatus}
-              isFindingSelectable={isFindingSelectable}
-              selectedIds={selectedFindings[detailPage.url] || []}
-              onToggleFinding={toggleFinding}
-              editingFinding={editingFinding}
-              findingValues={findingValues}
-              onOpenEdit={openFindingEdit}
-              onSaveEdit={f => {
-                if (f && (findingStatus(f) === 'Draft' || draftFindings.has(f.id))) {
-                  markFindingsFixed([f.id])
-                } else {
-                  setEditingFinding(null)
-                }
-              }}
-              onCancelEdit={() => setEditingFinding(null)}
-              onChangeValue={(id, value) => setFindingValues(prev => ({ ...prev, [id]: value }))}
-              onCopyValue={copyFindingValue}
-              copiedFinding={copiedFinding}
-              onFixFinding={fixSingleFinding}
-            />
-          )
-        )}
-      </IssueDetailDrawer>
 
       {/* Connect modal (WordPress + Cloudflare variants; demo toggle inside) */}
       {showConnectModal && (
@@ -5317,7 +5756,7 @@ function FoundLinksTab() {
             <div className="absolute right-0 top-10 z-50 bg-white border border-gray-200 rounded-lg overflow-hidden w-64" style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10)' }}>
               <div className="p-2 border-b border-gray-100">
                 <div className="relative flex items-center">
-                  <Search size={13} className="absolute left-2.5 text-gray-400 pointer-events-none" />
+                  <Search size={13} className="absolute left-2.5 text-gray-500 pointer-events-none" />
                   <input value={colSearch} onChange={e => setColSearch(e.target.value)} placeholder="Search columns" className="w-full pl-7 pr-3 py-1.5 text-[13px] text-gray-700 placeholder:text-gray-400 border border-primary-600 rounded-lg outline-none bg-white" />
                 </div>
               </div>
@@ -5378,10 +5817,10 @@ function FoundLinksTab() {
                 {linkCols.anchorText     && <td className="px-4 py-3 text-[14px] text-gray-700">{link.anchor}</td>}
                 {linkCols.anchorType     && <td className="px-4 py-3 text-[14px] text-gray-500">Text</td>}
                 {linkCols.context        && <td className="px-4 py-3 text-[14px] text-gray-500 max-w-[200px] truncate">Navigation link</td>}
-                {linkCols.title          && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
-                {linkCols.alt            && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
+                {linkCols.title          && <td className="px-4 py-3 text-[14px] text-gray-500">—</td>}
+                {linkCols.alt            && <td className="px-4 py-3 text-[14px] text-gray-500">—</td>}
                 {linkCols.nofollow       && <td className="px-4 py-3"><span className={`text-[14px] font-medium ${link.follow === 'Do follow' ? 'text-success-700' : 'text-warning-600'}`}>{link.follow}</span></td>}
-                {linkCols.sourceNoindex  && <td className="px-4 py-3 text-[14px] text-gray-400">—</td>}
+                {linkCols.sourceNoindex  && <td className="px-4 py-3 text-[14px] text-gray-500">—</td>}
                 {linkCols.linkScope      && <td className="px-4 py-3 text-[14px] text-gray-500">Global</td>}
               </tr>
             ))}
@@ -5439,7 +5878,7 @@ function HLPagination({ page, perPage, total, onPage, onPerPage }) {
         >
           {PER_PAGE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
         </select>
-        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400" />
+        <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-500" />
       </div>
 
       <span className="text-[13px] text-gray-500 shrink-0 min-w-[90px]">{start} – {end} of {total}</span>
@@ -5457,7 +5896,7 @@ function HLPagination({ page, perPage, total, onPage, onPerPage }) {
       <div className="flex items-center gap-1">
         {getPageNumbers().map((p, i) =>
           p === '…' ? (
-            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-gray-400">...</span>
+            <span key={`e${i}`} className="w-8 h-8 flex items-center justify-center text-[13px] text-gray-500">...</span>
           ) : (
             <button
               key={p}
@@ -5496,12 +5935,65 @@ function FoundResourcesTab() {
   const [detailResourceUrl, setDetailResourceUrl] = useState(null)
   const [page, setPage]                 = useState(1)
   const [perPage, setPerPage]           = useState(10)
+  const [detailSourcesPage, setDetailSourcesPage] = useState(1)
+  const [detailSourcesPerPage, setDetailSourcesPerPage] = useState(10)
+  const [detailFollowFilter, setDetailFollowFilter] = useState(() => new Set(['do-follow', 'no-follow']))
+  const [showDetailFollowDropdown, setShowDetailFollowDropdown] = useState(false)
+  const detailFollowDropdownRef = useRef(null)
   const [typeFilter, setTypeFilter]     = useState(new Set(['IMG', 'CSS', 'JS']))
   const [showTypeDropdown, setShowTypeDropdown] = useState(false)
+
+  const DETAIL_FOLLOW_OPTIONS = [
+    { id: 'do-follow', label: 'Do follow' },
+    { id: 'no-follow', label: 'No follow' },
+  ]
+  const FOLLOW_ID_BY_LABEL = { 'Do follow': 'do-follow', 'No follow': 'no-follow' }
 
   const detailResource = detailResourceUrl
     ? RESOURCE_DATA.find(r => r.url === detailResourceUrl) || null
     : null
+  const detailSourcesAll = detailResource?.sourceDetails || []
+  const detailFollowAll = detailFollowFilter.size === 0 || detailFollowFilter.size >= DETAIL_FOLLOW_OPTIONS.length
+  const detailSources = detailFollowAll
+    ? detailSourcesAll
+    : detailSourcesAll.filter(s => detailFollowFilter.has(FOLLOW_ID_BY_LABEL[s.followType]))
+  const detailSourcesTotalPages = Math.max(1, Math.ceil(detailSources.length / detailSourcesPerPage))
+  const detailSourcesSafePage = Math.min(detailSourcesPage, detailSourcesTotalPages)
+  const detailPaginatedSources = detailSources.slice(
+    (detailSourcesSafePage - 1) * detailSourcesPerPage,
+    detailSourcesSafePage * detailSourcesPerPage,
+  )
+
+  function toggleDetailFollow(id) {
+    setDetailFollowFilter(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) {
+        if (next.size === 1) return prev
+        next.delete(id)
+      } else {
+        next.add(id)
+      }
+      return next
+    })
+  }
+
+  function openResourceDetail(url) {
+    setDetailResourceUrl(url)
+    setDetailSourcesPage(1)
+    setDetailFollowFilter(new Set(DETAIL_FOLLOW_OPTIONS.map(o => o.id)))
+    setShowDetailFollowDropdown(false)
+  }
+
+  function closeResourceDetail() {
+    setDetailResourceUrl(null)
+    setDetailSourcesPage(1)
+    setDetailFollowFilter(new Set(DETAIL_FOLLOW_OPTIONS.map(o => o.id)))
+    setShowDetailFollowDropdown(false)
+  }
+
+  useEffect(() => {
+    setDetailSourcesPage(1)
+  }, [detailFollowFilter, detailResourceUrl])
 
   const RES_FILTER_OPTIONS = [
     { id: 'IMG', label: 'Image'      },
@@ -5665,6 +6157,145 @@ function FoundResourcesTab() {
     setAppliedAdvFilters({ statusCode: 'all', minSize: '', maxSize: '' })
   }
 
+  // Dedicated resource details — source pages table (same drill-in pattern as Crawled pages).
+  if (detailResource) {
+    const ts = TYPE_STYLE[detailResource.type] || { bg: '#F2F4F7', color: '#667085' }
+    return (
+      <div className="flex flex-col gap-4 min-w-0 pb-8">
+        <button
+          type="button"
+          onClick={closeResourceDetail}
+          className="flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit"
+        >
+          <ArrowLeft size={14} />
+          Back to found resources
+        </button>
+
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[16px] font-semibold text-gray-900 m-0 break-all leading-snug">{detailResource.url}</h2>
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
+              <span
+                className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold"
+                style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}
+              >
+                {detailResource.type}
+              </span>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(detailResource.status)}`}>
+                {detailResource.status}
+              </span>
+              <span className="text-[12px] text-gray-500">{detailResource.size}</span>
+              <span className="text-[12px] text-gray-500">{detailSourcesAll.length} source{detailSourcesAll.length === 1 ? '' : 's'}</span>
+            </div>
+          </div>
+          <a
+            href={detailResource.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${BTN_SECONDARY} inline-flex items-center gap-1.5 shrink-0`}
+          >
+            Open
+            <ExternalLink size={13} />
+          </a>
+        </div>
+
+        <SectionCard>
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-2 flex-wrap">
+            <FilterChipDropdown
+              label="Follow type"
+              options={DETAIL_FOLLOW_OPTIONS}
+              selected={detailFollowFilter}
+              onToggle={toggleDetailFollow}
+              onSelectAll={() => setDetailFollowFilter(new Set(DETAIL_FOLLOW_OPTIONS.map(o => o.id)))}
+              dropdownRef={detailFollowDropdownRef}
+              open={showDetailFollowDropdown}
+              onOpen={() => setShowDetailFollowDropdown(v => !v)}
+              onClose={() => setShowDetailFollowDropdown(false)}
+            />
+          </div>
+
+          {detailSourcesAll.length === 0 ? (
+            <div className="py-12 px-4 text-center">
+              <p className="text-[14px] font-medium text-gray-700 m-0">No source pages for this resource</p>
+            </div>
+          ) : detailSources.length === 0 ? (
+            <div className="py-12 px-4 text-center">
+              <p className="text-[14px] font-medium text-gray-700 m-0">No sources match this filter</p>
+              <p className="text-[13px] text-gray-500 m-0 mt-1">Try adjusting Follow type.</p>
+              <button
+                type="button"
+                onClick={() => setDetailFollowFilter(new Set(DETAIL_FOLLOW_OPTIONS.map(o => o.id)))}
+                className="mt-3 text-[13px] font-medium text-primary-600 hover:text-primary-700"
+              >
+                Clear filters
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse text-left min-w-[860px]">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-200">
+                      <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[280px]">From URL</th>
+                      <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Follow type</th>
+                      <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Alt attribute</th>
+                      <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[160px]">Title</th>
+                      <th className="px-3 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap min-w-[180px]">Unique title</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailPaginatedSources.map((s, i) => (
+                      <tr key={`${s.fromUrl}-${i}`} className="border-b border-gray-50 last:border-0 hover:bg-gray-50/40">
+                        <td className="px-3 py-3">
+                          <div className="flex items-center gap-1.5 min-w-0 max-w-[420px]">
+                            <a
+                              href={s.fromUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="min-w-0 truncate text-[14px] font-medium text-primary-600 hover:underline"
+                              title={s.fromUrl}
+                            >
+                              {s.fromUrl}
+                            </a>
+                            <a
+                              href={s.fromUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                              title="Open page in new tab"
+                              aria-label="Open page in new tab"
+                            >
+                              <ExternalLink size={12} />
+                            </a>
+                          </div>
+                        </td>
+                        <td className="px-3 py-3 whitespace-nowrap">
+                          <span className={`text-[14px] font-medium ${s.followType === 'Do follow' ? 'text-success-700' : 'text-warning-600'}`}>
+                            {s.followType}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-[14px] text-gray-700">{s.altAttr || '—'}</td>
+                        <td className="px-3 py-3 text-[14px] text-gray-700">{s.title || '—'}</td>
+                        <td className="px-3 py-3 text-[14px] text-gray-700">{s.uniqueTitle || '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <HLPagination
+                page={detailSourcesSafePage}
+                perPage={detailSourcesPerPage}
+                total={detailSources.length}
+                onPage={setDetailSourcesPage}
+                onPerPage={p => { setDetailSourcesPerPage(p); setDetailSourcesPage(1) }}
+              />
+            </>
+          )}
+        </SectionCard>
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-4 min-w-0 pb-8">
       {/* KPI cards — Images / CSS / JS include compact size share (replaces separate breakdown) */}
@@ -5744,7 +6375,7 @@ function FoundResourcesTab() {
                     onChange={e => setAdvFilters(v => ({ ...v, minSize: e.target.value }))}
                     className="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors"
                   />
-                  <span className="text-[14px] text-gray-400 shrink-0">to</span>
+                  <span className="text-[14px] text-gray-500 shrink-0">to</span>
                   <input
                     type="number"
                     placeholder="Max"
@@ -5800,7 +6431,7 @@ function FoundResourcesTab() {
                       style={{ accentColor: '#155EEF', width: 14, height: 14, flexShrink: 0 }}
                     />
                     <span className="text-[13px] text-gray-700">{col.label}</span>
-                    {col.id === 'url' && <span className="text-[12px] text-gray-400 ml-auto">Always on</span>}
+                    {col.id === 'url' && <span className="text-[12px] text-gray-500 ml-auto">Always on</span>}
                   </div>
                 ))}
               </div>
@@ -5814,7 +6445,7 @@ function FoundResourcesTab() {
           <thead>
             <tr className="border-b border-gray-100 bg-gray-50/60">
               <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 min-w-[380px]">URL</th>
-              <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Sources</th>
+              <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Action</th>
               {frCols.sourceUrls && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Source URLs</th>}
               {frCols.type       && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Type</th>}
               {frCols.statusCode && <th className="px-4 py-3 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Status code</th>}
@@ -5835,21 +6466,32 @@ function FoundResourcesTab() {
               return (
                 <tr key={i} className="border-b border-gray-50 transition-colors hover:bg-gray-50/40">
                   <td className="px-4 py-3">
-                    <a
-                      href={r.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-[14px] font-medium text-primary-600 hover:underline max-w-[460px]"
-                      title="Open resource in new tab"
-                    >
-                      <span className="truncate">{r.url}</span>
-                      <ExternalLink size={11} className="shrink-0" />
-                    </a>
+                    <div className="flex items-center gap-1.5 min-w-0 max-w-[460px]">
+                      <button
+                        type="button"
+                        onClick={() => openResourceDetail(r.url)}
+                        className="min-w-0 truncate text-left text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
+                        title="Open resource details"
+                      >
+                        {r.url}
+                      </button>
+                      <a
+                        href={r.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={e => e.stopPropagation()}
+                        className="shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-md text-gray-500 hover:text-primary-600 hover:bg-primary-50 transition-colors"
+                        title="Open resource in new tab"
+                        aria-label="Open resource in new tab"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                    </div>
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     <button
                       type="button"
-                      onClick={() => setDetailResourceUrl(r.url)}
+                      onClick={() => openResourceDetail(r.url)}
                       className="text-[14px] font-medium text-primary-600 hover:underline bg-transparent border-0 p-0 cursor-pointer"
                     >
                       View
@@ -5885,19 +6527,6 @@ function FoundResourcesTab() {
           onPerPage={p => { setPerPage(p); setPage(1) }}
         />
       </SectionCard>
-
-      <IssueDetailDrawer
-        open={Boolean(detailResource)}
-        onClose={() => setDetailResourceUrl(null)}
-        title={detailResource?.url || ''}
-        subtitle={detailResource
-          ? `${(detailResource.sourceDetails || []).length} source${(detailResource.sourceDetails || []).length === 1 ? '' : 's'}`
-          : ''}
-      >
-        {detailResource && (
-          <ResourceSourcesPanel sources={detailResource.sourceDetails || []} />
-        )}
-      </IssueDetailDrawer>
     </div>
   )
 }
@@ -5955,7 +6584,7 @@ function CompareDiffToggle({ showOnlyDiffs, onToggle, disabled = false }) {
         <HLTooltip content={tip} placement="top" variant="dark">
           <button
             type="button"
-            className="inline-flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors p-0 border-0 bg-transparent cursor-help"
+            className="inline-flex items-center justify-center text-gray-500 hover:text-gray-600 transition-colors p-0 border-0 bg-transparent cursor-help"
             aria-label="About show only differences"
           >
             <Info size={14} />
@@ -5972,7 +6601,7 @@ function compareRowIcon(icon) {
   if (icon === 'warning') return <span className={base} style={{ borderColor: 'var(--warning-600)', background: 'var(--warning-100)' }}><AlertTriangle size={10} className="text-warning-600" /></span>
   if (icon === 'notice')  return <span className={base} style={{ borderColor: 'var(--primary-600)', background: 'var(--primary-50)'  }}><Info          size={10} className="text-primary-600" /></span>
   if (icon === 'check')   return <span className={base} style={{ borderColor: 'var(--success-600)', background: 'var(--success-50)'  }}><CircleCheck   size={10} className="text-success-600" /></span>
-  return <BarChart3 size={14} className="text-gray-400 shrink-0" />
+  return <BarChart3 size={14} className="text-gray-500 shrink-0" />
 }
 
 function renderCompareVal(row, which) {
@@ -6021,7 +6650,7 @@ function CompareEmptyState({ message }) {
           <CircleCheck size={20} className="text-success-600" />
         </div>
         <p className="text-[14px] font-semibold text-gray-900">No differences found</p>
-        <p className="text-[12px] text-gray-400 mt-0.5 max-w-[320px]">{message}</p>
+        <p className="text-[12px] text-gray-500 mt-0.5 max-w-[320px]">{message}</p>
       </div>
     </SectionCard>
   )
@@ -6056,7 +6685,7 @@ function CrawlComparisonTab({ scope = 'comparison', date1Idx = 0, date2Idx = 1, 
     <SectionCard>
       <div className="px-5 py-4 border-b border-gray-100">
         <p className="text-[14px] font-semibold text-gray-900">{title}</p>
-        <p className="text-[12px] text-gray-400 mt-0.5">{subtitle}</p>
+        <p className="text-[12px] text-gray-500 mt-0.5">{subtitle}</p>
       </div>
       <table className="w-full border-collapse">
         <thead>
@@ -6072,7 +6701,7 @@ function CrawlComparisonTab({ scope = 'comparison', date1Idx = 0, date2Idx = 1, 
           {rows.length === 0 ? (
             <tr>
               <td className={COMPARE_TD} colSpan={5}>
-                <span className="text-[14px] text-gray-400">No differences between these two audits.</span>
+                <span className="text-[14px] text-gray-500">No differences between these two audits.</span>
               </td>
             </tr>
           ) : rows.map(row => (
@@ -6127,7 +6756,7 @@ function CrawlComparisonTab({ scope = 'comparison', date1Idx = 0, date2Idx = 1, 
             <SectionCard key={section.category}>
               <div className="px-5 py-4 border-b border-gray-100">
                 <p className="text-[14px] font-semibold text-gray-900">{section.category}</p>
-                <p className="text-[12px] text-gray-400 mt-0.5">
+                <p className="text-[12px] text-gray-500 mt-0.5">
                   {section.issues.length} tracked issue{section.issues.length !== 1 ? 's' : ''} in this comparison section.
                 </p>
               </div>
@@ -6174,7 +6803,7 @@ function CrawlComparisonTab({ scope = 'comparison', date1Idx = 0, date2Idx = 1, 
           <SectionCard>
             <div className="px-5 py-4 border-b border-gray-100">
               <p className="text-[14px] font-semibold text-gray-900">Crawled pages comparison</p>
-              <p className="text-[12px] text-gray-400 mt-0.5">Pages added, removed, or with issue-count changes between the two scans.</p>
+              <p className="text-[12px] text-gray-500 mt-0.5">Pages added, removed, or with issue-count changes between the two scans.</p>
             </div>
             <table className="w-full border-collapse">
               <thead>
@@ -6302,7 +6931,7 @@ function InitialCardPreviewHealth() {
             {score}
           </span>
         </div>
-        <span className="text-[9px] text-gray-400">/100</span>
+        <span className="text-[9px] text-gray-500">/100</span>
       </div>
       <div className="flex flex-col gap-1 flex-1 min-w-0">
         {[
@@ -6508,7 +7137,7 @@ function SiteHealthInitialState({ onLaunch }) {
                     <Icon size={16} />
                   </span>
                   <div>
-                    <p className="text-[11px] font-medium text-gray-400 m-0 tabular-nums">{n}</p>
+                    <p className="text-[11px] font-medium text-gray-500 m-0 tabular-nums">{n}</p>
                     <p className="text-[14px] font-semibold text-gray-900 m-0 mt-0.5 leading-snug">{label}</p>
                     <p className="text-[12px] text-gray-500 m-0 mt-1 leading-relaxed">{desc}</p>
                   </div>
@@ -6573,7 +7202,7 @@ function SiteHealthInitialState({ onLaunch }) {
                 className="flex items-center justify-between w-full px-3.5 py-3 bg-white hover:bg-gray-50 transition-colors"
               >
                 <span className="text-[13px] font-semibold text-gray-800">Advanced settings</span>
-                <ChevronDown size={14} className={`text-gray-400 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-gray-500 transition-transform duration-200 ${advanced ? 'rotate-180' : ''}`} />
               </button>
 
               <div style={{ display: 'grid', gridTemplateRows: advanced ? '1fr' : '0fr', transition: 'grid-template-rows 200ms ease' }}>
@@ -6591,7 +7220,7 @@ function SiteHealthInitialState({ onLaunch }) {
                           <option>Googlebot</option>
                           <option>Bingbot</option>
                         </select>
-                        <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <ChevronDown size={13} className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" />
                       </div>
                     </div>
                     <div>
@@ -6695,7 +7324,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
             </div>
             <div>
               <p className="text-[16px] font-bold text-gray-900">Site health</p>
-              <p className="text-[12px] text-gray-400 mt-0.5">Last scanned {AUDIT_DATES[0]}</p>
+              <p className="text-[12px] text-gray-500 mt-0.5">Last scanned {AUDIT_DATES[0]}</p>
             </div>
           </div>
           <button className={`${BTN_PRIMARY} cursor-default`}>
@@ -6725,7 +7354,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
                   ) : (
                     <div className="w-[18px] h-[18px] rounded-full border border-gray-200 shrink-0" />
                   )}
-                  <span className={`text-[14px] leading-snug ${isDone ? 'text-gray-400' : isActive ? 'font-semibold text-gray-900' : 'text-gray-300'}`}>
+                  <span className={`text-[14px] leading-snug ${isDone ? 'text-gray-500' : isActive ? 'font-semibold text-gray-900' : 'text-gray-300'}`}>
                     {stage.label}
                   </span>
                 </div>
@@ -6742,7 +7371,7 @@ function SiteHealthCrawlingState({ config, onComplete }) {
 
 function InfoTooltip({ text }) {
   const icon = (
-    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 12, fontWeight: 600, color: '#98A2B3', cursor: 'help' }}>i</span>
+    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 16, height: 16, borderRadius: 999, border: '1px solid #D0D5DD', fontSize: 12, fontWeight: 600, color: '#667085', cursor: 'help' }}>i</span>
   )
   if (!text) return <span style={{ flexShrink: 0 }}>{icon}</span>
   return (
@@ -6854,9 +7483,9 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
     return (
       <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] border border-gray-200 rounded-lg px-3 py-2 focus-within:border-primary-600 transition-colors cursor-text">
         {list.map(item => (
-          <span key={item} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 rounded-md bg-gray-100 text-[12px] font-medium text-gray-700 font-mono whitespace-nowrap shrink-0">
+          <span key={item} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 rounded-md bg-gray-100 text-[12px] font-medium text-gray-700 whitespace-nowrap shrink-0">
             {item}
-            <button onClick={() => setList(p => p.filter(x => x !== item))} className="text-gray-400 hover:text-gray-600 transition-colors"><X size={10} /></button>
+            <button onClick={() => setList(p => p.filter(x => x !== item))} className="text-gray-500 hover:text-gray-600 transition-colors"><X size={10} /></button>
           </span>
         ))}
         <input
@@ -6864,7 +7493,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }}
           placeholder={list.length === 0 ? placeholder : ''}
-          className="flex-1 min-w-[100px] text-[13px] text-gray-900 placeholder:text-gray-400 outline-none bg-transparent font-mono"
+          className="flex-1 min-w-[100px] text-[13px] text-gray-900 placeholder:text-gray-400 outline-none bg-transparent"
         />
       </div>
     )
@@ -6915,7 +7544,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
                         <td className="px-4 py-3 text-[14px] text-gray-800 break-all">{s.url}</td>
                         <td className="px-4 py-3 text-[14px] text-gray-700 whitespace-nowrap">{s.urlCount}</td>
                         <td className="px-4 py-3">
-                          <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="p-1 text-gray-400 hover:text-error-600 transition-colors rounded">
+                          <button onClick={() => setSitemaps(p => p.filter(x => x.url !== s.url))} className="p-1 text-gray-500 hover:text-error-600 transition-colors rounded">
                             <Trash2 size={13} />
                           </button>
                         </td>
@@ -7046,7 +7675,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
               >
                 {agents.map(a => <option key={a.value} value={a.value}>{a.label}</option>)}
               </select>
-              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              <ChevronDown size={13} className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-500" />
             </div>
           </SettingsField>
           <SettingsToggle label="JavaScript rendering" description="Enable client-side rendering when important content loads only after JavaScript executes." tooltip="JavaScript rendering increases crawl time because the page must be rendered after the initial HTML load. Use it for JS-heavy sites or pages where important content is injected after load." value={jsRendering} onChange={setJsRendering} />
@@ -7069,13 +7698,13 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
             <div className="flex items-center h-full shrink-0">
               <button
                 onClick={() => onChange(Math.max(min, value - 1))}
-                className="h-full w-9 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                className="h-full w-9 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <Minus size={13} />
               </button>
               <button
                 onClick={() => onChange(value + 1)}
-                className="h-full w-9 flex items-center justify-center text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors"
+                className="h-full w-9 flex items-center justify-center text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 <Plus size={13} />
               </button>
@@ -7149,7 +7778,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <p className="text-[16px] font-semibold text-gray-900">Website audit settings</p>
-          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-600">
             <X size={16} />
           </button>
         </div>
@@ -7250,7 +7879,7 @@ function CrawlingProgressView({ progress, message, config }) {
             {/* Left: percentage */}
             <div className="flex flex-col items-center justify-center gap-2 p-8 shrink-0" style={{ minWidth: 210 }}>
               <span className="text-[48px] font-semibold text-gray-900 tabular-nums leading-none">{progress}%</span>
-              <span className="text-[12px] text-gray-400">complete</span>
+              <span className="text-[12px] text-gray-500">complete</span>
             </div>
 
             {/* Divider */}
@@ -7260,7 +7889,7 @@ function CrawlingProgressView({ progress, message, config }) {
             <div className="flex-1 min-w-0 p-5 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <p className="text-[12px] font-semibold text-gray-700">Audit stages</p>
-                <span className="text-[12px] text-gray-400">{doneCount} of {CRAWL_STAGES.length} complete</span>
+                <span className="text-[12px] text-gray-500">{doneCount} of {CRAWL_STAGES.length} complete</span>
               </div>
               <div className="flex flex-col gap-0.5">
                 {CRAWL_STAGES.map((stage, i) => {
@@ -7283,7 +7912,7 @@ function CrawlingProgressView({ progress, message, config }) {
                       </div>
                       <p className={`text-[12px] flex-1 leading-snug ${
                         status === 'active' ? 'font-semibold text-primary-700' :
-                        status === 'done'   ? 'text-gray-400' :
+                        status === 'done'   ? 'text-gray-500' :
                                              'text-gray-300'
                       }`}>{stage.msg}</p>
                     </div>
@@ -7296,7 +7925,7 @@ function CrawlingProgressView({ progress, message, config }) {
           {/* Bottom: domain + counters */}
           <div className="px-6 py-5">
             <div className="flex items-center gap-2 mb-4">
-              <Globe size={13} className="text-gray-400 shrink-0" />
+              <Globe size={13} className="text-gray-500 shrink-0" />
               <p className="text-[13px] font-semibold text-gray-900 truncate">{domain}</p>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -7306,7 +7935,7 @@ function CrawlingProgressView({ progress, message, config }) {
               ].map(({ label, value, color }) => (
                 <div key={label} className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-3 text-center">
                   <p className="text-[24px] font-bold tabular-nums leading-none" style={{ color }}>{value.toLocaleString()}</p>
-                  <p className="text-[12px] text-gray-400 mt-1.5">{label}</p>
+                  <p className="text-[12px] text-gray-500 mt-1.5">{label}</p>
                 </div>
               ))}
             </div>

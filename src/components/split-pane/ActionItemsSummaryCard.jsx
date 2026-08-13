@@ -65,7 +65,7 @@ export default function ActionItemsSummaryCard({ items, onFixIssues }) {
             />
           </div>
 
-          <ChevronRight size={16} className="text-gray-400 shrink-0" />
+          <ChevronRight size={16} className="text-gray-500 shrink-0" />
         </div>
       </button>
     </div>

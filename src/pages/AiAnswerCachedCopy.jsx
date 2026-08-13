@@ -135,7 +135,7 @@ export default function AiAnswerCachedCopy() {
         {/* Left — metadata */}
         <aside className="border-b lg:border-b-0 lg:border-r border-gray-800 p-6 lg:p-8 flex flex-col gap-6 bg-gray-950/60">
           <div>
-            <p className="text-[12px] font-medium text-gray-400 m-0 mb-2">AI answer archive</p>
+            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">AI answer archive</p>
             <h1 className="text-[18px] font-semibold text-white m-0 leading-snug">
               AI answer cache copy
             </h1>
@@ -199,7 +199,7 @@ export default function AiAnswerCachedCopy() {
                     domain={group.domain}
                     size={24}
                     fallback={
-                      <div className="w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-[10px] text-gray-400">
+                      <div className="w-6 h-6 rounded bg-gray-800 flex items-center justify-center text-[10px] text-gray-500">
                         {group.domain.slice(0, 1).toUpperCase()}
                       </div>
                     }

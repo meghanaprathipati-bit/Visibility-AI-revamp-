@@ -164,7 +164,7 @@ function MultiLineChart({ lines, xLabels, height = 180, metricLabel = 'Visibilit
           {Y_TICKS.map(y => (
             <span
               key={y}
-              className="absolute right-1.5 text-[12px] font-normal text-gray-400 tabular-nums leading-none"
+              className="absolute right-1.5 text-[12px] font-normal text-gray-500 tabular-nums leading-none"
               style={{ top: `${padTPct + ((100 - y) / 100) * plotHPct}%`, transform: 'translateY(-50%)' }}
             >
               {y}
@@ -361,12 +361,12 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
         onClick={() => { setOpen(o => !o); setMode('list') }}
         className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 text-left hover:border-gray-400 hover:bg-gray-50 transition-colors"
       >
-        {Icon && <Icon size={14} className="text-gray-400 shrink-0" />}
+        {Icon && <Icon size={14} className="text-gray-500 shrink-0" />}
         <span className="relative inline-block text-left">
           <span className="invisible whitespace-nowrap select-none" aria-hidden="true">{widthLabel}</span>
           <span className="absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap">{value}</span>
         </span>
-        <ChevronDown size={14} className="text-gray-400 shrink-0" />
+        <ChevronDown size={14} className="text-gray-500 shrink-0" />
       </button>
 
       {open && mode === 'list' && (
@@ -411,9 +411,9 @@ const PERIOD_OPTIONS  = ['Last 3 days', 'Last 7 days', 'Last 15 days', 'Last 30 
 
 // HARDCODED: overview KPI ratings for prototyping (Good / Average / Poor)
 const KPI_RATING_CLASS = {
-  Good: 'text-success-600',
-  Average: 'text-warning-600',
-  Poor: 'text-error-600',
+  Good: 'bg-success-50 border-success-200 text-success-700',
+  Average: 'bg-warning-100 border-warning-200 text-warning-700',
+  Poor: 'bg-error-50 border-error-200 text-error-600',
 }
 
 const OVERVIEW_KPI_CARDS = [
@@ -815,7 +815,7 @@ function TopicVisibilityPanel({ topics, className = '' }) {
         </div>
         <div className="text-right shrink-0">
           <p className="text-[18px] font-bold text-gray-900 tabular-nums leading-none m-0">{avg}%</p>
-          <p className="text-[12px] text-gray-400 m-0 mt-0.5">Avg</p>
+          <p className="text-[12px] text-gray-500 m-0 mt-0.5">Avg</p>
         </div>
       </div>
 
@@ -836,7 +836,7 @@ function TopicVisibilityPanel({ topics, className = '' }) {
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className={`text-[13px] font-medium truncate m-0 ${isLead ? 'text-primary-700' : 'text-gray-800'}`}>{t.topic}</p>
-                  <p className="text-[12px] text-gray-400 truncate m-0">{t.sub}</p>
+                  <p className="text-[12px] text-gray-500 truncate m-0">{t.sub}</p>
                 </div>
                 <span className="text-[13px] font-semibold tabular-nums shrink-0" style={{ color }}>{t.pct}%</span>
               </div>
@@ -860,7 +860,7 @@ function PromptDenseRow({ prompt, onClick }) {
     >
       <div className="min-w-0 flex-1">
         <p className="text-[14px] font-semibold text-gray-900 leading-snug m-0 line-clamp-1">{prompt.prompt}</p>
-        <p className="text-[13px] text-gray-400 m-0 mt-1 truncate leading-snug">
+        <p className="text-[13px] text-gray-500 m-0 mt-1 truncate leading-snug">
           <span className="font-medium" style={topicColor ? { color: topicColor } : undefined}>{prompt.topic}</span>
           <span className="text-gray-300"> · </span>
           <span className="tabular-nums">{prompt.volume}</span>
@@ -905,7 +905,7 @@ function PromptStatusTabs({ segment, onChange }) {
             <span className="inline-flex items-center gap-1.5">
               {seg}
               <span className={`tabular-nums text-[12px] font-semibold ${
-                isActive ? 'text-primary-500' : 'text-gray-400'
+                isActive ? 'text-primary-500' : 'text-gray-500'
               }`}>
                 {count}
               </span>
@@ -926,7 +926,7 @@ function PromptStatusLabel({ status, count }) {
   return (
     <div className="flex items-center gap-1.5 px-0.5 pt-1 pb-0.5">
       <span className="text-[12px] font-semibold text-gray-900">{status}</span>
-      <span className="text-[12px] font-medium text-gray-400 tabular-nums">{count}</span>
+      <span className="text-[12px] font-medium text-gray-500 tabular-nums">{count}</span>
     </div>
   )
 }
@@ -956,7 +956,7 @@ function CompetitorBrandCell({ c, showDomain = false }) {
       <div className="flex items-center gap-2 min-w-0">
         <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
       </div>
-      {showDomain && <p className="text-[12px] text-gray-400 truncate m-0">{c.domain}</p>}
+      {showDomain && <p className="text-[12px] text-gray-500 truncate m-0">{c.domain}</p>}
     </div>
   )
 }
@@ -1034,7 +1034,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
             <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pt-3 pb-3 bg-white" style={{ scrollbarGutter: 'stable' }}>
               {totalVisible === 0 ? (
                 <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center bg-gray-50">
-                  <p className="text-[12px] text-gray-400 m-0">No prompts match this filter in the current range.</p>
+                  <p className="text-[12px] text-gray-500 m-0">No prompts match this filter in the current range.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -1161,7 +1161,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
     <div className="flex flex-col gap-4">
 
       {/* Back button */}
-      <button onClick={onBack} className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit">
         <ArrowLeft size={14} />
         {backLabel}
       </button>
@@ -1180,10 +1180,10 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
           >
             {heroStatus}
           </span>
-          <span className="text-[12px] text-gray-400">Last 30 days</span>
-          <span className="text-[12px] text-gray-400">US</span>
+          <span className="text-[12px] text-gray-500">Last 30 days</span>
+          <span className="text-[12px] text-gray-500">US</span>
         </div>
-        <h2 className="text-[20px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
+        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
         <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
 
         <div className="mt-4 pt-4 border-t border-gray-100">
@@ -1376,13 +1376,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                           <Check size={12} strokeWidth={2.5} />Yes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-400">
+                        <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-500">
                           <X size={12} strokeWidth={2.5} />No
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <span className={`text-[14px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-400'}`}>
+                      <span className={`text-[14px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-500'}`}>
                         {row.otherBrands ? 'Yes' : 'No'}
                       </span>
                     </td>
@@ -1444,8 +1444,8 @@ function OverviewContent({ contentScrollRef }) {
             key={kpi.label}
             label={kpi.label}
             value={kpi.value}
-            description={
-              <span className={`font-medium ${KPI_RATING_CLASS[kpi.rating] || 'text-gray-500'}`}>
+            valueAside={
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium leading-none ${KPI_RATING_CLASS[kpi.rating] || 'bg-gray-50 border-gray-200 text-gray-500'}`}>
                 {kpi.rating}
               </span>
             }
@@ -1561,7 +1561,7 @@ function OverviewContent({ contentScrollRef }) {
                     <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <p className="text-[14px] font-semibold text-gray-900">{eng.avgPos}</p>
-                      <p className="text-[12px] text-gray-400">{eng.urlsAnswer}</p>
+                      <p className="text-[12px] text-gray-500">{eng.urlsAnswer}</p>
                     </td>
                     <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
                     <td className="px-3 py-3 text-[14px] text-gray-500">{eng.insight}</td>
@@ -1720,8 +1720,8 @@ function OverviewContent({ contentScrollRef }) {
                               {isWatch ? <Search size={12} /> : <Check size={12} strokeWidth={2.5} />}
                             </span>
                             <div className="min-w-0">
-                              <p className="text-[14px] font-medium text-gray-900 leading-snug m-0 line-clamp-2">{item.prompt}</p>
-                              <p className="text-[12px] font-normal text-gray-400 m-0 mt-0.5">Tracked prompt</p>
+                              <p className="text-[14px] font-medium text-primary-600 group-hover:underline leading-snug m-0 line-clamp-2">{item.prompt}</p>
+                              <p className="text-[12px] font-normal text-gray-500 m-0 mt-0.5">Tracked prompt</p>
                             </div>
                           </div>
                         </td>
@@ -1774,14 +1774,14 @@ function OverviewContent({ contentScrollRef }) {
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
                       {item.tag}
                     </span>
-                    <span className="text-[12px] text-gray-400">{item.volume}</span>
-                    <span className="text-[12px] text-gray-400">{item.engines}</span>
+                    <span className="text-[12px] text-gray-500">{item.volume}</span>
+                    <span className="text-[12px] text-gray-500">{item.engines}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-right">
                     <p className="text-[16px] font-semibold text-gray-900 tabular-nums m-0 leading-none">{item.visibility}</p>
-                    <p className="text-[12px] text-gray-400 m-0 mt-1">Visibility</p>
+                    <p className="text-[12px] text-gray-500 m-0 mt-1">Visibility</p>
                   </div>
                   <span className={`text-[14px] font-medium tabular-nums w-[42px] text-right ${item.up ? 'text-success-600' : 'text-error-600'}`}>
                     {item.trendScore}
@@ -2017,7 +2017,7 @@ export function ManagePromptsModal({ onClose, onSave, embedded = false, hideEngi
       <div className="flex-1 min-h-0 flex flex-col gap-3">
         {embedded && (
           <div className="shrink-0 mb-1">
-            <p className="text-[18px] font-bold text-gray-900 m-0">Prompts</p>
+            <p className="text-[16px] font-semibold text-gray-900 m-0">Prompts</p>
             <p className="text-[13px] text-gray-500 m-0 mt-1">
               Track up to ten prompts. Your selection is the source of truth for AI answer tracking.
             </p>
@@ -2151,7 +2151,7 @@ export function ManagePromptsModal({ onClose, onSave, embedded = false, hideEngi
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
             {selectableSuggestions.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
+              <p className="text-[12px] text-gray-500 m-0 py-2">No more suggestions.</p>
             ) : (
               <div className="flex flex-col gap-1.5 content-start">
                 {selectableSuggestions.map(item => (
@@ -2205,7 +2205,7 @@ export function ManagePromptsModal({ onClose, onSave, embedded = false, hideEngi
       )}
       footer={(
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
+          <p className="text-[12px] text-gray-500 m-0">
             {overCapacity
               ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
               : pendingAdds.length > 0
@@ -2518,7 +2518,7 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
                     ? 'bg-success-600 text-white'
                     : isCurrent
                       ? 'bg-primary-600 text-white ring-4 ring-primary-100'
-                      : 'bg-white border-2 border-gray-200 text-gray-400'
+                      : 'bg-white border-2 border-gray-200 text-gray-500'
                 }`}
               >
                 {isComplete ? <Check size={14} strokeWidth={2.5} /> : step.id}
@@ -2530,7 +2530,7 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
                       ? 'text-primary-600'
                       : isComplete
                         ? 'text-gray-900'
-                        : 'text-gray-400'
+                        : 'text-gray-500'
                   }`}
                 >
                   {step.short}
@@ -2541,7 +2541,7 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
                       ? 'text-primary-600'
                       : isComplete
                         ? 'text-gray-500'
-                        : 'text-gray-400'
+                        : 'text-gray-500'
                   }`}
                 >
                   {step.hint}
@@ -2882,7 +2882,7 @@ function PromptTrackingInitialState({ onStart }) {
                     <option key={l} value={l}>{l}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               </div>
             </div>
             <div>
@@ -2898,13 +2898,13 @@ function PromptTrackingInitialState({ onStart }) {
                     <option key={c} value={c}>{c}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               </div>
             </div>
             <div>
               <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
               <div className="relative">
-                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
                 <select
                   id="pt-setup-region"
                   value={region}
@@ -2915,7 +2915,7 @@ function PromptTrackingInitialState({ onStart }) {
                     <option key={r} value={r}>{r}</option>
                   ))}
                 </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -3007,7 +3007,7 @@ function PromptTrackingInitialState({ onStart }) {
                     type="button"
                     onClick={() => toggleCompetitor(c)}
                     aria-label={`Remove ${c.name}`}
-                    className="w-7 h-7 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
+                    className="w-7 h-7 rounded-md text-gray-500 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
                   >
                     <X size={13} />
                   </button>
@@ -3077,7 +3077,7 @@ function PromptTrackingInitialState({ onStart }) {
         </HLButton>
         <div className="flex items-center gap-3 ml-auto">
           {!competitorsReady && (
-            <p className="text-[12px] text-gray-400 m-0 hidden sm:block">Select at least one competitor</p>
+            <p className="text-[12px] text-gray-500 m-0 hidden sm:block">Select at least one competitor</p>
           )}
           <button
             type="button"
@@ -3107,7 +3107,7 @@ function PromptTrackingInitialState({ onStart }) {
               {prompts.length}
               <span className="text-gray-300 font-medium">/{MAX_SETUP_PROMPTS}</span>
             </p>
-            <p className="text-[11px] text-gray-400 m-0 mt-1">prompts</p>
+            <p className="text-[11px] text-gray-500 m-0 mt-1">prompts</p>
           </div>
         </div>
 
@@ -3116,12 +3116,12 @@ function PromptTrackingInitialState({ onStart }) {
             <div className="flex items-center justify-between gap-2">
               <p className="text-[14px] font-semibold text-gray-900 m-0">
                 Your selection
-                <span className="ml-1.5 font-medium text-gray-400 tabular-nums">
+                <span className="ml-1.5 font-medium text-gray-500 tabular-nums">
                   {prompts.length} selected
                 </span>
               </p>
               {prompts.length > 4 && (
-                <p className="text-[11px] text-gray-400 m-0">Scroll to see all</p>
+                <p className="text-[11px] text-gray-500 m-0">Scroll to see all</p>
               )}
             </div>
             <div
@@ -3143,7 +3143,7 @@ function PromptTrackingInitialState({ onStart }) {
                   <button
                     type="button"
                     onClick={() => removePrompt(p.prompt)}
-                    className="w-6 h-6 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 transition-colors inline-flex items-center justify-center shrink-0"
+                    className="w-6 h-6 rounded-md text-gray-500 hover:text-error-600 hover:bg-error-50 transition-colors inline-flex items-center justify-center shrink-0"
                     aria-label="Remove prompt"
                   >
                     <X size={12} />
@@ -3210,7 +3210,7 @@ function PromptTrackingInitialState({ onStart }) {
 
           <div className="flex-1 min-h-0 rounded-xl border border-gray-200 overflow-y-auto divide-y divide-gray-100 bg-white">
             {availablePrompts.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 px-3.5 py-4 text-center">All suggestions are in your selection.</p>
+              <p className="text-[12px] text-gray-500 m-0 px-3.5 py-4 text-center">All suggestions are in your selection.</p>
             ) : (
               availablePrompts.map((s, i) => (
                 <div
@@ -3219,7 +3219,7 @@ function PromptTrackingInitialState({ onStart }) {
                   style={{ animationDelay: `${80 + i * 40}ms` }}
                 >
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] text-gray-400 tabular-nums">{s.volume}</span>
+                    <span className="text-[11px] text-gray-500 tabular-nums">{s.volume}</span>
                     <p className="text-[12px] text-gray-800 leading-snug m-0 mt-0.5 line-clamp-2">{s.prompt}</p>
                   </div>
                   <button
@@ -3239,7 +3239,7 @@ function PromptTrackingInitialState({ onStart }) {
         </div>
 
         {prompts.length === 0 && (
-          <p className="shrink-0 text-[12px] text-gray-400 m-0 mt-3 text-center">Add at least one prompt to continue.</p>
+          <p className="shrink-0 text-[12px] text-gray-500 m-0 mt-3 text-center">Add at least one prompt to continue.</p>
         )}
       </div>
 
@@ -3278,7 +3278,7 @@ function PromptTrackingInitialState({ onStart }) {
           <button
             type="button"
             onClick={() => setSetupStarted(false)}
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft size={14} />
             Back to overview
@@ -3366,7 +3366,7 @@ function PromptTrackingProgressView({ progress, setup }) {
                   }}
                 />
               </div>
-              <p className="text-[12px] text-gray-400 m-0 mb-4">{etaText}</p>
+              <p className="text-[12px] text-gray-500 m-0 mb-4">{etaText}</p>
 
               <div className="flex items-center gap-2 flex-wrap">
                 {TRACKING_ENGINES.map(eng => (
