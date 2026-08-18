@@ -1,34 +1,52 @@
 ---
-description: Topic / status meta pills use 14px (not table badges)
+description: Chip/tag/badge text sizing — 13px floor for content chips, 14px for hero meta pills
 alwaysApply: true
 ---
 
-# Meta pills (topic, status, hero labels)
+# Chips, tags, badges, and meta pills
+
+Every small "chip" in the app — a rounded/pill-shaped label with its own
+background/border holding a short word or two (brand names, `Mention`/`Link`,
+`Visible`/`Not visible`, HTTP codes, `Yes`/`No`, `Single`/`Multiple`, severity
+and fix-type badges, engine name badges, status tags like `New`/`Fixed`, etc.)
+— uses **13px** text, never 12px.
 
 Pill labels in **page heroes and card headers** — topic chips (`Citations`),
-status chips (`Opportunity`, `Winning`), and similar meta tags — use
-**14px** text.
+status chips (`Opportunity`, `Winning`), and similar meta tags — use **14px**
+text (unchanged, still higher than the 13px table/content-chip floor).
 
 ## Spec
 
 ```
 inline-flex items-center
-px-2.5 py-1
-rounded-full
-text-[14px] font-medium
+px-2 py-0.5 (dense chip) or px-2.5 py-1 (hero pill)
+rounded-full (or rounded/rounded-md for square-cornered tags)
+text-[13px] font-medium   ← dense chip / table content chip
+text-[14px] font-medium   ← hero meta pill
 border …
 ```
 
-Never `text-[12px]` or `text-[13px]` on these.
+Never `text-[12px]` on a content/status/category chip. This applies to every
+dashboard and shared component — `SevBadge`/`FixBadge`/`ImpactBadge`,
+`TypeBadge`/`MentionBadge`/`LinkBadge`, `EngineBadge`/`EngineList`,
+`BrandPill`/`BrandsCell`, `Badge`, HTTP-code tags, Yes/No/Single/Multiple/DF/NF
+table tags, and any other bespoke status/category `<span>` chip.
 
-## Examples
+## Exceptions — stay at 12px (not content chips)
 
-- Prompt detail hero: topic + status next to “Last 30 days”
-- AI Search Performance prompt detail hero
-- Other non-table topic / status label chips with the same chrome
+- **Numeric-only counters and avatars**: a fixed-size circle/square holding
+  just a number or a 1–2 letter abbreviation (rank badges, engine avatar
+  initials, notification counts, the numeric badge nested inside a filter
+  chip like `All (12)`). These aren't word-label chips.
+- **Metric delta/change pills**: an arrow + percentage indicating a trend
+  (e.g. `↑6.8%`, health-score delta). These are metric indicators, not
+  content tags.
+- `CountCard.jsx`'s own delta pill and `AdvancedFilterTrigger.jsx`'s active-filter
+  count badge are explicitly locked at 12px per the `count-card` and
+  `advanced-filter` rules — do not change those two specific components.
 
-## Not this rule
+## Do not
 
-Table-cell status tags (HTTP codes, Yes/No, overlap Watch/Stable, engine
-count badges) stay on the **12px** badge floor — those are denser data tags,
-not hero meta pills.
+- Do not leave a brand/status/type/severity/HTTP-code/Yes-No chip at 12px.
+- Do not bump numeric counters, avatars, or delta/trend pills to 13/14px —
+  keep those at 12px so they stay visually distinct from content chips.

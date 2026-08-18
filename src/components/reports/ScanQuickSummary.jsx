@@ -46,7 +46,7 @@ function CategorySnapshotItem({ category }) {
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[14px] font-semibold text-gray-900">{category.name}</span>
         {category.status && (
-          <span className="inline-flex text-[12px] font-medium px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
+          <span className="inline-flex text-[13px] font-medium px-2 py-0.5 rounded border bg-gray-100 text-gray-700 border-gray-200">
             {category.status}
           </span>
         )}

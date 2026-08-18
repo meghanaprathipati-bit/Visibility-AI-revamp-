@@ -938,7 +938,7 @@ function AiEngineTag({ engine }) {
     'Claude':             'bg-gray-100 text-gray-600 border-gray-200',
   }[engine] || 'bg-gray-100 text-gray-600 border-gray-200'
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium whitespace-nowrap ${cfg}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium whitespace-nowrap ${cfg}`}>
       {engine}
     </span>
   )
@@ -947,7 +947,7 @@ function AiEngineTag({ engine }) {
 function TypeBadge({ type }) {
   const isOwned = type === 'Owned domain' || type === 'Owned page'
   return (
-    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[12px] font-medium mt-0.5 ${
+    <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[13px] font-medium mt-0.5 ${
       isOwned ? 'bg-success-50 text-success-700' : 'bg-gray-100 text-gray-500'
     }`}>
       {type}
@@ -980,20 +980,20 @@ function BrandMentionBadge({ mentioned }) {
 function LinksAvailableBadge({ value }) {
   if (value === 'owned') {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-success-50 text-success-700">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[13px] font-semibold bg-success-50 text-success-700">
         Owned page
       </span>
     )
   }
   if (value === 'yes') {
     return (
-      <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-success-50 text-success-700">
+      <span className="inline-flex items-center px-2 py-0.5 rounded text-[13px] font-semibold bg-success-50 text-success-700">
         Yes
       </span>
     )
   }
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-[12px] font-semibold bg-error-50 text-error-600">
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-[13px] font-semibold bg-error-50 text-error-600">
       No
     </span>
   )
@@ -1355,69 +1355,67 @@ function SourceAnswersDetailView({ source, onBack }) {
         Back to source inventory
       </button>
 
-      {/* Hero */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-start gap-3 min-w-0">
-          {isPage ? (
-            <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-              <FileText size={18} className="text-gray-500" />
-            </div>
-          ) : (
-            <CompanyLogo
-              domain={source.domain}
-              size={40}
-              fallback={
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
-                  <Globe size={18} className="text-gray-500" />
-                </div>
-              }
-            />
-          )}
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h2 className="text-[16px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
-              <TypeBadge type={source.type} />
-            </div>
-            {subtitle && (
-              <p className="text-[13px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
-            )}
+      {/* Hero — no white frame; only the count cards and table below carry their own white bg */}
+      <div className="flex items-center gap-3 min-w-0">
+        {isPage ? (
+          <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+            <FileText size={18} className="text-gray-500" />
           </div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-100">
-          <CountCard
-            label="AI answers"
-            value={source.aiAnswers}
-            Icon={FileText}
-            iconColor="var(--primary-600)"
-            helpContent="Number of AI answers that cited this source in the current period. Higher means the source appears more often in AI responses."
-          />
-          <CountCard
-            label="Prompts"
-            value={source.prompts}
-            Icon={Search}
-            iconColor="var(--purple-600)"
-            helpContent="Distinct tracked prompts where this source was cited. More prompts mean broader topical reach across your tracking set."
-          />
-          <CountCard
-            label="Prompt coverage"
-            value={`${source.promptCoverage}%`}
-            Icon={TrendingUp}
-            iconColor="var(--success-600)"
-            helpContent="Share of AI answers for those prompts that cited this source. Higher coverage means the source is more consistently used when those prompts are answered."
-          />
-          <CountCard
-            label={isPage ? 'Coverage' : 'Mention rate'}
-            value={isPage ? `${source.coverage}%` : `${source.mentionRate}%`}
-            Icon={Globe}
-            iconColor="var(--warning-600)"
-            helpContent={
-              isPage
-                ? 'How often your brand is covered when this page is cited in AI answers. Higher is better for brand presence on this page.'
-                : 'How often your brand is mentioned when this domain is cited in AI answers. Higher means stronger brand presence on this source.'
+        ) : (
+          <CompanyLogo
+            domain={source.domain}
+            size={40}
+            fallback={
+              <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                <Globe size={18} className="text-gray-500" />
+              </div>
             }
           />
+        )}
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h2 className="text-[16px] font-semibold text-gray-900 m-0 truncate">{title}</h2>
+            <TypeBadge type={source.type} />
+          </div>
+          {subtitle && (
+            <p className="text-[13px] text-gray-500 m-0 mt-1 truncate">{subtitle}</p>
+          )}
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <CountCard
+          label="AI answers"
+          value={source.aiAnswers}
+          Icon={FileText}
+          iconColor="var(--primary-600)"
+          helpContent="Number of AI answers that cited this source in the current period. Higher means the source appears more often in AI responses."
+        />
+        <CountCard
+          label="Prompts"
+          value={source.prompts}
+          Icon={Search}
+          iconColor="var(--purple-600)"
+          helpContent="Distinct tracked prompts where this source was cited. More prompts mean broader topical reach across your tracking set."
+        />
+        <CountCard
+          label="Prompt coverage"
+          value={`${source.promptCoverage}%`}
+          Icon={TrendingUp}
+          iconColor="var(--success-600)"
+          helpContent="Share of AI answers for those prompts that cited this source. Higher coverage means the source is more consistently used when those prompts are answered."
+        />
+        <CountCard
+          label={isPage ? 'Coverage' : 'Mention rate'}
+          value={isPage ? `${source.coverage}%` : `${source.mentionRate}%`}
+          Icon={Globe}
+          iconColor="var(--warning-600)"
+          helpContent={
+            isPage
+              ? 'How often your brand is covered when this page is cited in AI answers. Higher is better for brand presence on this page.'
+              : 'How often your brand is mentioned when this domain is cited in AI answers. Higher means stronger brand presence on this source.'
+          }
+        />
       </div>
 
       {/* Answers table card */}

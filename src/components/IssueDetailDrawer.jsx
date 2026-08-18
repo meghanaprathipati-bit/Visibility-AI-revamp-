@@ -167,7 +167,7 @@ export function PageFindingsPanel({
                   />
                 )}
                 <span
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium whitespace-nowrap"
+                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium whitespace-nowrap"
                   style={{ background: sev.bg, borderColor: sev.border, color: sev.color }}
                 >
                   <sev.Icon size={9} />
@@ -184,7 +184,7 @@ export function PageFindingsPanel({
                   {status}
                 </span>
               </div>
-              <span className={`inline-flex items-center px-2 py-px rounded-full border text-[12px] font-medium shrink-0 ${fixTypePillClass(finding.fixType)}`}>
+              <span className={`inline-flex items-center px-2 py-px rounded-full border text-[13px] font-medium shrink-0 ${fixTypePillClass(finding.fixType)}`}>
                 {finding.fixType}
               </span>
             </div>

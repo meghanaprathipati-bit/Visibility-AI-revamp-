@@ -3,17 +3,20 @@ import { createPortal } from 'react-dom'
 import {
   TrendingUp, Globe, Search, Plus, Link2, LayoutDashboard,
   ChevronDown, ExternalLink, MessageCircle, Info,
-  Megaphone, Calendar, Sparkles, BarChart3, Award, ArrowUp,
-  Users, ArrowLeft, Check, Bot, Star, X,
+  Megaphone, Calendar, BarChart3, Award, ArrowUp,
+  Users, ArrowLeft, Check, Bot, Star, X, CircleCheck, Settings, Sparkles,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import HLButton, { BTN_PRIMARY } from '../HLButton.jsx'
-import { modalTitle, modalSubtext } from '../HLModal.jsx'
+import HLInput from '../HLInput.jsx'
+import HLTooltip from '../HLTooltip.jsx'
+import { modalTitle } from '../HLModal.jsx'
 import VisibilityMeter from '../VisibilityMeter.jsx'
 import SectionInfoTip from '../SectionInfoTip.jsx'
 import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
 import EngineLogo from '../EngineLogo.jsx'
 import ManageCompetitorsModal from '../ManageCompetitorsModal.jsx'
+import SettingsSideNavModal from '../settings/SettingsSideNavModal.jsx'
 
 // ── Sparkline ──────────────────────────────────────────────────────────────
 
@@ -312,7 +315,7 @@ function MultiLineChart({ lines, xLabels, height = 180, metricLabel = 'Visibilit
 
 function MentionBadge() {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[12px] font-medium border border-gray-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 text-[13px] font-medium border border-gray-200">
       Mention
     </span>
   )
@@ -320,7 +323,7 @@ function MentionBadge() {
 
 function LinkBadge() {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[13px] font-medium border border-success-200">
       Link
     </span>
   )
@@ -332,22 +335,24 @@ function TypeBadge({ type }) {
 
 function EngineBadge({ label }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border border-gray-200 text-gray-600 bg-gray-50 whitespace-nowrap">
+    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium border border-gray-200 text-gray-600 bg-gray-50 whitespace-nowrap">
       {label}
     </span>
   )
 }
 
 function EngineList({ engines }) {
-  const [first] = engines
-  const overflow = engines.length - 1
+  const [first, ...rest] = engines
+  const overflow = rest.length
   return (
     <div className="flex items-center gap-1 flex-nowrap">
       {first && <EngineBadge label={first.label} />}
       {overflow > 0 && (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border border-gray-200 text-gray-500 bg-gray-50 whitespace-nowrap">
-          +{overflow}
-        </span>
+        <HLTooltip content={rest.map(e => e.label).join(', ')}>
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium border border-gray-200 text-gray-500 bg-gray-50 whitespace-nowrap cursor-default">
+            +{overflow}
+          </span>
+        </HLTooltip>
       )}
     </div>
   )
@@ -355,7 +360,7 @@ function EngineList({ engines }) {
 
 function BrandPill({ name }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium bg-gray-50 text-gray-600 border-gray-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-medium bg-gray-50 text-gray-600 border-gray-200">
       {name}
     </span>
   )
@@ -389,7 +394,7 @@ function TruncatedLink({ href, children }) {
           onMouseEnter={() => setPos(pos)}
           onMouseLeave={hide}
           style={{ position: 'fixed', top: pos.top - 8, left: pos.left, transform: 'translateY(-100%)', zIndex: 9999, maxWidth: '480px' }}
-          className="px-2.5 py-1.5 bg-gray-900 text-white text-[12px] rounded-md shadow-lg break-all leading-relaxed"
+          className="px-2.5 py-1.5 bg-gray-900 text-white text-[14px] rounded-md shadow-lg break-all leading-relaxed"
         >
           {children}
         </div>,
@@ -420,7 +425,7 @@ function TruncatedCell({ children, className = '' }) {
           onMouseEnter={() => setPos(pos)}
           onMouseLeave={hide}
           style={{ position: 'fixed', top: pos.top - 8, left: pos.left, transform: 'translateY(-100%)', zIndex: 9999, maxWidth: '480px' }}
-          className="px-2.5 py-1.5 bg-gray-900 text-white text-[12px] rounded-md shadow-lg break-words leading-relaxed"
+          className="px-2.5 py-1.5 bg-gray-900 text-white text-[14px] rounded-md shadow-lg break-words leading-relaxed"
         >
           {children}
         </div>,
@@ -497,7 +502,7 @@ function BrandsCell({ brands, extraBrands = 0 }) {
             ref={chipRef}
             onMouseEnter={showTooltip}
             onMouseLeave={hideTooltip}
-            className="inline-flex items-center px-2 py-0.5 rounded border border-gray-300 text-[12px] font-medium text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors select-none"
+            className="inline-flex items-center px-2 py-0.5 rounded border border-gray-300 text-[13px] font-medium text-gray-600 bg-gray-50 cursor-pointer hover:bg-gray-100 hover:border-gray-400 transition-colors select-none"
           >
             +{overflowCount}
           </span>
@@ -509,7 +514,7 @@ function BrandsCell({ brands, extraBrands = 0 }) {
               className="flex flex-col gap-1.5 bg-white border border-gray-200 rounded-lg shadow-lg p-2.5 min-w-[148px]"
             >
               {hidden.map(b => (
-                <span key={b} className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[12px] font-medium text-gray-600 bg-gray-50">
+                <span key={b} className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[13px] font-medium text-gray-600 bg-gray-50">
                   {b}
                 </span>
               ))}
@@ -528,11 +533,11 @@ function BrandsCell({ brands, extraBrands = 0 }) {
 // ── Data ───────────────────────────────────────────────────────────────────
 
 const KPI_CARDS = [
-  { label: 'Brand presence',         value: '418',   change: '8.2%',  up: true,  data: [260, 290, 330, 365, 395, 418],             color: '#6938EF', Icon: Award    },
-  { label: 'AI opportunity traffic', value: '12.4K', change: '12.8%', up: true,  data: [8200, 9100, 9800, 10600, 11400, 12400],    color: '#155EEF', Icon: BarChart3 },
-  { label: 'Link presence',          value: '137',   change: '5.7%',  up: true,  data: [105, 112, 118, 124, 130, 137],             color: '#16A34A', Icon: Link2     },
-  { label: 'Average position',       value: '5.3',   change: '0.8',   up: false, data: [6.1, 6.0, 5.8, 5.6, 5.4, 5.3],           color: '#D97706', Icon: TrendingUp },
-  { label: 'Organic traffic',        value: '90.4K', change: '3.4%',  up: true,  data: [82000, 84000, 86000, 87500, 89200, 90400], color: '#E11D48', Icon: Globe     },
+  { label: 'Brand presence',         value: '418',   change: '8.2%',  up: true,  color: '#6938EF', Icon: Award    },
+  { label: 'AI opportunity traffic', value: '12.4K', change: '12.8%', up: true,  color: '#155EEF', Icon: BarChart3 },
+  { label: 'Link presence',          value: '137',   change: '5.7%',  up: true,  color: '#16A34A', Icon: Link2     },
+  { label: 'Average position',       value: '5.3',   change: '0.8',   up: false, color: '#D97706', Icon: TrendingUp },
+  { label: 'Organic traffic',        value: '90.4K', change: '3.4%',  up: true,  color: '#E11D48', Icon: Globe     },
 ]
 
 const COMPETITORS = [
@@ -913,24 +918,19 @@ function PromptDetailContent({ prompt, onBack }) {
         Back to prompts
       </button>
 
-      {/* Hero: prompt headline + KPI cards */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Hero — no white frame; only the CountCards below carry their own white bg */}
+      <div>
+        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt}</h2>
+        <div className="flex items-center gap-2">
           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200">AI Visibility</span>
           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-success-50 text-success-600 text-[14px] font-medium border border-success-200">Winning</span>
-          <span className="text-[12px] text-gray-500">Last 30 days</span>
-          <span className="text-[12px] text-gray-500">US</span>
         </div>
-        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt}</h2>
-        <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
+      </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <div className="grid grid-cols-4 gap-3">
-            {DETAIL_KPI.map(kpi => (
-              <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-4 gap-3">
+        {DETAIL_KPI.map(kpi => (
+          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
+        ))}
       </div>
 
       {/* Prompt Visibility Trend chart */}
@@ -1370,7 +1370,7 @@ function PromptTrackingContent() {
                     <td className="px-3 py-3 border-r border-gray-100 align-middle">
                       <p className="text-[14px] font-medium text-gray-900 m-0 mb-1">{item.prompt}</p>
                       <div className="flex items-center gap-3 flex-wrap">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[13px] font-medium border border-purple-200">
                           {item.tag}
                         </span>
                         <span className="text-[12px] text-gray-500">{item.volume}</span>
@@ -1410,34 +1410,38 @@ function OverviewContent() {
       {/* Hero: AI Presence score card */}
       <div className="border border-gray-200 rounded-xl bg-white flex overflow-hidden" style={{ height: '208px' }}>
         {/* Left — headline metric */}
-        <div className="px-7 py-6 flex flex-col justify-between shrink-0 w-[320px]">
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200 whitespace-nowrap self-start">
-            <Sparkles size={11} />
-            AI Presence
-          </span>
+        <div className="px-6 py-5 flex flex-col justify-between shrink-0 w-[300px] border-r border-gray-100">
           <div>
-            <p className="text-[13px] text-gray-500 font-medium mb-2">Share of voice</p>
+            <div className="flex items-center gap-1.5 mb-1">
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0">AI Presence</h3>
+              <SectionInfoTip
+                id="asp-ai-presence-info"
+                content="Your brand's share of voice across AI answers for the tracked prompt set, compared to the previous period."
+              />
+            </div>
+            <p className="text-[13px] text-gray-500">Share of voice</p>
+          </div>
+          <div>
             <div className="flex items-end gap-2.5">
-              <span className="text-[44px] font-bold text-gray-900 leading-[0.9] tracking-tight">14.20%</span>
+              <span className="text-[40px] font-bold text-gray-900 leading-[0.9] tracking-tight">14.20%</span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 mb-1.5 rounded-full bg-success-50 text-success-600 text-[12px] font-semibold border border-success-200 whitespace-nowrap">
                 <ArrowUp size={10} />
                 6.8%
               </span>
             </div>
-            <p className="text-[12px] text-gray-500 mt-2">vs previous period</p>
           </div>
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 pt-3 border-t border-gray-100">
             <Calendar size={13} className="text-gray-500 shrink-0" />
-            <p className="text-[12px] text-gray-500">Data as of <span className="font-semibold text-gray-600">Apr 2026</span></p>
+            <p className="text-[12px] text-gray-500 m-0">Data as of <span className="font-semibold text-gray-600">Apr 2026</span></p>
           </div>
         </div>
 
         {/* Right — 12-month trend, chart bleeds to the card edge */}
-        <div className="flex-1 min-w-0 flex flex-col border-l border-gray-100 bg-gradient-to-b from-purple-50/40 to-transparent">
-          <div className="px-7 pt-6 flex items-center justify-between shrink-0">
+        <div className="flex-1 min-w-0 flex flex-col bg-gradient-to-b from-purple-50/40 to-transparent">
+          <div className="px-6 pt-5 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" />
-              <p className="text-[13px] font-medium text-gray-700">12-month trend</p>
+              <p className="text-[13px] font-medium text-gray-700 m-0">12-month trend</p>
             </div>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 text-gray-500 text-[14px] font-medium border border-gray-200 whitespace-nowrap">
               <BarChart3 size={11} className="text-gray-500" />
@@ -1459,10 +1463,8 @@ function OverviewContent() {
             value={kpi.value}
             delta={kpi.change}
             deltaUp={kpi.up}
-            description="vs previous period"
             Icon={kpi.Icon}
             iconColor={kpi.color}
-            footer={<Sparkline data={kpi.data} color={kpi.color} width="100%" height={56} filled />}
           />
         ))}
       </div>
@@ -1470,9 +1472,12 @@ function OverviewContent() {
       {/* AI Presence Comparison */}
       <div className="border border-gray-200 rounded-lg bg-white p-5">
         <div className="flex items-start justify-between mb-5">
-          <div>
-            <h3 className="text-[14px] font-semibold text-gray-900">AI Presence Comparison</h3>
-            <p className="text-[13px] text-gray-500 mt-0.5">Switch between competitor and engine views using the global presence mode selected above.</p>
+          <div className="flex items-center gap-1.5">
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">AI Presence Comparison</h3>
+            <SectionInfoTip
+              id="asp-presence-comparison-info"
+              content="Share of AI answers where each competitor or engine is present, based on the tracked prompt set."
+            />
           </div>
           <div className="flex items-center gap-0.5 border border-gray-200 rounded p-0.5 bg-gray-50 shrink-0">
             {['competitors', 'engines'].map(v => (
@@ -1523,14 +1528,12 @@ function OverviewContent() {
 
       {/* Topic Presence */}
       <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-start justify-between mb-4">
-          <div>
-            <h3 className="text-[14px] font-semibold text-gray-900">Topic Presence</h3>
-            <p className="text-[13px] text-gray-500 mt-0.5">Top topic clusters comparing the primary brand against tracked competitors across the analyzed answer set.</p>
-          </div>
-          <button className="px-3 py-1.5 rounded border border-gray-200 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50 transition-colors shrink-0">
-            View more
-          </button>
+        <div className="flex items-center gap-1.5 mb-4">
+          <h3 className="text-[14px] font-semibold text-gray-900 m-0">Topic Presence</h3>
+          <SectionInfoTip
+            id="asp-topic-presence-info"
+            content="How often each competitor is present in AI answers for each tracked topic cluster."
+          />
         </div>
 
         <div className="border border-gray-200 rounded-lg overflow-hidden">
@@ -1707,13 +1710,12 @@ function PromptEngineModal({ prompt, onClose }) {
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div className="absolute inset-0 bg-gray-900/40" aria-hidden="true" />
-      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[920px] max-h-[calc(100vh-48px)] flex flex-col overflow-hidden">
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-[960px] max-h-[calc(100vh-48px)] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="px-6 pt-6 pb-4 border-b border-gray-200 shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0 flex-1">
               <h2 className={`${modalTitle} leading-snug`}>{prompt.prompt}</h2>
-              <p className={`${modalSubtext} mt-1`}>Prompt-level drill-down for visibility, citation placement, and brand context across the selected AI engines.</p>
             </div>
             <button
               type="button"
@@ -1728,8 +1730,8 @@ function PromptEngineModal({ prompt, onClose }) {
 
         {/* Body: engine list + selected engine detail */}
         <div className="flex-1 min-h-0 flex overflow-hidden">
-          <div className="w-[264px] shrink-0 border-r border-gray-100 p-4 overflow-y-auto">
-            <p className="text-[12px] font-medium text-gray-500 mb-3 px-1">AI engines</p>
+          <div className="w-[300px] shrink-0 border-r border-gray-100 p-4 overflow-y-auto">
+            <p className="text-[14px] font-medium text-gray-500 mb-3 px-1">AI engines</p>
             <div className="flex flex-col gap-2">
               {engines.map(e => {
                 const active = e.id === selectedId
@@ -1748,11 +1750,14 @@ function PromptEngineModal({ prompt, onClose }) {
                         <p className="text-[14px] font-semibold text-gray-900 m-0 truncate">{e.label}</p>
                       </div>
                       {e.visible
-                        ? <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[12px] font-medium border border-success-200">Visible</span>
-                        : <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-error-50 text-error-600 text-[12px] font-medium border border-error-200">Not visible</span>}
+                        ? <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-success-50 text-success-600 text-[13px] font-medium border border-success-200">Visible</span>
+                        : <span className="shrink-0 inline-flex items-center px-2 py-0.5 rounded-full bg-error-50 text-error-600 text-[13px] font-medium border border-error-200">Not visible</span>}
                     </div>
-                    <p className="text-[12px] text-gray-500 m-0">Brand position: {e.brandPosition ?? '—'}</p>
-                    <p className="text-[12px] text-gray-500 m-0">Link position: {e.visible ? (e.linkPosition ?? 'Missing') : '—'}</p>
+                    <p className="text-[12px] text-gray-500 m-0 flex items-center gap-1.5 whitespace-nowrap">
+                      <span>Brand position: {e.brandPosition ?? '—'}</span>
+                      <span className="text-gray-300">·</span>
+                      <span>Link position: {e.visible ? (e.linkPosition ?? 'Missing') : '—'}</span>
+                    </p>
                   </button>
                 )
               })}
@@ -1768,9 +1773,9 @@ function PromptEngineModal({ prompt, onClose }) {
             ) : (
               <div className="flex flex-col gap-4">
                 <div className="grid grid-cols-3 gap-3">
-                  <CountCard label="Brand position" value={engine.brandPosition} description="GoHighLevel order within the visible answer set." />
-                  <CountCard label="Link position" value={engine.linkPosition ?? 'Missing'} description="Citation placement when the domain is linked." />
-                  <CountCard label="Brands" value={brandCount} description="Detected brand entities in this answer cluster." />
+                  <CountCard label="Brand position" value={engine.brandPosition} helpContent="GoHighLevel order within the visible answer set." />
+                  <CountCard label="Link position" value={engine.linkPosition ?? 'Missing'} helpContent="Citation placement when the domain is linked." />
+                  <CountCard label="Brands" value={brandCount} helpContent="Detected brand entities in this answer cluster." />
                 </div>
 
                 <div>
@@ -1782,7 +1787,7 @@ function PromptEngineModal({ prompt, onClose }) {
                     {engine.brands.slice(0, 5).map(b => (
                       <span
                         key={b}
-                        className={`inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-medium ${
                           b === 'GoHighLevel' ? 'bg-purple-50 text-purple-700 border-purple-200' : 'bg-gray-50 text-gray-600 border-gray-200'
                         }`}
                       >
@@ -1790,7 +1795,7 @@ function PromptEngineModal({ prompt, onClose }) {
                       </span>
                     ))}
                     {(engine.brands.length - 5 + (engine.extraBrands || 0)) > 0 && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[12px] font-medium text-gray-500 bg-gray-50">
+                      <span className="inline-flex items-center px-2 py-0.5 rounded border border-gray-200 text-[13px] font-medium text-gray-500 bg-gray-50">
                         +{engine.brands.length - 5 + (engine.extraBrands || 0)}
                       </span>
                     )}
@@ -1863,11 +1868,10 @@ function TopicDetailContent({ topic, onBack, onViewPrompt }) {
 
       <div>
         <h2 className="text-[16px] font-semibold text-gray-900 m-0">{topic.topic}</h2>
-        <p className="text-[13px] text-gray-500 mt-1">{topic.prompts} tracked prompts in this topic, each with its own per-engine visibility breakdown.</p>
       </div>
 
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="w-full border-collapse table-fixed" style={{ minWidth: TOPIC_DETAIL_COL_W.reduce((a, b) => a + b, 0) }}>
+      <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+        <table className="w-full border-separate border-spacing-0 table-fixed" style={{ minWidth: TOPIC_DETAIL_COL_W.reduce((a, b) => a + b, 0) }}>
           <colgroup>
             {TOPIC_DETAIL_COL_W.map((w, i) => <col key={i} style={{ width: w }} />)}
           </colgroup>
@@ -1952,7 +1956,7 @@ function PromptsContent() {
 
   const thClass = "relative px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
   const tdClass = "px-3 py-3 text-[14px] text-gray-700 border-b border-r border-gray-200 align-middle"
-  const { widths: colW, onResizeStart } = useColumnResize([260, 72, 96, 106, 168, 120, 64])
+  const { widths: colW, onResizeStart } = useColumnResize([290, 72, 150, 106, 100, 120, 64])
 
   const detailTopic = detailTopicId !== null ? topics.find(t => t.id === detailTopicId) : null
 
@@ -1982,7 +1986,7 @@ function PromptsContent() {
                   onSelectAll={() => setTypeFilter(new Set(['Mention', 'Link']))}
                   dropdownRef={typeDropRef}
                   open={typeDropOpen}
-                  onOpen={() => setTypeDropOpen(true)}
+                  onOpen={() => setTypeDropOpen(v => !v)}
                   onClose={() => setTypeDropOpen(false)}
                 />
                 <FilterChipDropdown
@@ -1993,7 +1997,7 @@ function PromptsContent() {
                   onSelectAll={() => setBrandFilter(new Set(brandIds))}
                   dropdownRef={brandDropRef}
                   open={brandDropOpen}
-                  onOpen={() => setBrandDropOpen(true)}
+                  onOpen={() => setBrandDropOpen(v => !v)}
                   onClose={() => setBrandDropOpen(false)}
                   menuWidth={300}
                 />
@@ -2046,7 +2050,7 @@ function PromptsContent() {
                         <p className="text-[12px] text-gray-500 mt-0.5">{row.prompts} prompts</p>
                       </td>
                       <td className={tdClass}>{row.size}</td>
-                      <td className={tdClass}><div className="flex items-center gap-1 flex-wrap">{row.types.map(t => <TypeBadge key={t} type={t} />)}</div></td>
+                      <td className={tdClass}><div className="flex items-center gap-1 flex-nowrap">{row.types.map(t => <TypeBadge key={t} type={t} />)}</div></td>
                       <td className={tdClass}>{row.presence}</td>
                       <td className={tdClass}>{row.brands}</td>
                       <td className={tdClass}><EngineList engines={row.engines} /></td>
@@ -2095,23 +2099,64 @@ function DomainDetailContent({ domain, onBack }) {
 
       <div>
         <h2 className="text-[16px] font-semibold text-gray-900 m-0">{domain.domain}</h2>
-        <p className="text-[13px] text-gray-500 mt-1">{domain.pages.toLocaleString()} pages on this domain cite tracked prompt coverage.</p>
       </div>
 
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
-        <table className="w-full border-collapse table-fixed" style={{ minWidth: DOMAIN_DETAIL_COL_W.reduce((a, b) => a + b, 0) }}>
+      <div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+        <table className="w-full border-separate border-spacing-0 table-fixed" style={{ minWidth: DOMAIN_DETAIL_COL_W.reduce((a, b) => a + b, 0) }}>
           <colgroup>
             {DOMAIN_DETAIL_COL_W.map((w, i) => <col key={i} style={{ width: w }} />)}
           </colgroup>
           <thead>
             <tr>
               <th className={domainDetailTh}>Page</th>
-              <th className={domainDetailTh}>Citations</th>
-              <th className={domainDetailTh}>Type</th>
-              <th className={domainDetailTh}>Co-mention</th>
-              <th className={domainDetailTh}>PT</th>
-              <th className={domainDetailTh}>Org. traffic</th>
-              <th className={`${domainDetailTh} border-r-0`}>Topic</th>
+              <th className={domainDetailTh}>
+                <span className="flex items-center gap-1">
+                  Citations
+                  <HLTooltip content="Number of times this page is cited by tracked prompts.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
+              <th className={domainDetailTh}>
+                <span className="flex items-center gap-1">
+                  Type
+                  <HLTooltip content="Whether the domain is hyperlinked or only mentioned by name.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
+              <th className={domainDetailTh}>
+                <span className="flex items-center gap-1">
+                  Co-mention
+                  <HLTooltip content="How often GoHighLevel is mentioned alongside this domain.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
+              <th className={domainDetailTh}>
+                <span className="flex items-center gap-1">
+                  PT
+                  <HLTooltip content="Page trust — a 0-100 score estimating this page's trustworthiness.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
+              <th className={domainDetailTh}>
+                <span className="flex items-center gap-1">
+                  Org. traffic
+                  <HLTooltip content="Estimated monthly organic search traffic to this page.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
+              <th className={`${domainDetailTh} border-r-0`}>
+                <span className="flex items-center gap-1">
+                  Topic
+                  <HLTooltip content="The tracked topic cluster this page's citations belong to.">
+                    <Info size={11} className="text-gray-500 cursor-help" />
+                  </HLTooltip>
+                </span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -2140,7 +2185,7 @@ function DomainDetailContent({ domain, onBack }) {
 function CitationsContent() {
   const [searchQuery, setSearchQuery] = useState('')
   const [detailDomainId, setDetailDomainId] = useState(null)
-  const { widths: citW, onResizeStart: citResize } = useColumnResize([280, 80, 108, 88, 44, 68, 140, 64])
+  const { widths: citW, onResizeStart: citResize } = useColumnResize([280, 80, 108, 88, 44, 104, 140, 64])
   const citTh = "relative px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap bg-gray-50 border-b border-r border-gray-200 whitespace-nowrap overflow-hidden"
 
   const [citTypeFilter,  setCitTypeFilter]  = useState(new Set(['Mention', 'Link']))
@@ -2197,7 +2242,7 @@ function CitationsContent() {
               onSelectAll={() => setCitTypeFilter(new Set(['Mention', 'Link']))}
               dropdownRef={citTypeDropRef}
               open={citTypeDropOpen}
-              onOpen={() => setCitTypeDropOpen(true)}
+              onOpen={() => setCitTypeDropOpen(v => !v)}
               onClose={() => setCitTypeDropOpen(false)}
             />
             <FilterChipDropdown
@@ -2208,7 +2253,7 @@ function CitationsContent() {
               onSelectAll={() => setCitTopicFilter(new Set(CITING_TOPIC_OPTIONS.map(o => o.id)))}
               dropdownRef={citTopicDropRef}
               open={citTopicDropOpen}
-              onOpen={() => setCitTopicDropOpen(true)}
+              onOpen={() => setCitTopicDropOpen(v => !v)}
               onClose={() => setCitTopicDropOpen(false)}
               menuWidth={300}
             />
@@ -2309,9 +2354,636 @@ const SUB_TABS = [
   { id: 'citations', label: 'Citations', icon: Globe         },
 ]
 
+const ASP_SETTINGS_NAV = [
+  { id: 'competitors', label: 'Manage competitors' },
+]
+
+// ── Pitch / setup / scan flow ──────────────────────────────────────────────
+// Mirrors Prompt Tracking's phase pattern (pitch -> setup -> scanning -> ready)
+// and reuses its pitch-page + setup-wizard shells for consistency — see
+// AiSearchPerformancePitchPage / AiSearchPerformanceSetupForm /
+// AiSearchPerformanceScanProgress below.
+
+const ASP_PITCH_KNOW_ITEMS = [
+  {
+    title: 'Measure your AI presence',
+    body: 'See your share of voice, brand mentions, links, and visibility across AI engines.',
+    Icon: BarChart3,
+    iconWrap: 'bg-purple-50 text-purple-600',
+  },
+  {
+    title: 'See who\u2019s winning and where',
+    body: 'Compare your presence with competitors across the same topics and prompts.',
+    Icon: Award,
+    iconWrap: 'bg-primary-50 text-primary-600',
+  },
+  {
+    title: 'Find opportunities to improve',
+    body: 'Discover the prompts, topics, and sources where your brand is missing or competitors are ahead.',
+    Icon: Sparkles,
+    iconWrap: 'bg-success-50 text-success-600',
+  },
+]
+
+const ASP_PITCH_JOURNEY_ITEMS = [
+  {
+    title: 'Prompts',
+    body: 'See the questions people ask AI and whether your brand appears in the answers.',
+    Icon: MessageCircle,
+  },
+  {
+    title: 'Citations',
+    body: 'See which websites AI engines cite — and which sources are influencing your visibility.',
+    Icon: Link2,
+  },
+  {
+    title: 'Trends',
+    body: 'Track your AI presence over time and see whether you\u2019re gaining or losing ground.',
+    Icon: TrendingUp,
+  },
+]
+
+const ASP_PITCH_WORKFLOW_STEPS = [
+  { title: 'Run your scan', Icon: Search },
+  { title: 'Review your presence', Icon: BarChart3 },
+  { title: 'Compare competitors', Icon: Users },
+  { title: 'Track your progress', Icon: TrendingUp },
+]
+
+function AiSearchPerformancePitchPage({ onGetStarted }) {
+  return (
+    <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 p-4 sm:p-5 xl:p-6 flex flex-col">
+      <div className="w-full max-w-[1040px] mx-auto flex-1 min-h-0 flex flex-col rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden relative pt-setup-fade-up">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 55% 40% at 0% 0%, rgba(105,56,239,0.07), transparent 55%), radial-gradient(ellipse 40% 30% at 100% 0%, rgba(21,94,239,0.05), transparent 50%)',
+          }}
+          aria-hidden="true"
+        />
+
+        <div
+          className="relative flex-1 min-h-0 overflow-y-auto overscroll-contain px-6 py-8 sm:px-10 sm:py-10 flex flex-col gap-10 sm:gap-12"
+          style={{ scrollbarGutter: 'stable' }}
+        >
+          {/* Hero */}
+          <section>
+            <div className="max-w-[720px]">
+              <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight">
+                See how your brand shows up in AI search
+              </h1>
+              <p className="text-[15px] text-gray-500 m-0 mt-3 leading-relaxed max-w-[600px]">
+                Track where your brand is mentioned, cited, and recommended across ChatGPT, Gemini, Perplexity, and more — and see how you compare to competitors.
+              </p>
+            </div>
+            <div className="mt-6">
+              <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
+                Run your first scan
+              </HLButton>
+            </div>
+          </section>
+
+          {/* Know where you stand */}
+          <section>
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 mb-4">Know where you stand</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+              {ASP_PITCH_KNOW_ITEMS.map(({ title, body, Icon, iconWrap }, i) => (
+                <div
+                  key={title}
+                  className="group flex flex-col h-full rounded-2xl border border-gray-200 bg-gradient-to-b from-purple-50/50 to-white p-5 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm"
+                  style={{ animationDelay: `${60 + i * 40}ms` }}
+                >
+                  <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${iconWrap}`}>
+                    <Icon size={18} />
+                  </span>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 mt-4 leading-snug">{title}</p>
+                  <p className="text-[13px] text-gray-500 m-0 mt-2 leading-relaxed flex-1">{body}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* From prompts to citations */}
+          <section>
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 mb-4">From prompts to citations</h2>
+            <div className="rounded-2xl border border-gray-200 bg-gradient-to-b from-gray-50/90 to-white px-5 py-5 sm:px-6 sm:py-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
+                {ASP_PITCH_JOURNEY_ITEMS.map(({ title, body, Icon }) => (
+                  <div key={title} className="flex items-start gap-3 min-w-0">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-white border border-gray-200 text-primary-600 shrink-0">
+                      <Icon size={15} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="text-[14px] font-semibold text-gray-900 m-0">{title}</p>
+                      <p className="text-[13px] text-gray-500 m-0 mt-1 leading-relaxed">{body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* How it works — process rail */}
+          <section>
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 mb-5">How it works</h2>
+            <ol className="relative m-0 p-0 list-none grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-4">
+              <div
+                className="hidden lg:block absolute top-5 left-[12.5%] right-[12.5%] h-px bg-gradient-to-r from-purple-200 via-primary-200 to-purple-200"
+                aria-hidden="true"
+              />
+              {ASP_PITCH_WORKFLOW_STEPS.map(({ title, Icon }) => (
+                <li key={title} className="relative flex flex-col items-center text-center gap-3">
+                  <span className="relative z-[1] inline-flex items-center justify-center w-10 h-10 rounded-full bg-white border border-purple-200 text-purple-600 shadow-sm">
+                    <Icon size={18} />
+                  </span>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 leading-snug px-1">
+                    {title}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </section>
+
+          {/* Final CTA */}
+          <section className="flex flex-col items-start gap-2">
+            <HLButton variant="primary" color="blue" size="md" onClick={onGetStarted}>
+              See my AI search performance
+            </HLButton>
+            <p className="text-[12px] text-gray-500 m-0">Updated every 30 days.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// HARDCODED: engine set for the scan setup + progress views (prototyping)
+const ASP_SETUP_ENGINES = ['ChatGPT', 'Perplexity', 'Claude', 'Gemini', 'AI Mode', 'AI Overview']
+
+// HARDCODED: country list for the scan setup form (prototyping)
+const ASP_SETUP_COUNTRIES = [
+  'United States', 'United Kingdom', 'Canada', 'Australia', 'India',
+  'Germany', 'France', 'Netherlands', 'Singapore', 'Brazil',
+]
+
+const ASP_SCAN_STAGES = [
+  { at: 0,  msg: 'Crawling AI answers for {brand}' },
+  { at: 25, msg: 'Comparing citation coverage across engines' },
+  { at: 55, msg: 'Calculating share of voice vs competitors' },
+  { at: 80, msg: 'Scoring topic-level presence' },
+]
+
+function AiSearchPerformanceEngineCheckbox({ name, checked, onToggle }) {
+  return (
+    <button
+      type="button"
+      role="checkbox"
+      aria-checked={checked}
+      onClick={onToggle}
+      className={`relative flex items-center gap-2 rounded-lg border px-2.5 py-2 text-left transition-all ${
+        checked ? 'border-primary-600 bg-primary-50/60' : 'border-gray-200 bg-white hover:border-gray-300'
+      }`}
+    >
+      <EngineLogo name={name} size={14} className="w-6 h-6 shrink-0" />
+      <span className="min-w-0 flex-1 text-[14px] font-medium text-gray-900 truncate">{name}</span>
+      <span
+        className={`w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors ${
+          checked ? 'bg-primary-600 border-primary-600' : 'bg-white border-gray-300'
+        }`}
+      >
+        {checked && <Check size={10} className="text-white" strokeWidth={3} />}
+      </span>
+    </button>
+  )
+}
+
+function AiSearchPerformanceSetupForm({ onStart, onBack }) {
+  const [website, setWebsite] = useState('')
+  const [brandName, setBrandName] = useState('')
+  const [country, setCountry] = useState('United States')
+  const [selectedCompetitors, setSelectedCompetitors] = useState([]) // [{ name, domain }]
+  const [showCustomCompetitor, setShowCustomCompetitor] = useState(false)
+  const [compName, setCompName] = useState('')
+  const [compDomain, setCompDomain] = useState('')
+  const [selectedEngines, setSelectedEngines] = useState(() => new Set(ASP_SETUP_ENGINES))
+
+  // Auto-fill brand name from the domain the first time a website is entered.
+  useEffect(() => {
+    if (!website.trim() || brandName) return
+    const domain = website.trim().replace(/^https?:\/\//i, '').split('/')[0]
+    const guess = domain.split('.')[0]
+    if (guess) setBrandName(guess.charAt(0).toUpperCase() + guess.slice(1))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [website])
+
+  const atCompetitorCap = selectedCompetitors.length >= 5
+  const suggestions = COMPETITORS.filter(c => c.name !== 'GoHighLevel')
+
+  function toggleCompetitor(c) {
+    setSelectedCompetitors(prev => {
+      const exists = prev.some(s => s.domain === c.domain)
+      if (exists) return prev.filter(s => s.domain !== c.domain)
+      return atCompetitorCap ? prev : [...prev, { name: c.name, domain: c.domain }]
+    })
+  }
+
+  function removeCompetitor(domain) {
+    setSelectedCompetitors(prev => prev.filter(c => c.domain !== domain))
+  }
+
+  function addCustomCompetitor() {
+    const name = compName.trim()
+    const domain = compDomain.trim()
+    if (!name || !domain || atCompetitorCap) return
+    setSelectedCompetitors(prev => [...prev, { name, domain }])
+    setCompName('')
+    setCompDomain('')
+    setShowCustomCompetitor(false)
+  }
+
+  function toggleEngine(name) {
+    setSelectedEngines(prev => {
+      const next = new Set(prev)
+      next.has(name) ? next.delete(name) : next.add(name)
+      return next
+    })
+  }
+
+  const canStart = website.trim().length > 0 && brandName.trim().length > 0 && selectedEngines.size > 0 && selectedCompetitors.length > 0
+
+  function handleStart() {
+    if (!canStart) return
+    onStart({
+      website: website.trim(),
+      brandName: brandName.trim(),
+      country,
+      competitors: selectedCompetitors,
+      engines: Array.from(selectedEngines),
+    })
+  }
+
+  return (
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden bg-gray-50 p-4 sm:p-5 xl:p-6">
+      <div className="pt-setup-scale-in relative min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-w-[820px] w-full mx-auto">
+        {/* Header */}
+        <div className="shrink-0 px-6 pt-4 pb-5 border-b border-gray-100">
+          <button
+            type="button"
+            onClick={onBack}
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-800 transition-colors mb-3"
+          >
+            <ArrowLeft size={14} />
+            Back to overview
+          </button>
+          <div className="flex items-center gap-2.5">
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-purple-50 shrink-0">
+              <Sparkles size={15} className="text-purple-600" />
+            </span>
+            <div className="min-w-0">
+              <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Set up AI Search Performance</h2>
+              <p className="text-[13px] text-gray-500 m-0 mt-0.5">Tell us about your brand so we can benchmark your visibility across AI engines.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Body — scrolls internally only if it must, page itself never scrolls */}
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 flex flex-col">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-[14px] font-medium text-gray-500 mb-1">Website URL</label>
+              <HLInput size="sm" prefixIcon={Globe} value={website} onChange={e => setWebsite(e.target.value)} placeholder="https://yourbrand.com" />
+            </div>
+            <div>
+              <label className="block text-[14px] font-medium text-gray-500 mb-1">Brand name</label>
+              <HLInput size="sm" value={brandName} onChange={e => setBrandName(e.target.value)} placeholder="e.g. GoHighLevel" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+            <div>
+              <label className="block text-[14px] font-medium text-gray-500 mb-1">Country</label>
+              <div className="relative">
+                <select
+                  value={country}
+                  onChange={e => setCountry(e.target.value)}
+                  className="w-full h-9 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                >
+                  {ASP_SETUP_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6">
+            <div className="flex items-center justify-between gap-4">
+              <h3 className="text-[16px] font-semibold text-gray-900 m-0">Competitors</h3>
+              <p className="text-[13px] font-semibold text-gray-700 m-0 tabular-nums shrink-0" aria-live="polite">
+                {selectedCompetitors.length}
+                <span className="text-gray-300 font-medium">/5</span>
+              </p>
+            </div>
+
+            {suggestions.length > 0 && (
+              <>
+                <div className="flex items-center gap-2 mt-4 mb-2.5">
+                  <Sparkles size={13} className="text-primary-500 shrink-0" />
+                  <p className="text-[12px] font-medium text-gray-500 m-0">Recommended for you</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  {suggestions.map((c, i) => {
+                    const selected = selectedCompetitors.some(s => s.domain === c.domain)
+                    return (
+                      <button
+                        key={c.domain}
+                        type="button"
+                        disabled={!selected && atCompetitorCap}
+                        onClick={() => toggleCompetitor(c)}
+                        aria-pressed={selected}
+                        className={`w-full flex items-center gap-3 text-left rounded-xl border px-3.5 py-3 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none focus-visible:outline-none pt-setup-fade-up ${
+                          selected
+                            ? 'border-primary-600 bg-primary-50/50 shadow-xs focus-visible:border-primary-600'
+                            : 'border-gray-200 bg-white hover:border-primary-200 hover:bg-primary-50/20 focus-visible:border-primary-300'
+                        }`}
+                        style={{ animationDelay: `${60 + i * 40}ms` }}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
+                          <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">{c.domain}</p>
+                        </div>
+                        <span
+                          className={`w-5 h-5 rounded-full inline-flex items-center justify-center shrink-0 border transition-all duration-200 ${
+                            selected ? 'bg-primary-600 border-primary-600 text-white' : 'border-gray-300 bg-white'
+                          }`}
+                        >
+                          {selected && <Check size={11} strokeWidth={2.5} />}
+                        </span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </>
+            )}
+
+            {selectedCompetitors.filter(c => !suggestions.some(s => s.domain === c.domain)).length > 0 && (
+              <div className="mt-2 flex flex-col gap-2">
+                {selectedCompetitors
+                  .filter(c => !suggestions.some(s => s.domain === c.domain))
+                  .map(c => (
+                    <div
+                      key={c.domain}
+                      className="flex items-center gap-3 rounded-xl border border-primary-600 bg-primary-50/40 px-3.5 py-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
+                        <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">{c.domain}</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeCompetitor(c.domain)}
+                        aria-label={`Remove ${c.name}`}
+                        className="w-7 h-7 rounded-md text-gray-500 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
+                      >
+                        <X size={13} />
+                      </button>
+                    </div>
+                  ))}
+              </div>
+            )}
+
+            <div className="mt-3">
+              {!showCustomCompetitor ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCustomCompetitor(true)}
+                  disabled={atCompetitorCap}
+                  className="w-full flex items-center gap-3 rounded-xl border border-primary-200 px-4 py-3.5 text-left transition-all disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none group"
+                  style={{ backgroundImage: 'linear-gradient(135deg, #EEF4FF 0%, #F4F3FF 55%, #F9F5FF 100%)' }}
+                >
+                  <span className="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-white/90 text-primary-600 border border-primary-100 shrink-0 shadow-xs">
+                    <Plus size={16} strokeWidth={2} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold text-gray-900 m-0">Add another company</p>
+                    <p className="text-[12px] text-gray-500 m-0 mt-0.5">Enter a name and domain to track</p>
+                  </div>
+                </button>
+              ) : (
+                <div className="rounded-xl border border-primary-300 bg-white p-3.5 flex flex-col gap-2.5 pt-setup-fade-up">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <HLInput size="sm" value={compName} onChange={e => setCompName(e.target.value)} placeholder="Competitor name" autoFocus />
+                    <HLInput size="sm" value={compDomain} onChange={e => setCompDomain(e.target.value)} placeholder="Competitor URL" />
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <HLButton
+                      variant="secondary"
+                      color="gray"
+                      size="xs"
+                      onClick={() => { setShowCustomCompetitor(false); setCompName(''); setCompDomain('') }}
+                    >
+                      Cancel
+                    </HLButton>
+                    <HLButton
+                      variant="primary"
+                      color="blue"
+                      size="xs"
+                      disabled={!compName.trim() || !compDomain.trim() || atCompetitorCap}
+                      onClick={addCustomCompetitor}
+                    >
+                      Add
+                    </HLButton>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {selectedCompetitors.length === 0 && (
+              <p className="text-[12px] text-error-600 m-0 mt-2">Select at least one competitor.</p>
+            )}
+          </div>
+
+          <div className="mt-6">
+            <h3 className="text-[16px] font-semibold text-gray-900 m-0">AI engines to scan</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-4">
+              {ASP_SETUP_ENGINES.map(name => (
+                <AiSearchPerformanceEngineCheckbox
+                  key={name}
+                  name={name}
+                  checked={selectedEngines.has(name)}
+                  onToggle={() => toggleEngine(name)}
+                />
+              ))}
+            </div>
+            {selectedEngines.size === 0 && (
+              <p className="text-[12px] text-error-600 m-0 mt-2">Select at least one AI engine.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Footer pinned to the bottom of the card */}
+        <div className="shrink-0 px-6 py-4 border-t border-gray-100 flex items-center justify-end">
+          <HLButton variant="primary" color="blue" size="md" disabled={!canStart} onClick={handleStart}>
+            Start scan
+          </HLButton>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Mirrors Prompt Tracking's PromptTrackingProgressView design exactly (same shell,
+// card structure, stat grid, and progress bar) so every "scan in progress" screen
+// in the app looks and feels the same.
+function AiSearchPerformanceScanProgress({ progress, scanDraft }) {
+  const brand = scanDraft?.brandName || 'your brand'
+  const competitorCount = scanDraft?.competitors?.length ?? 0
+  const engines = scanDraft?.engines?.length ? scanDraft.engines : ASP_SETUP_ENGINES
+
+  const activeStage = [...ASP_SCAN_STAGES].reverse().find(s => progress >= s.at) || ASP_SCAN_STAGES[0]
+  const message = activeStage.msg.replace('{brand}', brand)
+  const secondsLeft = Math.max(0, Math.round((100 - progress) / 100 * 22))
+  const etaText = secondsLeft === 0 ? 'Almost done' : `About ${secondsLeft}s remaining`
+
+  return (
+    <div className="flex-1 min-h-0 overflow-y-auto bg-gray-50 flex justify-center p-6" style={{ scrollbarGutter: 'stable' }}>
+      <div className="w-full max-w-[760px] flex flex-col gap-4">
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+          <div className="p-6 border-b border-gray-100 flex flex-col gap-5">
+            <div className="min-w-0">
+              <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
+                Scanning AI Search Performance for {brand}
+              </h1>
+              <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2">
+                We're checking AI answers across your selected engines for brand mentions, citations, and competitor comparisons before opening the dashboard.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Competitors', value: competitorCount },
+                { label: 'AI engines', value: engines.length },
+              ].map(stat => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 flex flex-col gap-1 min-w-0"
+                >
+                  <span className="text-[12px] font-medium text-gray-500">{stat.label}</span>
+                  <span className="text-[20px] font-bold text-gray-900 tabular-nums leading-none">{stat.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="rounded-xl border border-gray-200 bg-white p-5">
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <p className="text-[13px] font-medium text-gray-700 m-0 leading-snug max-w-[420px]">
+                  {message}
+                </p>
+                <span className="text-[18px] font-bold text-gray-900 tabular-nums shrink-0">{Math.round(progress)}%</span>
+              </div>
+
+              <div className="h-2.5 rounded-full bg-gray-100 overflow-hidden mb-2">
+                <div
+                  className="h-full rounded-full transition-all duration-300 ease-out"
+                  style={{
+                    width: `${progress}%`,
+                    background: 'linear-gradient(90deg, var(--purple-600) 0%, var(--primary-600) 100%)',
+                  }}
+                />
+              </div>
+              <p className="text-[12px] text-gray-500 m-0 mb-4">{etaText}</p>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                {engines.map(name => (
+                  <span
+                    key={name}
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50"
+                  >
+                    <EngineLogo name={name} size={12} chip={false} />
+                    <span className="text-[14px] font-medium text-gray-700">{name}</span>
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AiSearchPerformanceDashboard() {
+  // Pitch -> setup -> scanning -> ready, mirrors Prompt Tracking's phase pattern.
+  const [phase, setPhase] = useState(() => sessionStorage.getItem('asp_hasScan') === '1' ? 'ready' : 'pitch')
+  const [scanDraft, setScanDraft] = useState(null)
+  const [scanProgress, setScanProgress] = useState(0)
+  const scanIntervalRef = useRef(null)
+
   const [activeTab, setActiveTab] = useState('overview')
   const [showManageCompetitors, setShowManageCompetitors] = useState(false)
+  const [successToast, setSuccessToast] = useState(null)
+  const toastTimer = useRef(null)
+
+  useEffect(() => () => { if (toastTimer.current) clearTimeout(toastTimer.current) }, [])
+  useEffect(() => () => { if (scanIntervalRef.current) clearInterval(scanIntervalRef.current) }, [])
+
+  useEffect(() => {
+    if (phase !== 'scanning') return
+    scanIntervalRef.current = setInterval(() => {
+      setScanProgress(p => {
+        const step = p < 50 ? 2.2 : p < 80 ? 1.2 : 0.6
+        return Math.min(100, p + step)
+      })
+    }, 80)
+    return () => clearInterval(scanIntervalRef.current)
+  }, [phase])
+
+  useEffect(() => {
+    if (phase !== 'scanning' || scanProgress < 100) return
+    clearInterval(scanIntervalRef.current)
+    const t = setTimeout(() => {
+      sessionStorage.setItem('asp_hasScan', '1')
+      setPhase('ready')
+      setScanProgress(0)
+    }, 700)
+    return () => clearTimeout(t)
+  }, [phase, scanProgress])
+
+  function fireToast(message) {
+    if (toastTimer.current) clearTimeout(toastTimer.current)
+    setSuccessToast(message)
+    toastTimer.current = setTimeout(() => setSuccessToast(null), 5000)
+  }
+
+  function handleSaveCompetitors() {
+    setShowManageCompetitors(false)
+    fireToast('Changes have been saved and will be applied to the next scan.')
+  }
+
+  function handleStartScan(draft) {
+    setScanDraft(draft)
+    setScanProgress(0)
+    setPhase('scanning')
+  }
+
+  function handlePreviewInitialState() {
+    sessionStorage.removeItem('asp_hasScan')
+    setPhase('pitch')
+  }
+
+  if (phase === 'pitch') {
+    return <AiSearchPerformancePitchPage onGetStarted={() => setPhase('setup')} />
+  }
+
+  if (phase === 'setup') {
+    return <AiSearchPerformanceSetupForm onStart={handleStartScan} onBack={() => setPhase('pitch')} />
+  }
+
+  if (phase === 'scanning') {
+    return <AiSearchPerformanceScanProgress progress={scanProgress} scanDraft={scanDraft} />
+  }
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
@@ -2331,10 +3003,18 @@ export default function AiSearchPerformanceDashboard() {
           <div className="flex items-center gap-2 shrink-0">
             <button
               type="button"
-              className={BTN_PRIMARY}
-              onClick={() => setShowManageCompetitors(true)}
+              onClick={handlePreviewInitialState}
+              className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-white text-[12px] font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
             >
-              Manage competitors
+              Preview initial state
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowManageCompetitors(true)}
+              aria-label="AI Search Performance settings"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white shadow-xs text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <Settings size={15} />
             </button>
           </div>
         </div>
@@ -2369,10 +3049,34 @@ export default function AiSearchPerformanceDashboard() {
       </div>
 
       {showManageCompetitors && (
-        <ManageCompetitorsModal
+        <SettingsSideNavModal
+          title="AI Search Performance settings"
+          navItems={ASP_SETTINGS_NAV}
+          activeSection="competitors"
+          onSectionChange={() => {}}
           onClose={() => setShowManageCompetitors(false)}
-          onSave={() => setShowManageCompetitors(false)}
-        />
+          onApply={handleSaveCompetitors}
+        >
+          <ManageCompetitorsModal embedded />
+        </SettingsSideNavModal>
+      )}
+
+      {successToast && createPortal(
+        <div
+          className="fixed top-6 left-1/2 -translate-x-1/2 z-[70] flex items-center gap-3 px-4 py-3 bg-success-50 rounded-lg shadow-lg min-w-[340px] max-w-[560px]"
+          style={{ border: '1px solid #16A34A' }}
+        >
+          <CircleCheck size={15} className="text-success-600 shrink-0" />
+          <p className="text-[13px] font-medium text-success-700 flex-1">{successToast}</p>
+          <button
+            type="button"
+            onClick={() => { setSuccessToast(null); if (toastTimer.current) clearTimeout(toastTimer.current) }}
+            className="shrink-0 text-success-600 hover:text-success-700 transition-colors p-0.5"
+          >
+            <X size={13} />
+          </button>
+        </div>,
+        document.body,
       )}
     </div>
   )

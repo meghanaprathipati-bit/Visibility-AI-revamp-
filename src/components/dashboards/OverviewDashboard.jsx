@@ -22,7 +22,7 @@ function TrendBadge({ value }) {
 function ReadyBadge({ ready, total }) {
   const allReady = ready === total
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border ${
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium border ${
       allReady
         ? 'bg-success-50 text-success-700 border-success-200'
         : 'bg-warning-100 text-warning-700 border-warning-100'
@@ -508,13 +508,13 @@ function ModuleSectionCard({ section }) {
 
 // ─── Setup Modal (preserved flow) ─────────────────────────────────────────────
 
-// Canonical input spec (sm / 32px, 8px radius, gray-300 border) — mirrors HLInput.
+// Canonical input spec (sm / 36px, 8px radius, gray-300 border) — mirrors HLInput.
 const INPUT_STYLE = {
-  width: '100%', height: 32, padding: '0 12px', borderRadius: 8,
+  width: '100%', height: 36, padding: '0 12px', borderRadius: 8,
   border: '1px solid #D0D5DD', fontSize: 14, color: '#101828',
   outline: 'none', background: '#fff', boxSizing: 'border-box', fontFamily: 'inherit',
 }
-const LABEL_STYLE = { fontSize: 14, fontWeight: 500, color: '#344054', display: 'block', marginBottom: 6 }
+const LABEL_STYLE = { fontSize: 14, fontWeight: 500, color: '#344054', display: 'block', marginBottom: 4 }
 
 function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName, setBrandName, country, setCountry, region, setRegion }) {
   return (
@@ -537,7 +537,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
         <label style={{ ...LABEL_STYLE, marginBottom: 12 }}>Target location</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>Country</label>
+            <label style={{ fontSize: 14, color: '#667085', display: 'block', marginBottom: 4, fontWeight: 500 }}>Country</label>
             <div style={{ position: 'relative' }}>
               <select value={country} onChange={e => setCountry(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option>United States</option>
@@ -549,7 +549,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>State / region <span style={{ color: '#667085' }}>(optional)</span></label>
+            <label style={{ fontSize: 14, color: '#667085', display: 'block', marginBottom: 4, fontWeight: 500 }}>State / region <span style={{ color: '#667085' }}>(optional)</span></label>
             <div style={{ position: 'relative' }}>
               <select value={region} onChange={e => setRegion(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option value="">Select state or region</option>

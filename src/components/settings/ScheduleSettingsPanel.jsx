@@ -12,7 +12,7 @@ function InfoTooltip({ text }) {
   return (
     <span className="relative inline-flex group shrink-0">
       {icon}
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-64 bg-gray-900 text-white text-[12px] leading-relaxed rounded-lg px-3 py-2.5 pointer-events-none z-[300] shadow-lg whitespace-normal opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-64 bg-gray-900 text-white text-[14px] leading-relaxed rounded-lg px-3 py-2.5 pointer-events-none z-[300] shadow-lg whitespace-normal opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         {text}
         <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-gray-900" />
       </span>
@@ -183,7 +183,7 @@ export default function ScheduleSettingsPanel({
                 <select
                   value={dayOfMonth}
                   onChange={e => onDayOfMonthChange(Number(e.target.value))}
-                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                  className="appearance-none w-full h-9 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
                 >
                   {Array.from({ length: 31 }, (_, i) => i + 1).map(n => (
                     <option key={n} value={n}>{n}</option>
@@ -197,7 +197,7 @@ export default function ScheduleSettingsPanel({
                 <select
                   value={auditTime}
                   onChange={e => onAuditTimeChange(e.target.value)}
-                  className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                  className="appearance-none w-full h-9 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
                 >
                   {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => (
                     <option key={t} value={t}>{t}</option>
@@ -215,7 +215,7 @@ export default function ScheduleSettingsPanel({
               <select
                 value={auditTime}
                 onChange={e => onAuditTimeChange(e.target.value)}
-                className="appearance-none w-full h-10 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
+                className="appearance-none w-full h-9 border border-gray-200 rounded-lg px-3 pr-8 text-[14px] text-gray-900 outline-none focus:border-primary-600 cursor-pointer bg-white transition-colors"
               >
                 {Array.from({ length: 24 }, (_, i) => `${i}:00`).map(t => (
                   <option key={t} value={t}>{t}</option>

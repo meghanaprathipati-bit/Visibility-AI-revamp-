@@ -193,7 +193,7 @@ function FailedRow({ item, isRetrying, retryProgress, onRetry, retryDisabled }) 
         </button>
 
         {isRetrying ? (
-          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-200 bg-white text-[12px] font-medium text-error-600 whitespace-nowrap">
+          <span className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-gray-200 bg-white text-[13px] font-medium text-error-600 whitespace-nowrap">
             <RefreshCw size={12} className="animate-spin" />
             Retrying API…
           </span>
@@ -286,12 +286,12 @@ function AutofixSummaryHeader({
       </div>
       <p className="text-[13px] text-gray-500 leading-relaxed m-0">{subtitle}</p>
       <div className="flex flex-wrap items-center gap-2 mt-2">
-        <span className="inline-flex items-center gap-1 text-[12px] font-medium text-success-700 bg-success-50 border border-success-200 rounded-full px-2 py-0.5">
+        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-success-700 bg-success-50 border border-success-200 rounded-full px-2 py-0.5">
           <CircleCheck size={12} />
           {appliedCount} applied
         </span>
         {failedCount > 0 && (
-          <span className="inline-flex items-center gap-1 text-[12px] font-medium text-error-600 bg-error-50 border border-error-200 rounded-full px-2 py-0.5">
+          <span className="inline-flex items-center gap-1 text-[13px] font-medium text-error-600 bg-error-50 border border-error-200 rounded-full px-2 py-0.5">
             <X size={12} />
             {failedCount} failed
           </span>

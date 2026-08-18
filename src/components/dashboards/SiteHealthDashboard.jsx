@@ -161,7 +161,7 @@ function Badge({ label, color = 'gray' }) {
     gray:   'bg-gray-100 text-gray-500 border-gray-200',
   }
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${map[color] || map.gray}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium ${map[color] || map.gray}`}>
       {label}
     </span>
   )
@@ -1127,7 +1127,7 @@ function PriorityIssuesSection({ onFindingClick, onTabSwitch }) {
               style={{ borderLeftColor: sc.border, borderLeftWidth: 3 }}>
               <div className="flex items-start justify-between gap-2">
                 <p className="text-[13px] font-semibold text-gray-800 leading-snug min-w-0">{f.title}</p>
-                <span className="shrink-0 text-[12px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
+                <span className="shrink-0 text-[13px] font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
                   style={{ color: sc.color, background: sc.bg }}>{sc.label}</span>
               </div>
               <div className="flex items-baseline gap-1.5">
@@ -1457,7 +1457,7 @@ function RobotsMetaCard() {
             return (
               <div key={r.label} className="flex-1 h-full flex flex-col items-center justify-end relative group">
                 {/* Hover tooltip */}
-                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 z-50 px-2.5 py-1.5 rounded-md bg-gray-900 text-white text-[12px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
+                <div className="absolute bottom-full mb-1.5 left-1/2 -translate-x-1/2 z-50 px-2.5 py-1.5 rounded-md bg-gray-900 text-white text-[14px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none shadow-lg">
                   {r.label}
                 </div>
                 <span className="text-[12px] font-bold text-gray-700 tabular-nums leading-none" style={{ marginBottom: 6 }}>{r.count}</span>
@@ -1782,7 +1782,7 @@ function TopFindingsWidget({ onFindingClick, onTabSwitch }) {
                 {/* Title */}
                 <p className="text-[13px] font-medium text-gray-700 flex-1 truncate group-hover:text-gray-900 leading-snug transition-colors">{f.title}</p>
                 {/* Chip + chevron */}
-                <span className="text-[12px] font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap border shrink-0"
+                <span className="text-[13px] font-medium px-2.5 py-0.5 rounded-full whitespace-nowrap border shrink-0"
                   style={{ color: sc.color, background: sc.bg, borderColor: sc.border + '40' }}>{sc.label}</span>
               </button>
             )
@@ -1923,7 +1923,7 @@ function SchemaPlaceholderCard() {
           <div key={s.type} className="flex items-center gap-2 px-3 py-2.5 rounded-lg border border-gray-100 bg-gray-50/60">
             <span className="flex-1 text-[12px] font-medium text-gray-700">{s.type}</span>
             <span className="text-[12px] tabular-nums text-gray-500">{s.count} pages</span>
-            <span className={`text-[12px] font-medium px-1.5 py-0.5 rounded-full ${s.status === 'warning' ? 'bg-warning-100 text-warning-600' : 'bg-success-50 text-success-600'}`}>
+            <span className={`text-[13px] font-medium px-1.5 py-0.5 rounded-full ${s.status === 'warning' ? 'bg-warning-100 text-warning-600' : 'bg-success-50 text-success-600'}`}>
               {s.status === 'warning' ? 'Warning' : 'Valid'}
             </span>
           </div>
@@ -2432,7 +2432,7 @@ const CATEGORY_SHORTS = {
 function SevBadge({ severity }) {
   const s = SEV_META[severity]
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${s.bg} ${s.text} ${s.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[13px] font-medium ${s.bg} ${s.text} ${s.border}`}>
       <s.Icon size={10} />
       {s.label}
     </span>
@@ -2443,7 +2443,7 @@ function FixBadge({ fixType }) {
   const f = FIX_META[fixType]
   if (!f) return null
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${f.bg} ${f.text} ${f.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[13px] font-medium ${f.bg} ${f.text} ${f.border}`}>
       {f.Icon && <f.Icon size={10} />}
       {f.label}
     </span>
@@ -2454,7 +2454,7 @@ function ImpactBadge({ impact }) {
   const m = IMPACT_META[impact]
   if (!m) return null
   return (
-    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[12px] font-medium ${m.bg} ${m.text} ${m.border}`}>
+    <span className={`inline-flex items-center gap-[2px] px-2 h-6 rounded-full border text-[13px] font-medium ${m.bg} ${m.text} ${m.border}`}>
       {m.label}
     </span>
   )
@@ -2563,8 +2563,8 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
         <div className="flex-1 min-w-0 ml-3 pr-4">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-[14px] font-semibold text-gray-900 leading-snug">{finding.title}</p>
-            {finding.isNew && <span className="text-[12px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
-            {finding.isRegression && <span className="text-[12px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
+            {finding.isNew && <span className="text-[13px] font-semibold text-primary-600 bg-primary-50 border border-primary-100 px-1.5 py-0.5 rounded">New</span>}
+            {finding.isRegression && <span className="text-[13px] font-semibold text-warning-700 bg-warning-100 border border-warning-200 px-1.5 py-0.5 rounded">Regression</span>}
           </div>
           <p className="text-[12px] text-gray-500 mt-0.5 leading-snug">{finding.description}</p>
         </div>
@@ -2808,7 +2808,7 @@ function FindingCard({ finding, isExpanded, onToggle, isSelected, onSelect, expa
                                     </button>
                                     {!canCheck && (
                                       <div className="absolute right-0 top-full mt-1.5 z-50 hidden group-hover/fixrow:block pointer-events-none">
-                                        <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
+                                        <div className="bg-gray-900 text-white text-[14px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
                                           {assistedVal.trim() === '' ? 'Enter a value to apply the fix' : 'Fix the value error first'}
                                         </div>
                                       </div>
@@ -2933,7 +2933,7 @@ function CategorySection({ category, isOpen, onToggleOpen, expandedFindings, onT
                 <Zap size={13} />
               </button>
               <div className="absolute right-0 bottom-full mb-1.5 z-50 hidden group-hover/applycat:block pointer-events-none">
-                <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
+                <div className="bg-gray-900 text-white text-[14px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-md">
                   Apply {autoCount} automatic fix{autoCount !== 1 ? 'es' : ''}
                 </div>
               </div>
@@ -4280,19 +4280,19 @@ function ResultsCountCell({ results }) {
           <p className="text-[12px] text-gray-500 mb-3 m-0">Total in current set</p>
           <div className="flex flex-col gap-1.5 border-t border-gray-100 pt-2.5">
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-[12px] font-medium text-gray-600">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-[13px] font-medium text-gray-600">
                 Current
               </span>
               <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.cur}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[12px] font-medium text-primary-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[13px] font-medium text-primary-700">
                 New
               </span>
               <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.isNew}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-success-200 bg-success-50 text-[12px] font-medium text-success-700">
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-success-200 bg-success-50 text-[13px] font-medium text-success-700">
                 Fixed
               </span>
               <span className="text-[12px] font-bold text-gray-800 tabular-nums">{results.fix}</span>
@@ -4726,7 +4726,7 @@ function CrawledPagesTab() {
           <div className="min-w-0 flex-1">
             <h2 className="text-[16px] font-semibold text-gray-900 m-0 break-all leading-snug">{detailPage.url}</h2>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(detailPage.httpCode)}`}>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium tabular-nums ${httpCodeTag(detailPage.httpCode)}`}>
                 {detailPage.httpCode}
               </span>
               {detailPage.indexable
@@ -5403,7 +5403,7 @@ function CrawledPagesTab() {
                     {visibleCols.traffic     && <td className="px-4 py-3 text-[14px] text-gray-700 tabular-nums whitespace-nowrap">{page.traffic.toLocaleString()}</td>}
                     {visibleCols.httpCode    && (
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium tabular-nums ${httpCodeTag(page.httpCode)}`}>{page.httpCode}</span>
                       </td>
                     )}
                     {visibleCols.indexable   && (
@@ -5429,8 +5429,8 @@ function CrawledPagesTab() {
                     {visibleCols.robots           && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.robots
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5455,16 +5455,16 @@ function CrawledPagesTab() {
                     {visibleCols.singleH1         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.singleH1 === 'Single'
-                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
-                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
                         }
                       </td>
                     )}
                     {visibleCols.dupH1            && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.dupH1
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5477,8 +5477,8 @@ function CrawledPagesTab() {
                     {visibleCols.singleH2         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.singleH2 === 'Single'
-                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
-                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-success-50 border-success-200 text-success-700">Single</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-600">Multiple</span>
                         }
                       </td>
                     )}
@@ -5489,8 +5489,8 @@ function CrawledPagesTab() {
                     {visibleCols.inSitemap        && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.inSitemap
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5500,8 +5500,8 @@ function CrawledPagesTab() {
                     {visibleCols.dupTitle         && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.dupTitle
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5513,8 +5513,8 @@ function CrawledPagesTab() {
                     {visibleCols.dupDesc          && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.dupDesc
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5532,8 +5532,8 @@ function CrawledPagesTab() {
                     {visibleCols.nofollowDofollow && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.nofollowDofollow === 'DF'
-                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">DF</span>
-                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-600">NF</span>
+                          ? <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-success-50 border-success-200 text-success-700">DF</span>
+                          : <span className="inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-600">NF</span>
                         }
                       </td>
                     )}
@@ -5556,16 +5556,16 @@ function CrawledPagesTab() {
                     {visibleCols.mixedContent     && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.mixedContent
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
                     {visibleCols.metaRefresh      && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.metaRefresh
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-error-50 border-error-200 text-error-600">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5575,7 +5575,7 @@ function CrawledPagesTab() {
                           <div className="relative group inline-block">
                             <span className=" text-[14px] text-gray-500 cursor-default">{page.contentHash.slice(0, 20)}&hellip;</span>
                             <div className="absolute bottom-full left-0 mb-1.5 z-50 hidden group-hover:block pointer-events-none">
-                              <div className="bg-gray-900 text-white text-[12px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">{page.contentHash}</div>
+                              <div className="bg-gray-900 text-white text-[14px] rounded-lg px-2.5 py-1.5 whitespace-nowrap shadow-lg">{page.contentHash}</div>
                             </div>
                           </div>
                         ) : (
@@ -5591,8 +5591,8 @@ function CrawledPagesTab() {
                     {visibleCols.isAmp            && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         {page.isAmp
-                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
-                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[12px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
+                          ? <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-success-50 border-success-200 text-success-700">✓ Yes</span>
+                          : <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border text-[13px] font-medium bg-gray-100 border-gray-200 text-gray-500">— No</span>
                         }
                       </td>
                     )}
@@ -5806,7 +5806,7 @@ function FoundLinksTab() {
                 )}
                 {linkCols.linkType && (
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${link.type === 'Internal' ? 'bg-primary-50 text-primary-700 border-blue-200' : 'bg-success-50 text-success-700 border-success-200'}`}>{link.type}</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium ${link.type === 'Internal' ? 'bg-primary-50 text-primary-700 border-blue-200' : 'bg-success-50 text-success-700 border-success-200'}`}>{link.type}</span>
                   </td>
                 )}
                 {linkCols.sourceUrl && (
@@ -6176,12 +6176,12 @@ function FoundResourcesTab() {
             <h2 className="text-[16px] font-semibold text-gray-900 m-0 break-all leading-snug">{detailResource.url}</h2>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <span
-                className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold"
+                className="inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-semibold"
                 style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}
               >
                 {detailResource.type}
               </span>
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium tabular-nums ${httpCodeTag(detailResource.status)}`}>
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium tabular-nums ${httpCodeTag(detailResource.status)}`}>
                 {detailResource.status}
               </span>
               <span className="text-[12px] text-gray-500">{detailResource.size}</span>
@@ -6502,7 +6502,7 @@ function FoundResourcesTab() {
                   )}
                   {frCols.type && (
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-semibold" style={{ background: ts.bg, color: ts.color, borderColor: ts.bg }}>
                         {r.type}
                       </span>
                     </td>
@@ -6636,7 +6636,7 @@ function CompareChangePill({ change }) {
   }
   const m = map[change] || map.unchanged
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[12px] font-medium ${m.cls}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium ${m.cls}`}>
       {m.label}
     </span>
   )
@@ -7177,7 +7177,7 @@ function SiteHealthInitialState({ onLaunch }) {
             </div>
 
             <div>
-              <label htmlFor="sh-setup-url" className="block text-[12px] font-medium text-gray-500 mb-2">Website URL</label>
+              <label htmlFor="sh-setup-url" className="block text-[14px] font-medium text-gray-500 mb-1">Website URL</label>
               <HLInput
                 id="sh-setup-url"
                 size="sm"
@@ -7209,12 +7209,12 @@ function SiteHealthInitialState({ onLaunch }) {
                 <div style={{ overflow: 'hidden' }}>
                   <div className="border-t border-gray-100 px-3.5 py-3.5 flex flex-col gap-4 bg-gray-50/50">
                     <div>
-                      <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0">Crawler user agent</p>
+                      <p className="text-[14px] font-medium text-gray-500 mb-1 m-0">Crawler user agent</p>
                       <div className="relative">
                         <select
                           value={agent}
                           onChange={e => setAgent(e.target.value)}
-                          className="w-full appearance-none h-8 border border-gray-300 rounded-lg px-3 text-[14px] text-gray-900 bg-white outline-none focus:border-primary-600 pr-8 cursor-pointer"
+                          className="w-full appearance-none h-9 border border-gray-300 rounded-lg px-3 text-[14px] text-gray-900 bg-white outline-none focus:border-primary-600 pr-8 cursor-pointer"
                         >
                           <option>Custom bot</option>
                           <option>Googlebot</option>
@@ -7224,7 +7224,7 @@ function SiteHealthInitialState({ onLaunch }) {
                       </div>
                     </div>
                     <div>
-                      <p className="text-[12px] font-medium text-gray-500 mb-1.5 m-0">Max pages</p>
+                      <p className="text-[14px] font-medium text-gray-500 mb-1 m-0">Max pages</p>
                       <HLInput
                         size="sm"
                         type="number"
@@ -7377,7 +7377,7 @@ function InfoTooltip({ text }) {
   return (
     <span className="relative inline-flex group" style={{ flexShrink: 0 }}>
       {icon}
-      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-64 bg-gray-900 text-white text-[12px] leading-relaxed rounded-lg px-3 py-2.5 pointer-events-none z-[300] shadow-lg whitespace-normal opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+      <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-64 bg-gray-900 text-white text-[14px] leading-relaxed rounded-lg px-3 py-2.5 pointer-events-none z-[300] shadow-lg whitespace-normal opacity-0 group-hover:opacity-100 transition-opacity duration-150">
         {text}
         <span className="absolute left-1/2 -translate-x-1/2 top-full" style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: '6px solid #101828' }} />
       </span>
@@ -7483,7 +7483,7 @@ function WebsiteAuditSettingsModal({ onClose, onApply }) {
     return (
       <div className="flex flex-wrap items-center gap-1.5 min-h-[38px] border border-gray-200 rounded-lg px-3 py-2 focus-within:border-primary-600 transition-colors cursor-text">
         {list.map(item => (
-          <span key={item} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 rounded-md bg-gray-100 text-[12px] font-medium text-gray-700 whitespace-nowrap shrink-0">
+          <span key={item} className="inline-flex items-center gap-1 pl-2 pr-1.5 py-0.5 rounded-md bg-gray-100 text-[13px] font-medium text-gray-700 whitespace-nowrap shrink-0">
             {item}
             <button onClick={() => setList(p => p.filter(x => x !== item))} className="text-gray-500 hover:text-gray-600 transition-colors"><X size={10} /></button>
           </span>

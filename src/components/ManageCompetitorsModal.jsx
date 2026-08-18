@@ -282,7 +282,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   <div>
-                    <label htmlFor="manage-competitor-brand" className="block text-[12px] font-medium text-gray-500 mb-1.5">Brand name</label>
+                    <label htmlFor="manage-competitor-brand" className="block text-[14px] font-medium text-gray-500 mb-1">Brand name</label>
                     <HLInput
                       id="manage-competitor-brand"
                       size="sm"
@@ -294,7 +294,7 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
                     />
                   </div>
                   <div>
-                    <label htmlFor="manage-competitor-website" className="block text-[12px] font-medium text-gray-500 mb-1.5">Website</label>
+                    <label htmlFor="manage-competitor-website" className="block text-[14px] font-medium text-gray-500 mb-1">Website</label>
                     <HLInput
                       id="manage-competitor-website"
                       size="sm"
@@ -306,14 +306,14 @@ export default function ManageCompetitorsModal({ onClose, onSave, embedded = fal
                     />
                   </div>
                   <div>
-                    <label htmlFor="manage-competitor-country" className="block text-[12px] font-medium text-gray-500 mb-1.5">Country</label>
+                    <label htmlFor="manage-competitor-country" className="block text-[14px] font-medium text-gray-500 mb-1">Country</label>
                     <div className="relative">
                       <select
                         id="manage-competitor-country"
                         value={customCountry}
                         onChange={e => setCustomCountry(e.target.value)}
                         disabled={atCapacity}
-                        className="w-full h-8 px-3 pr-8 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
+                        className="w-full h-9 px-3 pr-8 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
                       >
                         {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
                       </select>

@@ -21,7 +21,7 @@ const PLATFORM_META = {
   },
 }
 
-const FORM_LABEL_CLASS = 'block text-[12px] font-medium text-gray-500 mb-2'
+const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-500 mb-1'
 const FORM_HELPER_CLASS = 'text-[12px] text-gray-500 mb-3'
 
 // Small inline eye / eye-off toggle (no Eye icon exists in the icon set).
