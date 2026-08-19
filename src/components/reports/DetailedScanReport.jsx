@@ -52,6 +52,14 @@ const TONE_STYLES = {
     text: 'text-primary-600',
     ring: 'stroke-primary-600',
   },
+  neutral: {
+    dot: 'bg-gray-400',
+    badge: 'text-gray-600 bg-gray-100 border-gray-200',
+    bar: 'bg-gray-400',
+    text: 'text-gray-600',
+    ring: 'stroke-gray-400',
+    cell: 'bg-gray-200',
+  },
 }
 
 function ToneBadge({ tone, children }) {
@@ -260,7 +268,78 @@ function MetricProgressBar({ fill, tone }) {
   )
 }
 
-function SeoHealthReport({ data }) {
+function MapRankHeatGrid({ data }) {
+  const cellToneClass = {
+    success: 'bg-success-600',
+    warning: 'bg-warning-250',
+    error: 'bg-error-600',
+    neutral: 'bg-gray-300',
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      <div className="flex flex-col gap-1">
+        <h4 className="text-[14px] font-semibold text-gray-900">{data.title}</h4>
+        {data.keyword && (
+          <p className="text-[12px] text-gray-500">{data.keyword}</p>
+        )}
+      </div>
+      <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs">
+        <div className="flex flex-col gap-3">
+          <div className="inline-grid gap-1" style={{ gridTemplateColumns: `repeat(${data.grid[0]?.length ?? 5}, minmax(0, 1fr))` }}>
+            {data.grid.flatMap((row, rowIdx) =>
+              row.map((tone, colIdx) => (
+                <div
+                  key={`${rowIdx}-${colIdx}`}
+                  className={`w-8 h-8 rounded ${cellToneClass[tone] ?? cellToneClass.neutral}`}
+                  aria-hidden="true"
+                />
+              )),
+            )}
+          </div>
+          {data.legend?.length > 0 && (
+            <div className="flex flex-wrap gap-3 pt-1">
+              {data.legend.map(item => {
+                const styles = TONE_STYLES[item.tone] ?? TONE_STYLES.neutral
+                return (
+                  <span key={item.label} className="inline-flex items-center gap-1.5 text-[12px] text-gray-600">
+                    <span className={`w-2.5 h-2.5 rounded-sm shrink-0 ${styles.dot}`} />
+                    {item.label}
+                  </span>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function DirectoryCoverageList({ data }) {
+  return (
+    <section className="flex flex-col gap-3">
+      <h4 className="text-[14px] font-semibold text-gray-900">{data.title}</h4>
+      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-xs">
+        <ul className="divide-y divide-gray-100">
+          {data.directories.map(dir => {
+            const styles = TONE_STYLES[dir.tone] ?? TONE_STYLES.notice
+            return (
+              <li key={dir.name} className="flex items-center justify-between gap-3 px-4 py-2.5">
+                <span className="text-[13px] text-gray-700">{dir.name}</span>
+                <span className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded border shrink-0 ${styles.badge}`}>
+                  {dir.status}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+function ExecutiveScanReport({ data }) {
   const issueRows = data.technicalIssues.map(issue => [
     <div key={issue.title} className="flex items-start gap-2.5">
       <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${TONE_STYLES[issue.tone].dot}`} />
@@ -274,7 +353,7 @@ function SeoHealthReport({ data }) {
     </ToneBadge>,
   ])
 
-  const vitalsRows = data.coreWebVitals.metrics.map(metric => [
+  const vitalsRows = data.coreWebVitals?.metrics.map(metric => [
     metric.name,
     <div key={`vital-${metric.name}`}>
       <span className={`font-semibold ${TONE_STYLES[metric.tone].text}`}>{metric.value}</span>
@@ -284,7 +363,9 @@ function SeoHealthReport({ data }) {
     <ToneBadge key={`vital-badge-${metric.name}`} tone={metric.tone}>
       {metric.tone === 'success' ? 'Good' : metric.tone === 'warning' ? 'Fair' : 'Poor'}
     </ToneBadge>,
-  ])
+  ]) ?? []
+
+  const rankRows = data.localRankTracker?.rows ?? []
 
   return (
     <div className="flex flex-col gap-6 pb-2">
@@ -325,20 +406,53 @@ function SeoHealthReport({ data }) {
         <ReportTable columns={['Issue', 'Status']} rows={issueRows} />
       </section>
 
-      <section className="flex flex-col gap-3">
-        <h4 className="text-[14px] font-semibold text-gray-900">{data.coreWebVitals.title}</h4>
-        <ReportTable columns={['Metric', 'Value', 'Target', 'Status']} rows={vitalsRows} />
-        <div className="rounded-lg border border-warning-100 bg-warning-100/40 px-3 py-2.5">
-          <p className="text-[12px] text-gray-700 leading-relaxed">{data.coreWebVitals.insight}</p>
-        </div>
-      </section>
+      {data.mapRankHeatmap && <MapRankHeatGrid data={data.mapRankHeatmap} />}
 
-      <MobileReadinessSection data={data.mobileReadiness} />
+      {data.localRankTracker && (
+        <section className="flex flex-col gap-3">
+          <h4 className="text-[14px] font-semibold text-gray-900">{data.localRankTracker.title}</h4>
+          <ReportTable columns={data.localRankTracker.columns} rows={rankRows} />
+        </section>
+      )}
 
-      <RecommendedActionsSection actions={data.recommendedActions} />
+      {data.directoryCoverage && <DirectoryCoverageList data={data.directoryCoverage} />}
+
+      {data.directoryCounts && (
+        <section className="flex flex-col gap-3">
+          {data.directoryCounts.title && (
+            <h4 className="text-[14px] font-semibold text-gray-900">{data.directoryCounts.title}</h4>
+          )}
+          <ReportTable columns={data.directoryCounts.columns} rows={data.directoryCounts.rows} />
+        </section>
+      )}
+
+      {data.coreWebVitals && (
+        <>
+          <section className="flex flex-col gap-3">
+            <h4 className="text-[14px] font-semibold text-gray-900">{data.coreWebVitals.title}</h4>
+            <ReportTable columns={['Metric', 'Value', 'Target', 'Status']} rows={vitalsRows} />
+            <div className="rounded-lg border border-warning-100 bg-warning-100/40 px-3 py-2.5">
+              <p className="text-[12px] text-gray-700 leading-relaxed">{data.coreWebVitals.insight}</p>
+            </div>
+          </section>
+
+          {data.mobileReadiness && <MobileReadinessSection data={data.mobileReadiness} />}
+        </>
+      )}
+
+      {!data.readOnly && data.recommendedActions?.length > 0 && (
+        <RecommendedActionsSection actions={data.recommendedActions} />
+      )}
+
+      {data.closingLine && (
+        <p className="text-[13px] text-gray-500 leading-relaxed border-t border-gray-100 pt-4">
+          {data.closingLine}
+        </p>
+      )}
     </div>
   )
 }
+
 
 function ScoreGauge({ label, score }) {
   const tone = score >= 90 ? 'success' : score >= 70 ? 'warning' : 'error'
@@ -357,7 +471,7 @@ function ScoreGauge({ label, score }) {
 /** Detailed scan report for the side panel */
 export default function DetailedScanReport({ report, onPromptAction }) {
   if (report.executiveReport) {
-    return <SeoHealthReport data={report.executiveReport} />
+    return <ExecutiveScanReport data={report.executiveReport} />
   }
 
   const hasScoreOverview = Boolean(report.scoreOverview?.length)

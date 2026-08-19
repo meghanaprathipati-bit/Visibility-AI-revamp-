@@ -3,7 +3,11 @@
  * Shown on the chat landing when a returning user selects an existing project.
  */
 
-import { actionItems } from './actionItems.js'
+import { actionItems, getProjectSummaryActionItems, PROJECT_SUMMARY_ACTION_ITEM_IDS } from './actionItems.js'
+import { PROJECT_SUMMARY_PROMPT_MARKER } from './scanPrompts.js'
+
+/** Prototype open-issue count for project summary hero card */
+export const PROJECT_SUMMARY_ISSUE_COUNT = PROJECT_SUMMARY_ACTION_ITEM_IDS.length
 
 /** Priority tag labels mapped to design-system severity styling */
 export const PRIORITY_TAG_STYLES = {
@@ -29,6 +33,9 @@ export const DASHBOARD_GLIMPSE_MODULES = [
   { id: 'listings-sync', label: 'Listings sync', value: '82%', dashboardId: 'listings-health', icon: 'link', iconColor: 'var(--gray-600)' },
 ]
 
+/** Prototype action items surfaced when viewing all open issues from project summary — see actionItems.js */
+export { PROJECT_SUMMARY_ACTION_ITEM_IDS } from './actionItems.js'
+
 /**
  * Prototype open recommendations for project summary.
  * `actionItemId` links Fix it to the existing action-items detail panel when available.
@@ -38,9 +45,9 @@ export const PROJECT_RECOMMENDATIONS = [
     id: 'rec-hero',
     rank: 1,
     priorityTag: 'Top priority',
-    title: 'Repair priority crawl and schema issues',
-    description: '9 pages are blocking search engines and AI tools from trusting your best content.',
-    actionItemId: 'seo-af-2',
+    title: `${PROJECT_SUMMARY_ISSUE_COUNT} issues need your attention`,
+    description: 'Fix them to improve your performance in search and AI.',
+    actionItemIds: PROJECT_SUMMARY_ACTION_ITEM_IDS,
     icon: 'zap',
   },
   {
@@ -121,6 +128,21 @@ export function getProjectSummary(project) {
   }
 }
 
+/** Resolve linked action items for View all / detail panel scoping */
+export function getRecommendationActionItems(recommendation) {
+  if (!recommendation) return []
+  if (recommendation.id === 'rec-hero') {
+    return getProjectSummaryActionItems()
+  }
+  if (recommendation.actionItemIds?.length) {
+    return recommendation.actionItemIds
+      .map(id => actionItems.find(item => item.id === id))
+      .filter(Boolean)
+  }
+  const single = getRecommendationActionItem(recommendation)
+  return single ? [single] : []
+}
+
 /** Resolve linked action item for Fix it / detail panel scoping */
 export function getRecommendationActionItem(recommendation) {
   if (!recommendation?.actionItemId) return null
@@ -142,7 +164,7 @@ export function buildSummaryChatPrompt(summary, projectLabel) {
       lines.push(`- ${item.title} (${item.priorityTag})`)
     })
   }
-  lines.push('', 'Help me decide what to tackle first based on this summary.')
+  lines.push('', PROJECT_SUMMARY_PROMPT_MARKER)
   return lines.join('\n')
 }
 

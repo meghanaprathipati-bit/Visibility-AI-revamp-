@@ -1,6 +1,6 @@
 /** Builds a complete scan-results payload — replace with API response in production */
 
-import { getActionItemsForPrompt } from './actionItems.js'
+import { getActionItemsForPrompt, getProjectSummaryActionItems } from './actionItems.js'
 import {
   buildScanCompleteMessage,
   buildScanFindings,
@@ -9,6 +9,7 @@ import {
 import { buildVisibilityReport } from './visibilityReport.js'
 
 export function buildScanResultsPayload(promptText, scanKind = 'generic') {
+  if (scanKind === 'project-summary') return buildProjectSummaryPayload()
   if (scanKind === 'ai-visibility') return buildAiVisibilityPayload()
   if (scanKind === 'ai-action-plan') return buildActionPlanPayload()
   if (scanKind === 'gbp') return buildGbpPayload()
@@ -21,6 +22,18 @@ export function buildScanResultsPayload(promptText, scanKind = 'generic') {
     findings: buildScanFindings(promptText, actionItems),
     nextActions: getNextActionsForScan(promptText, actionItems),
     report: buildVisibilityReport(promptText),
+  }
+}
+
+function buildProjectSummaryPayload() {
+  const actionItems = getProjectSummaryActionItems()
+  return {
+    scanKind: 'project-summary',
+    actionItems,
+    summaryText: buildScanCompleteMessage('', actionItems),
+    findings: buildScanFindings('', actionItems),
+    nextActions: getNextActionsForScan('', actionItems),
+    report: buildVisibilityReport('full visibility scan'),
   }
 }
 
@@ -43,18 +56,15 @@ function buildAiVisibilityPayload() {
 }
 
 function buildGbpPayload() {
+  const promptText = 'Run GBP, listings, and reviews scans for my business'
+  const actionItems = getActionItemsForPrompt(promptText, 'gbp')
   return {
     scanKind: 'gbp',
-    // Dummy data — replace with API response in production
-    summaryText: "I've completed the GBP audit. The scan ran — however, two data sources could not be loaded. Here's the overall analysis:",
-    errors: [
-      { label: 'GBP Profile', message: 'GBP Profile is not available as a standalone data fetch.' },
-      { label: 'Listings Scan', message: 'Listings Scan is not available as a standalone data fetch.' },
-    ],
-    nextActions: ['Run reviews scan', 'Check scan status', 'Create action plan', 'Set up recurring audit'],
-    actionItems: [],
-    findings: [],
-    report: null,
+    actionItems,
+    summaryText: buildScanCompleteMessage(promptText, actionItems),
+    findings: buildScanFindings(promptText, actionItems),
+    nextActions: getNextActionsForScan(promptText, actionItems),
+    report: buildVisibilityReport(promptText),
   }
 }
 
@@ -84,14 +94,16 @@ export function hydrateScanResultsMessages(messages, fallbackPrompt = '') {
     if (
       msg.report?.topGaps?.length ||
       msg.report?.scoreOverview?.length ||
-      msg.report?.executiveReport
+      msg.report?.executiveReport ||
+      msg.report?.summaryCategories?.length
     ) {
       return msg
     }
 
     const priorUser = messages.slice(0, index).reverse().find(m => m.type === 'user')
     const promptText = priorUser?.content || fallbackPrompt
-    const payload = buildScanResultsPayload(promptText)
+    const scanKind = msg.scanKind || 'generic'
+    const payload = buildScanResultsPayload(promptText, scanKind)
 
     return {
       ...msg,

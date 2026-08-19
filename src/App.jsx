@@ -18,7 +18,8 @@ export default function App() {
     <div className="visibilityAiApp">
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Overview />} />
+        <Route path="/" element={<Navigate to="/visibility-ai" replace />} />
+        <Route path="/overview" element={<Overview />} />
         <Route path="/visibility-ai" element={<VisibilityAI />} />
 
         {/* Shell variant reference — not linked in the UI */}

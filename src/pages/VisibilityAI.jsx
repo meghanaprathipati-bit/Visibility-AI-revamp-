@@ -15,7 +15,7 @@ import {
 } from '../icons/index.js'
 import AppShell from '../shell/AppShell'
 import AiSearchPerformanceDashboard from '../components/dashboards/AiSearchPerformanceDashboard.jsx'
-import { ActionItemsPanel } from '../components/action-items/index.js'
+import { ActionItemsPanel, GBP_CATEGORY_SECTIONS } from '../components/action-items/index.js'
 import { deriveChatTitle, deriveChatTitleFromSession } from '../data/chatTitles.js'
 import { buildScanResultsPayload, hydrateScanResultsMessages } from '../data/scanResults.js'
 import { SEO_SCAN_PROMPT, isAutoScanPrompt, getScanKindFromPrompt } from '../data/scanPrompts.js'
@@ -49,6 +49,7 @@ import ProjectSummaryLanding from '../components/ProjectSummaryLanding.jsx'
 import TypingText from '../components/TypingText.jsx'
 import {
   buildFixItPrompt,
+  buildSummaryChatPrompt,
   getProjectSummary,
   getRecommendationActionItem,
   projectHasChatHistory,
@@ -59,6 +60,10 @@ import {
   createSeoScanSession,
   createEmptySession,
 } from '../data/seedChats.js'
+import {
+  GBP_SCAN_ACKNOWLEDGMENT,
+  GBP_SCAN_LOADER_INTRO,
+} from '../data/gbpScanContent.js'
 import {
   SEO_SCAN_ACKNOWLEDGMENT,
   SEO_SCAN_CONTEXT,
@@ -232,13 +237,11 @@ const SCAN_STEPS = {
     'Preparing your scan summary',
   ],
   gbp: [
-    'Preparing your visibility scan plan',
-    'Scan plan ready — checking',
-    'GBP Profile Scan data could not be loaded',
-    'Listings Scan data could not be loaded',
-    'Reviews analysis data ready',
+    'Reading Google Business Profile',
+    'Checking listings across directories',
+    'Scanning content and recent posts',
+    'Scoring local SEO health',
     'Turning scan data into visibility insights',
-    'Generating consolidated report',
     'Preparing your scan summary',
   ],
   'ai-visibility': [
@@ -274,8 +277,8 @@ const SCAN_STEPS = {
     'Preparing rescan summary',
   ],
 }
-// GBP partial-failure: steps at these indices show as errors but the scan continues to completion
-const GBP_PARTIAL_FAIL_STEPS = new Set([2, 3])
+// GBP partial-failure steps — unused in current GBP audit flow; kept for future API error states
+const GBP_PARTIAL_FAIL_STEPS = new Set()
 
 // Initial "already done" steps per kind (for visual progress effect)
 const SCAN_INITIAL_DONE = { seo: -1, gbp: 0, 'ai-visibility': 2, 'ai-visibility-prep': 0, 'ai-action-plan': 1, generic: 1, rescan: 0 }
@@ -690,6 +693,7 @@ export default function VisibilityAI() {
                   {detailPanel.type === 'action-items' && (
                     <ActionItemsPanel
                       items={detailPanel.items}
+                      categorySections={detailPanel.categorySections}
                       embedded
                       implementFlow={implementFlow}
                       onStartImplement={handleStartImplement}
@@ -1553,15 +1557,19 @@ function ScanProgressList({ scanKind = 'seo', onComplete, completed = false }) {
 
 function ScanConversationBlock({ scanKind = 'seo', onComplete, loaderIntro }) {
   const isSeoScan = scanKind === 'seo'
+  const isGbpScan = scanKind === 'gbp'
   const intro =
     loaderIntro ??
-    (!isSeoScan ? SCAN_INTRO[scanKind] || SCAN_INTRO.generic : null)
+    (!isSeoScan && !isGbpScan ? SCAN_INTRO[scanKind] || SCAN_INTRO.generic : null)
 
   return (
     <div className="flex flex-col gap-3.5">
       {intro && <p className="text-[14px] text-gray-700 leading-relaxed">{intro}</p>}
       {isSeoScan && (
         <p className="text-[14px] text-gray-700 leading-relaxed">{SEO_SCAN_LOADER_INTRO}</p>
+      )}
+      {isGbpScan && (
+        <p className="text-[14px] text-gray-700 leading-relaxed">{GBP_SCAN_LOADER_INTRO}</p>
       )}
       <ScanProgressList scanKind={scanKind} onComplete={onComplete} />
     </div>
@@ -1787,6 +1795,8 @@ function MainContent({
   )
   const messagesEndRef = useRef(null)
   const chatScrollRef = useRef(null)
+  const composerWrapRef = useRef(null)
+  const [composerFadeHeight, setComposerFadeHeight] = useState(52)
   const prevOnboardingPendingRef = useRef(false)
   const inputRef = useRef(null)
   const skipDraftRef = useRef(false)
@@ -2375,14 +2385,34 @@ function MainContent({
     )
   }, [messages, onboardingPending, onboardingCompleted])
 
+  useEffect(() => {
+    const el = composerWrapRef.current
+    if (!el) return
+    const FOOTER_TOP_PADDING = 8
+    const update = () => {
+      setComposerFadeHeight(FOOTER_TOP_PADDING + el.offsetHeight / 2)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [
+    pendingQuestions,
+    implementCredentialsPending,
+    aiVisibilityAttachedComposer,
+    aiVisibilityPending,
+    onboardingPending,
+    inputValue,
+  ])
 
   const chatFooter = (
-    <div className="shrink-0 relative bg-white">
-      <div
-        className="pointer-events-none absolute inset-x-0 bottom-full h-24 bg-gradient-to-t from-white via-white/90 to-transparent"
-        aria-hidden="true"
-      />
-      <div className={`mx-auto pb-2 pt-2 px-6 ${detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'}`}>
+    <div className="shrink-0 relative">
+      <div className={`mx-auto pb-2 pt-2 px-6 relative ${detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'}`}>
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-full bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent"
+          style={{ height: composerFadeHeight }}
+          aria-hidden="true"
+        />
         {pendingQuestions && (
           <div className="mb-2">
             <ClarifyingQuestionsCard
@@ -2406,17 +2436,19 @@ function MainContent({
               />
             </div>
             <div className="relative z-10 -mt-2">
-              <PromptComposer
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onSend={handleSend}
-                inputRef={inputRef}
-                focusKey={composerFocusKey}
-                scanning={isScanning}
-                onStop={handleStopScan}
-                attachedMode
-                placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
-              />
+              <div ref={composerWrapRef}>
+                <PromptComposer
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onSend={handleSend}
+                  inputRef={inputRef}
+                  focusKey={composerFocusKey}
+                  scanning={isScanning}
+                  onStop={handleStopScan}
+                  attachedMode
+                  placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+                />
+              </div>
             </div>
           </div>
         ) : aiVisibilityAttachedComposer ? (
@@ -2438,16 +2470,18 @@ function MainContent({
               </div>
             </div>
             <div className="relative z-10 -mt-2">
-              <PromptComposer
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onSend={handleSend}
-                inputRef={inputRef}
-                focusKey={composerFocusKey}
-                scanning={isScanning}
-                onStop={handleStopScan}
-                placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
-              />
+              <div ref={composerWrapRef}>
+                <PromptComposer
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onSend={handleSend}
+                  inputRef={inputRef}
+                  focusKey={composerFocusKey}
+                  scanning={isScanning}
+                  onStop={handleStopScan}
+                  placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+                />
+              </div>
             </div>
           </div>
         ) : aiVisibilityPending ? (
@@ -2461,29 +2495,33 @@ function MainContent({
               />
             </div>
             <div className="relative z-10 -mt-2">
-              <PromptComposer
-                value={inputValue}
-                onChange={e => setInputValue(e.target.value)}
-                onSend={handleSend}
-                inputRef={inputRef}
-                focusKey={composerFocusKey}
-                scanning={isScanning}
-                onStop={handleStopScan}
-                placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
-              />
+              <div ref={composerWrapRef}>
+                <PromptComposer
+                  value={inputValue}
+                  onChange={e => setInputValue(e.target.value)}
+                  onSend={handleSend}
+                  inputRef={inputRef}
+                  focusKey={composerFocusKey}
+                  scanning={isScanning}
+                  onStop={handleStopScan}
+                  placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+                />
+              </div>
             </div>
           </div>
         ) : (
-          <PromptComposer
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
-            onSend={handleSend}
-            inputRef={inputRef}
-            focusKey={composerFocusKey}
-            scanning={isScanning}
-            onStop={handleStopScan}
-            placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
-          />
+          <div ref={composerWrapRef}>
+            <PromptComposer
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onSend={handleSend}
+              inputRef={inputRef}
+              focusKey={composerFocusKey}
+              scanning={isScanning}
+              onStop={handleStopScan}
+              placeholder="Ask about SEO, or type a domain to audit, like 'audit example.com'"
+            />
+          </div>
         )}
         <p className="text-center text-[11px] text-gray-400 mt-2 mb-2">
           Review important AI-assisted changes before publishing.
@@ -2494,6 +2532,13 @@ function MainContent({
   )
 
   function handleFixRecommendation(recommendation) {
+    if (recommendation?.id === 'rec-hero') {
+      const summary = getProjectSummary(activeProject)
+      const prompt = buildSummaryChatPrompt(summary, activeProject?.label ?? 'Project')
+      submitPrompt(prompt, { chatTitle: 'Project summary', chatTitleAsIs: true })
+      return
+    }
+
     const actionItem = getRecommendationActionItem(recommendation)
     const prompt = buildFixItPrompt(recommendation)
     submitPrompt(prompt, { chatTitle: `Fix: ${recommendation.title}`, chatTitleAsIs: true })
@@ -2540,7 +2585,7 @@ function MainContent({
     }
 
     return (
-      <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
+      <main className="flex-1 min-w-0 bg-gray-50 flex flex-col overflow-hidden">
         <div className="flex-1 flex flex-col items-center justify-center py-10 overflow-y-auto overflow-x-hidden w-full">
           <div
             className={`mx-auto flex flex-col items-center gap-6 px-6 ${
@@ -2589,9 +2634,9 @@ function MainContent({
   }
 
   return (
-    <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
+    <main className="flex-1 min-w-0 bg-gray-50 flex flex-col overflow-hidden">
       <div className="relative flex-1 min-h-0">
-        <div ref={chatScrollRef} className="absolute inset-0 overflow-y-auto py-8">
+        <div ref={chatScrollRef} className="absolute inset-0 overflow-y-auto py-8 bg-gray-50">
           <div
             className={`mx-auto flex flex-col gap-6 px-6 pb-24 ${
               detailPanelOpen ? 'w-full max-w-[720px]' : 'w-[60%]'
@@ -2848,56 +2893,82 @@ function MainContent({
               const nextActions = msg.nextActions ?? []
               const scanKind = msg.scanKind || 'seo'
 
-              // ── GBP audit results — partial failure with overall analysis card ──
+              // ── GBP audit results — channel snapshot summary + action items ──
               if (scanKind === 'gbp') {
-                const errors = msg.errors ?? []
+                const report = msg.report ?? buildVisibilityReport(
+                  messages.slice(0, messages.indexOf(msg)).reverse().find(m => m.type === 'user')?.content || 'Run GBP audit',
+                )
+                const ack = GBP_SCAN_ACKNOWLEDGMENT
                 return (
                   <div key={msg.id} className="flex flex-col gap-4">
-                    <p className="text-[14px] text-gray-700 leading-relaxed">{msg.summaryText}</p>
-
-                    {/* Overall Analysis card */}
-                    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-xs">
-                      <div className="px-5 py-4 border-b border-gray-100">
-                        <p className="text-[14px] font-semibold text-gray-900 text-center">Overall Analysis</p>
-                      </div>
-                      {errors.length > 0 && (
-                        <div className="p-4">
-                          <div className="rounded-lg border border-gray-200 bg-white p-4">
-                            <p className="text-[13px] font-semibold text-gray-800 mb-2.5">Errors</p>
-                            <ul className="flex flex-col gap-2">
-                              {errors.map((err, i) => (
-                                <li key={i} className="flex items-start gap-2">
-                                  <span className="shrink-0 mt-[7px] w-1.5 h-1.5 rounded-full bg-gray-400" />
-                                  <span className="text-[13px] text-gray-700 leading-relaxed">
-                                    <span className="font-semibold">{err.label}:</span> {err.message}
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      )}
+                    <div className="flex flex-col gap-3 text-[14px] text-gray-700 leading-relaxed">
+                      <p>{ack.headline}</p>
+                      <p>{ack.intro}</p>
+                      <ul className="flex flex-col gap-1.5 pl-4 list-disc">
+                        <li>
+                          <span className="font-medium text-gray-900">Business:</span> {ack.business}
+                        </li>
+                        <li>
+                          <span className="font-medium text-gray-900">Location:</span> {ack.location}
+                        </li>
+                      </ul>
                     </div>
-
-                    {/* Next best action chips — grey style, matching existing product patterns */}
+                    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-xs">
+                      <ScanQuickSummary report={report} />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        onOpenDetailPanel({
+                          type: 'report',
+                          title: 'Detailed report',
+                          subtitle: 'Comprehensive results from your GBP audit.',
+                          report,
+                        })
+                      }
+                      className="w-full text-left rounded-xl border border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-25 transition-colors shadow-xs px-4 py-3 flex items-center gap-3"
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-gray-100 flex items-center justify-center shrink-0">
+                        <FileText size={16} className="text-gray-600" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[13px] font-semibold text-gray-900">Detailed report</p>
+                        <p className="text-[12px] text-gray-500 mt-0.5">Click to open the detailed report.</p>
+                      </div>
+                      <ChevronRight size={16} className="text-gray-400 shrink-0" />
+                    </button>
+                    <ActionItemsSummaryCard
+                      items={msg.actionItems}
+                      onFixIssues={() =>
+                        onOpenDetailPanel({
+                          type: 'action-items',
+                          title: 'Action items',
+                          subtitle: 'Review and implement fixes from your GBP audit',
+                          items: msg.actionItems,
+                          categorySections: GBP_CATEGORY_SECTIONS,
+                        })
+                      }
+                    />
                     {nextActions.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {nextActions.map(action => (
-                          <button
-                            key={action}
-                            type="button"
-                            onClick={() => {
-                              setInputValue(action)
-                              setTimeout(() => inputRef.current?.focus(), 0)
-                            }}
-                            className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg bg-gray-100 text-[13px] font-normal text-gray-600 hover:bg-gray-200 transition-colors"
-                          >
-                            {action}
-                          </button>
-                        ))}
+                      <div className="flex flex-col gap-2">
+                        <p className="text-[13px] font-medium text-gray-500">What would you like to do next?</p>
+                        <div className="flex flex-wrap gap-2">
+                          {nextActions.map(action => (
+                            <button
+                              key={action}
+                              type="button"
+                              onClick={() => {
+                                setInputValue(action)
+                                setTimeout(() => inputRef.current?.focus(), 0)
+                              }}
+                              className="shrink-0 whitespace-nowrap px-3 py-1.5 rounded-lg bg-gray-100 text-[13px] font-normal text-gray-600 hover:bg-gray-200 transition-colors"
+                            >
+                              {action}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
-
                     <AiFeedbackRow ts={msg.ts} />
                   </div>
                 )

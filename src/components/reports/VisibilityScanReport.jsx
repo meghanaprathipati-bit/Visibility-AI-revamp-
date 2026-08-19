@@ -166,18 +166,6 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
         <ReportTable columns={['Issue', 'Impact', 'Priority', 'Action']} rows={actionRows} />
       </div>
 
-      {/* Top 3 actions */}
-      <div>
-        <h4 className="text-[13px] font-semibold text-gray-900 mb-2">Top 3 actions to take now</h4>
-        <ol className="flex flex-col gap-2 pl-4 list-decimal">
-          {report.topActions.map(action => (
-            <li key={action} className="text-[13px] text-gray-700 leading-relaxed pl-1">
-              {action}
-            </li>
-          ))}
-        </ol>
-      </div>
-
       {/* Upsell + prompt actions */}
       <div className="flex flex-col gap-3 pt-1">
         <p className="text-[13px] text-gray-600 leading-relaxed">{report.upsellText}</p>
