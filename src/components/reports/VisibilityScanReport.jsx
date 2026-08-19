@@ -2,7 +2,7 @@ import { MapPin, Star } from '../../icons/index.js'
 
 function TagPill({ children }) {
   return (
-    <span className="text-[12px] font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-0.5">
+    <span className="text-[13px] font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-0.5">
       {children}
     </span>
   )
@@ -26,7 +26,7 @@ function PriorityBadge({ priority }) {
         ? 'text-warning-600 bg-warning-100 border-warning-100'
         : 'text-primary-600 bg-primary-50 border-primary-50'
   return (
-    <span className={`inline-flex text-[12px] font-medium px-2 py-0.5 rounded border ${styles}`}>
+    <span className={`inline-flex text-[13px] font-medium px-2 py-0.5 rounded border ${styles}`}>
       {priority}
     </span>
   )
@@ -117,13 +117,13 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
                     <span className="text-[13px] font-medium text-gray-900">{profile.rating}</span>
                     <span className="text-[12px] text-gray-500">({profile.reviewCount?.toLocaleString()} reviews)</span>
                   </div>
-                  <span className="text-[12px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
+                  <span className="text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
                     {profile.sentiment}
                   </span>
                 </div>
               )}
               {profile.rating == null && profile.sentiment && (
-                <span className="inline-flex mt-2 text-[12px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
+                <span className="inline-flex mt-2 text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
                   {profile.sentiment}
                 </span>
               )}
@@ -144,7 +144,7 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
               {profile.missingTasks.map(task => (
                 <span
                   key={task}
-                  className="text-[12px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2.5 py-0.5"
+                  className="text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2.5 py-0.5"
                 >
                   {task}
                 </span>

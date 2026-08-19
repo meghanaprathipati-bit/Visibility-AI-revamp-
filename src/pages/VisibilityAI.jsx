@@ -3216,7 +3216,7 @@ function NewProjectModal({ onClose, onCreateProject }) {
     onClose()
   }
 
-  const labelBase = 'flex items-center gap-1.5 text-[14px] font-medium text-gray-700 mb-1.5'
+  const labelBase = 'flex items-center gap-1.5 text-[14px] font-medium text-gray-700 mb-1'
 
   return (
     <HLModal

@@ -46,7 +46,7 @@ function ModalTableRemoveButton({ label, onClick }) {
 }
 
 // Shared form field chrome — matches HLForm + HLInput patterns used in VisibilityAI modals.
-const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-700 mb-1.5'
+const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-700 mb-1'
 const FORM_SELECT_CLASS =
   'w-full h-9 px-2 pr-8 bg-white border border-gray-300 rounded-md text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 focus:shadow-focus-primary-sm transition-all cursor-pointer'
 const FORM_TEXTAREA_CLASS =
@@ -941,7 +941,7 @@ function OverlapStatusChip({ status }) {
   const s = OVERLAP_STATUS_META[status] || OVERLAP_STATUS_META.Stable
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap"
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium whitespace-nowrap"
       style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
     >
       {status}
@@ -1101,7 +1101,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
 
 function BrandPill({ name }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium bg-gray-50 text-gray-600 border-gray-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-medium bg-gray-50 text-gray-600 border-gray-200">
       {name}
     </span>
   )
@@ -1119,14 +1119,14 @@ function TruncatedLink({ href, children }) {
     <>
       <a ref={ref} href={href || '#'} onClick={e => e.preventDefault()}
         onMouseEnter={show} onMouseLeave={hide}
-        className="flex items-center gap-1 text-[13px] text-primary-600 hover:underline min-w-0 w-full">
+        className="flex items-center gap-1 text-[14px] text-primary-600 hover:underline min-w-0 w-full">
         <span className="truncate block">{children}</span>
         <ExternalLink size={11} className="shrink-0" />
       </a>
       {pos && createPortal(
         <div onMouseEnter={() => setPos(pos)} onMouseLeave={hide}
           style={{ position: 'fixed', top: pos.top - 8, left: pos.left, transform: 'translateY(-100%)', zIndex: 9999, maxWidth: '480px' }}
-          className="px-2.5 py-1.5 bg-gray-900 text-white text-[12px] rounded-md shadow-lg break-all leading-relaxed">
+          className="px-2.5 py-1.5 bg-gray-900 text-white text-[14px] rounded-md shadow-lg break-all leading-relaxed">
           {children}
         </div>,
         document.body
@@ -1166,9 +1166,10 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
         {backLabel}
       </button>
 
-      {/* Hero card — snapshot stats sit below the title + subtext */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-center gap-2 mb-3">
+      {/* Hero — no white frame; only the CountCards below carry their own white bg */}
+      <div>
+        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
+        <div className="flex items-center gap-2">
           <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200">{heroTopic}</span>
           <span
             className="inline-flex items-center px-2.5 py-1 rounded-full text-[14px] font-medium border"
@@ -1180,19 +1181,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
           >
             {heroStatus}
           </span>
-          <span className="text-[12px] text-gray-500">Last 30 days</span>
-          <span className="text-[12px] text-gray-500">US</span>
         </div>
-        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
-        <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
+      </div>
 
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <div className="grid grid-cols-4 gap-3">
-            {DETAIL_KPI.map(kpi => (
-              <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
-            ))}
-          </div>
-        </div>
+      <div className="grid grid-cols-4 gap-3">
+        {DETAIL_KPI.map(kpi => (
+          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
+        ))}
       </div>
 
       {/* Prompt Visibility Trend + Engine performance */}
@@ -1771,7 +1766,7 @@ function OverviewContent({ contentScrollRef }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-[14px] font-medium text-gray-900 leading-snug m-0 mb-1">{item.prompt}</p>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[13px] font-medium border border-purple-200">
                       {item.tag}
                     </span>
                     <span className="text-[12px] text-gray-500">{item.volume}</span>
@@ -2451,7 +2446,7 @@ const SETUP_STEPS = [
 ]
 
 const SETUP_SELECT_CLASS =
-  'w-full h-8 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
+  'w-full h-9 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
 
 const PITCH_DISCOVER_ITEMS = [
   {
@@ -2839,14 +2834,14 @@ function PromptTrackingInitialState({ onStart }) {
     <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-1">
       <div className="flex-1 min-h-0 overflow-y-auto">
         <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Confirm your brand</h2>
-        <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed max-w-[520px]">
+        <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed">
           Add your brand name, market, and language so visibility scores reflect where you actually sell.
         </p>
 
-        <div className="mt-5 rounded-2xl border border-gray-200 bg-white shadow-xs p-4 sm:p-5 flex flex-col gap-4">
+        <div className="mt-5 flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label htmlFor="pt-setup-brand" className="block text-[12px] font-medium text-gray-500 mb-2">Brand name</label>
+              <label htmlFor="pt-setup-brand" className="block text-[14px] font-medium text-gray-500 mb-1">Brand name</label>
               <HLInput
                 id="pt-setup-brand"
                 size="sm"
@@ -2856,7 +2851,7 @@ function PromptTrackingInitialState({ onStart }) {
               />
             </div>
             <div>
-              <label htmlFor="pt-setup-website" className="block text-[12px] font-medium text-gray-500 mb-2">Brand website</label>
+              <label htmlFor="pt-setup-website" className="block text-[14px] font-medium text-gray-500 mb-1">Brand website</label>
               <HLInput
                 id="pt-setup-website"
                 size="sm"
@@ -2870,13 +2865,13 @@ function PromptTrackingInitialState({ onStart }) {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <label htmlFor="pt-setup-language" className="block text-[12px] font-medium text-gray-500 mb-2">Language</label>
+              <label htmlFor="pt-setup-language" className="block text-[14px] font-medium text-gray-500 mb-1">Language</label>
               <div className="relative">
                 <select
                   id="pt-setup-language"
                   value={language}
                   onChange={e => setLanguage(e.target.value)}
-                  className="w-full h-8 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                  className="w-full h-9 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
                 >
                   {SETUP_LANGUAGES.map(l => (
                     <option key={l} value={l}>{l}</option>
@@ -2886,13 +2881,13 @@ function PromptTrackingInitialState({ onStart }) {
               </div>
             </div>
             <div>
-              <label htmlFor="pt-setup-country" className="block text-[12px] font-medium text-gray-500 mb-2">Country</label>
+              <label htmlFor="pt-setup-country" className="block text-[14px] font-medium text-gray-500 mb-1">Country</label>
               <div className="relative">
                 <select
                   id="pt-setup-country"
                   value={country}
                   onChange={e => setCountry(e.target.value)}
-                  className="w-full h-8 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                  className="w-full h-9 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
                 >
                   {SETUP_COUNTRIES.map(c => (
                     <option key={c} value={c}>{c}</option>
@@ -2902,7 +2897,7 @@ function PromptTrackingInitialState({ onStart }) {
               </div>
             </div>
             <div>
-              <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
+              <label htmlFor="pt-setup-region" className="block text-[14px] font-medium text-gray-500 mb-1">Region</label>
               <div className="relative">
                 <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
                 <select

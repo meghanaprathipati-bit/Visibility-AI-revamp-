@@ -236,7 +236,7 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                           <p className="text-[13px] font-medium text-gray-900 truncate m-0">{b}</p>
                           <p className="text-[12px] text-gray-500 m-0">#{i + 1}.0 · {sentiment}</p>
                         </div>
-                        {you && <span className="text-[12px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
+                        {you && <span className="text-[13px] font-medium text-primary-600 bg-primary-50 rounded-full px-2 py-0.5 shrink-0">You</span>}
                       </div>
                     )
                   })}
@@ -255,10 +255,10 @@ export default function FullResponseModal({ response, promptText, onClose, sourc
                       </div>
                       <p className="text-[12px] text-gray-500 truncate m-0 mt-0.5">{s.url.replace(/^https?:\/\//, '')}</p>
                       <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-                        <span className={`text-[12px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
+                        <span className={`text-[13px] font-medium rounded-full px-2 py-0.5 ${s.brandMentioned ? 'bg-success-50 text-success-600' : 'bg-gray-100 text-gray-500'}`}>
                           {s.brandMentioned ? 'Brand mentioned' : 'Brand not mentioned'}
                         </span>
-                        {s.otherBrands && <span className="text-[12px] font-medium rounded-full px-2 py-0.5 bg-warning-100 text-warning-600">Competitor present</span>}
+                        {s.otherBrands && <span className="text-[13px] font-medium rounded-full px-2 py-0.5 bg-warning-100 text-warning-600">Competitor present</span>}
                       </div>
                     </div>
                   ))}

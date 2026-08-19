@@ -57,7 +57,7 @@ const TONE_STYLES = {
 function ToneBadge({ tone, children }) {
   const styles = TONE_STYLES[tone] ?? TONE_STYLES.notice
   return (
-    <span className={`inline-flex text-[12px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
+    <span className={`inline-flex text-[13px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
       {children}
     </span>
   )
@@ -155,7 +155,7 @@ function RecommendedActionCard({ action }) {
         <Icon size={16} className="text-gray-700" />
       </div>
       <div className="flex flex-col gap-1.5 min-w-0">
-        <span className={`inline-flex self-start text-[12px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
+        <span className={`inline-flex self-start text-[13px] font-medium px-2 py-0.5 rounded border ${styles.badge}`}>
           {action.priority}
         </span>
         <p className="text-[13px] font-semibold text-gray-900 leading-snug">{action.title}</p>
@@ -235,7 +235,7 @@ function MobileReadinessSection({ data }) {
           {data.breakdownTags.map(tag => (
             <span
               key={tag.label}
-              className={`inline-flex items-center gap-1 text-[12px] font-medium px-2 py-0.5 rounded border ${
+              className={`inline-flex items-center gap-1 text-[13px] font-medium px-2 py-0.5 rounded border ${
                 tag.pass
                   ? 'text-success-600 bg-success-50 border-success-50'
                   : 'text-error-600 bg-error-50 border-error-50'
@@ -295,7 +295,7 @@ function SeoHealthReport({ data }) {
             {data.domain} · {data.location} · {data.scanDate}
           </p>
         </div>
-        <span className="inline-flex items-center gap-1.5 shrink-0 text-[12px] font-medium text-success-600 bg-success-50 border border-success-50 rounded-full px-2.5 py-1">
+        <span className="inline-flex items-center gap-1.5 shrink-0 text-[13px] font-medium text-success-600 bg-success-50 border border-success-50 rounded-full px-2.5 py-1">
           <CircleCheck size={12} />
           {data.statusLabel}
         </span>

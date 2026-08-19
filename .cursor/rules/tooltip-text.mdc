@@ -1,0 +1,30 @@
+---
+description: Tooltip bubble text is 14px everywhere
+alwaysApply: true
+---
+
+# Tooltip text — 14px
+
+Every hover tooltip's message text (the dark bubble shown on hover of an info
+icon, truncated link/cell, disabled action, chart bar, etc.) uses **14px**
+text, never 12px/13px.
+
+- Shared component: `src/components/HLTooltip.jsx` — its bubble is
+  `text-[14px]`. Prefer this component (directly, or via `SectionInfoTip`)
+  for any new tooltip instead of hand-rolling a `bg-gray-900` popup.
+- If a tooltip must be hand-rolled (e.g. a `group-hover:opacity-100` bubble
+  tied to a chart bar or table cell), it still must use `text-[14px]` for the
+  message text.
+
+## Not covered by this rule
+
+- Rich info popovers with their own internal type scale (e.g. a metrics
+  breakdown card shown on hover, with a label + big number + description) —
+  those follow their own component's typography, not a single tooltip-text size.
+- The small icon glyph inside a custom `InfoTooltip`'s "i" circle (that's an
+  icon, not tooltip body text).
+
+## Before finishing tooltip work
+
+- [ ] Any new/edited tooltip bubble text is `text-[14px]`, not 12/13px.
+- [ ] Prefer `HLTooltip` / `SectionInfoTip` over a hand-rolled popup.

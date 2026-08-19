@@ -71,7 +71,7 @@ function DifficultyBadge({ label, score }) {
   )
 }
 
-const labelBase = 'text-[14px] font-medium text-gray-700 mb-1.5 block'
+const labelBase = 'text-[14px] font-medium text-gray-700 mb-1 block'
 
 function StepOneFields({ values, onChange, gbpProfileLinkRef }) {
   return (
