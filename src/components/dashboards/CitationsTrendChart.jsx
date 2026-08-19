@@ -68,7 +68,7 @@ export default function CitationsTrendChart() {
       <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
         <div>
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[16px] font-semibold text-gray-900">Citations trend</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">Citations trend</h3>
             <SectionInfoTip
               id="citations-trend-info"
               content="Track visibility, mentions, and citations over time"
@@ -129,7 +129,7 @@ export default function CitationsTrendChart() {
 
       <div className="flex justify-between mt-2 px-1">
         {data.filter((_, i) => i === 0 || i === data.length - 1 || i === Math.floor(data.length / 2)).map(p => (
-          <span key={p.date} className="text-[11px] text-gray-400">
+          <span key={p.date} className="text-[11px] text-gray-500">
             {new Date(`${p.date}-01`).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })}
           </span>
         ))}

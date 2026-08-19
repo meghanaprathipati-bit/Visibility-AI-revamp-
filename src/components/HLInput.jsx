@@ -174,7 +174,7 @@ const HLInput = forwardRef(function HLInput(
               <div className="hr-input__prefix-container">
                 {PrefixIcon ? (
                   <span className="hr-input__prefix-icon">
-                    <PrefixIcon size={prefixIconSize} className="text-gray-400" strokeWidth={1.67} />
+                    <PrefixIcon size={prefixIconSize} className="text-gray-500" strokeWidth={1.67} />
                   </span>
                 ) : (
                   prefix

@@ -1,0 +1,47 @@
+---
+description: Every table must sit on an explicit white background, never inherit the page canvas
+alwaysApply: true
+---
+
+# Tables must be explicitly white — never rely on an ancestor for it
+
+Every data table's outer wrapper (the `overflow-x-auto` / bordered card div that
+holds the `<table>`) must set `bg-white` **on that same wrapper**, not assume a
+distant ancestor happens to be white. The page canvas behind cards is a light
+gray (`gray-50`/`gray-100`), so any table wrapper missing `bg-white` shows the
+gray canvas bleeding through the table cells and header row — the header
+`bg-gray-50` shading and column strokes then blend into the page instead of
+standing out.
+
+## Rule
+
+Whenever you write (or refactor) a table wrapper, it MUST include `bg-white`:
+
+```jsx
+// Bad — no bg-white on the wrapper; cells blend into the gray page canvas
+<div className="overflow-x-auto border border-gray-200 rounded-lg">
+  <table>...</table>
+</div>
+
+// Good
+<div className="overflow-x-auto border border-gray-200 rounded-lg bg-white">
+  <table>...</table>
+</div>
+```
+
+- Prefer the shared `SectionCard` (`src/components/dashboards/SiteHealthDashboard.jsx`)
+  when available — it already bakes in `bg-white`.
+- If you hand-roll a card (e.g. a "one level in" drill-down view that
+  deliberately has no outer white frame around its header, per the
+  modal/detail-page pattern), the **table's own** wrapper div still must carry
+  `bg-white` even though the page/header above it doesn't.
+- This applies to every dashboard: Site Health, AI Search Performance, Prompt
+  Tracking, Source Inventory, and any new dashboard/table you add.
+
+## Before finishing any table work
+
+- [ ] Search the table's wrapper div for `bg-white`. If it's missing, add it —
+  do not assume a parent card already provides it without checking.
+- [ ] Visually confirm the header row (`bg-gray-50`) and column strokes
+  (`border-r`/`border-b border-gray-200`) are visibly distinct from the page
+  background, not blending into it.

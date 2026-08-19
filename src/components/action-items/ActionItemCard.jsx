@@ -4,6 +4,7 @@ import HLCheckbox from '../HLCheckbox.jsx'
 import HLTooltip from '../HLTooltip.jsx'
 import ActionItemDetailTable from './ActionItemDetailTable.jsx'
 import ActionItemDetailSingle from './ActionItemDetailSingle.jsx'
+import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 
 const MANUAL_FIX_TOOLTIP = 'Auto-fix unavailable. View the manual fix.'
 
@@ -53,7 +54,7 @@ function SubscribeFlow() {
           <button
             type="button"
             onClick={() => setStage('implement')}
-            className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[12px] font-semibold transition-colors"
+            className={`${BTN_PRIMARY} shrink-0`}
           >
             Configure
           </button>
@@ -217,7 +218,7 @@ export default function ActionItemCard({
           </div>
         </button>
         {item.affectedPages != null && (
-          <span className="text-[11px] text-gray-400 shrink-0">
+          <span className="text-[11px] text-gray-500 shrink-0">
             {item.affectedPages === 'site-wide' ? 'Site-wide' : `${item.affectedPages} pages`}
           </span>
         )}
@@ -227,7 +228,7 @@ export default function ActionItemCard({
           className="shrink-0 bg-transparent border-0 p-0 cursor-pointer"
           onClick={() => setOpen(v => !v)}
         >
-          <ChevronDown size={14} className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
+          <ChevronDown size={14} className={`text-gray-500 transition-transform ${open ? 'rotate-180' : ''}`} />
         </button>
       </div>
 

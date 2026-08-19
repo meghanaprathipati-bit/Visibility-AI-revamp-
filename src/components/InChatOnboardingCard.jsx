@@ -13,7 +13,7 @@ import {
   MAX_CUSTOM_COMPETITORS,
 } from '../data/onboardingData.js'
 
-const TABLE_HEADER_CLASS = 'text-[12px] font-medium text-gray-500'
+const TABLE_HEADER_CLASS = 'text-[14px] font-semibold text-gray-900'
 const KEYWORD_ROW_LAYOUT = 'flex items-center gap-x-6 w-full'
 const KEYWORD_LEFT_SECTION = 'flex flex-1 min-w-0 items-center gap-x-6'
 const KEYWORD_CHECKBOX_SLOT = 'w-[14px] shrink-0 flex items-center justify-center'
@@ -71,7 +71,7 @@ function DifficultyBadge({ label, score }) {
   )
 }
 
-const labelBase = 'text-[14px] font-medium text-gray-700 mb-1.5 block'
+const labelBase = 'text-[14px] font-medium text-gray-700 mb-1 block'
 
 function StepOneFields({ values, onChange, gbpProfileLinkRef }) {
   return (
@@ -152,7 +152,7 @@ function StepOneFields({ values, onChange, gbpProfileLinkRef }) {
         <div>
           <label htmlFor="onboarding-state-region" className={labelBase}>
             State / region{' '}
-            <span className="text-[12px] font-normal text-gray-400">(optional)</span>
+            <span className="text-[12px] font-normal text-gray-500">(optional)</span>
           </label>
           <HLInput
             id="onboarding-state-region"
@@ -181,7 +181,7 @@ function KeywordRow({ item, index, onToggle, onChange, onRemove, isCustom }) {
             <button
               type="button"
               onClick={() => onRemove(item.id)}
-              className={`${KEYWORD_CHECKBOX_SLOT} rounded text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors`}
+              className={`${KEYWORD_CHECKBOX_SLOT} rounded text-gray-500 hover:text-gray-600 hover:bg-gray-50 transition-colors`}
               aria-label="Remove custom keyword"
             >
               <Trash2 size={13} />
@@ -204,7 +204,7 @@ function KeywordRow({ item, index, onToggle, onChange, onRemove, isCustom }) {
             <div className="flex flex-1 min-w-0 items-center gap-2">
               <span
                 className={`text-[13px] font-medium truncate ${
-                  isMuted ? 'text-gray-400' : 'text-gray-900'
+                  isMuted ? 'text-gray-500' : 'text-gray-900'
                 }`}
               >
                 {toSentenceCase(item.keyword)}
@@ -227,7 +227,7 @@ function KeywordRow({ item, index, onToggle, onChange, onRemove, isCustom }) {
 
         <span
           className={`${KEYWORD_VOLUME_CELL} text-[13px] tabular-nums ${
-            awaitingMetrics ? 'text-gray-400' : 'text-gray-700'
+            awaitingMetrics ? 'text-gray-500' : 'text-gray-700'
           }`}
         >
           {awaitingMetrics ? '—' : item.monthlySearches}
@@ -235,7 +235,7 @@ function KeywordRow({ item, index, onToggle, onChange, onRemove, isCustom }) {
 
         <div className={KEYWORD_DIFFICULTY_CELL}>
           {awaitingMetrics ? (
-            <span className="text-[12px] text-gray-400 whitespace-nowrap">Awaiting text</span>
+            <span className="text-[12px] text-gray-500 whitespace-nowrap">Awaiting text</span>
           ) : (
             <DifficultyBadge label={item.difficulty} score={item.difficultyScore} />
           )}
@@ -249,7 +249,7 @@ function CompetitorNotesCell({ id, notes, isMuted, isCustom }) {
   if (isCustom) {
     return (
       <span
-        className={`text-[13px] tabular-nums ${isMuted ? 'text-gray-400' : 'text-gray-500'}`}
+        className={`text-[13px] tabular-nums ${isMuted ? 'text-gray-500' : 'text-gray-500'}`}
       >
         —
       </span>
@@ -257,7 +257,7 @@ function CompetitorNotesCell({ id, notes, isMuted, isCustom }) {
   }
 
   const textClass = `block w-full min-w-0 text-[13px] leading-snug truncate text-left ${
-    isMuted ? 'text-gray-400' : 'text-gray-500'
+    isMuted ? 'text-gray-500' : 'text-gray-500'
   }`
 
   if (!notes?.trim()) {
@@ -288,7 +288,7 @@ function CompetitorRow({ item, onToggle, onChange, onRemove, isCustom }) {
             <button
               type="button"
               onClick={() => onRemove(item.id)}
-              className="w-[14px] h-[14px] flex shrink-0 items-center justify-center rounded text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+              className="w-[14px] h-[14px] flex shrink-0 items-center justify-center rounded text-gray-500 hover:text-gray-600 hover:bg-gray-50 transition-colors"
               aria-label="Remove custom competitor"
             >
               <Trash2 size={13} />
@@ -319,7 +319,7 @@ function CompetitorRow({ item, onToggle, onChange, onRemove, isCustom }) {
           ) : (
             <span
               className={`block w-full min-w-0 text-[13px] font-medium truncate ${
-                isMuted ? 'text-gray-400' : 'text-gray-900'
+                isMuted ? 'text-gray-500' : 'text-gray-900'
               }`}
             >
               {item.name}
@@ -340,7 +340,7 @@ function CompetitorRow({ item, onToggle, onChange, onRemove, isCustom }) {
           ) : (
             <span
               className={`block w-full min-w-0 text-[13px] truncate ${
-                isMuted ? 'text-gray-400' : 'text-gray-500'
+                isMuted ? 'text-gray-500' : 'text-gray-500'
               }`}
             >
               {item.domain}
@@ -529,7 +529,7 @@ export default function InChatOnboardingCard({
               type="button"
               onClick={() => setStepIdx(i => Math.max(0, i - 1))}
               disabled={stepIdx === 0}
-              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Previous step"
             >
               <ChevronUp size={13} />
@@ -541,7 +541,7 @@ export default function InChatOnboardingCard({
               type="button"
               onClick={() => setStepIdx(i => Math.min(totalSteps - 1, i + 1))}
               disabled={stepIdx === totalSteps - 1}
-              className="w-6 h-6 flex items-center justify-center rounded text-gray-400 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-6 h-6 flex items-center justify-center rounded text-gray-500 hover:text-gray-700 hover:bg-purple-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               aria-label="Next step"
             >
               <ChevronDown size={13} />

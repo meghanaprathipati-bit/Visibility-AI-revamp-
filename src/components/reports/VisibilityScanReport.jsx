@@ -2,7 +2,7 @@ import { MapPin, Star } from '../../icons/index.js'
 
 function TagPill({ children }) {
   return (
-    <span className="text-[11px] font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-0.5">
+    <span className="text-[13px] font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-full px-2.5 py-0.5">
       {children}
     </span>
   )
@@ -11,9 +11,9 @@ function TagPill({ children }) {
 function MetricTile({ label, value, sub }) {
   return (
     <div className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2.5 min-w-0">
-      <p className="text-[11px] text-gray-500 leading-tight">{label}</p>
+      <p className="text-[12px] text-gray-500 leading-tight">{label}</p>
       <p className="text-[14px] font-semibold text-gray-900 mt-0.5 leading-tight">{value}</p>
-      {sub && <p className="text-[11px] text-gray-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-[12px] text-gray-500 mt-0.5">{sub}</p>}
     </div>
   )
 }
@@ -26,7 +26,7 @@ function PriorityBadge({ priority }) {
         ? 'text-warning-600 bg-warning-100 border-warning-100'
         : 'text-primary-600 bg-primary-50 border-primary-50'
   return (
-    <span className={`inline-flex text-[11px] font-medium px-2 py-0.5 rounded border ${styles}`}>
+    <span className={`inline-flex text-[13px] font-medium px-2 py-0.5 rounded border ${styles}`}>
       {priority}
     </span>
   )
@@ -39,7 +39,7 @@ function ReportTable({ columns, rows }) {
         <thead>
           <tr className="bg-gray-50 border-b border-gray-100">
             {columns.map(col => (
-              <th key={col} className="text-[12px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap">
+              <th key={col} className="text-[14px] font-semibold text-gray-900 px-3 py-2.5 whitespace-nowrap">
                 {col}
               </th>
             ))}
@@ -49,7 +49,7 @@ function ReportTable({ columns, rows }) {
           {rows.map((row, idx) => (
             <tr key={idx} className="border-b border-gray-100 last:border-0">
               {row.map((cell, cellIdx) => (
-                <td key={cellIdx} className="text-[13px] text-gray-700 px-3 py-2.5 align-top leading-snug">
+                <td key={cellIdx} className="text-[14px] text-gray-700 px-3 py-2.5 align-top leading-snug">
                   {cell}
                 </td>
               ))}
@@ -77,7 +77,7 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
     <div className="flex flex-col gap-5">
       {/* Report header */}
       <div>
-        <h3 className="text-[15px] font-semibold text-gray-900 leading-snug">{report.title}</h3>
+        <h3 className="text-[14px] font-semibold text-gray-900 leading-snug">{report.title}</h3>
         <div className="flex flex-wrap gap-1.5 mt-3">
           {report.tags.map(tag => (
             <TagPill key={tag}>{tag}</TagPill>
@@ -99,15 +99,15 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
               <div className="w-[72px] h-[72px] rounded-full border-[3px] border-primary-600 flex items-center justify-center">
                 <span className="text-[22px] font-bold text-primary-600 leading-none">{profile.healthScore}</span>
               </div>
-              <span className="text-[11px] text-gray-500 text-center leading-tight">Health score</span>
-              <span className="text-[11px] font-medium text-gray-700">{profile.healthScore}/100</span>
+              <span className="text-[12px] text-gray-500 text-center leading-tight">Health score</span>
+              <span className="text-[12px] font-medium text-gray-700">{profile.healthScore}/100</span>
             </div>
 
             {/* Business / domain info */}
             <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-semibold text-gray-900 leading-snug">{profile.businessName}</p>
+              <p className="text-[14px] font-semibold text-gray-900 leading-snug">{profile.businessName}</p>
               <p className="text-[13px] text-gray-500 mt-1 flex items-center gap-1">
-                <MapPin size={13} className="shrink-0 text-gray-400" />
+                <MapPin size={13} className="shrink-0 text-gray-500" />
                 {profile.location}
               </p>
               {profile.rating != null && (
@@ -117,13 +117,13 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
                     <span className="text-[13px] font-medium text-gray-900">{profile.rating}</span>
                     <span className="text-[12px] text-gray-500">({profile.reviewCount?.toLocaleString()} reviews)</span>
                   </div>
-                  <span className="text-[11px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
+                  <span className="text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
                     {profile.sentiment}
                   </span>
                 </div>
               )}
               {profile.rating == null && profile.sentiment && (
-                <span className="inline-flex mt-2 text-[11px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
+                <span className="inline-flex mt-2 text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2 py-0.5">
                   {profile.sentiment}
                 </span>
               )}
@@ -144,7 +144,7 @@ export default function VisibilityScanReport({ report, onPromptAction }) {
               {profile.missingTasks.map(task => (
                 <span
                   key={task}
-                  className="text-[11px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2.5 py-0.5"
+                  className="text-[13px] font-medium text-warning-600 bg-warning-100 border border-warning-100 rounded-full px-2.5 py-0.5"
                 >
                   {task}
                 </span>

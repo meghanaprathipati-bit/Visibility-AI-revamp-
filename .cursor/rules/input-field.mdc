@@ -1,5 +1,5 @@
 ---
-description: Use the shared HLInput (sm, 8px radius) for every input field
+description: Use the shared HLInput (sm, 36px, 8px radius) for every input field
 alwaysApply: true
 ---
 
@@ -12,46 +12,64 @@ must use the shared component:
 src/components/HLInput.jsx
 ```
 
-This is the React adapter for the HighRise `HLInput`. Do not hand-roll `<input>`
+This is the React mirror of the HighRise `HLInput`. Do not hand-roll `<input>`
 markup with bespoke sizing, and do not fork these styles into a page.
 
 ## Fixed design — never change
 
-- **Size**: `sm` → 32px tall (`h-8`).
+- **Size**: `sm` → 36px tall (`size="sm"`, i.e. `h-9` for any hand-rolled `<select>`
+  that must visually match).
 - **Corners**: 8px (`rounded-lg`).
 - **Border**: `border-gray-300`; focus → `focus:border-primary-600`.
 - **Text**: `text-[14px] text-gray-900`, `placeholder:text-gray-400`.
-- **Padding**: `px-3` (or `pl-9 pr-3` when there is a leading icon).
+- **Padding**: `px-3` (or `pl-9 pr-3` when there is a leading icon via `prefixIcon`).
 - **Disabled**: `disabled:bg-gray-50 disabled:text-gray-400`.
 
-Do not use `h-9`/`h-10`, `rounded-md`, `border-gray-200` on inputs, `py-2.5`
-free-form padding, or `focus:border-primary-400`. If a design shows a different
-height or radius, still use the `HLInput` sizing.
+Do not use `h-8`/`h-10`, `rounded-md`, `border-gray-200` on form inputs/selects,
+or `focus:border-primary-400`. If a design shows a different height or radius,
+still use this sizing. (Toolbar filter/search chips are a deliberate exception —
+see the `highrise-table` / `filter-styles` rules, which keep those at 32px.)
 
 ## Usage
 
 ```jsx
-import HLInput, { HL_INPUT_CLASS } from '../HLInput.jsx' // adjust relative depth
+import HLInput from '../HLInput.jsx' // adjust relative depth
 
 // Plain input
-<HLInput value={v} onChange={e => setV(e.target.value)} placeholder="Input text" />
+<HLInput size="sm" value={v} onChange={e => setV(e.target.value)} placeholder="Input text" />
 
-// With a leading icon (from src/icons)
-<HLInput icon={Globe} value={site} onChange={e => setSite(e.target.value)} placeholder="e.g. hubspot.com" />
+// With a leading icon
+<HLInput size="sm" prefixIcon={Globe} value={site} onChange={e => setSite(e.target.value)} placeholder="e.g. hubspot.com" />
 
-// Non-input elements that must match (e.g. a <select>): reuse the class
-<select className={`${HL_INPUT_CLASS} appearance-none pr-10 cursor-pointer`}>…</select>
+// Non-input elements that must match (e.g. a <select>) — hand-roll the same spec
+<select className="w-full h-9 px-3 pr-8 rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer">…</select>
 ```
 
-- Label pattern above the field: `text-[12px] font-medium text-gray-500 mb-2`.
+## Label pattern — every labeled field, everywhere
+
+The label directly above a form input or dropdown is always:
+
+```
+text-[14px] font-medium mb-1
+```
+
+(`mb-1` = 4px gap between the label and the field below it.) Label color may be
+`text-gray-500` or `text-gray-700` depending on the surrounding form, but size
+(14px), weight (medium), and the 4px gap are fixed. Never use `text-[12px]` or
+`text-[13px]` for a field label, and never use `mb-2`/`mb-1.5`/`mb-3` between a
+label and its own input — that 4px gap is reserved for label→field only, not
+for a label→helper-paragraph→input chain (a helper/description line between
+label and field may keep its own spacing).
+
 - `HLInput` forwards all native props (`value`, `onChange`, `placeholder`,
-  `type`, `disabled`, `autoFocus`, `maxLength`, …).
-- For a leading icon use the `icon` prop (renders it at `left-3`, adds `pl-9`).
-- `<textarea>` and `<select>` are not inputs, but should match the input's
-  radius/border/focus — reuse `HL_INPUT_CLASS` (drop `h-8` for multiline).
+  `type`, `disabled`, `autoFocus`, `maxLength`, `prefixIcon`, `suffix`, …).
+- `<textarea>` and `<select>` are not `HLInput`, but must match its
+  radius/border/focus/height (36px) — hand-roll the same classes shown above.
 
 ## Do not
 
 - Do not build an input with raw `<input className="…custom…">` when `HLInput` fits.
 - Do not change the height, radius, border color, or focus color per usage.
-- Do not reintroduce `h-9`/`rounded-md` search or form inputs.
+- Do not leave a `<select>` at 32px (`h-8`) or 40px (`h-10`) next to `HLInput`
+  fields at 36px — every labeled field in the same form must be the same height.
+- Do not leave a field label at 12px/13px or with more than a 4px gap to its input.

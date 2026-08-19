@@ -22,7 +22,7 @@ export default function AiSentimentChart() {
     <div className="border border-gray-200 rounded-lg bg-white p-5">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
-          <h3 className="text-[16px] font-semibold text-gray-900">
+          <h3 className="text-[14px] font-semibold text-gray-900">
             How AI is describing {DUMMY_DOMAIN}
           </h3>
           <SectionInfoTip

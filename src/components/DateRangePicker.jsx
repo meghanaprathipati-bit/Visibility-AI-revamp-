@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from '../icons/index.js'
+import { BTN_PRIMARY, BTN_SECONDARY } from './HLButton.jsx'
 
 // React adapter for the HighRise `HLDatePicker type="daterange"`. Presentational
 // range calendar shown inside a popover: two Start/End inputs, twin month grids,
@@ -44,7 +45,7 @@ function MonthGrid({ view, start, end, hover, onPick, onHover }) {
     <div className="w-[236px]">
       <div className="grid grid-cols-7 mb-1">
         {WEEKDAYS.map(w => (
-          <div key={w} className="h-7 flex items-center justify-center text-[11px] font-medium text-gray-400">{w}</div>
+          <div key={w} className="h-7 flex items-center justify-center text-[11px] font-medium text-gray-500">{w}</div>
         ))}
       </div>
       <div className="grid grid-cols-7 gap-y-0.5">
@@ -63,7 +64,7 @@ function MonthGrid({ view, start, end, hover, onPick, onHover }) {
                 type="button"
                 onClick={() => onPick(day)}
                 onMouseEnter={() => onHover(day)}
-                className={`w-8 h-8 flex items-center justify-center rounded-full text-[13px] transition-colors
+                className={`w-8 h-8 flex items-center justify-center rounded-full text-[14px] transition-colors
                   ${isEndpoint ? 'bg-primary-600 text-white font-semibold' : inRange ? 'text-primary-700' : 'text-gray-700 hover:bg-gray-100'}`}
               >
                 {day.getDate()}
@@ -110,7 +111,7 @@ export default function DateRangePicker({ value = {}, onApply, onCancel }) {
             <button type="button" onClick={() => setLeftMonth(addMonths(leftMonth, -1))} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">
               <ChevronLeft size={16} />
             </button>
-            <span className="text-[13px] font-semibold text-gray-900">{MONTHS[leftMonth.getMonth()]} {leftMonth.getFullYear()}</span>
+            <span className="text-[14px] font-semibold text-gray-900">{MONTHS[leftMonth.getMonth()]} {leftMonth.getFullYear()}</span>
             <span className="w-7 h-7" />
           </div>
           <MonthGrid view={leftMonth} start={start} end={end} hover={hover} onPick={pick} onHover={setHover} />
@@ -118,7 +119,7 @@ export default function DateRangePicker({ value = {}, onApply, onCancel }) {
         <div className="flex-1">
           <div className="flex items-center justify-between mb-2">
             <span className="w-7 h-7" />
-            <span className="text-[13px] font-semibold text-gray-900">{MONTHS[rightMonth.getMonth()]} {rightMonth.getFullYear()}</span>
+            <span className="text-[14px] font-semibold text-gray-900">{MONTHS[rightMonth.getMonth()]} {rightMonth.getFullYear()}</span>
             <button type="button" onClick={() => setLeftMonth(addMonths(leftMonth, 1))} className="w-7 h-7 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-100">
               <ChevronRight size={16} />
             </button>
@@ -129,14 +130,14 @@ export default function DateRangePicker({ value = {}, onApply, onCancel }) {
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-        <button type="button" onClick={clear} className="text-[13px] font-medium text-gray-500 hover:text-gray-700">Clear</button>
+        <button type="button" onClick={clear} className="text-[14px] font-medium text-gray-500 hover:text-gray-700">Clear</button>
         <div className="flex items-center gap-2">
-          <button type="button" onClick={onCancel} className="h-8 px-3 rounded-lg border border-gray-300 bg-white text-[13px] font-medium text-gray-700 hover:bg-gray-50">Cancel</button>
+          <button type="button" onClick={onCancel} className={BTN_SECONDARY}>Cancel</button>
           <button
             type="button"
             disabled={!start || !end}
             onClick={() => onApply?.({ start, end })}
-            className="h-8 px-3 rounded-lg bg-primary-600 text-white text-[13px] font-semibold hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className={BTN_PRIMARY}
           >
             Apply
           </button>
@@ -156,7 +157,7 @@ function RangeInput({ label, value, onClear }) {
         className="w-full h-8 rounded-lg border border-gray-300 bg-white px-3 pr-7 text-[14px] text-gray-900 placeholder:text-gray-400 outline-none focus:border-primary-600"
       />
       {onClear && (
-        <button type="button" onClick={onClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+        <button type="button" onClick={onClear} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-600">
           <X size={13} />
         </button>
       )}

@@ -5,12 +5,12 @@ import {
   Award, ArrowUp, Users, Bot, Clock, MapPin,
   MessageCircle, Check, BarChart3, Search, Plus,
   ArrowLeft, ExternalLink, Calendar, AlertTriangle,
-  X, CircleCheck, Sparkles, RefreshCw02, Trash2, Building2, FileText,
+  X, CircleCheck, Sparkles, RefreshCw02, Trash2, Building2, FileText, Settings,
 } from '../../icons/index.js'
 import SourceInventoryContent from './SourceInventoryContent'
 import CountCard from '../CountCard.jsx'
 import HLInput from '../HLInput.jsx'
-import HLButton from '../HLButton.jsx'
+import HLButton, { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 import HLModal, { modalTitle, modalSubtext, MODAL_MANAGE_HEIGHT } from '../HLModal.jsx'
 import SectionInfoTip from '../SectionInfoTip.jsx'
 import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
@@ -23,7 +23,8 @@ import EngineLogo, {
   PerplexityLogo,
 } from '../EngineLogo.jsx'
 import FullResponseModal from '../FullResponseModal.jsx'
-const MODAL_TABLE_TD = 'px-4 py-2.5 text-left text-[12px]'
+import PromptTrackingSettingsModal from '../PromptTrackingSettingsModal.jsx'
+const MODAL_TABLE_TD = 'px-4 py-2.5 text-left text-[14px]'
 const MODAL_TABLE_TD_MUTED = `${MODAL_TABLE_TD} text-gray-600 tabular-nums whitespace-nowrap`
 const MODAL_TABLE_TD_STRONG = `${MODAL_TABLE_TD} font-medium text-gray-900 tabular-nums whitespace-nowrap`
 const MODAL_TABLE_COL_VOLUME = 'w-[92px]'
@@ -45,7 +46,7 @@ function ModalTableRemoveButton({ label, onClick }) {
 }
 
 // Shared form field chrome — matches HLForm + HLInput patterns used in VisibilityAI modals.
-const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-700 mb-1.5'
+const FORM_LABEL_CLASS = 'block text-[14px] font-medium text-gray-700 mb-1'
 const FORM_SELECT_CLASS =
   'w-full h-9 px-2 pr-8 bg-white border border-gray-300 rounded-md text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 focus:shadow-focus-primary-sm transition-all cursor-pointer'
 const FORM_TEXTAREA_CLASS =
@@ -163,7 +164,7 @@ function MultiLineChart({ lines, xLabels, height = 180, metricLabel = 'Visibilit
           {Y_TICKS.map(y => (
             <span
               key={y}
-              className="absolute right-1.5 text-[12px] font-normal text-gray-400 tabular-nums leading-none"
+              className="absolute right-1.5 text-[12px] font-normal text-gray-500 tabular-nums leading-none"
               style={{ top: `${padTPct + ((100 - y) / 100) * plotHPct}%`, transform: 'translateY(-50%)' }}
             >
               {y}
@@ -358,14 +359,14 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
       {/* Matches the canonical table filter chip (h-8, rounded-full, border-gray-300). */}
       <button
         onClick={() => { setOpen(o => !o); setMode('list') }}
-        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[13px] font-medium text-gray-700 text-left hover:border-gray-400 hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center gap-1.5 h-8 px-3 rounded-full border border-gray-300 bg-white text-[14px] font-medium text-gray-700 text-left hover:border-gray-400 hover:bg-gray-50 transition-colors"
       >
-        {Icon && <Icon size={14} className="text-gray-400 shrink-0" />}
+        {Icon && <Icon size={14} className="text-gray-500 shrink-0" />}
         <span className="relative inline-block text-left">
           <span className="invisible whitespace-nowrap select-none" aria-hidden="true">{widthLabel}</span>
           <span className="absolute left-0 top-1/2 -translate-y-1/2 whitespace-nowrap">{value}</span>
         </span>
-        <ChevronDown size={14} className="text-gray-400 shrink-0" />
+        <ChevronDown size={14} className="text-gray-500 shrink-0" />
       </button>
 
       {open && mode === 'list' && (
@@ -376,7 +377,7 @@ function DarkDropdown({ value, onChange, options, icon: Icon, variant = 'default
               <button
                 key={opt}
                 onClick={() => handleSelect(opt)}
-                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[13px] transition-colors text-left ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
+                className={`w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg text-[14px] transition-colors text-left ${isSelected ? 'bg-primary-50' : 'hover:bg-gray-50'}`}
               >
                 <span className={`text-left ${isSelected ? 'text-primary-700 font-semibold' : 'text-gray-700'}`}>{opt}</span>
                 {isSelected && <Check size={13} className="text-primary-600 shrink-0" />}
@@ -410,9 +411,9 @@ const PERIOD_OPTIONS  = ['Last 3 days', 'Last 7 days', 'Last 15 days', 'Last 30 
 
 // HARDCODED: overview KPI ratings for prototyping (Good / Average / Poor)
 const KPI_RATING_CLASS = {
-  Good: 'text-success-600',
-  Average: 'text-warning-600',
-  Poor: 'text-error-600',
+  Good: 'bg-success-50 border-success-200 text-success-700',
+  Average: 'bg-warning-100 border-warning-200 text-warning-700',
+  Poor: 'bg-error-50 border-error-200 text-error-600',
 }
 
 const OVERVIEW_KPI_CARDS = [
@@ -523,11 +524,6 @@ function competitorSentimentTone(v) {
   if (v >= 50) return { text: 'text-warning-600', bg: 'bg-warning-50' }
   return { text: 'text-error-600', bg: 'bg-error-50' }
 }
-
-const ADD_COMPETITOR_COUNTRIES = [
-  'United States', 'United Kingdom', 'Canada', 'Australia', 'India',
-  'Germany', 'France', 'Netherlands', 'Singapore', 'Brazil',
-]
 
 const ENGINE_COVERAGE_DATA = [
   { name: 'Perplexity',  abbr: 'P',  color: 'var(--primary-800)', sub: 'US · English · 12 prompts', vis: 76, presence: '69.0%', avgPos: '#2.3', urlsAnswer: '6.4 URLs / answer', citRate: '58.0%', insight: 'Best current engine for mention depth and citation pickup.' },
@@ -811,7 +807,7 @@ function TopicVisibilityPanel({ topics, className = '' }) {
     <div className={`border border-gray-200 rounded-2xl bg-white shadow-xs p-4 flex flex-col min-h-0 ${className}`}>
       <div className="flex items-start justify-between gap-3 mb-4 shrink-0">
         <div className="flex items-center gap-1.5 min-w-0">
-          <h3 className="text-[15px] font-semibold text-gray-900 m-0">Topic visibility</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900 m-0">Topic visibility</h3>
           <SectionInfoTip
             id="pt-topic-visibility-info"
             content="Shows how your visibility compares across different topics. It helps you identify which topics your brand already owns and where you have the biggest opportunity to improve. Higher visibility means stronger topic authority."
@@ -819,7 +815,7 @@ function TopicVisibilityPanel({ topics, className = '' }) {
         </div>
         <div className="text-right shrink-0">
           <p className="text-[18px] font-bold text-gray-900 tabular-nums leading-none m-0">{avg}%</p>
-          <p className="text-[11px] text-gray-400 m-0 mt-0.5">Avg</p>
+          <p className="text-[12px] text-gray-500 m-0 mt-0.5">Avg</p>
         </div>
       </div>
 
@@ -833,14 +829,14 @@ function TopicVisibilityPanel({ topics, className = '' }) {
               className={`rounded-lg px-2.5 py-2 transition-colors ${isLead ? 'bg-primary-50/70' : 'hover:bg-gray-50'}`}
             >
               <div className="flex items-center gap-2.5">
-                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md text-[11px] font-semibold tabular-nums shrink-0 ${
+                <span className={`inline-flex items-center justify-center w-5 h-5 rounded-md text-[12px] font-semibold tabular-nums shrink-0 ${
                   isLead ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-500'
                 }`}>
                   {i + 1}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className={`text-[13px] font-medium truncate m-0 ${isLead ? 'text-primary-700' : 'text-gray-800'}`}>{t.topic}</p>
-                  <p className="text-[11px] text-gray-400 truncate m-0">{t.sub}</p>
+                  <p className="text-[12px] text-gray-500 truncate m-0">{t.sub}</p>
                 </div>
                 <span className="text-[13px] font-semibold tabular-nums shrink-0" style={{ color }}>{t.pct}%</span>
               </div>
@@ -864,7 +860,7 @@ function PromptDenseRow({ prompt, onClick }) {
     >
       <div className="min-w-0 flex-1">
         <p className="text-[14px] font-semibold text-gray-900 leading-snug m-0 line-clamp-1">{prompt.prompt}</p>
-        <p className="text-[13px] text-gray-400 m-0 mt-1 truncate leading-snug">
+        <p className="text-[13px] text-gray-500 m-0 mt-1 truncate leading-snug">
           <span className="font-medium" style={topicColor ? { color: topicColor } : undefined}>{prompt.topic}</span>
           <span className="text-gray-300"> · </span>
           <span className="tabular-nums">{prompt.volume}</span>
@@ -902,14 +898,14 @@ function PromptStatusTabs({ segment, onChange }) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(seg)}
-            className={`relative px-3 py-2.5 text-[13px] font-medium whitespace-nowrap transition-colors ${
+            className={`relative px-3 py-2.5 text-[14px] font-medium whitespace-nowrap transition-colors ${
               isActive ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <span className="inline-flex items-center gap-1.5">
               {seg}
-              <span className={`tabular-nums text-[11px] font-semibold ${
-                isActive ? 'text-primary-500' : 'text-gray-400'
+              <span className={`tabular-nums text-[12px] font-semibold ${
+                isActive ? 'text-primary-500' : 'text-gray-500'
               }`}>
                 {count}
               </span>
@@ -930,7 +926,7 @@ function PromptStatusLabel({ status, count }) {
   return (
     <div className="flex items-center gap-1.5 px-0.5 pt-1 pb-0.5">
       <span className="text-[12px] font-semibold text-gray-900">{status}</span>
-      <span className="text-[11px] font-medium text-gray-400 tabular-nums">{count}</span>
+      <span className="text-[12px] font-medium text-gray-500 tabular-nums">{count}</span>
     </div>
   )
 }
@@ -945,7 +941,7 @@ function OverlapStatusChip({ status }) {
   const s = OVERLAP_STATUS_META[status] || OVERLAP_STATUS_META.Stable
   return (
     <span
-      className="inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium whitespace-nowrap"
+      className="inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium whitespace-nowrap"
       style={{ background: s.bg, color: s.color, border: `1px solid ${s.border}` }}
     >
       {status}
@@ -960,7 +956,7 @@ function CompetitorBrandCell({ c, showDomain = false }) {
       <div className="flex items-center gap-2 min-w-0">
         <p className={`text-[13px] font-semibold truncate m-0 ${c.isMe ? 'text-primary-700' : 'text-gray-900'}`}>{c.name}</p>
       </div>
-      {showDomain && <p className="text-[12px] text-gray-400 truncate m-0">{c.domain}</p>}
+      {showDomain && <p className="text-[12px] text-gray-500 truncate m-0">{c.domain}</p>}
     </div>
   )
 }
@@ -1023,7 +1019,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
           <div className="min-w-0 min-h-0 h-full border border-gray-200 rounded-2xl bg-white shadow-xs flex flex-col overflow-hidden">
             <div className="shrink-0 px-4 pt-4 pb-3">
               <div className="flex items-center gap-1.5">
-                <h3 className="text-[15px] font-semibold text-gray-900 m-0">Tracked prompts</h3>
+                <h3 className="text-[14px] font-semibold text-gray-900 m-0">Tracked prompts</h3>
                 <SectionInfoTip
                   id="pt-prompt-rollups-info"
                   content="Filter by status with the tabs, then scroll the list. Under All, prompts are ordered Opportunity → Losing → Neutral → Winning so actionable items stay on top."
@@ -1038,7 +1034,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
             <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-3 pt-3 pb-3 bg-white" style={{ scrollbarGutter: 'stable' }}>
               {totalVisible === 0 ? (
                 <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center bg-gray-50">
-                  <p className="text-[12px] text-gray-400 m-0">No prompts match this filter in the current range.</p>
+                  <p className="text-[12px] text-gray-500 m-0">No prompts match this filter in the current range.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -1065,7 +1061,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
             <TopicVisibilityPanel topics={TOPIC_VIS_DATA} className="flex-1 min-h-0" />
 
             <div className="shrink-0 border border-gray-200 rounded-2xl bg-white p-4 shadow-xs">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0 mb-3">AI engine coverage</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0 mb-3">AI engine coverage</h3>
               <div className="flex flex-col gap-3">
                 {ENGINE_COVERAGE_BARS.map(e => (
                   <div key={e.name} className="flex items-center gap-2.5">
@@ -1105,7 +1101,7 @@ function PromptsTabContent({ injectedPrompt = null, onInjectedBack, contentScrol
 
 function BrandPill({ name }) {
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[12px] font-medium bg-gray-50 text-gray-600 border-gray-200">
+    <span className="inline-flex items-center px-2 py-0.5 rounded border text-[13px] font-medium bg-gray-50 text-gray-600 border-gray-200">
       {name}
     </span>
   )
@@ -1123,14 +1119,14 @@ function TruncatedLink({ href, children }) {
     <>
       <a ref={ref} href={href || '#'} onClick={e => e.preventDefault()}
         onMouseEnter={show} onMouseLeave={hide}
-        className="flex items-center gap-1 text-[13px] text-primary-600 hover:underline min-w-0 w-full">
+        className="flex items-center gap-1 text-[14px] text-primary-600 hover:underline min-w-0 w-full">
         <span className="truncate block">{children}</span>
         <ExternalLink size={11} className="shrink-0" />
       </a>
       {pos && createPortal(
         <div onMouseEnter={() => setPos(pos)} onMouseLeave={hide}
           style={{ position: 'fixed', top: pos.top - 8, left: pos.left, transform: 'translateY(-100%)', zIndex: 9999, maxWidth: '480px' }}
-          className="px-2.5 py-1.5 bg-gray-900 text-white text-[12px] rounded-md shadow-lg break-all leading-relaxed">
+          className="px-2.5 py-1.5 bg-gray-900 text-white text-[14px] rounded-md shadow-lg break-all leading-relaxed">
           {children}
         </div>,
         document.body
@@ -1165,17 +1161,18 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
     <div className="flex flex-col gap-4">
 
       {/* Back button */}
-      <button onClick={onBack} className="flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit">
+      <button onClick={onBack} className="flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-700 transition-colors w-fit">
         <ArrowLeft size={14} />
         {backLabel}
       </button>
 
-      {/* Hero card — snapshot stats sit below the title + subtext */}
-      <div className="border border-gray-200 rounded-lg bg-white p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">{heroTopic}</span>
+      {/* Hero — no white frame; only the CountCards below carry their own white bg */}
+      <div>
+        <h2 className="text-[16px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
+        <div className="flex items-center gap-2">
+          <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-purple-50 text-purple-600 text-[14px] font-medium border border-purple-200">{heroTopic}</span>
           <span
-            className="inline-flex items-center px-2.5 py-1 rounded-full text-[12px] font-medium border"
+            className="inline-flex items-center px-2.5 py-1 rounded-full text-[14px] font-medium border"
             style={{
               color: heroStatusMeta.color,
               background: `color-mix(in srgb, ${heroStatusMeta.color} 10%, transparent)`,
@@ -1184,34 +1181,28 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
           >
             {heroStatus}
           </span>
-          <span className="text-[12px] text-gray-400">Last 30 days</span>
-          <span className="text-[12px] text-gray-400">US</span>
-        </div>
-        <h2 className="text-[20px] font-semibold text-gray-900 leading-snug mb-2">{prompt.prompt}</h2>
-        <p className="text-[13px] text-gray-500 leading-relaxed max-w-3xl">This view separates trend analysis, AI response conversations, engine diagnostics, and prompt-level sources so each widget answers a different analysis question.</p>
-
-        <div className="mt-4 pt-4 border-t border-gray-100">
-          <div className="grid grid-cols-4 gap-3">
-            {DETAIL_KPI.map(kpi => (
-              <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
-            ))}
-          </div>
         </div>
       </div>
 
+      <div className="grid grid-cols-4 gap-3">
+        {DETAIL_KPI.map(kpi => (
+          <CountCard key={kpi.label} label={kpi.label} value={kpi.value} help helpContent={kpi.desc} Icon={kpi.Icon} iconColor={kpi.color} />
+        ))}
+      </div>
+
       {/* Prompt Visibility Trend + Engine performance */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 63fr) minmax(0, 37fr)' }}>
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 59fr) minmax(0, 41fr)' }}>
         <div className="border border-gray-200 rounded-lg bg-white p-5 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4 gap-3">
             <div className="min-w-0">
-              <h3 className="text-[15px] font-semibold text-gray-900">Prompt Visibility Trend</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900">Prompt Visibility Trend</h3>
               <p className="text-[13px] text-gray-500 mt-0.5">Prompt-level visibility by AI engine across the selected window</p>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['Visibility', 'Mentions', 'Citations'].map(m => (
                   <button key={m} onClick={() => setTrendMetric(m)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {m}
                   </button>
                 ))}
@@ -1219,7 +1210,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['7D', '28D', '3M'].map(p => (
                   <button key={p} onClick={() => setTrendPeriod(p)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {p}
                   </button>
                 ))}
@@ -1239,10 +1230,10 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
 
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 h-full flex flex-col">
           <div className="flex items-center gap-1.5 mb-4">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine performance</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">Engine performance</h3>
             <SectionInfoTip id="pt-engine-performance-info" content="Prompt metrics by engine" />
           </div>
-          <div className="grid text-[12px] font-semibold text-gray-900 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2.5 py-2" style={{ gridTemplateColumns: ENGINE_PERF_GRID }}>
+          <div className="grid text-[14px] font-semibold text-gray-900 normal-case bg-gray-50 border border-gray-200 rounded-t-lg px-2.5 py-2" style={{ gridTemplateColumns: ENGINE_PERF_GRID }}>
             <span>Engine</span>
             <span className="text-right">Mention</span>
             <span className="text-right whitespace-nowrap">Citation</span>
@@ -1257,10 +1248,10 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <EngineLogo name={eng.engine} size={14} className="w-6 h-6" />
-                  <p className="text-[12px] font-medium text-gray-900 truncate m-0">{eng.engine}</p>
+                  <p className="text-[14px] font-medium text-gray-900 truncate m-0">{eng.engine}</p>
                 </div>
-                <span className="text-[12px] font-medium text-gray-700 text-right tabular-nums">{eng.mentionPct}</span>
-                <span className="text-[12px] font-medium text-gray-700 text-right tabular-nums">{eng.citRate}</span>
+                <span className="text-[14px] font-medium text-gray-700 text-right tabular-nums">{eng.mentionPct}</span>
+                <span className="text-[14px] font-medium text-gray-700 text-right tabular-nums">{eng.citRate}</span>
                 <span className={`text-[12px] font-semibold text-right tabular-nums ${eng.trendUp ? 'text-success-600' : 'text-error-600'}`}>{eng.trend}</span>
               </div>
             ))}
@@ -1272,7 +1263,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-1.5 mb-3">
-            <h3 className="text-[15px] font-semibold text-gray-900">AI Responses</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900">AI Responses</h3>
             <SectionInfoTip
               id="pt-ai-responses-info"
               content="Latest prompt responses from tracked engines with drill-in answer analysis"
@@ -1284,11 +1275,11 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[130px]">AI</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[180px]">Brands</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Sources</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[130px]">AI</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200">Chat</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[180px]">Brands</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[72px]">Sources</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Created</th>
                 </tr>
               </thead>
               <tbody>
@@ -1298,16 +1289,16 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                       <div className="flex items-center gap-2">
                         <EngineLogo name={row.engine} size={16} className="w-7 h-7" />
                         <div>
-                          <p className="text-[13px] font-semibold text-gray-900">{row.engine}</p>
+                          <p className="text-[14px] font-semibold text-gray-900">{row.engine}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100 align-top">
-                      <p className="text-[13px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
+                      <p className="text-[14px] text-gray-700 leading-relaxed mb-1">{row.text}</p>
                       <button
                         type="button"
                         onClick={() => setFullResponse(row)}
-                        className="text-[12px] text-primary-600 hover:underline"
+                        className="text-[14px] text-primary-600 hover:underline"
                       >
                         Open full response
                       </button>
@@ -1317,8 +1308,8 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                         {row.brands.map(b => <BrandPill key={b} name={b} />)}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100 align-top">{row.sources}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500 align-top">{row.created}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100 align-top">{row.sources}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500 align-top">{row.created}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1332,7 +1323,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
         <div className="p-5 flex items-start justify-between">
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[15px] font-semibold text-gray-900">Prompt sources</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900">Prompt sources</h3>
               <SectionInfoTip
                 id="pt-prompt-sources-info"
                 content="All detected sources for this prompt with a compact matrix of position, coverage, and mention signals"
@@ -1342,7 +1333,7 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
           <div className="flex items-center border border-gray-200 rounded-md overflow-hidden shrink-0">
             {['Domain', 'URL'].map(v => (
               <button key={v} onClick={() => setSourcesView(v)}
-                className={`px-3 py-1.5 text-[13px] font-medium transition-colors ${sourcesView === v ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                className={`px-3 py-1.5 text-[14px] font-medium transition-colors ${sourcesView === v ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                 {v}
               </button>
             ))}
@@ -1353,13 +1344,13 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[200px]">{sourcesView === 'URL' ? 'URL' : 'Domain'}</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Other brands mentioned</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 min-w-[200px]">{sourcesView === 'URL' ? 'URL' : 'Domain'}</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px]">Coverage</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px]">Seen in chats</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[120px]">Brand mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px]">Other brands mentioned</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[110px]">Last seen</th>
                 </tr>
               </thead>
               <tbody>
@@ -1368,29 +1359,29 @@ function PromptDetailView({ prompt, onBack, backLabel = 'Back to overview' }) {
                     <td className="px-3 py-3 border-r border-gray-100 max-w-[280px] overflow-hidden">
                       {sourcesView === 'URL'
                         ? <TruncatedLink href={row.url}>{row.url}</TruncatedLink>
-                        : <span className="text-[13px] font-semibold text-gray-900">{row.domain}</span>
+                        : <span className="text-[14px] font-semibold text-gray-900">{row.domain}</span>
                       }
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.avgPos}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.coverage}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{row.seenInChats}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.avgPos}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.coverage}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{row.seenInChats}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       {row.brandMentioned ? (
-                        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-success-600">
+                        <span className="inline-flex items-center gap-1 text-[14px] font-semibold text-success-600">
                           <Check size={12} strokeWidth={2.5} />Yes
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[13px] font-medium text-gray-400">
+                        <span className="inline-flex items-center gap-1 text-[14px] font-medium text-gray-500">
                           <X size={12} strokeWidth={2.5} />No
                         </span>
                       )}
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <span className={`text-[13px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-400'}`}>
+                      <span className={`text-[14px] font-medium ${row.otherBrands ? 'text-warning-600' : 'text-gray-500'}`}>
                         {row.otherBrands ? 'Yes' : 'No'}
                       </span>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500">{row.lastSeen}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500">{row.lastSeen}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1448,8 +1439,8 @@ function OverviewContent({ contentScrollRef }) {
             key={kpi.label}
             label={kpi.label}
             value={kpi.value}
-            description={
-              <span className={`font-medium ${KPI_RATING_CLASS[kpi.rating] || 'text-gray-500'}`}>
+            valueAside={
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium leading-none ${KPI_RATING_CLASS[kpi.rating] || 'bg-gray-50 border-gray-200 text-gray-500'}`}>
                 {kpi.rating}
               </span>
             }
@@ -1466,7 +1457,7 @@ function OverviewContent({ contentScrollRef }) {
           {OVERVIEW_METRICS.map((m, i) => (
             <div key={m.label} className={`px-4 py-3 ${i < 3 ? 'border-b border-gray-100' : ''} ${i % 3 !== 2 ? 'border-r border-gray-100' : ''}`}>
               <div className="flex items-center gap-1 mb-1.5">
-                <p className="text-[12px] font-medium text-gray-500 m-0 normal-case">{m.label}</p>
+                <p className="text-[14px] font-medium text-gray-500 m-0 normal-case">{m.label}</p>
                 <SectionInfoTip id={`pt-overview-metric-${i}`} content={m.help} />
               </div>
               <p className="text-[18px] font-semibold text-gray-900 leading-none m-0">{m.value}</p>
@@ -1476,12 +1467,12 @@ function OverviewContent({ contentScrollRef }) {
       </div>
 
       {/* Row 3: Visibility trend + Competitor ranking */}
-      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 63fr) minmax(0, 37fr)' }}>
+      <div className="grid gap-4 items-stretch" style={{ gridTemplateColumns: 'minmax(0, 65fr) minmax(0, 35fr)' }}>
         {/* Visibility trend */}
         <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 overflow-hidden flex flex-col">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Visibility trend</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0">Visibility trend</h3>
               <SectionInfoTip
                 id="pt-visibility-trend-info"
                 content="Track how your brand's visibility, mentions, or citations change over time and compare performance against competitors."
@@ -1491,7 +1482,7 @@ function OverviewContent({ contentScrollRef }) {
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['Visibility', 'Mentions', 'Citations'].map(m => (
                   <button key={m} onClick={() => setTrendMetric(m)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendMetric === m ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {m}
                   </button>
                 ))}
@@ -1499,7 +1490,7 @@ function OverviewContent({ contentScrollRef }) {
               <div className="flex items-center border border-gray-200 rounded-md overflow-hidden">
                 {['7D', '28D', '3M'].map(p => (
                   <button key={p} onClick={() => setTrendPeriod(p)}
-                    className={`px-2.5 py-1.5 text-[12px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
+                    className={`px-2.5 py-1.5 text-[14px] font-medium transition-colors ${trendPeriod === p ? 'bg-primary-50 text-primary-600' : 'text-gray-500 hover:bg-gray-50'}`}>
                     {p}
                   </button>
                 ))}
@@ -1528,7 +1519,7 @@ function OverviewContent({ contentScrollRef }) {
       <div className="border border-gray-200 rounded-lg bg-white overflow-hidden">
         <div className="p-5">
           <div className="flex items-center gap-1.5">
-            <h3 className="text-[15px] font-semibold text-gray-900 m-0">Engine coverage</h3>
+            <h3 className="text-[14px] font-semibold text-gray-900 m-0">Engine coverage</h3>
             <SectionInfoTip
               id="pt-engine-coverage-info"
               content="See how your brand performs across different AI search engines."
@@ -1540,12 +1531,12 @@ function OverviewContent({ contentScrollRef }) {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px] normal-case">Engine</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px] normal-case">Visibility</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px] normal-case">Presence</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px] normal-case">Avg position</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px] normal-case">Citation rate</th>
-                  <th className="px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap normal-case">Insight</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[216px] normal-case">Engine</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[160px] normal-case">Visibility</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[88px] normal-case">Presence</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[140px] normal-case">Avg position</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap border-r border-gray-200 w-[100px] normal-case">Citation rate</th>
+                  <th className="px-3 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap normal-case">Insight</th>
                 </tr>
               </thead>
               <tbody>
@@ -1555,20 +1546,20 @@ function OverviewContent({ contentScrollRef }) {
                       <div className="flex items-center gap-2">
                         <EngineLogo name={eng.name} size={16} className="w-8 h-8" />
                         <div>
-                          <p className="text-[13px] font-semibold text-gray-900">{eng.name}</p>
+                          <p className="text-[14px] font-semibold text-gray-900">{eng.name}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-3 py-3 border-r border-gray-100">
                       <VisibilityMeter value={eng.vis} barWidth="120px" />
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.presence}</td>
                     <td className="px-3 py-3 border-r border-gray-100">
-                      <p className="text-[13px] font-semibold text-gray-900">{eng.avgPos}</p>
-                      <p className="text-[12px] text-gray-400">{eng.urlsAnswer}</p>
+                      <p className="text-[14px] font-semibold text-gray-900">{eng.avgPos}</p>
+                      <p className="text-[12px] text-gray-500">{eng.urlsAnswer}</p>
                     </td>
-                    <td className="px-3 py-3 text-[13px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
-                    <td className="px-3 py-3 text-[13px] text-gray-500">{eng.insight}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-700 border-r border-gray-100">{eng.citRate}</td>
+                    <td className="px-3 py-3 text-[14px] text-gray-500">{eng.insight}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1580,7 +1571,7 @@ function OverviewContent({ contentScrollRef }) {
       {/* Row 5: How AI is describing GoHighLevel */}
       <div className="border border-gray-200 rounded-lg bg-white p-4">
         <div className="flex items-center gap-1.5 mb-3">
-          <h3 className="text-[15px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900 m-0">How AI is describing GoHighLevel</h3>
           <SectionInfoTip
             id="pt-ai-describing-info"
             content="See how AI platforms describe your brand across detected mentions, from strong recommendations to negative or dismissive responses."
@@ -1613,7 +1604,7 @@ function OverviewContent({ contentScrollRef }) {
         <div className="px-5 pt-5 pb-4 flex items-start justify-between gap-4 flex-wrap">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Prompt insights</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0">Prompt insights</h3>
               <SectionInfoTip
                 id="pt-prompt-insights-info"
                 content={
@@ -1632,7 +1623,7 @@ function OverviewContent({ contentScrollRef }) {
                 role="tab"
                 aria-selected={promptView === v.id}
                 onClick={() => setPromptView(v.id)}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[14px] font-medium transition-all ${
                   promptView === v.id ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -1689,10 +1680,10 @@ function OverviewContent({ contentScrollRef }) {
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-100">
-                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900">Prompt</th>
-                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">AI rank</th>
-                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">SEO → AI support</th>
-                    <th className="px-4 py-2 text-[12px] font-semibold text-gray-900 whitespace-nowrap">Status</th>
+                    <th className="px-4 py-2 text-[14px] font-semibold text-gray-900">Prompt</th>
+                    <th className="px-4 py-2 text-[14px] font-semibold text-gray-900 whitespace-nowrap">AI rank</th>
+                    <th className="px-4 py-2 text-[14px] font-semibold text-gray-900 whitespace-nowrap">SEO → AI support</th>
+                    <th className="px-4 py-2 text-[14px] font-semibold text-gray-900 whitespace-nowrap">Status</th>
                     <th className="px-4 py-2 w-8"><span className="sr-only">Open</span></th>
                   </tr>
                 </thead>
@@ -1724,17 +1715,17 @@ function OverviewContent({ contentScrollRef }) {
                               {isWatch ? <Search size={12} /> : <Check size={12} strokeWidth={2.5} />}
                             </span>
                             <div className="min-w-0">
-                              <p className="text-[13px] font-medium text-gray-900 leading-snug m-0 line-clamp-2">{item.prompt}</p>
-                              <p className="text-[11px] font-normal text-gray-400 m-0 mt-0.5">Tracked prompt</p>
+                              <p className="text-[14px] font-medium text-primary-600 group-hover:underline leading-snug m-0 line-clamp-2">{item.prompt}</p>
+                              <p className="text-[12px] font-normal text-gray-500 m-0 mt-0.5">Tracked prompt</p>
                             </div>
                           </div>
                         </td>
-                        <td className="px-4 py-2.5 align-middle text-[13px] font-medium text-gray-900 tabular-nums whitespace-nowrap">
+                        <td className="px-4 py-2.5 align-middle text-[14px] font-medium text-gray-900 tabular-nums whitespace-nowrap">
                           {item.aioPos}
                         </td>
                         <td className="px-4 py-2.5 align-middle">
                           <div className="flex items-center gap-2.5">
-                            <span className="text-[12px] font-medium text-gray-700 tabular-nums shrink-0">{item.overlap}%</span>
+                            <span className="text-[14px] font-medium text-gray-700 tabular-nums shrink-0">{item.overlap}%</span>
                             <div className="w-14 h-1.5 rounded-full bg-gray-100 overflow-hidden shrink-0">
                               <div
                                 className={`h-full rounded-full ${isWatch ? 'bg-warning-400' : 'bg-success-500'}`}
@@ -1775,17 +1766,17 @@ function OverviewContent({ contentScrollRef }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-[14px] font-medium text-gray-900 leading-snug m-0 mb-1">{item.prompt}</p>
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[12px] font-medium border border-purple-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-purple-50 text-purple-600 text-[13px] font-medium border border-purple-200">
                       {item.tag}
                     </span>
-                    <span className="text-[12px] text-gray-400">{item.volume}</span>
-                    <span className="text-[12px] text-gray-400">{item.engines}</span>
+                    <span className="text-[12px] text-gray-500">{item.volume}</span>
+                    <span className="text-[12px] text-gray-500">{item.engines}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                   <div className="text-right">
                     <p className="text-[16px] font-semibold text-gray-900 tabular-nums m-0 leading-none">{item.visibility}</p>
-                    <p className="text-[12px] text-gray-400 m-0 mt-1">Visibility</p>
+                    <p className="text-[12px] text-gray-500 m-0 mt-1">Visibility</p>
                   </div>
                   <span className={`text-[14px] font-medium tabular-nums w-[42px] text-right ${item.up ? 'text-success-600' : 'text-error-600'}`}>
                     {item.trendScore}
@@ -1834,7 +1825,7 @@ function EngineCheckboxCard({ engine, checked, onToggle }) {
       <span className="w-6 h-6 rounded-md bg-white border border-gray-200 flex items-center justify-center shrink-0">
         <Logo size={14} />
       </span>
-      <span className="min-w-0 flex-1 text-[12px] font-medium text-gray-900 truncate">{name}</span>
+      <span className="min-w-0 flex-1 text-[14px] font-medium text-gray-900 truncate">{name}</span>
       <span
         className={`w-4 h-4 rounded-[4px] border flex items-center justify-center shrink-0 transition-colors ${
           checked ? 'bg-primary-600 border-primary-600' : 'bg-white border-gray-300'
@@ -1936,7 +1927,7 @@ const MANAGE_EXTRA_SUGGESTIONS = [
   { prompt: 'What tool is best for landing pages, funnels, and automated lead capture?', topic: 'Funnels', volume: '1.8K' },
 ]
 
-function ManagePromptsModal({ onClose, onSave }) {
+export function ManagePromptsModal({ onClose, onSave, embedded = false, hideEngines = false }) {
   // HARDCODED: seed under the track limit so add / suggestions stay usable (prototyping)
   const [trackedPrompts, setTrackedPrompts] = useState(() =>
     PROMPTS_DATA.slice(0, 6).map(p => ({ ...p })),
@@ -1992,7 +1983,7 @@ function ManagePromptsModal({ onClose, onSave }) {
   }
 
   function handleSave() {
-    if (selectedEngines.size === 0 || overCapacity) return
+    if ((!hideEngines && selectedEngines.size === 0) || overCapacity) return
     onSave({ tracked: trackedPrompts, pending: pendingAdds, engines: selectedEngines })
   }
 
@@ -2010,77 +2001,42 @@ function ManagePromptsModal({ onClose, onSave }) {
   ]
 
   const canAddCustom = Boolean(customPrompt.trim()) && !atCapacity
-  const canSave = selectedEngines.size > 0 && !overCapacity
+  const canSave = (hideEngines || selectedEngines.size > 0) && !overCapacity
 
   const selectionRows = [
     ...pendingAdds.map(p => ({ ...p, _kind: 'pending' })),
     ...trackedPrompts.map(p => ({ ...p, _kind: 'tracked' })),
   ]
 
-  return (
-    <HLModal
-      id="manage-prompts"
-      width={880}
-      height={MODAL_MANAGE_HEIGHT}
-      headerDivider
-      onClose={onClose}
-      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
-      footerClassName="px-6 py-3.5"
-      header={(
-        <div className="px-6 pt-5 pb-3.5">
-          <div className="flex items-center gap-2">
-            <h2 id="manage-prompts-title" className={`${modalTitle} m-0`}>Manage prompts</h2>
-            <SectionInfoTip content="Track up to ten prompts. Your selection is the source of truth — suggestions and custom adds fill open slots." />
-          </div>
-          <p className={`${modalSubtext} m-0 mt-1`}>
-            Review what you’re tracking, add prompts you care about, and optionally use suggestions to fill open slots.
-          </p>
-        </div>
-      )}
-      footer={(
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
-            {overCapacity
-              ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
-              : pendingAdds.length > 0
-                ? `${pendingAdds.length} new prompt${pendingAdds.length === 1 ? '' : 's'} will start tracking on save.`
-                : 'Changes will be applied to the next scan when you save.'}
-          </p>
-          <div className="flex items-center gap-2">
-            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
-              Cancel
-            </HLButton>
-            <HLButton
-              variant="primary"
-              color="blue"
-              size="sm"
-              disabled={!canSave}
-              onClick={handleSave}
-            >
-              Save and refresh results
-            </HLButton>
-          </div>
-        </div>
-      )}
-    >
+  const body = (
       <div className="flex-1 min-h-0 flex flex-col gap-3">
-        {/* AI engines — prompts-only control; same modal chrome as competitors */}
-        <section className="shrink-0">
-          <div className="flex items-center gap-2 mb-2">
-            <p className="text-[14px] font-semibold text-gray-900 m-0">AI engines</p>
-            <SectionInfoTip content="Engine selection applies globally to every tracked prompt." />
+        {embedded && (
+          <div className="shrink-0 mb-1">
+            <p className="text-[16px] font-semibold text-gray-900 m-0">Prompts</p>
+            <p className="text-[13px] text-gray-500 m-0 mt-1">
+              Track up to ten prompts. Your selection is the source of truth for AI answer tracking.
+            </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-            {ADD_PROMPT_ENGINES.map(engine => (
-              <EngineCheckboxCard
-                key={engine.id}
-                engine={engine}
-                checked={selectedEngines.has(engine.id)}
-                onToggle={() => toggleEngine(engine.id)}
-              />
-            ))}
-          </div>
-        </section>
+        )}
+        {/* AI engines — hidden when managed from the dedicated settings tab */}
+        {!hideEngines && (
+          <section className="shrink-0">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-[14px] font-semibold text-gray-900 m-0">AI engines</p>
+              <SectionInfoTip content="Engine selection applies globally to every tracked prompt." />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+              {ADD_PROMPT_ENGINES.map(engine => (
+                <EngineCheckboxCard
+                  key={engine.id}
+                  engine={engine}
+                  checked={selectedEngines.has(engine.id)}
+                  onToggle={() => toggleEngine(engine.id)}
+                />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Primary: compact selection roster — capped so suggestions keep usable height */}
         <section className="shrink-0 rounded-xl border border-gray-200 bg-white overflow-hidden">
@@ -2190,7 +2146,7 @@ function ManagePromptsModal({ onClose, onSave }) {
           </div>
           <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
             {selectableSuggestions.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
+              <p className="text-[12px] text-gray-500 m-0 py-2">No more suggestions.</p>
             ) : (
               <div className="flex flex-col gap-1.5 content-start">
                 {selectableSuggestions.map(item => (
@@ -2218,6 +2174,57 @@ function ManagePromptsModal({ onClose, onSave }) {
           </div>
         </section>
       </div>
+  )
+
+  if (embedded) return body
+
+  return (
+    <HLModal
+      id="manage-prompts"
+      width={880}
+      height={MODAL_MANAGE_HEIGHT}
+      headerDivider
+      onClose={onClose}
+      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
+      footerClassName="px-6 py-3.5"
+      header={(
+        <div className="px-6 pt-5 pb-3.5">
+          <div className="flex items-center gap-2">
+            <h2 id="manage-prompts-title" className={`${modalTitle} m-0`}>Manage prompts</h2>
+            <SectionInfoTip content="Track up to ten prompts. Your selection is the source of truth — suggestions and custom adds fill open slots." />
+          </div>
+          <p className={`${modalSubtext} m-0 mt-1`}>
+            Review what you’re tracking, add prompts you care about, and optionally use suggestions to fill open slots.
+          </p>
+        </div>
+      )}
+      footer={(
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <p className="text-[12px] text-gray-500 m-0">
+            {overCapacity
+              ? `Remove ${totalSelected - MAX_TRACKED_PROMPTS} prompt${totalSelected - MAX_TRACKED_PROMPTS === 1 ? '' : 's'} to stay within the ${MAX_TRACKED_PROMPTS}-prompt limit.`
+              : pendingAdds.length > 0
+                ? `${pendingAdds.length} new prompt${pendingAdds.length === 1 ? '' : 's'} will start tracking on save.`
+                : 'Changes will be applied to the next scan when you save.'}
+          </p>
+          <div className="flex items-center gap-2">
+            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
+              Cancel
+            </HLButton>
+            <HLButton
+              variant="primary"
+              color="blue"
+              size="sm"
+              disabled={!canSave}
+              onClick={handleSave}
+            >
+              Save and refresh results
+            </HLButton>
+          </div>
+        </div>
+      )}
+    >
+      {body}
     </HLModal>
   )
 }
@@ -2275,7 +2282,7 @@ function CompetitorsTabContent() {
         <div className="p-5 flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-1.5">
-              <h3 className="text-[15px] font-semibold text-gray-900 m-0">Competitor views</h3>
+              <h3 className="text-[14px] font-semibold text-gray-900 m-0">Competitor views</h3>
               <SectionInfoTip
                 id="pt-competitor-views-info"
                 content="This leaderboard shows how each brand performs across AI-generated answers. Compare visibility, share of voice, average position, and sentiment to identify who leads the conversation."
@@ -2287,7 +2294,7 @@ function CompetitorsTabContent() {
               <button
                 key={v}
                 onClick={() => setView(v)}
-                className={`px-3 py-1.5 rounded-md text-[13px] font-medium transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[14px] font-medium transition-all ${
                   view === v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -2301,12 +2308,12 @@ function CompetitorsTabContent() {
           <table className="w-full border-collapse table-fixed">
             <thead>
               <tr className="border-y border-gray-200 bg-gray-50">
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[70px]">Rank</th>
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap">Brand</th>
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[180px]">Visibility</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[140px] text-center">Share of voice</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[124px] text-center">Avg position</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[108px] text-center">Sentiment</th>
+                <th className="px-5 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[70px]">Rank</th>
+                <th className="px-5 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap">Brand</th>
+                <th className="px-5 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[180px]">Visibility</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[140px] text-center">Share of voice</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[124px] text-center">Avg position</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[108px] text-center">Sentiment</th>
               </tr>
             </thead>
             <tbody>
@@ -2314,15 +2321,15 @@ function CompetitorsTabContent() {
                 const tone = competitorSentimentTone(c.sentiment)
                 return (
                   <tr key={c.rank} className={`border-b border-gray-100 last:border-b-0 transition-colors ${c.isMe ? 'bg-primary-50' : 'hover:bg-gray-50'}`}>
-                    <td className="px-5 py-3.5 text-[13px] font-medium text-gray-500">#{c.rank}</td>
+                    <td className="px-5 py-3.5 text-[14px] font-medium text-gray-500">#{c.rank}</td>
                     <td className="px-5 py-3.5">
                       <CompetitorBrandCell c={c} showDomain />
                     </td>
                     <td className="px-5 py-3.5">
                       <VisibilityMeter value={c.visibility} barWidth="110px" />
                     </td>
-                    <td className="px-5 py-3.5 text-center text-[13px] text-gray-700 tabular-nums">{c.sov}%</td>
-                    <td className="px-5 py-3.5 text-center text-[13px] text-gray-700 tabular-nums">{c.avgPos}</td>
+                    <td className="px-5 py-3.5 text-center text-[14px] text-gray-700 tabular-nums">{c.sov}%</td>
+                    <td className="px-5 py-3.5 text-center text-[14px] text-gray-700 tabular-nums">{c.avgPos}</td>
                     <td className="px-5 py-3.5 text-center">
                       <span className={`inline-flex items-center justify-center px-2 py-0.5 rounded-full text-[12px] font-medium ${tone.bg} ${tone.text}`}>
                         +{c.sentiment}
@@ -2339,10 +2346,10 @@ function CompetitorsTabContent() {
           <table className="w-full border-collapse table-fixed">
             <thead>
               <tr className="border-y border-gray-200 bg-gray-50">
-                <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[42%]">Brand</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[18%] text-right">AI mentions</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-right">Source citations</th>
-                <th className="px-5 py-2.5 text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-center">Citation rate</th>
+                <th className="px-5 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[42%]">Brand</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[18%] text-right">AI mentions</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-right">Source citations</th>
+                <th className="px-5 py-2.5 text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[20%] text-center">Citation rate</th>
               </tr>
             </thead>
             <tbody>
@@ -2376,9 +2383,9 @@ function CompetitorsTabContent() {
             <table className="w-full border-collapse table-fixed" style={{ minWidth: 720 }}>
               <thead>
                 <tr className="border-y border-gray-200 bg-gray-50">
-                  <th className="px-5 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap w-[220px]">Brand</th>
+                  <th className="px-5 py-2.5 text-left text-[14px] font-semibold text-gray-900 whitespace-nowrap w-[220px]">Brand</th>
                   {COMPETITOR_TOPICS.map(t => (
-                    <th key={t} className="px-5 py-2.5 text-center text-[12px] font-semibold text-gray-900 whitespace-nowrap">{t}</th>
+                    <th key={t} className="px-5 py-2.5 text-center text-[14px] font-semibold text-gray-900 whitespace-nowrap">{t}</th>
                   ))}
                 </tr>
               </thead>
@@ -2391,7 +2398,7 @@ function CompetitorsTabContent() {
                     {COMPETITOR_TOPICS.map((t, ti) => {
                       const score = competitorTopicScore(c.visibility, ti)
                       return (
-                        <td key={t} className="px-5 py-3.5 text-center text-[13px] font-medium text-gray-900 tabular-nums">
+                        <td key={t} className="px-5 py-3.5 text-center text-[14px] font-medium text-gray-900 tabular-nums">
                           {score}
                         </td>
                       )
@@ -2404,319 +2411,6 @@ function CompetitorsTabContent() {
         )}
       </div>
     </div>
-  )
-}
-
-const MAX_TRACKED_COMPETITORS = 5
-
-// HARDCODED: AI-suggested competitors for the manage modal (prototyping)
-const ADD_COMPETITOR_SUGGESTIONS = [
-  { name: 'Keap', domain: 'keap.com', description: 'CRM and marketing automation frequently compared in AI answers.', visibility: 35, sov: 9 },
-  { name: 'Monday CRM', domain: 'monday.com', description: 'Work management platform cited in small-business software roundups.', visibility: 28, sov: 6 },
-  { name: 'Zoho CRM', domain: 'zoho.com', description: 'Often cited alongside mid-market CRM platforms in AI roundups.', visibility: 24, sov: 7 },
-  { name: 'Pipedrive', domain: 'pipedrive.com', description: 'Sales CRM frequently compared for pipeline and deal tracking.', visibility: 41, sov: 11 },
-]
-
-function ManageCompetitorsModal({ onClose, onSave }) {
-  const [trackedCompetitors, setTrackedCompetitors] = useState(() =>
-    COMPETITOR_LEADERBOARD.slice(0, 3).map(c => ({ ...c })),
-  )
-  const [pendingCompetitors, setPendingCompetitors] = useState([])
-  const [customBrand, setCustomBrand] = useState('')
-  const [customWebsite, setCustomWebsite] = useState('')
-  const [customCountry, setCustomCountry] = useState('United States')
-  const [showAddForm, setShowAddForm] = useState(false)
-  const { listRef: selectionListRef, markAdded, animateRemove, rowMotionClass } = useSelectionRowMotion()
-
-  const totalSelected = trackedCompetitors.length + pendingCompetitors.length
-  const atCapacity = totalSelected >= MAX_TRACKED_COMPETITORS
-
-  function deleteTracked(domain) {
-    animateRemove(domain, () => {
-      setTrackedCompetitors(prev => prev.filter(c => c.domain !== domain))
-    })
-  }
-
-  function stageCompetitor(item) {
-    if (atCapacity) return
-    if (trackedCompetitors.some(c => c.domain === item.domain)) return
-    if (pendingCompetitors.some(c => c.domain === item.domain)) return
-    const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
-    // Newest first — appears at top of Your selection
-    setPendingCompetitors(prev => [{ ...item, id }, ...prev])
-    markAdded(id)
-  }
-
-  function removePending(id) {
-    animateRemove(id, () => {
-      setPendingCompetitors(prev => prev.filter(c => c.id !== id))
-    })
-  }
-
-  function addCustomCompetitor() {
-    const name = customBrand.trim()
-    const website = customWebsite.trim().replace(/^https?:\/\//i, '')
-    if (!name || !website || atCapacity) return
-    stageCompetitor({
-      name,
-      domain: website.split('/')[0],
-      description: 'Custom competitor added for tracking.',
-      visibility: 0,
-      sov: 0,
-      country: customCountry,
-    })
-    setCustomBrand('')
-    setCustomWebsite('')
-    setShowAddForm(false)
-  }
-
-  function handleSave() {
-    onSave({ tracked: trackedCompetitors, pending: pendingCompetitors })
-  }
-
-  const stagedDomains = new Set([
-    ...trackedCompetitors.map(c => c.domain),
-    ...pendingCompetitors.map(c => c.domain),
-  ])
-  const availableSuggestions = ADD_COMPETITOR_SUGGESTIONS.filter(item => !stagedDomains.has(item.domain))
-  const canAddCustom = Boolean(customBrand.trim() && customWebsite.trim()) && !atCapacity
-
-  const selectionRows = [
-    ...pendingCompetitors.map(c => ({ ...c, _kind: 'pending' })),
-    ...trackedCompetitors.map(c => ({ ...c, _kind: 'tracked' })),
-  ]
-
-  return (
-    <HLModal
-      id="manage-competitors"
-      width={880}
-      height={MODAL_MANAGE_HEIGHT}
-      headerDivider
-      onClose={onClose}
-      contentClassName="px-6 py-4 overflow-hidden flex flex-col"
-      footerClassName="px-6 py-3.5"
-      header={(
-        <div className="px-6 pt-5 pb-3.5">
-          <div className="flex items-center gap-2">
-            <h2 id="manage-competitors-title" className={`${modalTitle} m-0`}>Manage competitors</h2>
-            <SectionInfoTip content="Track up to five brands. Your selection is the source of truth — suggestions and custom adds fill open slots." />
-          </div>
-          <p className={`${modalSubtext} m-0 mt-1`}>
-            Review what you’re tracking, add brands you care about, and optionally use suggestions to fill open slots.
-          </p>
-        </div>
-      )}
-      footer={(
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <p className="text-[12px] text-gray-400 m-0">
-            {pendingCompetitors.length > 0
-              ? `${pendingCompetitors.length} new competitor${pendingCompetitors.length === 1 ? '' : 's'} will start tracking on save.`
-              : 'Changes will be applied to the next scan when you save.'}
-          </p>
-          <div className="flex items-center gap-2">
-            <HLButton variant="secondary" color="gray" size="sm" onClick={onClose}>
-              Cancel
-            </HLButton>
-            <HLButton variant="primary" color="blue" size="sm" onClick={handleSave}>
-              Save and refresh results
-            </HLButton>
-          </div>
-        </div>
-      )}
-    >
-      <div className="flex-1 min-h-0 flex flex-col gap-4">
-        {/* Primary: selection roster + add */}
-        <section className="shrink-0 rounded-2xl border border-gray-200 bg-white overflow-hidden">
-          <div className="px-4 py-3.5 border-b border-gray-100">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[14px] font-semibold text-gray-900 m-0">Your selection</p>
-                <p className="text-[12px] text-gray-500 m-0 mt-1">
-                  Brands in your competitive set for AI answers
-                </p>
-              </div>
-              <span className="shrink-0 text-[13px] font-semibold text-gray-700 tabular-nums">
-                {totalSelected}
-                <span className="text-gray-300 font-medium">/{MAX_TRACKED_COMPETITORS}</span>
-              </span>
-            </div>
-          </div>
-
-          <div className="p-4 flex flex-col gap-2">
-            {selectionRows.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-gray-200 px-4 py-8 text-center">
-                <p className="text-[13px] font-medium text-gray-700 m-0">No competitors yet</p>
-                <p className="text-[12px] text-gray-500 m-0 mt-1">Add a brand you already know — or grab one from suggestions below.</p>
-              </div>
-            ) : (
-              <div
-                ref={selectionListRef}
-                className="max-h-[220px] overflow-y-auto flex flex-col gap-2 pr-0.5"
-                style={{ scrollbarWidth: 'thin' }}
-              >
-                {selectionRows.map((c) => {
-                  const isPending = c._kind === 'pending'
-                  const rowId = isPending ? c.id : c.domain
-                  return (
-                    <div
-                      key={rowId}
-                      className={`group flex items-center gap-3 rounded-xl border px-3.5 py-3 ${rowMotionClass(rowId)}`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <p className="text-[14px] font-semibold text-gray-900 m-0 truncate">{c.name}</p>
-                          {c.isMe && (
-                            <span className="shrink-0 text-[10px] font-semibold text-gray-600 bg-gray-100 border border-gray-200 rounded-md px-1.5 py-0.5">
-                              You
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[12px] text-gray-500 m-0 mt-0.5 truncate">
-                          {c.domain}
-                          {c.visibility != null && c.visibility > 0 ? (
-                            <span className="text-gray-400"> · Mentioned in {c.visibility}% of AI answers</span>
-                          ) : null}
-                        </p>
-                      </div>
-                      {(isPending || !c.isMe) && (
-                        <ModalTableRemoveButton
-                          label={isPending ? 'Remove competitor' : 'Delete competitor'}
-                          onClick={() => (isPending ? removePending(c.id) : deleteTracked(c.domain))}
-                        />
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-
-            {!showAddForm ? (
-              <button
-                type="button"
-                disabled={atCapacity}
-                onClick={() => setShowAddForm(true)}
-                className={`mt-1 w-full h-11 inline-flex items-center justify-center gap-2 rounded-xl text-[13px] font-semibold transition-all ${
-                  atCapacity
-                    ? 'bg-white text-gray-300 border border-gray-200 cursor-not-allowed'
-                    : 'bg-white text-gray-800 border border-gray-300 hover:border-gray-400 hover:bg-gray-50'
-                }`}
-              >
-                <Plus size={15} strokeWidth={2.25} />
-                Add a competitor
-              </button>
-            ) : (
-              <div className="mt-1 rounded-xl border border-primary-300 bg-white p-4 flex flex-col gap-3">
-                <div>
-                  <p className="text-[14px] font-semibold text-gray-900 m-0">Add a competitor</p>
-                  <p className="text-[12px] text-gray-500 m-0 mt-0.5">Brand name, website, and country.</p>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div>
-                    <label htmlFor="manage-competitor-brand" className="block text-[12px] font-medium text-gray-500 mb-1.5">Brand name</label>
-                    <HLInput
-                      id="manage-competitor-brand"
-                      size="sm"
-                      value={customBrand}
-                      onChange={e => setCustomBrand(e.target.value)}
-                      placeholder="e.g. HubSpot"
-                      disabled={atCapacity}
-                      autoFocus
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="manage-competitor-website" className="block text-[12px] font-medium text-gray-500 mb-1.5">Website</label>
-                    <HLInput
-                      id="manage-competitor-website"
-                      size="sm"
-                      prefixIcon={Globe}
-                      value={customWebsite}
-                      onChange={e => setCustomWebsite(e.target.value)}
-                      placeholder="e.g. hubspot.com"
-                      disabled={atCapacity}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="manage-competitor-country" className="block text-[12px] font-medium text-gray-500 mb-1.5">Country</label>
-                    <div className="relative">
-                      <select
-                        id="manage-competitor-country"
-                        value={customCountry}
-                        onChange={e => setCustomCountry(e.target.value)}
-                        disabled={atCapacity}
-                        className="w-full h-8 px-3 pr-8 bg-white border border-gray-300 rounded-lg text-[14px] text-gray-900 outline-none appearance-none focus:border-primary-600 transition-colors cursor-pointer disabled:bg-gray-50 disabled:text-gray-400"
-                      >
-                        {ADD_COMPETITOR_COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
-                      </select>
-                      <ChevronDown size={14} className="text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                    </div>
-                  </div>
-                </div>
-                <div className="flex items-center justify-end gap-2">
-                  <HLButton
-                    variant="secondary"
-                    color="gray"
-                    size="sm"
-                    onClick={() => { setShowAddForm(false); setCustomBrand(''); setCustomWebsite('') }}
-                  >
-                    Cancel
-                  </HLButton>
-                  <HLButton
-                    variant="primary"
-                    color="blue"
-                    size="sm"
-                    disabled={!canAddCustom}
-                    onClick={addCustomCompetitor}
-                  >
-                    Add
-                  </HLButton>
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Secondary: optional suggestions — fuller layout */}
-        <section className="flex-1 min-h-0 flex flex-col">
-          <div className="flex items-baseline gap-2 mb-3 shrink-0">
-            <p className="text-[14px] font-semibold text-gray-900 m-0">Suggested competitors</p>
-          </div>
-          <div className="flex-1 min-h-0 overflow-y-auto" style={{ scrollbarWidth: 'thin' }}>
-            {availableSuggestions.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 py-2">No more suggestions.</p>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 content-start">
-                {availableSuggestions.map(item => (
-                  <button
-                    key={item.domain}
-                    type="button"
-                    disabled={atCapacity}
-                    onClick={() => stageCompetitor(item)}
-                    className={`flex items-center gap-3 text-left rounded-xl border border-dashed px-3.5 py-3 transition-all outline-none focus:outline-none ${
-                      atCapacity
-                        ? 'border-gray-200 bg-white text-gray-300 cursor-not-allowed'
-                        : 'border-gray-300 bg-white hover:border-primary-300'
-                    }`}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className={`text-[13px] font-semibold m-0 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-900'}`}>
-                        {item.name}
-                      </p>
-                      <p className={`text-[11px] m-0 mt-0.5 truncate ${atCapacity ? 'text-gray-300' : 'text-gray-500'}`}>
-                        {item.domain}
-                        {item.visibility > 0 ? ` · Mentioned in ${item.visibility}% of AI answers` : ''}
-                      </p>
-                    </div>
-                    <span className={`text-[12px] font-semibold shrink-0 ${atCapacity ? 'text-gray-300' : 'text-primary-600'}`}>
-                      Add
-                    </span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    </HLModal>
   )
 }
 
@@ -2747,19 +2441,12 @@ const SETUP_COMPETITOR_SUGGESTIONS = [
 
 const SETUP_STEPS = [
   { id: 1, short: 'Brand', hint: 'Verify your brand' },
-  { id: 2, short: 'Competitors', hint: 'Add competitors' },
-  { id: 3, short: 'Prompts', hint: 'Add or select prompts' },
+  { id: 2, short: 'Competitors', hint: 'Select competitors' },
+  { id: 3, short: 'Prompts', hint: 'Select prompts' },
 ]
 
 const SETUP_SELECT_CLASS =
-  'w-full h-8 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
-
-const PITCH_ENGINES = [
-  { name: 'ChatGPT', Logo: ChatGptLogo },
-  { name: 'Claude', Logo: ClaudeLogo },
-  { name: 'Gemini', Logo: GeminiLogo },
-  { name: 'Perplexity', Logo: PerplexityLogo },
-]
+  'w-full h-9 pl-9 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer'
 
 const PITCH_DISCOVER_ITEMS = [
   {
@@ -2798,16 +2485,6 @@ const PITCH_REPORT_INCLUDES = [
   'Recommended improvements',
 ]
 
-function competitorInitials(name) {
-  return String(name || '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .map(w => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase() || '?'
-}
-
 function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
   return (
     <div
@@ -2836,7 +2513,7 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
                     ? 'bg-success-600 text-white'
                     : isCurrent
                       ? 'bg-primary-600 text-white ring-4 ring-primary-100'
-                      : 'bg-white border-2 border-gray-200 text-gray-400'
+                      : 'bg-white border-2 border-gray-200 text-gray-500'
                 }`}
               >
                 {isComplete ? <Check size={14} strokeWidth={2.5} /> : step.id}
@@ -2844,7 +2521,11 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
               <div className="min-w-0 text-left">
                 <p
                   className={`text-[13px] font-semibold m-0 leading-tight truncate ${
-                    isCurrent || isComplete ? 'text-gray-900' : 'text-gray-400'
+                    isCurrent
+                      ? 'text-primary-600'
+                      : isComplete
+                        ? 'text-gray-900'
+                        : 'text-gray-500'
                   }`}
                 >
                   {step.short}
@@ -2855,7 +2536,7 @@ function SetupProgressHeader({ activeStep, completed, onStepSelect }) {
                       ? 'text-primary-600'
                       : isComplete
                         ? 'text-gray-500'
-                        : 'text-gray-400'
+                        : 'text-gray-500'
                   }`}
                 >
                   {step.hint}
@@ -2919,26 +2600,6 @@ function PromptTrackingPitchPage({ onGetStarted }) {
         >
           {/* Hero */}
           <section>
-            <div
-              className="flex items-center mb-4"
-              role="list"
-              aria-label="Monitored AI engines"
-            >
-              {PITCH_ENGINES.map(({ name, Logo }, i) => (
-                <span
-                  key={name}
-                  role="listitem"
-                  title={name}
-                  className={`relative inline-flex items-center justify-center w-9 h-9 rounded-full bg-white border border-gray-200 shadow-xs ring-2 ring-white ${
-                    i === 0 ? '' : '-ml-2.5'
-                  }`}
-                  style={{ zIndex: PITCH_ENGINES.length - i }}
-                >
-                  <Logo size={18} />
-                  <span className="sr-only">{name}</span>
-                </span>
-              ))}
-            </div>
             <div className="max-w-[720px]">
               <h1 className="text-[28px] sm:text-[34px] font-bold text-gray-900 m-0 leading-[1.25] tracking-tight">
                 <span className="block whitespace-nowrap">
@@ -2971,7 +2632,7 @@ function PromptTrackingPitchPage({ onGetStarted }) {
                   <span className={`inline-flex items-center justify-center w-10 h-10 rounded-xl shrink-0 ${iconWrap}`}>
                     <Icon size={18} />
                   </span>
-                  <p className="text-[15px] font-semibold text-gray-900 m-0 mt-4 leading-snug">{title}</p>
+                  <p className="text-[14px] font-semibold text-gray-900 m-0 mt-4 leading-snug">{title}</p>
                   <p className="text-[13px] text-gray-500 m-0 mt-2 leading-relaxed flex-1">{body}</p>
                 </div>
               ))}
@@ -3028,10 +2689,18 @@ function PromptTrackingPitchPage({ onGetStarted }) {
   )
 }
 
+const SETUP_LANGUAGES = ['English', 'Spanish', 'French', 'German', 'Portuguese', 'Hindi']
+const SETUP_COUNTRIES = [
+  'United States', 'United Kingdom', 'Canada', 'Australia', 'India',
+  'Germany', 'France', 'Netherlands', 'Singapore', 'Brazil',
+]
+
 function PromptTrackingInitialState({ onStart }) {
   const [setupStarted, setSetupStarted] = useState(false)
   const [brandName, setBrandName] = useState('Go High Level')
   const [brandWebsite, setBrandWebsite] = useState('https://gohighlevel.com')
+  const [language, setLanguage] = useState('English')
+  const [country, setCountry] = useState('United States')
   const [region, setRegion] = useState('United States')
   const [competitors, setCompetitors] = useState([])
   const [compName, setCompName] = useState('')
@@ -3040,14 +2709,21 @@ function PromptTrackingInitialState({ onStart }) {
   const [prompts, setPrompts] = useState([])
   const [customPrompt, setCustomPrompt] = useState('')
   const [showCustomPrompt, setShowCustomPrompt] = useState(false)
-  // Prefill is ready on mount — land on competitors with brand collapsed as complete.
-  const [activeStep, setActiveStep] = useState(2)
-  const [step1Confirmed, setStep1Confirmed] = useState(true)
+  // Prefill is ready on mount — land on Brand so the user reviews and continues.
+  const [activeStep, setActiveStep] = useState(1)
+  const [step1Confirmed, setStep1Confirmed] = useState(false)
   const [step2Confirmed, setStep2Confirmed] = useState(false)
   const selectedPromptsListRef = useRef(null)
 
-  const brandReady = brandName.trim().length > 0 && brandWebsite.trim().length > 0
-  const canTrack = brandReady && prompts.length > 0
+  const brandReady =
+    brandName.trim().length > 0
+    && brandWebsite.trim().length > 0
+    && Boolean(language)
+    && Boolean(country)
+    && Boolean(region)
+  const competitorsReady = competitors.length > 0
+  const promptsReady = prompts.length > 0
+  const canTrack = brandReady && step1Confirmed && competitorsReady && step2Confirmed && promptsReady
   const atCompLimit = competitors.length >= MAX_SETUP_COMPETITORS
   const atPromptLimit = prompts.length >= MAX_SETUP_PROMPTS
 
@@ -3070,7 +2746,7 @@ function PromptTrackingInitialState({ onStart }) {
       setActiveStep(2)
       return
     }
-    if (id === 3 && step2Confirmed) {
+    if (id === 3 && step2Confirmed && competitorsReady) {
       setActiveStep(3)
     }
   }
@@ -3082,6 +2758,7 @@ function PromptTrackingInitialState({ onStart }) {
   }
 
   function confirmCompetitors() {
+    if (!competitorsReady) return
     setStep2Confirmed(true)
     setActiveStep(3)
   }
@@ -3138,6 +2815,8 @@ function PromptTrackingInitialState({ onStart }) {
     onStart({
       brandName: brandName.trim(),
       brandWebsite: brandWebsite.trim(),
+      language,
+      country,
       region,
       competitors,
       prompts,
@@ -3147,55 +2826,92 @@ function PromptTrackingInitialState({ onStart }) {
 
   const completed = {
     1: step1Confirmed && brandReady,
-    2: step2Confirmed,
+    2: step2Confirmed && competitorsReady,
     3: false,
   }
 
   const brandStep = (
     <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-1">
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <h2 className="text-[16px] font-semibold text-gray-900 m-0">Confirm brand and region</h2>
+        <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Confirm your brand</h2>
         <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed">
-          We match AI answers to your brand name and market — so visibility scores reflect where you actually sell.
+          Add your brand name, market, and language so visibility scores reflect where you actually sell.
         </p>
-        <div className="flex flex-col gap-3.5 mt-5">
-          <div>
-            <label htmlFor="pt-setup-brand" className="block text-[12px] font-medium text-gray-500 mb-2">Brand name</label>
-            <HLInput
-              id="pt-setup-brand"
-              size="sm"
-              prefixIcon={Sparkles}
-              value={brandName}
-              onChange={e => setBrandName(e.target.value)}
-              placeholder="e.g. Go High Level"
-            />
+
+        <div className="mt-5 flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="pt-setup-brand" className="block text-[14px] font-medium text-gray-500 mb-1">Brand name</label>
+              <HLInput
+                id="pt-setup-brand"
+                size="sm"
+                value={brandName}
+                onChange={e => setBrandName(e.target.value)}
+                placeholder="e.g. Go High Level"
+              />
+            </div>
+            <div>
+              <label htmlFor="pt-setup-website" className="block text-[14px] font-medium text-gray-500 mb-1">Brand website</label>
+              <HLInput
+                id="pt-setup-website"
+                size="sm"
+                prefixIcon={Globe}
+                value={brandWebsite}
+                onChange={e => setBrandWebsite(e.target.value)}
+                placeholder="https://example.com"
+              />
+            </div>
           </div>
-          <div>
-            <label htmlFor="pt-setup-website" className="block text-[12px] font-medium text-gray-500 mb-2">Brand website</label>
-            <HLInput
-              id="pt-setup-website"
-              size="sm"
-              prefixIcon={Globe}
-              value={brandWebsite}
-              onChange={e => setBrandWebsite(e.target.value)}
-              placeholder="https://example.com"
-            />
-          </div>
-          <div>
-            <label htmlFor="pt-setup-region" className="block text-[12px] font-medium text-gray-500 mb-2">Region</label>
-            <div className="relative">
-              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" />
-              <select
-                id="pt-setup-region"
-                value={region}
-                onChange={e => setRegion(e.target.value)}
-                className={SETUP_SELECT_CLASS}
-              >
-                {ADD_PROMPT_REGIONS.map(r => (
-                  <option key={r} value={r}>{r}</option>
-                ))}
-              </select>
-              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+              <label htmlFor="pt-setup-language" className="block text-[14px] font-medium text-gray-500 mb-1">Language</label>
+              <div className="relative">
+                <select
+                  id="pt-setup-language"
+                  value={language}
+                  onChange={e => setLanguage(e.target.value)}
+                  className="w-full h-9 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                >
+                  {SETUP_LANGUAGES.map(l => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="pt-setup-country" className="block text-[14px] font-medium text-gray-500 mb-1">Country</label>
+              <div className="relative">
+                <select
+                  id="pt-setup-country"
+                  value={country}
+                  onChange={e => setCountry(e.target.value)}
+                  className="w-full h-9 px-3 pr-8 appearance-none rounded-lg border border-gray-300 bg-white text-[14px] text-gray-900 outline-none focus:border-primary-600 transition-colors cursor-pointer"
+                >
+                  {SETUP_COUNTRIES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="pt-setup-region" className="block text-[14px] font-medium text-gray-500 mb-1">Region</label>
+              <div className="relative">
+                <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none z-10" />
+                <select
+                  id="pt-setup-region"
+                  value={region}
+                  onChange={e => setRegion(e.target.value)}
+                  className={SETUP_SELECT_CLASS}
+                >
+                  {ADD_PROMPT_REGIONS.map(r => (
+                    <option key={r} value={r}>{r}</option>
+                  ))}
+                </select>
+                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none" />
+              </div>
             </div>
           </div>
         </div>
@@ -3205,10 +2921,9 @@ function PromptTrackingInitialState({ onStart }) {
           type="button"
           disabled={!brandReady}
           onClick={confirmBrand}
-          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold transition-colors"
+          className={BTN_PRIMARY}
         >
           Continue
-          <ChevronRight size={14} />
         </button>
       </div>
     </div>
@@ -3217,15 +2932,21 @@ function PromptTrackingInitialState({ onStart }) {
   const competitorsStep = (
     <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-2">
       <div className="flex-1 min-h-0 overflow-y-auto">
-        <div className="flex items-center justify-between gap-4">
-          <h2 className="text-[16px] font-semibold text-gray-900 m-0">Who do you compete with?</h2>
-          <p className="text-[13px] text-gray-400 m-0 tabular-nums shrink-0" aria-live="polite">
-            {competitors.length}/{MAX_SETUP_COMPETITORS} selected
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Who do you compete with?</h2>
+            <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed">
+              Select at least one competitor to compare visibility in AI answers.
+            </p>
+          </div>
+          <p className="text-[13px] font-semibold text-gray-700 m-0 tabular-nums shrink-0 pt-1" aria-live="polite">
+            {competitors.length}
+            <span className="text-gray-300 font-medium">/{MAX_SETUP_COMPETITORS}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-2 mt-5 mb-2.5">
-          <Sparkles size={13} className="text-purple-500/80 shrink-0" />
+          <Sparkles size={13} className="text-primary-500 shrink-0" />
           <p className="text-[12px] font-medium text-gray-500 m-0">Recommended for you</p>
         </div>
 
@@ -3241,8 +2962,8 @@ function PromptTrackingInitialState({ onStart }) {
                 aria-pressed={selected}
                 className={`w-full flex items-center gap-3 text-left rounded-xl border px-3.5 py-3 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed outline-none focus:outline-none focus-visible:outline-none pt-setup-fade-up ${
                   selected
-                    ? 'border-primary-600 bg-primary-50/40 focus-visible:border-primary-600'
-                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50/60 focus-visible:border-primary-300'
+                    ? 'border-primary-600 bg-primary-50/50 shadow-xs focus-visible:border-primary-600'
+                    : 'border-gray-200 bg-white hover:border-primary-200 hover:bg-primary-50/20 focus-visible:border-primary-300'
                 }`}
                 style={{ animationDelay: `${60 + i * 40}ms` }}
               >
@@ -3281,7 +3002,7 @@ function PromptTrackingInitialState({ onStart }) {
                     type="button"
                     onClick={() => toggleCompetitor(c)}
                     aria-label={`Remove ${c.name}`}
-                    className="w-7 h-7 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
+                    className="w-7 h-7 rounded-md text-gray-500 hover:text-error-600 hover:bg-error-50 inline-flex items-center justify-center transition-colors shrink-0"
                   >
                     <X size={13} />
                   </button>
@@ -3350,20 +3071,16 @@ function PromptTrackingInitialState({ onStart }) {
           Back
         </HLButton>
         <div className="flex items-center gap-3 ml-auto">
+          {!competitorsReady && (
+            <p className="text-[12px] text-gray-500 m-0 hidden sm:block">Select at least one competitor</p>
+          )}
           <button
             type="button"
+            disabled={!competitorsReady}
             onClick={confirmCompetitors}
-            className="text-[13px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
-          >
-            Skip for now
-          </button>
-          <button
-            type="button"
-            onClick={confirmCompetitors}
-            className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+            className={BTN_PRIMARY}
           >
             Continue
-            <ChevronRight size={14} />
           </button>
         </div>
       </div>
@@ -3373,28 +3090,33 @@ function PromptTrackingInitialState({ onStart }) {
   const promptsStep = (
     <div className="flex flex-col min-h-0 flex-1 pt-setup-scale-in" key="step-3">
       <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
-        <div className="shrink-0 flex items-center justify-between gap-4">
-          <h2 className="text-[16px] font-semibold text-gray-900 m-0">Add prompts</h2>
+        <div className="shrink-0 flex items-start justify-between gap-4">
+          <div className="min-w-0">
+            <h2 className="text-[18px] font-semibold text-gray-900 m-0 tracking-tight">Add prompts</h2>
+            <p className="text-[13px] text-gray-500 m-0 mt-1.5 leading-relaxed">
+              Add at least one prompt to start tracking AI answers.
+            </p>
+          </div>
           <div className="shrink-0 text-right" aria-live="polite">
             <p className="text-[18px] font-semibold text-gray-900 m-0 tabular-nums leading-none tracking-tight">
               {prompts.length}
               <span className="text-gray-300 font-medium">/{MAX_SETUP_PROMPTS}</span>
             </p>
-            <p className="text-[11px] text-gray-400 m-0 mt-1">prompts</p>
+            <p className="text-[11px] text-gray-500 m-0 mt-1">prompts</p>
           </div>
         </div>
 
         {prompts.length > 0 && (
           <div className="shrink-0 mt-4 flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
-              <p className="text-[12px] font-semibold text-gray-900 m-0">
+              <p className="text-[14px] font-semibold text-gray-900 m-0">
                 Your selection
-                <span className="ml-1.5 font-medium text-gray-400 tabular-nums">
+                <span className="ml-1.5 font-medium text-gray-500 tabular-nums">
                   {prompts.length} selected
                 </span>
               </p>
               {prompts.length > 4 && (
-                <p className="text-[11px] text-gray-400 m-0">Scroll to see all</p>
+                <p className="text-[11px] text-gray-500 m-0">Scroll to see all</p>
               )}
             </div>
             <div
@@ -3406,17 +3128,17 @@ function PromptTrackingInitialState({ onStart }) {
               {prompts.map((p, i) => (
                 <div
                   key={p.prompt}
-                  className="flex items-start gap-2 rounded-lg border border-primary-100 bg-white px-3 py-2 pt-setup-scale-in"
+                  className="flex items-center gap-2 rounded-lg border border-primary-100 bg-white px-3 py-2 pt-setup-scale-in"
                   style={{ animationDelay: `${i * 40}ms` }}
                 >
-                  <span className="text-[11px] font-semibold text-primary-600 tabular-nums shrink-0 mt-0.5 w-4">
+                  <span className="text-[11px] font-semibold text-gray-500 tabular-nums shrink-0 w-4">
                     {i + 1}
                   </span>
                   <p className="text-[12px] text-gray-800 leading-snug m-0 flex-1 min-w-0 line-clamp-2">{p.prompt}</p>
                   <button
                     type="button"
                     onClick={() => removePrompt(p.prompt)}
-                    className="w-6 h-6 rounded-md text-gray-400 hover:text-error-600 hover:bg-error-50 transition-colors inline-flex items-center justify-center shrink-0"
+                    className="w-6 h-6 rounded-md text-gray-500 hover:text-error-600 hover:bg-error-50 transition-colors inline-flex items-center justify-center shrink-0"
                     aria-label="Remove prompt"
                   >
                     <X size={12} />
@@ -3483,7 +3205,7 @@ function PromptTrackingInitialState({ onStart }) {
 
           <div className="flex-1 min-h-0 rounded-xl border border-gray-200 overflow-y-auto divide-y divide-gray-100 bg-white">
             {availablePrompts.length === 0 ? (
-              <p className="text-[12px] text-gray-400 m-0 px-3.5 py-4 text-center">All suggestions are in your selection.</p>
+              <p className="text-[12px] text-gray-500 m-0 px-3.5 py-4 text-center">All suggestions are in your selection.</p>
             ) : (
               availablePrompts.map((s, i) => (
                 <div
@@ -3492,7 +3214,7 @@ function PromptTrackingInitialState({ onStart }) {
                   style={{ animationDelay: `${80 + i * 40}ms` }}
                 >
                   <div className="min-w-0 flex-1">
-                    <span className="text-[11px] text-gray-400 tabular-nums">{s.volume}</span>
+                    <span className="text-[11px] text-gray-500 tabular-nums">{s.volume}</span>
                     <p className="text-[12px] text-gray-800 leading-snug m-0 mt-0.5 line-clamp-2">{s.prompt}</p>
                   </div>
                   <button
@@ -3512,7 +3234,7 @@ function PromptTrackingInitialState({ onStart }) {
         </div>
 
         {prompts.length === 0 && (
-          <p className="shrink-0 text-[12px] text-gray-400 m-0 mt-3 text-center">Add at least one prompt to start tracking.</p>
+          <p className="shrink-0 text-[12px] text-gray-500 m-0 mt-3 text-center">Add at least one prompt to continue.</p>
         )}
       </div>
 
@@ -3524,10 +3246,9 @@ function PromptTrackingInitialState({ onStart }) {
           type="button"
           disabled={!canTrack}
           onClick={handleTrack}
-          className="inline-flex items-center gap-1.5 h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 disabled:bg-gray-200 disabled:text-gray-400 text-white text-[13px] font-semibold transition-colors"
+          className={BTN_PRIMARY}
         >
           Track and show results
-          <ChevronRight size={14} />
         </button>
       </div>
     </div>
@@ -3539,23 +3260,33 @@ function PromptTrackingInitialState({ onStart }) {
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden relative bg-gray-50 p-4 sm:p-5 xl:p-6">
-      <div className="min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xs max-w-[880px] w-full mx-auto">
-        <div className="shrink-0 px-5 sm:px-6 pt-4 pb-0">
+      <div className="relative min-h-0 min-w-0 flex-1 flex flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-w-[880px] w-full mx-auto">
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'radial-gradient(ellipse 50% 35% at 0% 0%, rgba(21,94,239,0.06), transparent 55%), radial-gradient(ellipse 40% 30% at 100% 0%, rgba(105,56,239,0.05), transparent 50%)',
+          }}
+          aria-hidden="true"
+        />
+        <div className="relative shrink-0 px-5 sm:px-6 pt-4 pb-0">
           <button
             type="button"
             onClick={() => setSetupStarted(false)}
-            className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
+            className="inline-flex items-center gap-1.5 text-[14px] font-medium text-gray-500 hover:text-gray-800 transition-colors"
           >
             <ArrowLeft size={14} />
             Back to overview
           </button>
         </div>
-        <SetupProgressHeader
-          activeStep={activeStep}
-          completed={completed}
-          onStepSelect={focusStep}
-        />
-        <div className="flex-1 min-h-0 flex flex-col overflow-hidden p-4 sm:p-5">
+        <div className="relative">
+          <SetupProgressHeader
+            activeStep={activeStep}
+            completed={completed}
+            onStepSelect={focusStep}
+          />
+        </div>
+        <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden p-4 sm:p-5 xl:p-6">
           {activeStep === 1 && brandStep}
           {activeStep === 2 && competitorsStep}
           {activeStep === 3 && promptsStep}
@@ -3585,35 +3316,30 @@ function PromptTrackingProgressView({ progress, setup }) {
     <div className={TRACKING_STATUS_SHELL} style={{ scrollbarGutter: 'stable' }}>
       <div className={TRACKING_STATUS_COLUMN}>
         <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-start justify-between gap-4 flex-wrap">
-              <div className="min-w-0 flex-1">
-                <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
-                  Refreshing AI rank tracking for {brand}
-                </h1>
-                <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2 max-w-[480px]">
-                  We are pulling fresh prompt answers, competitor visibility, citation coverage, and engine-level ranking data before reopening the dashboard.
-                </p>
-              </div>
+          <div className="p-6 border-b border-gray-100 flex flex-col gap-5">
+            <div className="min-w-0">
+              <h1 className="text-[22px] font-bold text-gray-900 leading-snug m-0">
+                Refreshing AI rank tracking for {brand}
+              </h1>
+              <p className="text-[14px] text-gray-500 leading-relaxed m-0 mt-2">
+                We are pulling fresh prompt answers, competitor visibility, citation coverage, and engine-level ranking data before reopening the dashboard.
+              </p>
+            </div>
 
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3.5 shrink-0 min-w-[180px]">
-                <p className="text-[11px] font-semibold text-gray-400 m-0 mb-2.5">Refresh setup</p>
-                <div className="flex flex-col gap-1.5">
-                  {[
-                    { label: 'Prompts', value: promptCount },
-                    { label: 'Competitors', value: competitorCount },
-                    { label: 'AI engines', value: engineCount },
-                    { label: 'Change type', value: 'First setup', strong: true },
-                  ].map(row => (
-                    <div key={row.label} className="flex items-center justify-between gap-4">
-                      <span className="text-[12px] text-gray-500">{row.label}</span>
-                      <span className={`text-[12px] tabular-nums ${row.strong ? 'font-semibold text-gray-900' : 'font-medium text-gray-700'}`}>
-                        {row.value}
-                      </span>
-                    </div>
-                  ))}
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: 'Prompts', value: promptCount },
+                { label: 'Competitors', value: competitorCount },
+                { label: 'AI engines', value: engineCount },
+              ].map(stat => (
+                <div
+                  key={stat.label}
+                  className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3 flex flex-col gap-1 min-w-0"
+                >
+                  <span className="text-[12px] font-medium text-gray-500">{stat.label}</span>
+                  <span className="text-[20px] font-bold text-gray-900 tabular-nums leading-none">{stat.value}</span>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
 
@@ -3635,7 +3361,7 @@ function PromptTrackingProgressView({ progress, setup }) {
                   }}
                 />
               </div>
-              <p className="text-[12px] text-gray-400 m-0 mb-4">{etaText}</p>
+              <p className="text-[12px] text-gray-500 m-0 mb-4">{etaText}</p>
 
               <div className="flex items-center gap-2 flex-wrap">
                 {TRACKING_ENGINES.map(eng => (
@@ -3644,7 +3370,7 @@ function PromptTrackingProgressView({ progress, setup }) {
                     className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-gray-200 bg-gray-50"
                   >
                     <EngineLogo name={eng.name} size={12} chip={false} />
-                    <span className="text-[12px] font-medium text-gray-700">{eng.name}</span>
+                    <span className="text-[14px] font-medium text-gray-700">{eng.name}</span>
                   </span>
                 ))}
               </div>
@@ -3673,8 +3399,9 @@ function PromptTrackingErrorContent({ onRetry }) {
           <button
             type="button"
             onClick={onRetry}
-            className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors"
+            className={BTN_PRIMARY}
           >
+            <RefreshCw02 size={14} />
             Retry scan
           </button>
         </div>
@@ -3692,13 +3419,16 @@ const PAGE_TABS = [
   { id: 'Competitors', label: 'Competitors', Icon: BarChart3     },
 ]
 
+function SettingsPromptsPanel() {
+  return <ManagePromptsModal embedded hideEngines />
+}
+
 export default function PromptTrackingDashboard() {
   const [phase, setPhase] = useState(() => sessionStorage.getItem('pt_hasTracking') === '1' ? 'ready' : 'setup')
   const [activeTab, setActiveTab]       = useState('Overview')
   const [engineFilter, setEngineFilter] = useState('All AI engines')
   const [periodFilter, setPeriodFilter] = useState('Last 30 days')
-  const [showManagePrompts, setShowManagePrompts] = useState(false)
-  const [showManageCompetitors, setShowManageCompetitors] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
   const [successToast, setSuccessToast] = useState(null)
   const [promptFromOverview, setPromptFromOverview] = useState(null)
   const [isTracking, setIsTracking] = useState(false)
@@ -3769,13 +3499,8 @@ export default function PromptTrackingDashboard() {
     toastTimer.current = setTimeout(() => setSuccessToast(null), 5000)
   }
 
-  function handleSavePrompt() {
-    setShowManagePrompts(false)
-    fireToast('Changes have been saved and will be applied to the next scan.')
-  }
-
-  function handleSaveCompetitor() {
-    setShowManageCompetitors(false)
+  function handleApplySettings() {
+    setShowSettings(false)
     fireToast('Changes have been saved and will be applied to the next scan.')
   }
 
@@ -3838,6 +3563,14 @@ export default function PromptTrackingDashboard() {
             >
               Preview initial state
             </button>
+            <button
+              type="button"
+              onClick={() => setShowSettings(true)}
+              aria-label="Prompt tracking settings"
+              className="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-gray-300 bg-white shadow-xs text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-colors"
+            >
+              <Settings size={15} />
+            </button>
           </div>
         </div>
 
@@ -3850,7 +3583,7 @@ export default function PromptTrackingDashboard() {
                 onClick={() => { setActiveTab(id); setPromptFromOverview(null) }}
                 className={`px-1 border-b-2 -mb-px transition-colors ${isActive ? 'border-primary-600' : 'border-transparent'}`}
               >
-                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[13px] font-medium transition-colors ${
+                <span className={`flex items-center gap-1.5 px-3 py-2.5 rounded-md text-[14px] font-medium transition-colors ${
                   isActive ? 'text-primary-600' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                 }`}>
                   <Icon size={14} />
@@ -3861,31 +3594,13 @@ export default function PromptTrackingDashboard() {
           })}
         </div>
 
-        <div className="px-6 py-2 border-t border-gray-100 bg-white flex items-center justify-between gap-3 min-h-12">
-          <div className="flex items-center gap-2">
+        <div className="px-6 h-[52px] border-t border-gray-100 bg-white flex items-center gap-3">
+          <div className="flex items-center gap-2 min-w-0">
             {activeTab !== 'Overview' && (
               <DarkDropdown value={engineFilter} onChange={setEngineFilter} options={ENGINE_OPTIONS} icon={Bot} variant="default" />
             )}
             <DarkDropdown value={periodFilter} onChange={setPeriodFilter} options={PERIOD_OPTIONS} icon={Clock} variant="active" dateRangeOption="Custom date range" />
           </div>
-          {activeTab === 'Prompts' && (
-            <button
-              type="button"
-              onClick={() => setShowManagePrompts(true)}
-              className="inline-flex items-center justify-center h-8 px-3.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
-            >
-              Manage prompts
-            </button>
-          )}
-          {activeTab === 'Competitors' && (
-            <button
-              type="button"
-              onClick={() => setShowManageCompetitors(true)}
-              className="inline-flex items-center justify-center h-8 px-3.5 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shadow-sm"
-            >
-              Manage competitors
-            </button>
-          )}
         </div>
       </div>
 
@@ -3910,17 +3625,11 @@ export default function PromptTrackingDashboard() {
         {activeTab === 'Competitors' && <CompetitorsTabContent />}
       </div>
 
-      {showManagePrompts && (
-        <ManagePromptsModal
-          onClose={() => setShowManagePrompts(false)}
-          onSave={handleSavePrompt}
-        />
-      )}
-
-      {showManageCompetitors && (
-        <ManageCompetitorsModal
-          onClose={() => setShowManageCompetitors(false)}
-          onSave={handleSaveCompetitor}
+      {showSettings && (
+        <PromptTrackingSettingsModal
+          onClose={() => setShowSettings(false)}
+          onApply={handleApplySettings}
+          PromptsPanel={SettingsPromptsPanel}
         />
       )}
 

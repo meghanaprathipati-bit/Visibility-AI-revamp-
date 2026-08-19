@@ -17,7 +17,7 @@ export default function EngineCoverageChart() {
     <div className="border border-gray-200 rounded-lg bg-white p-5">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
-          <h3 className="text-[16px] font-semibold text-gray-900">Engine coverage</h3>
+          <h3 className="text-[14px] font-semibold text-gray-900">Engine coverage</h3>
           <SectionInfoTip
             id="engine-coverage-chart-info"
             content="See how your brand performs across different AI search engines."
@@ -26,15 +26,15 @@ export default function EngineCoverageChart() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[520px] text-[13px]">
+        <table className="w-full min-w-[520px] text-[14px]">
           <thead>
             <tr className="border-b border-gray-200 text-left">
-              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Engine</th>
-              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Visibility</th>
-              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Presence</th>
-              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Avg position</th>
-              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[12px]">Citation rate</th>
-              <th className="pb-2 font-semibold text-gray-900 text-[12px]">Insight</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[14px]">Engine</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[14px]">Visibility</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[14px]">Presence</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[14px]">Avg position</th>
+              <th className="pb-2 pr-3 font-semibold text-gray-900 text-[14px]">Citation rate</th>
+              <th className="pb-2 font-semibold text-gray-900 text-[14px]">Insight</th>
             </tr>
           </thead>
           <tbody>
@@ -42,7 +42,7 @@ export default function EngineCoverageChart() {
               <tr key={engine.key} className="border-b border-gray-100 last:border-0">
                 <td className="py-3 pr-3">
                   <div className="flex items-center gap-2">
-                    <span className={`w-7 h-7 rounded-md border flex items-center justify-center text-[11px] font-semibold shrink-0 ${ENGINE_COLORS[engine.key]}`}>
+                    <span className={`w-7 h-7 rounded-md border flex items-center justify-center text-[12px] font-semibold shrink-0 ${ENGINE_COLORS[engine.key]}`}>
                       {engine.abbr}
                     </span>
                     <span className="font-medium text-gray-900">{engine.label}</span>

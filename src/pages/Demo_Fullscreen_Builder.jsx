@@ -50,7 +50,7 @@ export default function Demo_Fullscreen_Builder() {
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-4">
             {['Content', 'Style', 'Settings'].map(section => (
               <div key={section}>
-                <p className="text-[12px] font-semibold uppercase tracking-wider text-[#98A2B3] mb-2">
+                <p className="text-[12px] font-semibold text-[#98A2B3] mb-2">
                   {section}
                 </p>
                 <div className="flex flex-col gap-2">

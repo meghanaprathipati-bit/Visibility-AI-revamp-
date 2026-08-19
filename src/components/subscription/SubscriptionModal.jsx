@@ -42,12 +42,12 @@ function ModalStepper({ currentStep }) {
               <div className="flex flex-col items-center min-w-0">
                 <div
                   className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 text-[12px] font-semibold ${
-                    isCompleted || isActive ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-400 border border-gray-200'
+                    isCompleted || isActive ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-500 border border-gray-200'
                   }`}
                 >
                   {isCompleted ? <Check size={12} strokeWidth={2.5} /> : stepNum}
                 </div>
-                <span className={`mt-1.5 text-[12px] whitespace-nowrap ${isActive ? 'font-semibold text-gray-900' : isCompleted ? 'text-primary-600' : 'text-gray-400'}`}>
+                <span className={`mt-1.5 text-[12px] whitespace-nowrap ${isActive ? 'font-semibold text-gray-900' : isCompleted ? 'text-primary-600' : 'text-gray-500'}`}>
                   {label}
                 </span>
               </div>
@@ -70,7 +70,7 @@ function SubscriptionStep({ onContinue }) {
             <Star size={18} className="text-warning-600" />
           </div>
           <div>
-            <p className="text-[15px] font-semibold text-gray-900 m-0">{plan.name}</p>
+            <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name}</p>
             <p className="text-[12px] text-gray-500 mt-0.5 m-0">{plan.subtitle}</p>
           </div>
         </div>
@@ -89,10 +89,10 @@ function SubscriptionStep({ onContinue }) {
       </div>
       <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-0.5">Selected plan</p>
+          <p className="text-[10px] font-semibold text-gray-500 m-0 mb-0.5">Selected plan</p>
           <p className="text-[14px] font-semibold text-gray-900 m-0">{plan.name} · Monthly · ${plan.monthlyPrice} due today</p>
         </div>
-        <button type="button" onClick={onContinue} className={`inline-flex items-center justify-center h-9 px-4 rounded-lg ${modalBtnPrimary}`}>
+        <button type="button" onClick={onContinue} className={modalBtnPrimary}>
           Continue
         </button>
       </div>
@@ -108,7 +108,7 @@ function PaymentStep({ onBack, onSubscribe }) {
     <div className="px-4 py-4">
       <div className="flex gap-4">
         <aside className="w-[220px] shrink-0 border border-gray-200 rounded-xl p-4 bg-white">
-          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wide m-0 mb-3">{plan.name} plan</p>
+          <p className="text-[10px] font-semibold text-gray-500 m-0 mb-3">{plan.name} plan</p>
           <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
             <div className="flex items-start gap-2 mb-2">
               <div className="w-7 h-7 rounded-md bg-warning-100 flex items-center justify-center shrink-0">
@@ -121,14 +121,14 @@ function PaymentStep({ onBack, onSubscribe }) {
           </div>
         </aside>
         <div className="flex-1 min-w-0">
-          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 text-[13px] font-medium text-primary-600 hover:text-primary-700 mb-4">
+          <button type="button" onClick={onBack} className="inline-flex items-center gap-1 text-[14px] font-medium text-primary-600 hover:text-primary-700 mb-4">
             <ArrowLeft size={14} />
             Change plan
           </button>
           <div className="flex items-start gap-2.5 mb-4">
             <VaLogo size="sm" />
             <div>
-              <p className="text-[15px] font-semibold text-gray-900 m-0">Visibility AI subscription</p>
+              <p className="text-[14px] font-semibold text-gray-900 m-0">Visibility AI subscription</p>
               <p className="text-[13px] text-gray-500 mt-0.5 m-0">Choose how you want to pay for this subscription.</p>
             </div>
           </div>
@@ -138,7 +138,7 @@ function PaymentStep({ onBack, onSubscribe }) {
               onClick={() => setPaymentMethod('card')}
               className={`rounded-xl border p-4 text-left ${paymentMethod === 'card' ? 'border-primary-600 bg-primary-50/30' : 'border-gray-200'}`}
             >
-              <CreditCard size={18} className={paymentMethod === 'card' ? 'text-primary-600' : 'text-gray-400'} />
+              <CreditCard size={18} className={paymentMethod === 'card' ? 'text-primary-600' : 'text-gray-500'} />
               <p className={`text-[14px] font-semibold mt-2 mb-0.5 ${paymentMethod === 'card' ? 'text-primary-600' : 'text-gray-900'}`}>Pay with card</p>
               <p className="text-[12px] text-gray-500 m-0">Use a saved or new card</p>
             </button>
@@ -147,7 +147,7 @@ function PaymentStep({ onBack, onSubscribe }) {
               onClick={() => setPaymentMethod('agency')}
               className={`rounded-xl border p-4 text-left ${paymentMethod === 'agency' ? 'border-primary-600 bg-primary-50/30' : 'border-gray-200'}`}
             >
-              <Building2 size={18} className={paymentMethod === 'agency' ? 'text-primary-600' : 'text-gray-400'} />
+              <Building2 size={18} className={paymentMethod === 'agency' ? 'text-primary-600' : 'text-gray-500'} />
               <p className={`text-[14px] font-semibold mt-2 mb-0.5 ${paymentMethod === 'agency' ? 'text-primary-600' : 'text-gray-900'}`}>Charge to agency</p>
               <p className="text-[12px] text-gray-500 m-0">Bill the agency account</p>
             </button>
@@ -156,12 +156,12 @@ function PaymentStep({ onBack, onSubscribe }) {
       </div>
       <div className="mt-4 pt-3 border-t border-gray-200 flex items-center justify-between gap-4">
         <p className="inline-flex items-center gap-1.5 text-[12px] text-gray-500 m-0">
-          <Lock01Icon size={13} className="text-gray-400 shrink-0" />
+          <Lock01Icon size={13} className="text-gray-500 shrink-0" />
           By confirming, you activate your Visibility AI subscription.
         </p>
         <div className="flex items-center gap-2 shrink-0">
           <button type="button" onClick={onBack} className={modalBtnSecondary}>Cancel</button>
-          <button type="button" onClick={onSubscribe} className={`inline-flex items-center justify-center ${modalBtnPrimary}`}>
+          <button type="button" onClick={onSubscribe} className={modalBtnPrimary}>
             Pay $ {plan.monthlyPrice} and subscribe
           </button>
         </div>

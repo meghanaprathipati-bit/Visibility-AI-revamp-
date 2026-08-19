@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { X } from '../icons/index.js'
+import { BTN_PRIMARY, BTN_SECONDARY } from './HLButton.jsx'
 
 /** React adapter for HighRise HLModal — https://highrise.gohighlevel.com/components/feedback/modal */
 export default function HLModal({
@@ -81,10 +82,9 @@ export default function HLModal({
 export const modalTitle = 'text-[16px] font-semibold text-gray-900'
 export const modalSubtext = 'text-[14px] font-normal text-gray-500'
 
-export const modalBtnSecondary =
-  'h-8 px-2.5 rounded border border-gray-300 bg-white text-[14px] font-semibold text-gray-600 hover:bg-gray-50 shadow-xs transition-colors'
-export const modalBtnPrimary =
-  'h-8 px-2.5 rounded border border-primary-600 bg-primary-600 text-[14px] font-semibold text-white hover:bg-primary-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs transition-colors'
+/** Modal footer CTAs — same chrome as app primary/secondary (button-styles rule). */
+export const modalBtnSecondary = BTN_SECONDARY
+export const modalBtnPrimary = BTN_PRIMARY
 
 /** Fixed height for large manage modals — 48px gutter top/bottom; body scrolls when content exceeds this. */
 export const MODAL_MANAGE_HEIGHT = 'calc(100vh - 96px)'

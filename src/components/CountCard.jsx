@@ -7,8 +7,8 @@ import HLTooltip from './HLTooltip.jsx'
  * This is the single source of truth for every count card across the app
  * (Site Health, Prompt Tracking, AI Search Performance, AI Rank Tracking,
  * Source Inventory). Keep typography locked so every usage stays consistent:
- *   - label:      13px, font-medium, gray-500
- *   - value:      16px, font-semibold, gray-900
+ *   - label:      14px, font-medium, gray-500
+ *   - value:      24px, font-bold, gray-900
  *   - delta pill: reference green / red pill (12px)
  *
  * Optional extras (icon, description, change text, footer/sparkline) let
@@ -17,12 +17,13 @@ import HLTooltip from './HLTooltip.jsx'
  *
  * Props:
  *   label        string                 — metric label (required)
- *   value        string|number          — the count / value (required)
+ *   value        string|number          — the count / value (omit to hide the value row)
  *   delta        string|number          — short delta → reference pill (e.g. "1.6%")
  *   deltaUp      boolean (default true)  — pill direction (green up / red down)
  *   changeText   string                  — descriptive change line (e.g. "+6 vs prior period")
  *   changeUp     boolean                 — direction/colour for changeText
  *   description  node                    — muted sub-line under the value (prefer helpContent)
+ *   valueAside   node                    — sits beside the value (e.g. Good / Average rating)
  *   Icon         component               — optional icon → top-right tinted box
  *   iconColor    string (css colour)     — icon colour (default primary-600)
  *   help         boolean                 — show an Info icon beside the label
@@ -38,6 +39,7 @@ export default function CountCard({
   changeText,
   changeUp = true,
   description,
+  valueAside,
   Icon,
   iconColor = 'var(--primary-600)',
   help = false,
@@ -49,21 +51,21 @@ export default function CountCard({
   const helpIcon = showHelp && (
     helpContent ? (
       <HLTooltip content={helpContent} variant="dark" placement="top" wrap>
-        <Info size={12} className="text-gray-400 shrink-0 cursor-help" aria-label="More information" />
+        <Info size={12} className="text-gray-500 shrink-0 cursor-help" aria-label="More information" />
       </HLTooltip>
     ) : (
-      <Info size={12} className="text-gray-400 shrink-0" aria-hidden="true" />
+      <Info size={12} className="text-gray-500 shrink-0" aria-hidden="true" />
     )
   )
 
   return (
     <div
-      className={`border border-gray-200 rounded-lg bg-white px-3 py-2.5 flex flex-col gap-1 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
+      className={`border border-gray-200 rounded-lg bg-white px-3.5 py-3.5 flex flex-col gap-2 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
     >
       {/* Header: label (+ optional help) and optional icon */}
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-1 min-w-0">
-          <p className="text-[13px] font-medium text-gray-500 leading-tight m-0 truncate">{label}</p>
+          <p className="text-[14px] font-medium text-gray-500 leading-tight m-0 truncate">{label}</p>
           {helpIcon}
         </div>
         {Icon && (
@@ -76,22 +78,25 @@ export default function CountCard({
         )}
       </div>
 
-      {/* Value + optional delta pill */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-[16px] font-semibold text-gray-900 leading-none">{value}</span>
-        {delta != null && delta !== '' && (
-          <span
-            className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[12px] font-medium leading-none"
-            style={{
-              background: deltaUp ? 'var(--success-100)' : '#FEE2E2',
-              color: deltaUp ? '#15803D' : '#DC2626',
-            }}
-          >
-            <ArrowUp size={10} style={deltaUp ? {} : { transform: 'rotate(180deg)' }} />
-            {typeof delta === 'number' ? `${delta}%` : delta}
-          </span>
-        )}
-      </div>
+      {/* Value + optional aside / delta pill — skipped when value is omitted (e.g. chart-only cards) */}
+      {value != null && value !== '' && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-[24px] font-bold text-gray-900 leading-none tabular-nums">{value}</span>
+          {valueAside}
+          {delta != null && delta !== '' && (
+            <span
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[12px] font-medium leading-none"
+              style={{
+                background: deltaUp ? 'var(--success-100)' : '#FEE2E2',
+                color: deltaUp ? '#15803D' : '#DC2626',
+              }}
+            >
+              <ArrowUp size={10} style={deltaUp ? {} : { transform: 'rotate(180deg)' }} />
+              {typeof delta === 'number' ? `${delta}%` : delta}
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Descriptive change line (arrow + coloured text) */}
       {changeText && (
@@ -106,7 +111,7 @@ export default function CountCard({
       )}
 
       {/* Muted description */}
-      {description && <p className="text-[12px] text-gray-400 leading-snug m-0">{description}</p>}
+      {description && <p className="text-[12px] text-gray-500 leading-snug m-0">{description}</p>}
 
       {/* Footer (e.g. sparkline) */}
       {footer && <div className="mt-0.5 w-full">{footer}</div>}

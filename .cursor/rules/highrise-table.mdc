@@ -21,7 +21,8 @@ The table toolbar is a single row: **filters on the left, search + actions on th
 
 - Put every filter control on the **left**: filter pills / segmented filters
   (e.g. `All sources | Mentioned | Not mentioned`), status filter chips, and the
-  `Add filter` / `Advanced filter` trigger.
+  `Advanced filter` trigger (use shared `AdvancedFilterTrigger` — see
+  `advanced-filter` rule; Crawled pages is the reference).
 - Put **search on the right**, followed by `Columns` and any primary CTA
   (`Apply fixes`, etc.). Right-align the group with `ml-auto`.
 - Never put search on the left / filters on the right. Never split filters across
@@ -35,7 +36,9 @@ The table toolbar is a single row: **filters on the left, search + actions on th
 - Search input follows the canonical input (see the input-field rule): `h-8`,
   `rounded-lg`, `border-gray-300`, `text-[14px]`, `focus:border-primary-600`, with
   a leading `Search` icon (`pl-9`). Give it a fixed width (~240–280px), not `flex-1`.
-- `Columns` / filter buttons: `h-8 px-3 rounded-lg`, `text-[13px]`/`text-[12px]`.
+- Filter chips / Advanced filter: `text-[14px]` (see `filter-styles` rule).
+- `Columns` buttons: `h-8 px-3 rounded-lg bg-gray-100`, `text-[14px] font-medium`
+  (never 12px / 13px).
 
 ## Reference implementation
 

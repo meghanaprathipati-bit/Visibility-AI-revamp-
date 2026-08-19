@@ -1,0 +1,112 @@
+---
+description: Canonical primary & secondary buttons — 36px tall, 8×14 padding, 8px radius
+alwaysApply: true
+---
+
+# Primary & secondary buttons
+
+Every **primary** and **secondary** button in the app must use one shared style.
+Prefer `HLButton` or the exported class constants — do not invent per-screen
+button chrome.
+
+**Scope:** apply across the whole product UI in one pass whenever button chrome
+changes — dashboards, modals, drawers, empty states — not one button at a time
+when a teammate spots a mismatch. Frozen `src/shell/*` files stay untouched.
+
+## Fixed size — never change
+
+| Spec | Value | Tailwind |
+|------|-------|----------|
+| **Total height** | **36px** | `h-9` + `box-border` |
+| Padding top/bottom | 8px | `py-2` |
+| Padding left/right | 14px | `px-3.5` |
+| Border radius | 8px | `rounded-lg` |
+| Gap (icon + label) | 8px | `gap-2` |
+| Shadow | `0 1px 2px 0 rgba(16, 24, 40, 0.05)` | `shadow-xs` |
+| Label | 14px semibold | `text-[14px] font-semibold leading-none` |
+
+`box-border` + `h-9` keeps the **1px border inside** the 36px box. If you omit
+`h-9` and only use `py-2`, content + padding + borders measure **~39px** — that
+is a bug.
+
+```
+display: inline-flex
+box-sizing: border-box
+height: 36px
+padding: 8px 14px
+justify-content: center
+align-items: center
+gap: 8px
+border-radius: 8px
+```
+
+## Primary
+
+```
+border: 1px solid #155EEF (primary-600)
+background: #155EEF (primary-600)
+color: white
+hover: primary-700 bg + border
+```
+
+```jsx
+import HLButton, { BTN_PRIMARY } from '../HLButton.jsx'
+
+// Preferred
+<HLButton variant="primary" color="blue" size="sm">Re-scan site</HLButton>
+
+// Raw <button> when HLButton cannot be used
+<button type="button" className={BTN_PRIMARY}>Re-scan site</button>
+```
+
+## Secondary
+
+```
+border: 1px solid #D0D5DD (gray-300)
+background: #FFF
+color: gray-700
+hover: bg-gray-50
+```
+
+```jsx
+import HLButton, { BTN_SECONDARY } from '../HLButton.jsx'
+
+<HLButton variant="secondary" color="gray" size="sm">Compare scans</HLButton>
+
+<button type="button" className={BTN_SECONDARY}>Compare scans</button>
+```
+
+## Exported constants (source of truth)
+
+```
+src/components/HLButton.jsx → BTN_BASE, BTN_PRIMARY, BTN_SECONDARY
+```
+
+`modalBtnPrimary` / `modalBtnSecondary` in `HLModal.jsx` alias these same
+strings — do not fork modal button sizing.
+
+When this spec changes, update `BTN_BASE` first; every `BTN_*` consumer and
+`HLButton` size `sm` (36px) must stay aligned.
+
+## Do not
+
+- Do not ship a primary/secondary CTA at **39px** (or any height other than 36px).
+- Do not use `h-8` (32px) on primary/secondary CTAs.
+- Do not replace `py-2 px-3.5` with `py-1.5` / `px-3` / `px-4` / `h-9 px-4` alone.
+- Do not use `border-gray-200` on secondary — use `border-gray-300`.
+- Do not use purple (`bg-purple-600`) for standard primary CTAs — primary is
+  blue (`primary-600` / `#155EEF`). Purple remains for AI-specific accents only
+  when the product explicitly calls for it.
+- Do not drop `shadow-xs` on these two variants.
+- Do not hand-roll primary/secondary classes — always `BTN_PRIMARY` /
+  `BTN_SECONDARY` or `HLButton`.
+- Icon-only square controls (settings gear, close) are **not** primary/secondary
+  CTAs — they keep their own sizing.
+
+## Before finishing button work
+
+- [ ] Primary/secondary use `HLButton` or `BTN_PRIMARY` / `BTN_SECONDARY`.
+- [ ] Computed height is **36px** (inspect if unsure).
+- [ ] Padding is **8px 14px** (`py-2 px-3.5`), radius `8px`, `shadow-xs` present.
+- [ ] Primary border+bg are `primary-600`; secondary border is `gray-300`.
+- [ ] No leftover bespoke `h-8` / `py-1.5` / `border-gray-200` / missing shadow.

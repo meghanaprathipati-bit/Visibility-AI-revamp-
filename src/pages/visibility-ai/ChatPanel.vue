@@ -260,7 +260,7 @@ function toggleCollapse() {
             class="absolute left-full top-0 ml-2 z-[100] w-[220px] bg-white border border-gray-200 rounded-lg shadow-dropdown p-2"
           >
             <div class="flex items-center gap-2 px-2.5 py-1.5 bg-white border border-gray-100 rounded-lg">
-              <Search :size="13" class="text-gray-400 shrink-0" />
+              <Search :size="13" class="text-gray-500 shrink-0" />
               <input
                 v-if="activePanel === 'Chats'"
                 v-model="searchQuery"
@@ -280,7 +280,7 @@ function toggleCollapse() {
               <button
                 v-if="activePanel === 'Chats' ? searchQuery : dashboardSearchQuery"
                 type="button"
-                class="shrink-0 text-gray-400 hover:text-gray-500"
+                class="shrink-0 text-gray-500 hover:text-gray-500"
                 aria-label="Clear search"
                 @click="activePanel === 'Chats' ? searchQuery = '' : dashboardSearchQuery = ''"
               >
@@ -336,7 +336,7 @@ function toggleCollapse() {
             </span>
             <ChevronDown
               :size="13"
-              class="text-gray-400 shrink-0 transition-transform duration-200"
+              class="text-gray-500 shrink-0 transition-transform duration-200"
               :class="{ 'rotate-180': projectDropdownOpen }"
             />
           </button>
@@ -404,7 +404,7 @@ function toggleCollapse() {
       <!-- Group 3: Search + list (decoupled from New chat) -->
       <div class="px-3 mt-[18px] pb-3 shrink-0">
         <div v-if="activePanel === 'Chats'" class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-lg">
-          <Search :size="13" class="text-gray-400 shrink-0" />
+          <Search :size="13" class="text-gray-500 shrink-0" />
           <input
             v-model="searchQuery"
             type="text"
@@ -414,14 +414,14 @@ function toggleCollapse() {
           <button
             v-if="searchQuery"
             type="button"
-            class="shrink-0 text-gray-400 hover:text-gray-500"
+            class="shrink-0 text-gray-500 hover:text-gray-500"
             @click="searchQuery = ''"
           >
             <X :size="12" />
           </button>
         </div>
         <div v-else class="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-lg">
-          <Search :size="13" class="text-gray-400 shrink-0" />
+          <Search :size="13" class="text-gray-500 shrink-0" />
           <input
             v-model="dashboardSearchQuery"
             type="text"
@@ -431,7 +431,7 @@ function toggleCollapse() {
           <button
             v-if="dashboardSearchQuery"
             type="button"
-            class="shrink-0 text-gray-400 hover:text-gray-500"
+            class="shrink-0 text-gray-500 hover:text-gray-500"
             @click="dashboardSearchQuery = ''"
           >
             <X :size="12" />
@@ -483,7 +483,7 @@ function toggleCollapse() {
               <div class="shrink-0 items-center gap-0.5 hidden group-hover:flex">
                 <button
                   type="button"
-                  class="p-1 text-gray-400 hover:text-gray-700 transition-colors rounded"
+                  class="p-1 text-gray-500 hover:text-gray-700 transition-colors rounded"
                   aria-label="Edit"
                   @click="handleEdit($event, chat)"
                 >

@@ -8,7 +8,7 @@ import { countByPriority } from '../../data/scanSummary.js'
 function SeverityPill({ Icon, count, label, bg, border, text }) {
   if (count === 0) return null
   return (
-    <span className={`inline-flex items-center gap-1 rounded-full py-1 px-2.5 border border-solid text-[12px] font-medium shrink-0 ${bg} ${border} ${text}`}>
+    <span className={`inline-flex items-center gap-1 rounded-full py-1 px-2.5 border border-solid text-[13px] font-medium shrink-0 ${bg} ${border} ${text}`}>
       <Icon size={11} strokeWidth={2.5} />
       {count} {count === 1 ? label.replace(/s$/, '') : label}
     </span>
@@ -65,7 +65,7 @@ export default function ActionItemsSummaryCard({ items, onFixIssues }) {
             />
           </div>
 
-          <ChevronRight size={16} className="text-gray-400 shrink-0" />
+          <ChevronRight size={16} className="text-gray-500 shrink-0" />
         </div>
       </button>
     </div>

@@ -1,0 +1,51 @@
+---
+description: "One level in" drill-down heroes sit on the canvas, never in a white frame
+alwaysApply: true
+---
+
+# Drill-down detail hero — no white frame
+
+Every "one level inside" detail view — reached by clicking `View` on a table
+row to open a page showing a header/hero (icon + title + badges/subtext,
+optionally a row of `CountCard`s) followed by another table — must have its
+back button and hero section sit **directly on the gray canvas**, with no
+wrapping `border border-gray-200 rounded-lg bg-white` card around them.
+
+Only two things are allowed their own white background:
+
+1. Each individual `CountCard` (already self-contained via `CountCard.jsx`).
+2. The actual data table below the hero (its own `border border-gray-200
+   rounded-lg bg-white` wrapper, or the shared `SectionCard`).
+
+```jsx
+// Bad — hero + CountCards wrapped in one big white card
+<div className="border border-gray-200 rounded-lg bg-white p-5">
+  <div className="flex items-center gap-3">{icon}<h2>{title}</h2></div>
+  <div className="grid grid-cols-4 gap-3 mt-4 pt-4 border-t border-gray-100">
+    {kpis.map(k => <CountCard key={k.label} {...k} />)}
+  </div>
+</div>
+
+// Good — header on canvas, CountCards in their own row, no shared wrapper
+<div className="flex items-center gap-3">{icon}<h2>{title}</h2></div>
+<div className="grid grid-cols-4 gap-3">
+  {kpis.map(k => <CountCard key={k.label} {...k} />)}
+</div>
+```
+
+- Icon/avatar next to the title stays vertically centered with the title
+  text: use `items-center` on the header row's flex container (not
+  `items-start`).
+- Reference implementations: `TopicDetailContent` / `DomainDetailContent` in
+  `AiSearchPerformanceDashboard.jsx`, the crawled-page/found-resource detail
+  views in `SiteHealthDashboard.jsx`, `SourceAnswersDetailView` in
+  `SourceInventoryContent.jsx`, and `PromptDetailView` in
+  `PromptTrackingDashboard.jsx`.
+
+## Before finishing any new drill-down view
+
+- [ ] Back button + hero sit on the canvas — no `bg-white` wrapper around them.
+- [ ] Any KPI/count cards are a plain `grid`, not nested inside a shared white card.
+- [ ] Icon/avatar is vertically centered with the title (`items-center`).
+- [ ] Only the table (and each `CountCard` individually) has its own white
+  bordered box.

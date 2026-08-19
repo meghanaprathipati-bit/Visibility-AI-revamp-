@@ -19,19 +19,16 @@ export default function CloudflareTokenCard({ onContinue, actionsDisabled = fals
           Visibility AI will analyze your website, suggest improvements, and make it easy for you to publish approved changes when you&apos;re ready.
         </p>
       </div>
-      <div className="flex flex-wrap items-center justify-end gap-2">
-        <HLButton
-          variant="secondary"
-          size="sm"
+      <div className="flex flex-wrap items-center justify-end gap-3">
+        <button
+          type="button"
           disabled={actionsDisabled}
-          className="w-fit"
           onClick={handleOpenCloudflare}
+          className="inline-flex items-center gap-1.5 text-[13px] font-medium text-gray-500 hover:text-gray-700 disabled:text-gray-300 disabled:cursor-not-allowed transition-colors"
         >
-          <span className="inline-flex items-center gap-1">
-            <ExternalLink size={14} className="shrink-0" />
-            Open Cloudflare API token page
-          </span>
-        </HLButton>
+          <ExternalLink size={14} className="shrink-0" />
+          Open Cloudflare API token page
+        </button>
         <HLButton
           variant="primary"
           color="blue"

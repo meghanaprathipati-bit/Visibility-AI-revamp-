@@ -96,7 +96,7 @@ const ENGINE_LOGO_MAP = {
 /** Renders the real engine logo inside a consistent white chip. */
 export default function EngineLogo({ name, size = 18, chip = true, className = '' }) {
   const Logo = ENGINE_LOGO_MAP[name]
-  const glyph = Logo ? <Logo size={size} /> : <Bot size={size} className="text-gray-400" />
+  const glyph = Logo ? <Logo size={size} /> : <Bot size={size} className="text-gray-500" />
   if (!chip) return glyph
   return (
     <span className={`inline-flex items-center justify-center rounded-lg bg-white border border-gray-200 shrink-0 ${className}`}>

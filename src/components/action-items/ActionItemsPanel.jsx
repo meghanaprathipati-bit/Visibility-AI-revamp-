@@ -137,7 +137,7 @@ function FilterPill({ active, onClick, children }) {
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`text-[12px] px-3 py-1 rounded-full border transition-colors shrink-0 ${
+      className={`text-[14px] px-3 py-1 rounded-full border transition-colors shrink-0 ${
         active ? 'border-primary-600 text-primary-700 bg-primary-50' : 'border-gray-200 text-gray-500 bg-transparent hover:bg-gray-50'
       }`}
     >
@@ -158,7 +158,7 @@ function PriorityFilterDot({ priority }) {
 function SectionLabel({ children, suppressTopMargin = false }) {
   return (
     <div
-      className={`text-[11px] font-medium text-gray-400 mb-1.5 pl-0.5 ${suppressTopMargin ? '' : 'mt-4'}`}
+      className={`text-[11px] font-medium text-gray-500 mb-1.5 pl-0.5 ${suppressTopMargin ? '' : 'mt-4'}`}
     >
       {children}
     </div>
@@ -213,7 +213,7 @@ function ActionItemsFooter({
     return (
       <div className={`shrink-0 border-t border-gray-200 px-4 py-3 flex items-center justify-between gap-3 ${bgClass}`}>
         <span className="inline-flex items-center gap-1.5 text-[13px] text-gray-500 min-w-0">
-          <Info size={14} className="shrink-0 text-gray-400" />
+          <Info size={14} className="shrink-0 text-gray-500" />
           Fix manual actions and then rescan to verify.
         </span>
         <div className="flex items-center gap-2 shrink-0">

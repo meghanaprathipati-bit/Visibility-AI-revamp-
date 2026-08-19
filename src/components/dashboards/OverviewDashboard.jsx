@@ -4,6 +4,7 @@ import {
   AlertTriangle, CircleCheck, ChevronRight, ChevronDown, Zap, Bot, FileText,
   Sparkles, ArrowUp, Check, X, ArrowLeft, RefreshCw, Plus,
 } from '../../icons/index.js'
+import { BTN_PRIMARY, BTN_SECONDARY } from '../HLButton.jsx'
 
 // ─── Primitives ───────────────────────────────────────────────────────────────
 
@@ -21,7 +22,7 @@ function TrendBadge({ value }) {
 function ReadyBadge({ ready, total }) {
   const allReady = ready === total
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[12px] font-medium border ${
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[13px] font-medium border ${
       allReady
         ? 'bg-success-50 text-success-700 border-success-200'
         : 'bg-warning-100 text-warning-700 border-warning-100'
@@ -257,7 +258,7 @@ function SetupProgressSteps({ steps, setupComplete }) {
                   ? 'bg-success-600 border-success-600 text-white'
                   : current
                     ? 'bg-primary-600 border-primary-600 text-white'
-                    : 'bg-white border-gray-300 text-gray-400'
+                    : 'bg-white border-gray-300 text-gray-500'
               }`}
               style={{ width: CIRCLE, height: CIRCLE }}
               aria-current={current ? 'step' : undefined}
@@ -269,7 +270,7 @@ function SetupProgressSteps({ steps, setupComplete }) {
 
             <p
               className={`mt-2 text-[12px] font-medium text-center m-0 leading-snug w-full px-1 ${
-                complete ? 'text-success-700' : current ? 'text-primary-600' : 'text-gray-400'
+                complete ? 'text-success-700' : current ? 'text-primary-600' : 'text-gray-500'
               }`}
             >
               {step.title}
@@ -296,7 +297,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
             Ramada International · ramada.9hf9h.com · Hotel &amp; Hospitality
           </p>
         </div>
-        <p className="text-[13px] font-medium text-gray-400 m-0 shrink-0">
+        <p className="text-[13px] font-medium text-gray-500 m-0 shrink-0">
           {setupComplete
             ? 'All steps completed'
             : `Step ${completedCount + 1} of ${SETUP_CONNECTIONS.length}`}
@@ -332,7 +333,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
                 }`}>
                   {complete
                     ? <CircleCheck size={16} className="text-success-600" />
-                    : <item.Icon size={16} className={current ? 'text-primary-600' : 'text-gray-400'} />
+                    : <item.Icon size={16} className={current ? 'text-primary-600' : 'text-gray-500'} />
                   }
                 </div>
 
@@ -348,7 +349,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
                       </span>
                     )}
                     {!complete && !current && (
-                      <span className="text-[12px] font-normal text-gray-400">{item.meta}</span>
+                      <span className="text-[12px] font-normal text-gray-500">{item.meta}</span>
                     )}
                   </div>
                   <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">
@@ -368,7 +369,7 @@ function SetupWorkspaceCard({ onConnect, setupComplete }) {
                   <button
                     type="button"
                     onClick={onConnect}
-                    className="inline-flex items-center gap-1 h-8 px-3 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors shrink-0"
+                    className={`${BTN_PRIMARY} shrink-0`}
                   >
                     {item.cta} <ChevronRight size={13} />
                   </button>
@@ -396,7 +397,7 @@ function ModuleReadinessStrip() {
   return (
     <div className="bg-white border border-gray-200 rounded-xl p-6">
       <div className="mb-6">
-        <p className="text-[16px] font-semibold text-gray-900 m-0">Module readiness</p>
+        <p className="text-[14px] font-semibold text-gray-900 m-0">Module readiness</p>
         <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
           {totalNeeds} of {totalMods} modules still need setup
         </p>
@@ -410,7 +411,7 @@ function ModuleReadinessStrip() {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-semibold text-gray-900 m-0 truncate">{s.title}</p>
-                <p className="text-[12px] font-normal text-gray-400 m-0 tabular-nums">{s.ready}/{s.total}</p>
+                <p className="text-[12px] font-normal text-gray-500 m-0 tabular-nums">{s.ready}/{s.total}</p>
               </div>
             </div>
             <ProgressBar pct={s.pct} colorClass={s.bar} />
@@ -450,7 +451,7 @@ function ModuleSectionCard({ section }) {
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 flex-wrap">
-            <h2 className="text-[16px] font-semibold text-gray-900 m-0">{title}</h2>
+            <h2 className="text-[14px] font-semibold text-gray-900 m-0">{title}</h2>
             <ReadyBadge ready={ready} total={total} />
           </div>
           <p className="text-[14px] font-normal text-gray-500 m-0 mt-1 leading-relaxed">{desc}</p>
@@ -462,10 +463,10 @@ function ModuleSectionCard({ section }) {
         <table className="w-full border-collapse min-w-[640px]">
           <thead>
             <tr className="border-t border-gray-200 bg-gray-50">
-              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Module</th>
-              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Primary metric</th>
-              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Secondary metric</th>
-              <th className="px-6 py-2.5 text-left text-[12px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '16%' }} />
+              <th className="px-6 py-2.5 text-left text-[14px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Module</th>
+              <th className="px-6 py-2.5 text-left text-[14px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Primary metric</th>
+              <th className="px-6 py-2.5 text-left text-[14px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '28%' }}>Secondary metric</th>
+              <th className="px-6 py-2.5 text-left text-[14px] font-semibold text-gray-900 border-b border-gray-200" style={{ width: '16%' }} />
             </tr>
           </thead>
           <tbody>
@@ -507,19 +508,19 @@ function ModuleSectionCard({ section }) {
 
 // ─── Setup Modal (preserved flow) ─────────────────────────────────────────────
 
-// Canonical input spec (sm / 32px, 8px radius, gray-300 border) — mirrors HLInput.
+// Canonical input spec (sm / 36px, 8px radius, gray-300 border) — mirrors HLInput.
 const INPUT_STYLE = {
-  width: '100%', height: 32, padding: '0 12px', borderRadius: 8,
+  width: '100%', height: 36, padding: '0 12px', borderRadius: 8,
   border: '1px solid #D0D5DD', fontSize: 14, color: '#101828',
   outline: 'none', background: '#fff', boxSizing: 'border-box', fontFamily: 'inherit',
 }
-const LABEL_STYLE = { fontSize: 13, fontWeight: 500, color: '#344054', display: 'block', marginBottom: 6 }
+const LABEL_STYLE = { fontSize: 14, fontWeight: 500, color: '#344054', display: 'block', marginBottom: 4 }
 
 function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName, setBrandName, country, setCountry, region, setRegion }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div>
-        <label style={LABEL_STYLE}>GBP profile link <span style={{ color: '#98A2B3', fontWeight: 400 }}>(optional)</span></label>
+        <label style={LABEL_STYLE}>GBP profile link <span style={{ color: '#667085', fontWeight: 400 }}>(optional)</span></label>
         <input value={gbpLink} onChange={e => setGbpLink(e.target.value)} placeholder="https://www.google.com/maps/place/..." style={INPUT_STYLE} />
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
@@ -536,7 +537,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
         <label style={{ ...LABEL_STYLE, marginBottom: 12 }}>Target location</label>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>Country</label>
+            <label style={{ fontSize: 14, color: '#667085', display: 'block', marginBottom: 4, fontWeight: 500 }}>Country</label>
             <div style={{ position: 'relative' }}>
               <select value={country} onChange={e => setCountry(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option>United States</option>
@@ -544,11 +545,11 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
                 <option>Canada</option>
                 <option>Australia</option>
               </select>
-              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#98A2B3', pointerEvents: 'none' }} />
+              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#667085', pointerEvents: 'none' }} />
             </div>
           </div>
           <div>
-            <label style={{ fontSize: 12, color: '#667085', display: 'block', marginBottom: 6, fontWeight: 500 }}>State / region <span style={{ color: '#98A2B3' }}>(optional)</span></label>
+            <label style={{ fontSize: 14, color: '#667085', display: 'block', marginBottom: 4, fontWeight: 500 }}>State / region <span style={{ color: '#667085' }}>(optional)</span></label>
             <div style={{ position: 'relative' }}>
               <select value={region} onChange={e => setRegion(e.target.value)} style={{ ...INPUT_STYLE, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
                 <option value="">Select state or region</option>
@@ -557,7 +558,7 @@ function SetupStep1({ gbpLink, setGbpLink, websiteUrl, setWebsiteUrl, brandName,
                 <option>Texas</option>
                 <option>Florida</option>
               </select>
-              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#98A2B3', pointerEvents: 'none' }} />
+              <ChevronDown size={13} style={{ position: 'absolute', right: 11, top: '50%', transform: 'translateY(-50%)', color: '#667085', pointerEvents: 'none' }} />
             </div>
           </div>
         </div>
@@ -587,14 +588,14 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <p style={{ fontSize: 13, color: '#475467', margin: 0, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 14, color: '#475467', margin: 0, lineHeight: 1.6 }}>
         Confirm the keywords and prompts that matter most for search, AI, and local business opportunities.
       </p>
 
       <div style={cardStyle}>
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={14} style={{ color: '#6938EF' }} />
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#101828', margin: 0 }}>Top keywords to verify</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: 0 }}>Top keywords to verify</p>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <thead>
@@ -609,15 +610,15 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
             {keywords.map(kw => (
               <tr key={kw.id} style={{ borderBottom: '1px solid #F2F4F7' }}>
                 <td style={TABLE_TD}><input type="checkbox" checked={kw.use} onChange={() => toggleKeyword(kw.id)} style={{ width: 15, height: 15, accentColor: '#155EEF', cursor: 'pointer' }} /></td>
-                <td style={{ ...TABLE_TD, fontSize: 13, color: '#101828', fontWeight: 500 }}>{kw.keyword}</td>
-                <td style={{ ...TABLE_TD, fontSize: 13, color: '#667085' }}>{kw.searches}</td>
-                <td style={{ ...TABLE_TD, fontSize: 13, color: '#667085' }}>{kw.difficulty}</td>
+                <td style={{ ...TABLE_TD, fontSize: 14, color: '#101828', fontWeight: 500 }}>{kw.keyword}</td>
+                <td style={{ ...TABLE_TD, fontSize: 14, color: '#667085' }}>{kw.searches}</td>
+                <td style={{ ...TABLE_TD, fontSize: 14, color: '#667085' }}>{kw.difficulty}</td>
               </tr>
             ))}
             <tr>
               <td style={TABLE_TD}><Plus size={12} style={{ color: '#9CA3AF' }} /></td>
               <td style={TABLE_TD} colSpan={2}>
-                <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)} onKeyDown={e => e.key === 'Enter' && addKeyword()} placeholder="Add a keyword manually" style={{ width: '100%', border: 'none', outline: 'none', fontSize: 13, color: '#667085', background: 'transparent', fontFamily: 'inherit' }} />
+                <input value={newKeyword} onChange={e => setNewKeyword(e.target.value)} onKeyDown={e => e.key === 'Enter' && addKeyword()} placeholder="Add a keyword manually" style={{ width: '100%', border: 'none', outline: 'none', fontSize: 14, color: '#667085', background: 'transparent', fontFamily: 'inherit' }} />
               </td>
               <td style={TABLE_TD}>
                 <button type="button" onClick={addKeyword} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -632,7 +633,7 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
       <div style={cardStyle}>
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={14} style={{ color: '#6938EF' }} />
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#101828', margin: 0 }}>Prompt suggestions to save with these keywords</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: 0 }}>Prompt suggestions to save with these keywords</p>
         </div>
         <p style={{ fontSize: 12, color: '#667085', padding: '0 16px 12px', margin: 0 }}>No prompt suggestions are ready yet. You can still add your own prompts below.</p>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
@@ -646,14 +647,14 @@ function SetupStep2({ keywords, setKeywords, newKeyword, setNewKeyword, prompts,
             {prompts.map(p => (
               <tr key={p.id} style={{ borderBottom: '1px solid #F2F4F7' }}>
                 <td style={TABLE_TD}><input type="checkbox" checked={p.use} onChange={() => togglePrompt(p.id)} style={{ width: 15, height: 15, accentColor: '#155EEF', cursor: 'pointer' }} /></td>
-                <td style={{ ...TABLE_TD, fontSize: 13, color: '#101828' }}>{p.prompt}</td>
+                <td style={{ ...TABLE_TD, fontSize: 14, color: '#101828' }}>{p.prompt}</td>
               </tr>
             ))}
             <tr>
               <td style={TABLE_TD}><Plus size={12} style={{ color: '#9CA3AF' }} /></td>
               <td style={{ padding: '8px 16px' }}>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
-                  <textarea value={newPrompt} onChange={e => setNewPrompt(e.target.value)} placeholder="Add a strategic AI search prompt" rows={2} style={{ flex: 1, border: '1px solid #EAECF0', borderRadius: 8, padding: '7px 10px', fontSize: 13, color: '#667085', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }} />
+                  <textarea value={newPrompt} onChange={e => setNewPrompt(e.target.value)} placeholder="Add a strategic AI search prompt" rows={2} style={{ flex: 1, border: '1px solid #EAECF0', borderRadius: 8, padding: '7px 10px', fontSize: 14, color: '#667085', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }} />
                   <button type="button" onClick={addPrompt} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0, marginTop: 4 }}>
                     <Plus size={11} style={{ color: '#667085' }} />
                   </button>
@@ -678,13 +679,13 @@ function SetupStep3({ competitors, setCompetitors, newBrand, setNewBrand, newDom
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <p style={{ fontSize: 13, color: '#475467', margin: 0, lineHeight: 1.6 }}>
+      <p style={{ fontSize: 14, color: '#475467', margin: 0, lineHeight: 1.6 }}>
         Select the right competitors to benchmark rankings, local visibility, and AI answer share against the businesses that matter.
       </p>
       <div style={{ border: '1px solid #EAECF0', borderRadius: 8, overflow: 'hidden' }}>
         <div style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 8 }}>
           <Sparkles size={14} style={{ color: '#6938EF' }} />
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#101828', margin: 0 }}>Competitors to review</p>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#101828', margin: 0 }}>Competitors to review</p>
         </div>
         <table style={{ width: '100%', borderCollapse: 'collapse', borderTop: '1px solid #EAECF0' }}>
           <colgroup>
@@ -705,18 +706,18 @@ function SetupStep3({ competitors, setCompetitors, newBrand, setNewBrand, newDom
             {competitors.map(c => (
               <tr key={c.id} style={{ borderBottom: '1px solid #F2F4F7' }}>
                 <td style={TABLE_TD}><input type="checkbox" checked={c.use} onChange={() => toggleCompetitor(c.id)} style={{ width: 15, height: 15, accentColor: '#155EEF', cursor: 'pointer' }} /></td>
-                <td style={TABLE_TD}><div style={{ border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 13, color: '#101828' }}>{c.brand}</div></td>
-                <td style={TABLE_TD}><div style={{ border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 13, color: '#101828' }}>{c.domain}</div></td>
+                <td style={TABLE_TD}><div style={{ border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 14, color: '#101828' }}>{c.brand}</div></td>
+                <td style={TABLE_TD}><div style={{ border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 14, color: '#101828' }}>{c.domain}</div></td>
                 <td style={{ ...TABLE_TD, fontSize: 12, color: '#667085', lineHeight: 1.5 }}>{c.notes}</td>
               </tr>
             ))}
             <tr>
               <td style={TABLE_TD}><Plus size={12} style={{ color: '#9CA3AF' }} /></td>
               <td style={TABLE_TD}>
-                <input value={newBrand} onChange={e => setNewBrand(e.target.value)} placeholder="Add brand name" style={{ width: '100%', border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 13, color: '#667085', outline: 'none', fontFamily: 'inherit' }} />
+                <input value={newBrand} onChange={e => setNewBrand(e.target.value)} placeholder="Add brand name" style={{ width: '100%', border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 14, color: '#667085', outline: 'none', fontFamily: 'inherit' }} />
               </td>
               <td style={TABLE_TD}>
-                <input value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="Add competitor domain" style={{ width: '100%', border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 13, color: '#667085', outline: 'none', fontFamily: 'inherit' }} />
+                <input value={newDomain} onChange={e => setNewDomain(e.target.value)} placeholder="Add competitor domain" style={{ width: '100%', border: '1px solid #EAECF0', borderRadius: 6, padding: '5px 9px', fontSize: 14, color: '#667085', outline: 'none', fontFamily: 'inherit' }} />
               </td>
               <td style={TABLE_TD}>
                 <button type="button" onClick={addCompetitor} style={{ width: 26, height: 26, borderRadius: '50%', border: '1px solid #D0D5DD', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
@@ -762,7 +763,7 @@ function SetupModal({ onClose, onComplete }) {
         <div className="px-6 pt-6 pb-5 border-b border-gray-200 shrink-0">
           <div className="flex items-start justify-between gap-4 mb-4">
             <div>
-              <h2 className="text-[16px] font-semibold text-gray-900 m-0">Complete your Visibility AI setup</h2>
+              <h2 className="text-[14px] font-semibold text-gray-900 m-0">Complete your Visibility AI setup</h2>
               <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">Add business details, search priorities, and competitors to sharpen audits and insights.</p>
             </div>
             <button type="button" onClick={onClose} className="w-8 h-8 rounded-lg border border-gray-200 bg-white flex items-center justify-center hover:bg-gray-50 transition-colors shrink-0">
@@ -783,10 +784,10 @@ function SetupModal({ onClose, onComplete }) {
                   <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 border ${
                     done ? 'bg-success-600 border-success-600' : active ? 'bg-primary-50 border-primary-600' : 'bg-gray-100 border-gray-300'
                   }`}>
-                    {done ? <Check size={12} className="text-white" strokeWidth={3} /> : <SIcon size={12} className={active ? 'text-primary-600' : 'text-gray-400'} />}
+                    {done ? <Check size={12} className="text-white" strokeWidth={3} /> : <SIcon size={12} className={active ? 'text-primary-600' : 'text-gray-500'} />}
                   </div>
                   <div>
-                    <p className={`text-[10px] font-medium tracking-wide m-0 ${done ? 'text-success-700' : active ? 'text-primary-600' : 'text-gray-400'}`}>{label}</p>
+                    <p className={`text-[10px] font-medium tracking-wide m-0 ${done ? 'text-success-700' : active ? 'text-primary-600' : 'text-gray-500'}`}>{label}</p>
                     <p className={`text-[13px] font-semibold m-0 ${done ? 'text-success-700' : active ? 'text-gray-900' : 'text-gray-500'}`}>{title}</p>
                   </div>
                 </div>
@@ -802,18 +803,18 @@ function SetupModal({ onClose, onComplete }) {
         </div>
 
         <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-2 shrink-0">
-          <button type="button" onClick={onClose} className="h-9 px-4 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Close</button>
+          <button type="button" onClick={onClose} className={BTN_SECONDARY}>Close</button>
           {step > 0 && (
-            <button type="button" onClick={() => setStep(s => s - 1)} className="h-9 px-3.5 rounded-lg border border-gray-300 bg-white text-[13px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors inline-flex items-center gap-1.5">
+            <button type="button" onClick={() => setStep(s => s - 1)} className={BTN_SECONDARY}>
               <ArrowLeft size={13} /> Previous step
             </button>
           )}
           {step < 2 ? (
-            <button type="button" onClick={() => setStep(s => s + 1)} className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
+            <button type="button" onClick={() => setStep(s => s + 1)} className={BTN_PRIMARY}>
               Save and continue to {step === 0 ? 'keywords' : 'competitors'}
             </button>
           ) : (
-            <button type="button" onClick={onComplete} className="h-9 px-4 rounded-lg bg-primary-600 hover:bg-primary-700 text-white text-[13px] font-semibold transition-colors">
+            <button type="button" onClick={onComplete} className={BTN_PRIMARY}>
               Save and complete setup
             </button>
           )}

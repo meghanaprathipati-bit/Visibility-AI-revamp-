@@ -118,7 +118,7 @@ export default function SubAccountSwitcher({ onClose, sidebarWidth = 280 }) {
           ) : (
             <>
               <div className="px-4 pt-4 pb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">Recent</span>
+                <span className="text-[11px] font-semibold text-gray-500">Recent</span>
               </div>
               <div className="flex flex-col gap-2 px-3 pb-3">
                 {RECENT_ACCOUNTS.map(a => (
@@ -129,7 +129,7 @@ export default function SubAccountSwitcher({ onClose, sidebarWidth = 280 }) {
               <div className="h-px bg-gray-200" />
 
               <div className="px-4 pt-4 pb-2">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-gray-500">All Accounts</span>
+                <span className="text-[11px] font-semibold text-gray-500">All accounts</span>
               </div>
               <div className="flex flex-col gap-2 px-3 pb-3">
                 {ALL_ACCOUNTS.map(a => (

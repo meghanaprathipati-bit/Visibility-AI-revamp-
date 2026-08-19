@@ -109,7 +109,7 @@ export default function HLTooltip({
           />
         )}
         <span
-          className={`px-2.5 py-1.5 rounded-md text-[12px] leading-snug ${bubbleClass} ${
+          className={`px-2.5 py-1.5 rounded-md text-[14px] leading-snug ${bubbleClass} ${
             wrap
               ? 'inline-block w-fit max-w-[280px] whitespace-normal text-left'
               : 'whitespace-nowrap font-medium leading-tight'
