@@ -50,9 +50,9 @@ export const actionItems = [
     tags: ['Categories'],
     detailType: 'single',
     fieldName: 'Primary category',
-    currentValue: 'Hotel (generic)',
+    currentValue: 'Salon (generic)',
     recommendationLabel: 'Recommendation',
-    recommendation: 'Set primary category to "Hotel" with secondary "Conference center" for better local discovery.',
+    recommendation: 'Set primary category to "Hair salon" with secondary "Beauty salon" for better local discovery.',
   },
   {
     id: '4',
@@ -200,7 +200,7 @@ export const actionItems = [
   },
   {
     id: 'gbp-w-1',
-    title: 'Business hours may be outdated on Google Business Profile',
+    title: 'Business hours missing on Google Business Profile',
     priority: 'warning',
     source: 'gbp',
     autofix: false,
@@ -208,9 +208,65 @@ export const actionItems = [
     tags: ['Hours'],
     detailType: 'single',
     fieldName: 'Business hours',
-    currentValue: 'Mon–Fri 9am–5pm (last updated 2023)',
+    currentValue: '(missing — no weekend or holiday hours)',
     recommendationLabel: 'Recommendation',
-    recommendation: 'Verify holiday hours and update weekend availability to match your current schedule.',
+    recommendation: 'Add complete weekday, weekend, and holiday hours so customers know when you are open.',
+  },
+  {
+    id: 'listing-e-1',
+    title: 'Fix NAP inconsistency on Yelp listing',
+    priority: 'error',
+    source: 'listing',
+    autofix: true,
+    manualFix: false,
+    tags: ['NAP'],
+    detailType: 'single',
+    fieldName: 'Name, address, phone',
+    currentValue: 'Phone number mismatch',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Update Yelp listing phone to match your Google Business Profile and website.',
+  },
+  {
+    id: 'listing-e-3',
+    title: 'Fix business name inconsistent across directories',
+    priority: 'error',
+    source: 'listing',
+    autofix: true,
+    manualFix: false,
+    tags: ['NAP'],
+    detailType: 'single',
+    fieldName: 'Business name',
+    currentValue: '4 directories use alternate names',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Standardize to "Ethnic Premium Salon — ADCS Layout" across Yelp, Justdial, Foursquare, and Facebook.',
+  },
+  {
+    id: 'listing-e-2',
+    title: 'Claim listing on Apple Maps and Bing Places',
+    priority: 'error',
+    source: 'listing',
+    autofix: false,
+    manualFix: true,
+    tags: ['Directories'],
+    detailType: 'single',
+    fieldName: 'Directory presence',
+    currentValue: 'Not found on Apple Maps or Bing Places',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Create and verify listings on Apple Maps and Bing Places to reach iOS and Microsoft search users.',
+  },
+  {
+    id: 'content-w-1',
+    title: 'Publish a new GBP post — none in 60+ days',
+    priority: 'warning',
+    source: 'content',
+    autofix: false,
+    manualFix: true,
+    tags: ['Posts'],
+    detailType: 'single',
+    fieldName: 'Last GBP post',
+    currentValue: '67 days ago',
+    recommendationLabel: 'Recommendation',
+    recommendation: 'Publish a weekly offer or service highlight post to signal an active business and improve local engagement.',
   },
   {
     id: 'gbp-w-2',
@@ -285,7 +341,7 @@ export const actionItems = [
     recommendation: 'Set cache-control headers for static assets to improve repeat visit load times.',
   },
   {
-    id: 'listing-e-1',
+    id: 'listing-e-1-old',
     title: 'Fix NAP inconsistency on Yelp listing',
     priority: 'error',
     source: 'listing',
@@ -488,8 +544,22 @@ const CANONICAL_SEO_ACTION_ITEM_IDS = [
   'listing-w-1',
   'listing-n-1',
 ]
-const CANONICAL_GBP_ACTION_ITEM_IDS = ['1', '2', 'gbp-w-1', 'gbp-w-2', 'gbp-n-1', 'gbp-n-2']
+const CANONICAL_GBP_ACTION_ITEM_IDS = [
+  'gbp-af-1',
+  'listing-e-3',
+  'gbp-w-1',
+  'listing-e-2',
+  'content-w-1',
+  'gbp-n-1',
+]
 const CANONICAL_GENERIC_ACTION_ITEM_IDS = ['1', '4', '6', 'gbp-w-1', '8', 'seo-n-1']
+
+/** Project summary "View all" — 15 prototype items across error, warning, and notice */
+export const PROJECT_SUMMARY_ACTION_ITEM_IDS = [
+  ...CANONICAL_SEO_ACTION_ITEM_IDS,
+  '2',
+  '5',
+]
 
 function cloneItem(item) {
   return {
@@ -501,6 +571,11 @@ function cloneItem(item) {
 
 function itemsByIds(ids) {
   return ids.map(id => actionItems.find(i => i.id === id)).filter(Boolean).map(cloneItem)
+}
+
+/** Prototype action items for project summary View all — errors, warnings, and notices */
+export function getProjectSummaryActionItems() {
+  return itemsByIds(PROJECT_SUMMARY_ACTION_ITEM_IDS)
 }
 
 function shuffle(items) {

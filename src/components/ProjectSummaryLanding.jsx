@@ -1,6 +1,11 @@
+import { useEffect, useRef, useState, Fragment } from 'react'
 import {
+  Award,
   ChevronRight,
   ExternalLink,
+  Globe,
+  Link2,
+  MapPin,
   Zap,
 } from '../icons/index.js'
 import VaLogo from './VaLogo.jsx'
@@ -8,6 +13,7 @@ import HLButton from './HLButton.jsx'
 import TypingText from './TypingText.jsx'
 import {
   buildSummaryChatPrompt,
+  DASHBOARD_GLIMPSE_MODULES,
   getProjectSummary,
   PROJECT_SUMMARY_CHIPS,
 } from '../data/projectSummary.js'
@@ -35,7 +41,7 @@ function FixItAction({ onClick, className = '', size = 'sm' }) {
       onClick={onClick}
     >
       <span className="inline-flex items-center gap-0.5 whitespace-nowrap">
-        Fix it
+        View all
         <ChevronRight size={chevronSize} />
       </span>
     </HLButton>
@@ -66,49 +72,50 @@ function MilestoneTrack({ score, target }) {
   )
 }
 
-function MiniSparkline({ data }) {
-  const width = 100
-  const height = 32
-  const pad = 4
-  const min = Math.min(...data)
-  const max = Math.max(...data)
-  const range = max - min || 1
-  const points = data
-    .map((value, index) => {
-      const x = pad + (index / (data.length - 1)) * (width - pad * 2)
-      const y = height - pad - ((value - min) / range) * (height - pad * 2)
-      return `${x},${y}`
-    })
-    .join(' ')
+const SCORE_CARD_CLASS =
+  'rounded-xl border border-gray-200 bg-white shadow-xs min-w-0 h-full'
 
-  return (
-    <svg
-      viewBox={`0 0 ${width} ${height}`}
-      className="w-full h-8"
-      preserveAspectRatio="none"
-      aria-hidden="true"
-    >
-      <polyline
-        points={points}
-        fill="none"
-        stroke="var(--primary-600)"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
+const SCORE_CARD_PADDING = 'pt-4 pb-4 px-4'
+
+const GLIMPSE_ICON_MAP = {
+  globe: Globe,
+  award: Award,
+  mapPin: MapPin,
+  link: Link2,
 }
 
-const SCORE_CARD_CLASS =
-  'rounded-xl border border-gray-200 bg-white p-3.5 shadow-xs min-w-0 h-full'
+function DashboardGlimpseStats({ modules }) {
+  return (
+    <div className="flex items-center h-full">
+      {modules.map((mod, index) => (
+        <Fragment key={mod.id}>
+          {index > 0 && (
+            <div className="w-px h-12 bg-gray-200 shrink-0" aria-hidden="true" />
+          )}
+          <div className="flex flex-1 flex-col items-center justify-center px-2 py-1 min-w-0">
+            <TintedIconBadge
+              Icon={GLIMPSE_ICON_MAP[mod.icon]}
+              iconColor={mod.iconColor}
+              size={14}
+              boxClass="w-8 h-8 rounded-lg"
+            />
+            <span className="mt-3 text-[16px] font-semibold text-gray-900 tabular-nums leading-none">
+              {mod.value}
+            </span>
+            <span className="mt-1 text-[12px] font-normal text-gray-500 text-center leading-snug">
+              {mod.label}
+            </span>
+          </div>
+        </Fragment>
+      ))}
+    </div>
+  )
+}
 
 function OverallScoreProgress({ summary, onStartSummaryChat, onGoToDashboard, projectLabel }) {
   const score = summary.visibilityScore
   const target = summary.nextTargetScore ?? 75
-  const pointsToTarget = Math.max(0, target - score)
-  const momentumData = summary.momentumSparkline ?? [57, 58, 56, 59, 60, 58, 61, 62, 63, score]
-  const monthDelta = summary.momentumMonthDelta ?? '+14'
+  const glimpseModules = summary.dashboardModules ?? DASHBOARD_GLIMPSE_MODULES
 
   function handleStartSummaryChat(e) {
     e.preventDefault()
@@ -119,10 +126,6 @@ function OverallScoreProgress({ summary, onStartSummaryChat, onGoToDashboard, pr
 
   function handleViewDashboard(e) {
     e.preventDefault()
-    onGoToDashboard?.('overview')
-  }
-
-  function handleOpenDashboard() {
     onGoToDashboard?.('overview')
   }
 
@@ -149,48 +152,27 @@ function OverallScoreProgress({ summary, onStartSummaryChat, onGoToDashboard, pr
         </button>
       </div>
 
-      <button
-        type="button"
-        onClick={handleOpenDashboard}
-        aria-label="Open overall score and progress dashboard"
-        className="w-full text-left rounded-xl transition-colors hover:opacity-95"
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div className={SCORE_CARD_CLASS}>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Visibility score</p>
-            <p className="m-0 mb-2 leading-none">
+      <div className="grid grid-cols-3 gap-3">
+        <div className={`${SCORE_CARD_CLASS} ${SCORE_CARD_PADDING} flex flex-col gap-4`}>
+          <div className="flex items-center justify-between gap-2 shrink-0">
+            <p className="text-[12px] font-medium text-gray-500 m-0">Visibility score</p>
+            <p className="text-[12px] font-semibold text-success-600 m-0 whitespace-nowrap">
+              {summary.trendDelta} {summary.trendLabel}
+            </p>
+          </div>
+          <div className="min-w-0">
+            <p className="m-0 mb-3 leading-none">
               <span className="text-[24px] font-bold text-primary-600 tabular-nums">{score}</span>
               <span className="text-[13px] font-normal text-gray-400 ml-0.5">/100</span>
             </p>
             <MilestoneTrack score={score} target={target} />
           </div>
-
-          <div className={SCORE_CARD_CLASS}>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Momentum</p>
-            <div className="mb-2">
-              <MiniSparkline data={momentumData} />
-            </div>
-            <p className="text-[12px] font-normal text-gray-500 m-0 leading-snug">
-              <span className="font-semibold text-success-600">{summary.trendDelta}</span>
-              {' '}{summary.trendLabel}
-              <span className="text-gray-300 mx-1" aria-hidden="true">·</span>
-              <span className="font-semibold text-success-600">{monthDelta}</span>
-              {' '}in 30 days
-            </p>
-          </div>
-
-          <div className={SCORE_CARD_CLASS}>
-            <p className="text-[12px] font-medium text-gray-500 m-0 mb-2">Next goal</p>
-            <p className="m-0 mb-2 leading-none">
-              <span className="text-[24px] font-bold text-success-600 tabular-nums">{target}</span>
-              <span className="text-[13px] font-normal text-gray-400 ml-1">target</span>
-            </p>
-            <p className="text-[12px] font-normal text-gray-500 m-0 leading-snug">
-              +{pointsToTarget} pts needed
-            </p>
-          </div>
         </div>
-      </button>
+
+        <div className={`${SCORE_CARD_CLASS} ${SCORE_CARD_PADDING} col-span-2`}>
+          <DashboardGlimpseStats modules={glimpseModules} />
+        </div>
+      </div>
     </div>
   )
 }
@@ -211,9 +193,24 @@ export default function ProjectSummaryLanding({
 }) {
   const summary = summaryProp ?? getProjectSummary(project)
   const contentWidth = detailPanelOpen ? 'max-w-[720px]' : 'max-w-[800px]'
+  const composerWrapRef = useRef(null)
+  const [composerFadeHeight, setComposerFadeHeight] = useState(52)
+
+  useEffect(() => {
+    const el = composerWrapRef.current
+    if (!el) return
+    const FOOTER_TOP_PADDING = 30
+    const update = () => {
+      setComposerFadeHeight(FOOTER_TOP_PADDING + el.offsetHeight / 2)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [footer])
 
   return (
-    <main className="flex-1 min-w-0 bg-white flex flex-col overflow-hidden">
+    <main className="flex-1 min-w-0 bg-gray-50 flex flex-col overflow-hidden">
       <div className="relative flex-1 min-h-0 overflow-hidden">
         <div className="absolute inset-0 overflow-y-auto overflow-x-hidden bg-gray-50">
           <div className={`mx-auto flex min-h-full flex-col items-center justify-center gap-8 px-6 py-8 pb-24 ${contentWidth} w-full`}>
@@ -229,7 +226,7 @@ export default function ProjectSummaryLanding({
             {/* 2. Hero recommendation */}
             {summary.hero && (
               <div className="w-full">
-                <p className="text-[12px] font-semibold text-gray-700 mb-2 m-0">Pick up where you left off</p>
+                <p className="text-[12px] font-semibold text-gray-700 mb-2 m-0">Recommended fixes from previous chats</p>
                 <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
                   <div className="flex items-center gap-3">
                     <TintedIconBadge Icon={Zap} iconColor="var(--purple-600)" />
@@ -247,11 +244,6 @@ export default function ProjectSummaryLanding({
                     />
                   </div>
                 </div>
-                {summary.pendingRecommendationsCount > 0 && (
-                  <p className="text-[13px] font-normal text-gray-500 mt-2 mb-0 leading-relaxed">
-                    +{summary.pendingRecommendationsCount} more recommendations after this
-                  </p>
-                )}
               </div>
             )}
 
@@ -267,13 +259,14 @@ export default function ProjectSummaryLanding({
       </div>
 
       {/* 5. Fixed footer — composer + chips with explicit spacing */}
-      <div className="shrink-0 relative bg-gray-100">
-        <div
-          className="pointer-events-none absolute inset-x-0 bottom-full h-24 bg-gradient-to-t from-gray-100 via-gray-100/90 to-transparent"
-          aria-hidden="true"
-        />
-        <div className={`mx-auto px-6 pt-[30px] pb-[50px] w-full ${contentWidth}`}>
-          {footer}
+      <div className="shrink-0 relative">
+        <div className={`mx-auto px-6 pt-[30px] pb-[50px] w-full relative ${contentWidth}`}>
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-full bg-gradient-to-t from-gray-50 via-gray-50/90 to-transparent"
+            style={{ height: composerFadeHeight }}
+            aria-hidden="true"
+          />
+          <div ref={composerWrapRef}>{footer}</div>
           <div className="flex flex-wrap items-center justify-center gap-1.5 mt-5">
             {PROJECT_SUMMARY_CHIPS.map(({ label, prompt }) => (
               <button

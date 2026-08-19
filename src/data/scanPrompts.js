@@ -3,6 +3,13 @@
  * Replace with API routing in production.
  */
 
+/** Marker appended to project-summary chat prompts — used for scan routing */
+export const PROJECT_SUMMARY_PROMPT_MARKER = 'Help me decide what to tackle first based on this summary.'
+
+export function isProjectSummaryPrompt(text) {
+  return (text || '').includes(PROJECT_SUMMARY_PROMPT_MARKER)
+}
+
 /** Second quick-action chip — always shows the website SEO report */
 export const SEO_SCAN_PROMPT =
   'Run website SEO — check health score, technical issues, page speed, and mobile readiness for my website'
@@ -59,6 +66,7 @@ export function getCanonicalScanKind(text) {
 
 /** Returns the demo scenario kind for routing scans to their specific behavior */
 export function getScanKindFromPrompt(text) {
+  if (isProjectSummaryPrompt(text)) return 'project-summary'
   if (isGbpScanPrompt(text)) return 'gbp'
   if (isSeoScanPrompt(text)) return 'seo'
   const lower = normalizeScanPrompt(text)

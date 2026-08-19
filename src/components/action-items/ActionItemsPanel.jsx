@@ -18,16 +18,33 @@ const FILTER_OPTIONS = [
   { label: 'Listing', value: 'listing', showCount: false },
 ]
 
+function buildFilterOptions(categorySections) {
+  const severity = FILTER_OPTIONS.filter(f => ['error', 'warning', 'notice', 'autofix'].includes(f.value))
+  const category = categorySections.map(section => ({
+    label: section.label,
+    value: section.id,
+    showCount: false,
+  }))
+  return [...severity, ...category]
+}
+
 /** Display order for action item list sections — replace with API category field in production */
-const CATEGORY_SECTIONS = [
+export const DEFAULT_CATEGORY_SECTIONS = [
   { id: 'website', label: 'Website' },
   { id: 'gbp', label: 'GBP' },
   { id: 'listing', label: 'Listing' },
 ]
 
+/** GBP audit flow — GBP, Listings, Content categories */
+export const GBP_CATEGORY_SECTIONS = [
+  { id: 'gbp', label: 'GBP' },
+  { id: 'listing', label: 'Listings' },
+  { id: 'content', label: 'Content' },
+]
+
 const RESOLVED_SECTION_LABEL = 'Resolved items'
 
-const CATEGORY_FILTER_IDS = ['website', 'gbp', 'listing']
+const CATEGORY_FILTER_IDS = ['website', 'gbp', 'listing', 'content']
 const SEVERITY_FILTER_IDS = ['error', 'warning', 'notice']
 
 const PRIORITY_ORDER = { error: 0, warning: 1, notice: 2 }
@@ -42,6 +59,7 @@ const PRIORITY_DOT = {
 function getItemCategory(item) {
   if (item.category) return item.category
   if (item.source === 'gbp') return 'gbp'
+  if (item.source === 'content') return 'content'
   if (item.source === 'listings' || item.source === 'listing') return 'listing'
   if (item.source === 'seo') return 'website'
   return 'website'
@@ -51,16 +69,21 @@ function sortByPriority(items) {
   return [...items].sort((a, b) => PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
 }
 
-function getVisibleCategorySections(activeFilters) {
-  const activeCategoryFilters = CATEGORY_FILTER_IDS.filter(id => activeFilters.has(id))
-  if (activeCategoryFilters.length > 0) {
-    return CATEGORY_SECTIONS.filter(section => activeCategoryFilters.includes(section.id))
-  }
-  return CATEGORY_SECTIONS
+function getCategoryFilterIds(categorySections) {
+  return categorySections.map(section => section.id)
 }
 
-function groupItemsByCategory(items, activeFilters) {
-  return getVisibleCategorySections(activeFilters).map(section => ({
+function getVisibleCategorySections(activeFilters, categorySections) {
+  const categoryFilterIds = getCategoryFilterIds(categorySections)
+  const activeCategoryFilters = categoryFilterIds.filter(id => activeFilters.has(id))
+  if (activeCategoryFilters.length > 0) {
+    return categorySections.filter(section => activeCategoryFilters.includes(section.id))
+  }
+  return categorySections
+}
+
+function groupItemsByCategory(items, activeFilters, categorySections) {
+  return getVisibleCategorySections(activeFilters, categorySections).map(section => ({
     ...section,
     items: sortByPriority(items.filter(item => getItemCategory(item) === section.id)),
   }))
@@ -76,10 +99,11 @@ function getScrollParent(el) {
   return null
 }
 
-function matchesFilters(item, filters) {
+function matchesFilters(item, filters, categorySections) {
   if (filters.size === 0) return true
 
-  const categoryFilters = CATEGORY_FILTER_IDS.filter(id => filters.has(id))
+  const categoryFilterIds = getCategoryFilterIds(categorySections)
+  const categoryFilters = categoryFilterIds.filter(id => filters.has(id))
   const severityFilters = SEVERITY_FILTER_IDS.filter(id => filters.has(id))
   const autofixActive = filters.has('autofix')
 
@@ -274,12 +298,14 @@ function ItemList({ items, selected, onToggleSelect, onUpdateRec, resolved = fal
 
 export default function ActionItemsPanel({
   items: initialItems = defaultActionItems,
+  categorySections = DEFAULT_CATEGORY_SECTIONS,
   embedded = false,
   implementFlow = null,
   onStartImplement,
   onCancel,
   onRescan,
 }) {
+  const filterOptions = useMemo(() => buildFilterOptions(categorySections), [categorySections])
   const filterBarRef = useRef(null)
   const listAreaRef = useRef(null)
   const scrollAnchorRef = useRef(null)
@@ -327,17 +353,20 @@ export default function ActionItemsPanel({
   const noticeCount = useMemo(() => pendingItems.filter(i => i.priority === 'notice').length, [pendingItems])
   const autofixCount = useMemo(() => pendingItems.filter(i => i.autofix).length, [pendingItems])
   const filtered = useMemo(
-    () => pendingItems.filter(i => matchesFilters(i, activeFilters)),
-    [pendingItems, activeFilters],
+    () => pendingItems.filter(i => matchesFilters(i, activeFilters, categorySections)),
+    [pendingItems, activeFilters, categorySections],
   )
-  const categoryGroups = useMemo(() => groupItemsByCategory(filtered, activeFilters), [filtered, activeFilters])
+  const categoryGroups = useMemo(
+    () => groupItemsByCategory(filtered, activeFilters, categorySections),
+    [filtered, activeFilters, categorySections],
+  )
   const defaultOpenItemId = useMemo(() => {
-    const groups = groupItemsByCategory(pendingItems, new Set())
+    const groups = groupItemsByCategory(pendingItems, new Set(), categorySections)
     for (const group of groups) {
       if (group.items.length > 0) return group.items[0].id
     }
     return null
-  }, [pendingItems])
+  }, [pendingItems, categorySections])
   const selectedAutofixCount = useMemo(
     () => [...selected].filter(id => pendingItems.find(i => i.id === id)?.autofix).length,
     [selected, pendingItems],
@@ -457,8 +486,8 @@ export default function ActionItemsPanel({
   const scrollableContent = (
     <>
       <div ref={filterBarRef} className="flex items-center gap-2 flex-wrap my-4">
-        <span className="text-[14px] text-gray-500 shrink-0">Filter by:</span>
-        {FILTER_OPTIONS.map(f => {
+        <span className="text-[12px] text-gray-500 shrink-0">Filter by:</span>
+        {filterOptions.map(f => {
           const count = filterCounts[f.value]
           if (f.value === 'notice' && count === 0) return null
           if (f.value === 'autofix' && count === 0) return null

@@ -1,5 +1,7 @@
 /** Dummy detailed report data — replace with API response in production */
 
+import { GBP_HEALTH_REPORT } from './gbpDetailedReport.js'
+import { GBP_SCAN_SUMMARY } from './gbpScanContent.js'
 import { getScanTypeLabel } from './scanSummary.js'
 import { SEO_HEALTH_REPORT } from './seoDetailedReport.js'
 import {
@@ -15,9 +17,15 @@ import {
 
 const GBP_REPORT_TEMPLATE = {
   title: 'Visibility AI analysis: Optimizing your local SEO',
-  tags: ['Google Business Profile', 'Local directories', 'Reviews platforms'],
+  tags: ['Google Business Profile', 'Listings', 'Content'],
   sectionTitle: 'Local SEO',
   sourceLabel: 'Google Business Profile',
+  summaryTitle: GBP_SCAN_SUMMARY.title,
+  channelsAnalyzed: GBP_SCAN_SUMMARY.channelsAnalyzed,
+  opportunityScope: GBP_SCAN_SUMMARY.opportunityScope,
+  summaryCategories: GBP_SCAN_SUMMARY.categories,
+  detailedTitle: 'GBP audit report',
+  executiveReport: GBP_HEALTH_REPORT,
   profile: {
     businessName: 'Ethnic Premium Salon — ADCS Layout',
     location: 'Bengaluru, Karnataka, India',
