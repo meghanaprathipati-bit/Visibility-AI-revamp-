@@ -575,6 +575,13 @@ select {
   align-items: center;
   flex-wrap: nowrap;
   min-width: 0;
+  gap: var(--n-icon-margin);
+}
+
+.hr-v-4-7-2 .hr-button__content-default-slot > svg {
+  width: var(--n-icon-size);
+  height: var(--n-icon-size);
+  flex-shrink: 0;
 }
 
 .hr-v-4-7-2 .hr-button__border,

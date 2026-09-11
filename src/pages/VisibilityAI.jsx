@@ -28,6 +28,7 @@ import VisibilityScanReport from '../components/reports/VisibilityScanReport.jsx
 import AiRankTrackingDashboard from '../components/dashboards/AiRankTrackingDashboard.jsx'
 import OverviewDashboard from '../components/dashboards/OverviewDashboard.jsx'
 import AiSearchOverviewDashboard from '../components/dashboards/AiSearchOverviewDashboard.jsx'
+import SeoAuditOverviewDashboard from '../components/dashboards/SeoAuditOverviewDashboard.jsx'
 import PromptTrackingDashboard from '../components/dashboards/PromptTrackingDashboard.jsx'
 import SiteHealthDashboard from '../components/dashboards/SiteHealthDashboard.jsx'
 import AiSentimentChart from '../components/dashboards/AiSentimentChart.jsx'
@@ -307,6 +308,20 @@ const DASHBOARD_ACCORDION_SECTIONS = [
       { id: 'prompt-tracking', label: 'Prompt Tracking' },
       { id: 'ai-health', label: 'AI Health', locked: true },
       { id: 'bot-activity-ai', label: 'Bot Activity', locked: true },
+    ],
+  },
+  {
+    id: 'seo-audit',
+    label: 'SEO audit',
+    icon: LighthouseNavIcon,
+    iconBg: 'bg-primary-50',
+    iconColor: 'text-primary-600',
+    children: [
+      { id: 'seo-audit-overview', label: 'Overview' },
+      { id: 'seo-audit-pages', label: 'Pages' },
+      { id: 'seo-audit-links', label: 'Links' },
+      { id: 'seo-audit-resources', label: 'Resources' },
+      { id: 'seo-audit-actions', label: 'Actions' },
     ],
   },
   {
@@ -664,11 +679,26 @@ export default function VisibilityAI() {
                     onViewPrompts={() => setSelectedDashboardId('prompt-tracking')}
                   />
                 )
+              : selectedDashboardId === 'seo-audit-overview'
+                ? (
+                  <SeoAuditOverviewDashboard
+                    onViewActions={() => setSelectedDashboardId('site-health')}
+                    onViewPages={() => setSelectedDashboardId('site-health')}
+                    onViewLinks={() => setSelectedDashboardId('site-health')}
+                    onViewResources={() => setSelectedDashboardId('site-health')}
+                  />
+                )
               : selectedDashboardId === 'ai-search-performance'
                 ? <AiSearchPerformanceDashboard />
                 : selectedDashboardId === 'prompt-tracking'
                   ? <PromptTrackingDashboard />
-                  : selectedDashboardId === 'site-health'
+                  : (
+                    selectedDashboardId === 'site-health'
+                    || selectedDashboardId === 'seo-audit-pages'
+                    || selectedDashboardId === 'seo-audit-links'
+                    || selectedDashboardId === 'seo-audit-resources'
+                    || selectedDashboardId === 'seo-audit-actions'
+                  )
                     ? <SiteHealthDashboard />
                     : <AiRankTrackingDashboard />
           ) : (
@@ -861,7 +891,7 @@ function ChatPanel({
   const [nextId, setNextId] = useState(INITIAL_CHATS.length + 1)
   const [searchQuery, setSearchQuery] = useState('')
   const [dashboardSearchQuery, setDashboardSearchQuery] = useState('')
-  const [expandedSections, setExpandedSections] = useState(new Set(['ai-search']))
+  const [expandedSections, setExpandedSections] = useState(new Set(['ai-search', 'seo-audit']))
   const [projectDropdownOpen, setProjectDropdownOpen] = useState(false)
   const [newProjectModalOpen, setNewProjectModalOpen] = useState(false)
   const [collapsedSearchOpen, setCollapsedSearchOpen] = useState(false)
