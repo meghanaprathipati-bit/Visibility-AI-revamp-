@@ -99,12 +99,14 @@ function syncSegmentCapsule(railRef, capsuleRef, activeName) {
   const capsule = capsuleRef.current
   if (!rail || !capsule || activeName == null) return
 
-  const activeTab = rail.querySelector(`[data-name="${activeName}"]`)
+  const activeTab = rail.querySelector(`[data-name="${CSS.escape(String(activeName))}"]`)
   if (!activeTab) return
 
-  capsule.style.width = `${activeTab.offsetWidth}px`
-  capsule.style.height = `${activeTab.offsetHeight}px`
-  capsule.style.transform = `translateX(${activeTab.offsetLeft}px) translateY(${activeTab.offsetTop}px)`
+  const railRect = rail.getBoundingClientRect()
+  const tabRect = activeTab.getBoundingClientRect()
+  capsule.style.width = `${tabRect.width}px`
+  capsule.style.height = `${tabRect.height}px`
+  capsule.style.transform = `translate(${tabRect.left - railRect.left}px, ${tabRect.top - railRect.top}px)`
 }
 
 /**
@@ -120,6 +122,7 @@ export default function HLTabs({
   defaultValue,
   onValueChange,
   tabsOnly = false,
+  compact = false,
   className = '',
   noBorder = false,
 }) {
@@ -153,7 +156,7 @@ export default function HLTabs({
   const activePane = panes.find(pane => pane.name === activeValue)
 
   return (
-    <div className={`hr-v-4-7-2 w-full ${className}`}>
+    <div className={`hr-v-4-7-2 ${compact ? 'w-fit shrink-0' : 'w-full'} ${className}`}>
       <div
         id={id}
         style={themeVars}
@@ -164,6 +167,7 @@ export default function HLTabs({
           `hr-tabs--${naiveSize}-size`,
           'hr-tabs--top',
           isSegment && 'hr-tabs--segment',
+          compact && 'hr-tabs--compact',
           'top',
         ]
           .filter(Boolean)
@@ -171,46 +175,42 @@ export default function HLTabs({
       >
         <div className="hr-tabs-nav hr-tabs-nav--segment-type hr-tabs-nav--top">
           <div ref={railRef} className="hr-tabs-rail" role="tablist" aria-orientation="horizontal">
-            {isSegment && (
-              <div ref={capsuleRef} className="hr-tabs-capsule" aria-hidden="true">
-                <div className="hr-tabs-wrapper">
-                  <div className="hr-tabs-tab" />
-                </div>
-              </div>
-            )}
-            {panes.map((pane, index) => {
-              const isActive = pane.name === activeValue
-              return (
-                <div key={pane.name} className="hr-tabs-tab-wrapper">
-                  {index > 0 && <div className="hr-tabs-tab-pad" aria-hidden="true" />}
-                  <div
-                    data-name={pane.name}
-                    data-disabled={pane.disabled ? 'true' : undefined}
-                    role="tab"
-                    id={id ? `${id}-tab-${pane.name}` : undefined}
-                    aria-selected={isActive}
-                    aria-disabled={pane.disabled || undefined}
-                    tabIndex={isActive ? 0 : -1}
-                    className={[
-                      'hr-tabs-tab',
-                      isActive && 'hr-tabs-tab--active',
-                      pane.disabled && 'hr-tabs-tab--disabled',
-                    ]
-                      .filter(Boolean)
-                      .join(' ')}
-                    onClick={() => handleSelect(pane.name, pane.disabled)}
-                    onKeyDown={e => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault()
-                        handleSelect(pane.name, pane.disabled)
-                      }
-                    }}
-                  >
-                    <span className="hr-tabs-tab__label">{pane.tab}</span>
+            {isSegment && <div ref={capsuleRef} className="hr-tabs-capsule" aria-hidden="true" />}
+            <div className="hr-tabs-rail-inner">
+              {panes.map((pane, index) => {
+                const isActive = pane.name === activeValue
+                return (
+                  <div key={pane.name} className="hr-tabs-tab-wrapper">
+                    {index > 0 && <div className="hr-tabs-tab-pad" aria-hidden="true" />}
+                    <div
+                      data-name={pane.name}
+                      data-disabled={pane.disabled ? 'true' : undefined}
+                      role="tab"
+                      id={id ? `${id}-tab-${pane.name}` : undefined}
+                      aria-selected={isActive}
+                      aria-disabled={pane.disabled || undefined}
+                      tabIndex={isActive ? 0 : -1}
+                      className={[
+                        'hr-tabs-tab',
+                        isActive && 'hr-tabs-tab--active',
+                        pane.disabled && 'hr-tabs-tab--disabled',
+                      ]
+                        .filter(Boolean)
+                        .join(' ')}
+                      onClick={() => handleSelect(pane.name, pane.disabled)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleSelect(pane.name, pane.disabled)
+                        }
+                      }}
+                    >
+                      <span className="hr-tabs-tab__label">{pane.tab}</span>
+                    </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
 

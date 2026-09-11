@@ -27,6 +27,7 @@ import ScanQuickSummary from '../components/reports/ScanQuickSummary.jsx'
 import VisibilityScanReport from '../components/reports/VisibilityScanReport.jsx'
 import AiRankTrackingDashboard from '../components/dashboards/AiRankTrackingDashboard.jsx'
 import OverviewDashboard from '../components/dashboards/OverviewDashboard.jsx'
+import AiSearchOverviewDashboard from '../components/dashboards/AiSearchOverviewDashboard.jsx'
 import PromptTrackingDashboard from '../components/dashboards/PromptTrackingDashboard.jsx'
 import SiteHealthDashboard from '../components/dashboards/SiteHealthDashboard.jsx'
 import AiSentimentChart from '../components/dashboards/AiSentimentChart.jsx'
@@ -301,6 +302,7 @@ const DASHBOARD_ACCORDION_SECTIONS = [
     iconBg: 'bg-purple-50',
     iconColor: 'text-purple-600',
     children: [
+      { id: 'ai-search-overview', label: 'Overview' },
       { id: 'ai-search-performance', label: 'AI Search Performance' },
       { id: 'prompt-tracking', label: 'Prompt Tracking' },
       { id: 'ai-health', label: 'AI Health', locked: true },
@@ -653,6 +655,15 @@ export default function VisibilityAI() {
           {activePanel === 'Dashboards' ? (
             selectedDashboardId === 'overview'
               ? <OverviewDashboard />
+              : selectedDashboardId === 'ai-search-overview'
+                ? (
+                  <AiSearchOverviewDashboard
+                    onViewActions={() => setSelectedDashboardId('overview')}
+                    onViewCompetitors={() => setSelectedDashboardId('prompt-tracking')}
+                    onViewSources={() => setSelectedDashboardId('prompt-tracking')}
+                    onViewPrompts={() => setSelectedDashboardId('prompt-tracking')}
+                  />
+                )
               : selectedDashboardId === 'ai-search-performance'
                 ? <AiSearchPerformanceDashboard />
                 : selectedDashboardId === 'prompt-tracking'

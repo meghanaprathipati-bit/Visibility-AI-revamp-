@@ -60,7 +60,7 @@ export default function CountCard({
 
   return (
     <div
-      className={`border border-gray-200 rounded-lg bg-white px-3.5 py-3.5 flex flex-col gap-2 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
+      className={`border border-gray-200 rounded-md bg-white px-3.5 py-3.5 flex flex-col gap-2 min-w-0 ${footer ? 'overflow-hidden' : ''} ${className}`}
     >
       {/* Header: label (+ optional help) and optional icon */}
       <div className="flex items-start justify-between gap-2">

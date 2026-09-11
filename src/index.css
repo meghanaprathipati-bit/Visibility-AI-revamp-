@@ -672,14 +672,21 @@ select {
   width: 100%;
   background-color: var(--n-color-segment);
   transition: background-color 0.3s var(--n-bezier);
+}
+
+.hr-v-4-7-2 .hr-tabs-rail-inner {
   display: flex;
   align-items: center;
+  flex-wrap: nowrap;
+  position: relative;
+  z-index: 1;
 }
 
 .hr-v-4-7-2 .hr-tabs-capsule {
   border-radius: var(--n-tab-border-radius);
   position: absolute;
   pointer-events: none;
+  z-index: 0;
   background-color: var(--n-tab-color-segment);
   box-shadow:
     0 1px 2px 0 color-mix(in srgb, var(--gray-900) 6%, transparent),
@@ -697,6 +704,22 @@ select {
   justify-content: center;
   position: relative;
   z-index: 1;
+}
+
+/* Compact segment — hug labels instead of stretching to 100% (HighRise segment, fitted) */
+.hr-v-4-7-2 .hr-tabs--compact {
+  width: auto;
+}
+.hr-v-4-7-2 .hr-tabs--compact .hr-tabs-nav,
+.hr-v-4-7-2 .hr-tabs--compact .hr-tabs-rail {
+  width: max-content;
+}
+.hr-v-4-7-2 .hr-tabs--compact .hr-tabs-tab-wrapper {
+  flex-basis: auto;
+  flex-grow: 0;
+}
+.hr-v-4-7-2 .hr-tabs--compact .hr-tabs-tab {
+  width: auto;
 }
 
 .hr-v-4-7-2 .hr-tabs-tab-pad {
