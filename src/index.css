@@ -753,6 +753,17 @@ select {
   transition: color 0.3s var(--n-bezier);
   border: none;
   background: transparent;
+  outline: none;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.hr-v-4-7-2 .hr-tabs-tab:focus,
+.hr-v-4-7-2 .hr-tabs-tab:focus-visible,
+.hr-v-4-7-2 .hr-tabs-tab:active,
+.hr-v-4-7-2 .hr-tabs-tab:hover {
+  outline: none;
+  box-shadow: none;
 }
 
 .hr-v-4-7-2 .hr-tabs-tab__label {
