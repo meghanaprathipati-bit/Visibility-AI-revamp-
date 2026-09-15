@@ -28,6 +28,8 @@ import VisibilityScanReport from '../components/reports/VisibilityScanReport.jsx
 import AiRankTrackingDashboard from '../components/dashboards/AiRankTrackingDashboard.jsx'
 import OverviewDashboard from '../components/dashboards/OverviewDashboard.jsx'
 import AiSearchOverviewDashboard from '../components/dashboards/AiSearchOverviewDashboard.jsx'
+import { ExperiencePreviewPanel, useExperiencePreview } from '../components/ExperiencePreviewPanel.jsx'
+import { resetPreviewToLive } from '../data/experiencePreview.js'
 import SeoAuditOverviewDashboard from '../components/dashboards/SeoAuditOverviewDashboard.jsx'
 import PromptTrackingDashboard from '../components/dashboards/PromptTrackingDashboard.jsx'
 import SiteHealthDashboard from '../components/dashboards/SiteHealthDashboard.jsx'
@@ -421,6 +423,7 @@ function isChatConversational(chatId, sessions, activeChatUsed) {
 }
 
 export default function VisibilityAI() {
+  const { fixture: previewFixture } = useExperiencePreview()
   const [activePanel, setActivePanel] = useState('Chats')
   const [selectedDashboardId, setSelectedDashboardId] = useState('overview')
   const [chatPanelCollapsed, setChatPanelCollapsed] = useState(false)
@@ -634,6 +637,12 @@ export default function VisibilityAI() {
       topbar="simple"
       topbarProps={{ title: '' }}
     >
+      <ExperiencePreviewPanel
+        onNavigate={id => {
+          setActivePanel('Dashboards')
+          setSelectedDashboardId(id)
+        }}
+      />
       <div
         className="grid flex-1 min-w-0 min-h-0 overflow-hidden bg-white"
         style={{
@@ -658,7 +667,10 @@ export default function VisibilityAI() {
             if (tab === 'Dashboards') setDetailPanel(null)
           }}
           selectedDashboardId={selectedDashboardId}
-          onSelectDashboard={setSelectedDashboardId}
+          onSelectDashboard={id => {
+            resetPreviewToLive()
+            setSelectedDashboardId(id)
+          }}
           collapsed={chatPanelCollapsed}
           onToggleCollapse={() => setChatPanelCollapsed(c => !c)}
           onNewChat={handleNewChatSession}
@@ -673,6 +685,8 @@ export default function VisibilityAI() {
               : selectedDashboardId === 'ai-search-overview'
                 ? (
                   <AiSearchOverviewDashboard
+                    key={previewFixture}
+                    previewFixture={previewFixture}
                     onViewActions={() => setSelectedDashboardId('overview')}
                     onViewCompetitors={() => setSelectedDashboardId('prompt-tracking')}
                     onViewSources={() => setSelectedDashboardId('prompt-tracking')}
@@ -682,6 +696,8 @@ export default function VisibilityAI() {
               : selectedDashboardId === 'seo-audit-overview'
                 ? (
                   <SeoAuditOverviewDashboard
+                    key={previewFixture}
+                    previewFixture={previewFixture}
                     onViewActions={() => setSelectedDashboardId('site-health')}
                     onViewPages={() => setSelectedDashboardId('site-health')}
                     onViewLinks={() => setSelectedDashboardId('site-health')}

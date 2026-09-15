@@ -34,7 +34,7 @@ export default function AiSentimentChart({
   }))
 
   return (
-    <div className="border border-gray-200 rounded-md bg-white p-5 shrink-0">
+    <div className="border border-gray-200 rounded-lg bg-white p-5 shrink-0">
       <div className="mb-4">
         <div className="flex items-center gap-1.5">
           <h3 className="text-[14px] font-semibold text-gray-900">
@@ -45,10 +45,10 @@ export default function AiSentimentChart({
             content={`Sentiment breakdown from ${total} classified AI responses`}
           />
         </div>
-        {subtitle && <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{subtitle}</p>}
+        {subtitle && <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">{subtitle}</p>}
       </div>
 
-      <div className="flex h-8 w-full overflow-hidden rounded-md mb-5">
+      <div className="flex h-8 w-full overflow-hidden rounded-lg mb-5">
         {segments.map(seg => (
           seg.count > 0 && (
             <div
@@ -96,7 +96,7 @@ export default function AiSentimentChart({
       )}
 
       {footer && (
-        <p className="text-[14px] text-gray-500 m-0 mt-4 leading-relaxed">{footer}</p>
+        <p className="text-[13px] text-gray-500 m-0 mt-4 leading-relaxed">{footer}</p>
       )}
     </div>
   )

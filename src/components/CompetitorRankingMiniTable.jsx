@@ -33,18 +33,18 @@ export default function CompetitorRankingMiniTable({
   plain = false,
 }) {
   return (
-    <div className="border border-gray-200 rounded-md bg-white p-4 min-w-0 h-full flex flex-col shrink-0">
+    <div className="border border-gray-200 rounded-lg bg-white p-4 min-w-0 h-full flex flex-col shrink-0">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="text-[14px] font-semibold text-gray-900 m-0 leading-none">{title}</h3>
             <SectionInfoTip id={infoId} content={infoContent} />
           </div>
-          {subtitle && <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{subtitle}</p>}
+          {subtitle && <p className="text-[13px] font-normal text-gray-500 m-0 mt-0.5">{subtitle}</p>}
         </div>
         {headerRight && <div className="shrink-0 pt-0.5">{headerRight}</div>}
       </div>
-      <div className={`min-w-0 bg-white ${plain ? '' : 'rounded-md border border-gray-200 overflow-hidden'}`}>
+      <div className={`min-w-0 bg-white ${plain ? '' : 'rounded-lg border border-gray-200 overflow-hidden'}`}>
         <table className="w-full table-fixed border-collapse">
           <colgroup>
             <col style={{ width: 36 }} />

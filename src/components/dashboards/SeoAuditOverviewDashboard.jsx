@@ -1,14 +1,18 @@
 import {
-  AlertTriangle, Clock, FileText, LayoutDashboard, LayoutList,
+  AlertTriangle, CircleX, Clock, FileText, LayoutDashboard, LayoutList,
   Link2, RefreshCw02, Settings, ChevronRight,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import HLButton from '../HLButton.jsx'
 import SectionInfoTip from '../SectionInfoTip.jsx'
+import { useExperiencePreview } from '../ExperiencePreviewPanel.jsx'
+import SeoAuditActionsEmptyView from './SeoAuditActionsEmptyView.jsx'
 
-const CARD = 'border border-gray-200 rounded-md bg-white shrink-0'
-const TH = 'px-4 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap'
-const TD = 'px-4 py-2.5 text-[14px] text-gray-600'
+const CARD = 'border border-gray-200 rounded-lg bg-white shrink-0'
+const TH = 'px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap'
+const TD = 'px-3 py-2.5 text-[14px] text-gray-600'
+const MUTED = 'text-[13px] font-normal text-gray-500 m-0 mt-0.5'
+const TABLE_WRAP = 'overflow-x-auto border border-gray-200 rounded-lg bg-white'
 
 // HARDCODED: prototype KPI strip for SEO Audit Overview — replace with live scan metrics.
 const OVERVIEW_KPIS = [
@@ -107,12 +111,17 @@ function Pill({ children, className }) {
 // DS gap: HighRise has no SectionBand primitive in this React scaffold. Token-only card used 3×.
 function SectionBand({ title, description }) {
   return (
-    <div className="rounded-md border border-purple-200 bg-purple-50 px-5 py-4 shrink-0">
+    <div className="rounded-lg border border-purple-200 bg-purple-50 px-5 py-4 shrink-0">
       <h2 className="text-[16px] font-semibold text-gray-900 m-0">{title}</h2>
-      <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{description}</p>
+      <p className={MUTED}>{description}</p>
     </div>
   )
 }
+
+const NAME_LINK =
+  'text-[14px] font-medium text-primary-600 hover:text-primary-700 hover:underline text-left bg-transparent border-0 p-0 cursor-pointer'
+const AREA_TAG =
+  'inline-flex items-center px-2 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[13px] font-medium text-primary-700'
 
 function TextLink({ children, onClick }) {
   return (
@@ -127,53 +136,158 @@ function TextLink({ children, onClick }) {
   )
 }
 
+// HARDCODED: saved crawl settings from the failed first SEO scan — replace with setup API.
+const SAVED_SEO_SETUP = [
+  { label: 'User agent', value: 'Googlebot' },
+  { label: 'Maximum pages', value: '10' },
+  { label: 'Crawl speed', value: '500 req/s' },
+]
+
+const FAIL_SHELL = 'flex-1 min-h-0 overflow-y-auto bg-gray-50 flex justify-center p-6'
+const FAIL_COLUMN = 'w-full max-w-[880px]'
+
+function SeoAuditFailedState({ onInitiateScan }) {
+  return (
+    <div className={FAIL_SHELL} style={{ scrollbarGutter: 'stable' }}>
+      <div className={FAIL_COLUMN}>
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+          <div className="h-1 bg-error-600" />
+          <div className="px-6 py-6">
+            <div className="flex items-center gap-2.5">
+              <span className="w-9 h-9 rounded-lg bg-error-50 flex items-center justify-center shrink-0">
+                <CircleX size={16} className="text-error-600" />
+              </span>
+              <span className="text-[13px] font-medium text-error-600">SEO audit setup needs attention</span>
+            </div>
+
+            <div className="grid gap-5 mt-5 items-start" style={{ gridTemplateColumns: 'minmax(0, 1.4fr) minmax(220px, 0.8fr)' }}>
+              <div className="min-w-0">
+                <h2 className="text-[18px] font-semibold text-gray-900 m-0 leading-snug">
+                  We couldn't prepare your SEO audit results
+                </h2>
+                <p className="text-[14px] font-normal text-gray-500 m-0 mt-2 leading-relaxed">
+                  Something went wrong while we were collecting your first SEO audit results for ramada.9hf9h.com. No results are available yet, but your SEO audit setup is saved.
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5">
+                <p className="text-[13px] font-medium text-gray-500 m-0 mb-3">SEO audit setup</p>
+                <div className="flex flex-col gap-2.5">
+                  {SAVED_SEO_SETUP.map(row => (
+                    <div key={row.label} className="flex items-baseline justify-between gap-3">
+                      <p className="text-[14px] text-gray-600 m-0">{row.label}</p>
+                      <p className="text-[14px] font-semibold text-gray-900 m-0 text-right">{row.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center gap-4 flex-wrap rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <span className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0">
+                  <AlertTriangle size={14} className="text-error-600" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold text-gray-900 m-0">
+                    We couldn't finish analyzing your SEO audit data.
+                  </p>
+                  <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
+                    Try again with the same website and crawl settings.
+                  </p>
+                </div>
+              </div>
+              <HLButton variant="primary" color="blue" size="sm" onClick={onInitiateScan}>
+                <RefreshCw02 />
+                Initiate scan
+              </HLButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SeoAuditOverviewDashboard({
+  previewFixture,
   onViewActions,
   onViewPages,
   onViewLinks,
   onViewResources,
 }) {
-  return (
-    <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
-      <div className="flex-1 overflow-y-auto min-h-0 p-5 pb-8 flex flex-col gap-4" style={{ scrollbarGutter: 'stable' }}>
+  const { fixture: hookFixture, resetToLive } = useExperiencePreview()
+  const fixture = previewFixture ?? hookFixture
 
-        <div className="flex items-start justify-between gap-4 flex-wrap shrink-0">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-md bg-primary-50 flex items-center justify-center shrink-0">
-              <LayoutDashboard size={20} className="text-primary-600" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5">
-                <h1 className="text-[18px] font-semibold text-gray-900 m-0">Overview</h1>
-                <SectionInfoTip
-                  id="seo-audit-overview-info"
-                  content="See your overall SEO audit score, crawl status, and highest-impact detected items."
-                />
-              </div>
-              <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
-                See your overall SEO audit score, crawl status, and highest-impact detected items.
-              </p>
-            </div>
+  function handleInitiateScan() {
+    resetToLive()
+  }
+
+  const header = (
+    <div className="bg-white border-b border-gray-200 shrink-0">
+      <div className="px-6 py-5 flex items-center justify-between gap-4">
+        <div className="flex items-start gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
+            <LayoutDashboard size={20} className="text-primary-600" />
           </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <h1 className="text-[18px] font-bold text-gray-900 m-0">Overview</h1>
+              <SectionInfoTip
+                id="seo-audit-overview-info"
+                content="See your overall SEO audit score, crawl status, and highest-impact detected items."
+              />
+            </div>
+            <p className="text-[13px] text-gray-500 m-0 mt-0.5">
+              See your overall SEO audit score, crawl status, and highest-impact detected items.
+            </p>
+          </div>
+        </div>
+        {fixture === 'data-loading-failed' ? (
+          <span className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-gray-50 text-[14px] font-medium text-gray-400 shrink-0">
+            <Clock size={14} />
+            Sep 11, 2026 · 3:19:48 PM
+          </span>
+        ) : (
           <div className="flex items-center gap-2 shrink-0">
-            <HLButton color="gray" size="sm">
-              <Clock />
+            <span className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-300 bg-white text-[14px] font-medium text-gray-700">
+              <Clock size={14} className="text-gray-500" />
               Sep 11, 2026 · 3:19:48 PM
-            </HLButton>
-            <HLButton color="gray" size="sm">
-              <Clock />
+            </span>
+            <span className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-gray-50 text-[14px] font-medium text-gray-500">
+              <Clock size={14} />
               Next scan Oct 1
-            </HLButton>
+            </span>
             <HLButton variant="primary" color="blue" size="sm">
               <RefreshCw02 />
               Rerun scan
             </HLButton>
-            <HLButton color="gray" size="sm">
-              <Settings />
+            <HLButton variant="secondary" color="gray" size="sm">
+              <Settings size={16} />
               Settings
             </HLButton>
           </div>
-        </div>
+        )}
+      </div>
+    </div>
+  )
+
+  if (fixture === 'setup-failed') {
+    return <SeoAuditActionsEmptyView />
+  }
+
+  if (fixture === 'data-loading-failed') {
+    return (
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+        {header}
+        <SeoAuditFailedState onInitiateScan={handleInitiateScan} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+      {header}
+      <div className="flex-1 overflow-y-auto min-h-0 px-5 pt-5 pb-5 flex flex-col gap-4" style={{ scrollbarGutter: 'stable' }}>
 
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 shrink-0">
           {OVERVIEW_KPIS.map(kpi => (
@@ -198,13 +312,13 @@ export default function SeoAuditOverviewDashboard({
           <div className="flex items-start justify-between gap-3 mb-4">
             <div className="min-w-0">
               <h2 className="text-[14px] font-semibold text-gray-900 m-0">Priority items</h2>
-              <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">
+              <p className={MUTED}>
                 Recommendations and affected URLs from the latest scan.
               </p>
             </div>
             <TextLink onClick={onViewActions}>View actions</TextLink>
           </div>
-          <div className="overflow-x-auto border border-gray-200 rounded-md bg-white">
+          <div className={TABLE_WRAP}>
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
@@ -216,13 +330,19 @@ export default function SeoAuditOverviewDashboard({
               </thead>
               <tbody>
                 {PRIORITY_ITEMS.map(row => (
-                  <tr key={row.item} className="border-b border-gray-100 last:border-0">
-                    <td className="px-4 py-2.5 text-[14px] font-medium text-gray-900">{row.item}</td>
-                    <td className={TD}>{row.area}</td>
-                    <td className="px-4 py-2.5">
+                  <tr key={row.item} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                    <td className={TD}>
+                      <button type="button" onClick={onViewActions} className={NAME_LINK}>
+                        {row.item}
+                      </button>
+                    </td>
+                    <td className={TD}>
+                      <span className={AREA_TAG}>{row.area}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
                       <Pill className={PRIORITY_PILL[row.priority]}>{row.priority}</Pill>
                     </td>
-                    <td className="px-4 py-2.5 text-[14px] text-gray-900 text-right tabular-nums">{row.affected}</td>
+                    <td className="px-3 py-2.5 text-[14px] text-gray-600 text-right tabular-nums">{row.affected}</td>
                   </tr>
                 ))}
               </tbody>
@@ -235,16 +355,16 @@ export default function SeoAuditOverviewDashboard({
           description="Check page access and the internal paths that help crawlers find content."
         />
 
-        <div className="grid gap-4 items-stretch shrink-0" style={{ gridTemplateColumns: 'minmax(0, 65fr) minmax(0, 35fr)' }}>
-          <div className={`${CARD} p-5 min-w-0`}>
+        <div className="grid gap-4 items-stretch shrink-0" style={{ gridTemplateColumns: 'minmax(0, 2.2fr) minmax(220px, 0.8fr)' }}>
+          <div className={`${CARD} p-5 min-w-0 h-full`}>
             <div className="flex items-start justify-between gap-3 mb-4">
               <div className="min-w-0">
                 <h3 className="text-[14px] font-semibold text-gray-900 m-0">Crawl and indexability</h3>
-                <p className="text-[14px] text-gray-500 m-0 mt-1">Page eligibility and response health.</p>
+                <p className={MUTED}>Page eligibility and response health.</p>
               </div>
               <TextLink onClick={onViewPages}>Review pages</TextLink>
             </div>
-            <div className="overflow-x-auto border border-gray-200 rounded-md bg-white">
+            <div className={TABLE_WRAP}>
               <table className="w-full border-collapse text-left">
                 <thead>
                   <tr className="bg-gray-50 border-b border-gray-200">
@@ -256,11 +376,15 @@ export default function SeoAuditOverviewDashboard({
                 </thead>
                 <tbody>
                   {CRAWL_ROWS.map(row => (
-                    <tr key={row.signal} className="border-b border-gray-100 last:border-0">
-                      <td className="px-4 py-2.5 text-[14px] font-medium text-gray-900">{row.signal}</td>
-                      <td className="px-4 py-2.5 text-[14px] text-gray-900 text-right tabular-nums">{row.pages}</td>
+                    <tr key={row.signal} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                      <td className={TD}>
+                        <button type="button" onClick={onViewPages} className={NAME_LINK}>
+                          {row.signal}
+                        </button>
+                      </td>
+                      <td className="px-3 py-2.5 text-[14px] text-gray-600 text-right tabular-nums">{row.pages}</td>
                       <td className={TD}>{row.meaning}</td>
-                      <td className="px-4 py-2.5">
+                      <td className="px-3 py-2.5">
                         <Pill className={STATUS_PILL[row.status]}>{row.status}</Pill>
                       </td>
                     </tr>
@@ -270,23 +394,23 @@ export default function SeoAuditOverviewDashboard({
             </div>
           </div>
 
-          <div className={`${CARD} p-5 min-w-0 flex flex-col`}>
-            <div className="flex items-start justify-between gap-3 mb-4">
+          <div className={`${CARD} p-5 min-w-0 h-full flex flex-col`}>
+            <div className="flex items-start justify-between gap-3 mb-3">
               <div className="min-w-0">
                 <h3 className="text-[14px] font-semibold text-gray-900 m-0">Link discovery</h3>
-                <p className="text-[14px] text-gray-500 m-0 mt-1">Internal and external paths found in the crawl.</p>
+                <p className={MUTED}>Internal and external paths found in the crawl.</p>
               </div>
               <TextLink onClick={onViewLinks}>Review links</TextLink>
             </div>
-            <div className="flex flex-col">
+            <div>
               {LINK_STATS.map(stat => (
-                <div key={stat.label} className="flex items-center justify-between gap-3 py-3 border-b border-gray-100">
+                <div key={stat.label} className="flex items-center justify-between gap-3 py-2.5 border-b border-gray-100 last:border-0">
                   <p className="text-[14px] text-gray-600 m-0">{stat.label}</p>
                   <p className="text-[16px] font-semibold text-gray-900 tabular-nums m-0">{stat.value}</p>
                 </div>
               ))}
             </div>
-            <p className="text-[14px] font-normal text-gray-500 m-0 mt-auto pt-4">
+            <p className={`${MUTED} mt-3`}>
               Use the Links module to inspect source pages, destinations, status codes, and follow signals.
             </p>
           </div>
@@ -300,7 +424,7 @@ export default function SeoAuditOverviewDashboard({
         <div className="grid gap-4 items-stretch shrink-0" style={{ gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)' }}>
           <div className={`${CARD} p-5 min-w-0`}>
             <h3 className="text-[14px] font-semibold text-gray-900 m-0">Core Web Vitals</h3>
-            <p className="text-[14px] text-gray-500 m-0 mt-1 mb-4">Loading, responsiveness, and visual stability.</p>
+            <p className={`${MUTED} mb-4`}>Loading, responsiveness, and visual stability.</p>
             <div className="grid grid-cols-3 gap-4">
               {CWV_METRICS.map(metric => (
                 <div key={metric.caption}>
@@ -316,7 +440,7 @@ export default function SeoAuditOverviewDashboard({
             <div className="flex items-start justify-between gap-3 mb-4">
               <div className="min-w-0">
                 <h3 className="text-[14px] font-semibold text-gray-900 m-0">Crawled resources</h3>
-                <p className="text-[14px] text-gray-500 m-0 mt-1">Images, scripts, and other files loaded by the site.</p>
+                <p className={MUTED}>Images, scripts, and other files loaded by the site.</p>
               </div>
               <TextLink onClick={onViewResources}>Review resources</TextLink>
             </div>

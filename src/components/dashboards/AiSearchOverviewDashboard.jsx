@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
-  Award, BarChart3, Calendar, ChevronDown, ChevronRight, Clock, Code2,
-  FileText, LayoutDashboard, Link2, Megaphone, Settings, TrendingUp,
+  AlertTriangle, Award, BarChart3, Calendar, ChevronDown, ChevronRight, CircleX, Clock, Code2,
+  FileText, LayoutDashboard, Link2, Megaphone, RefreshCw02, Settings, TrendingUp,
 } from '../../icons/index.js'
 import CountCard from '../CountCard.jsx'
 import HLButton from '../HLButton.jsx'
@@ -11,17 +11,28 @@ import CompetitorRankingMiniTable from '../CompetitorRankingMiniTable.jsx'
 import EngineLogo from '../EngineLogo.jsx'
 import MultiLineChart from './MultiLineChart.jsx'
 import AiSentimentChart from './AiSentimentChart.jsx'
+import AiSearchActionsEmptyView from './AiSearchActionsEmptyView.jsx'
+import { useExperiencePreview } from '../ExperiencePreviewPanel.jsx'
 
-const CARD = 'border border-gray-200 rounded-md bg-white shrink-0'
-const TH = 'px-4 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap'
-const TD = 'px-4 py-2.5 text-[14px] text-gray-600'
+const CARD = 'border border-gray-200 rounded-lg bg-white shrink-0'
+const TH = 'px-3 py-2.5 text-left text-[12px] font-semibold text-gray-900 whitespace-nowrap'
+const TD = 'px-3 py-2.5 text-[14px] text-gray-600'
+const MUTED = 'text-[13px] font-normal text-gray-500 m-0 mt-0.5'
+const TABLE_WRAP = 'overflow-x-auto border border-gray-200 rounded-lg bg-white'
+
+function visibilityTier(value) {
+  if (value >= 70) return { text: 'text-success-600', bar: 'bg-success-600' }
+  if (value >= 50) return { text: 'text-warning-600', bar: 'bg-warning-600' }
+  return { text: 'text-error-600', bar: 'bg-error-600' }
+}
 
 function ScoreBar({ value }) {
+  const tier = visibilityTier(value)
   return (
     <div>
-      <p className="text-[14px] font-semibold text-gray-900 tabular-nums m-0 mb-1">{value}</p>
-      <div className="w-[72px] h-1.5 rounded-full bg-gray-100 overflow-hidden">
-        <div className="h-full rounded-full bg-primary-600" style={{ width: `${Math.min(100, value)}%` }} />
+      <p className={`text-[14px] font-semibold tabular-nums m-0 mb-1 ${tier.text}`}>{value}</p>
+      <div className="w-[72px] h-1.5 rounded-full bg-gray-100">
+        <div className={`h-full rounded-full ${tier.bar}`} style={{ width: `${Math.min(100, value)}%` }} />
       </div>
     </div>
   )
@@ -72,26 +83,34 @@ const OVERVIEW_KPIS = [
 const IMPROVE_NEXT = [
   {
     title: 'Boost content visibility',
-    count: 10,
-    countLabel: '10 open',
+    count: 15,
+    countLabel: '15 open',
+    tone: 'warning',
     description: 'Create content for prompts where you are missing.',
     Icon: FileText,
   },
   {
     title: 'Technical items',
-    count: 3,
-    countLabel: '3 open',
+    count: 0,
+    countLabel: '0 open',
+    tone: 'success',
     description: 'Schema, robots.txt, llms.txt, and crawl access issues.',
     Icon: Code2,
   },
   {
     title: 'Get external mentions',
-    count: 7,
-    countLabel: '7 open',
+    count: 9,
+    countLabel: '9 open',
+    tone: 'warning',
     description: 'Earn mentions and citations from third-party sources.',
     Icon: Megaphone,
   },
 ]
+
+const COUNT_TAG = {
+  warning: 'bg-warning-100 text-warning-600 border-warning-200',
+  success: 'bg-success-50 text-success-600 border-success-200',
+}
 
 const TREND_X_LABELS = ['Aug 12', 'Aug 18', 'Aug 24', 'Aug 30', 'Sep 5', 'Sep 10']
 
@@ -183,14 +202,14 @@ function PeriodFilter({ value, onChange }) {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="inline-flex items-center gap-2 h-8 px-3 rounded-md border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50"
+        className="inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-gray-300 bg-white text-[14px] font-medium text-gray-700 hover:bg-gray-50"
       >
         <Calendar size={14} className="text-gray-500" />
         {value}
         <ChevronDown size={14} className="text-gray-500" />
       </button>
       {open && (
-        <div className="absolute right-0 mt-1 z-20 min-w-[180px] rounded-md border border-gray-200 bg-white shadow-lg py-1">
+        <div className="absolute right-0 mt-1 z-20 min-w-[180px] rounded-lg border border-gray-200 bg-white shadow-lg py-1">
           {DATE_OPTIONS.map(opt => (
             <button
               key={opt}
@@ -212,9 +231,9 @@ function PeriodFilter({ value, onChange }) {
 // DS gap: HighRise has no SectionBand primitive in this React scaffold. Token-only card used 3×.
 function SectionBand({ title, description }) {
   return (
-    <div className="rounded-md border border-purple-200 bg-purple-50 px-5 py-4 shrink-0">
+    <div className="rounded-lg border border-purple-200 bg-purple-50 px-5 py-4 shrink-0">
       <h2 className="text-[16px] font-semibold text-gray-900 m-0">{title}</h2>
-      <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{description}</p>
+      <p className={MUTED}>{description}</p>
     </div>
   )
 }
@@ -232,41 +251,141 @@ function TextLink({ children, onClick }) {
   )
 }
 
+// HARDCODED: saved AI search setup from the failed first scan — replace with setup API.
+const SAVED_SETUP = [
+  { label: 'Prompt categories', value: 3 },
+  { label: 'Prompts', value: 20 },
+  { label: 'Competitors', value: 0 },
+  { label: 'AI platforms', value: 5 },
+]
+
+// Same canvas treatment as Prompt Tracking error/progress: centered column on gray-50, no page header.
+const FAIL_SHELL = 'flex-1 min-h-0 overflow-y-auto bg-gray-50 flex justify-center p-6'
+const FAIL_COLUMN = 'w-full max-w-[880px]'
+
+function AiSearchFailedState({ onInitiateScan }) {
+  return (
+    <div className={FAIL_SHELL} style={{ scrollbarGutter: 'stable' }}>
+      <div className={FAIL_COLUMN}>
+        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
+          <div className="h-1 bg-error-600" />
+          <div className="px-6 py-6">
+            <div className="flex items-center gap-2.5">
+              <span className="w-9 h-9 rounded-lg bg-error-50 flex items-center justify-center shrink-0">
+                <CircleX size={16} className="text-error-600" />
+              </span>
+              <span className="text-[13px] font-medium text-error-600">AI search setup needs attention</span>
+            </div>
+
+            <div className="grid gap-5 mt-5 items-start" style={{ gridTemplateColumns: 'minmax(0, 1.4fr) minmax(220px, 0.8fr)' }}>
+              <div className="min-w-0">
+                <h2 className="text-[18px] font-semibold text-gray-900 m-0 leading-snug">
+                  We couldn't prepare your AI search results
+                </h2>
+                <p className="text-[14px] font-normal text-gray-500 m-0 mt-2 leading-relaxed">
+                  Something went wrong while we were collecting your first AI search results. No results are available yet, but your AI search setup is saved.
+                </p>
+              </div>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5">
+                <p className="text-[13px] font-medium text-gray-500 m-0 mb-3">AI search setup</p>
+                <div className="flex flex-col gap-2.5">
+                  {SAVED_SETUP.map(row => (
+                    <div key={row.label} className="flex items-baseline justify-between gap-3">
+                      <p className="text-[14px] text-gray-600 m-0">{row.label}</p>
+                      <p className="text-[14px] font-semibold text-gray-900 m-0 text-right tabular-nums">{row.value}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center gap-4 flex-wrap rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5">
+              <div className="flex items-start gap-3 flex-1 min-w-0">
+                <span className="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center shrink-0">
+                  <AlertTriangle size={14} className="text-error-600" />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-[14px] font-semibold text-gray-900 m-0">
+                    We couldn't finish analyzing your AI search data.
+                  </p>
+                  <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
+                    Try again with the same prompts, competitors, and AI platforms.
+                  </p>
+                </div>
+              </div>
+              <HLButton variant="primary" color="blue" size="sm" onClick={onInitiateScan}>
+                <RefreshCw02 />
+                Initiate scan
+              </HLButton>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AiSearchOverviewDashboard({
+  previewFixture,
   onViewActions,
   onViewCompetitors,
   onViewSources,
   onViewPrompts,
+  onInitiateScan,
 }) {
+  const { fixture: hookFixture, resetToLive } = useExperiencePreview()
+  const fixture = previewFixture ?? hookFixture
   const [period, setPeriod] = useState('Past 30 days')
   const [trendMetric, setTrendMetric] = useState('Visibility')
   const trendLines = TREND_LINES_MAP[trendMetric]
+  const viewState = fixture === 'setup-failed' || fixture === 'data-loading-failed' ? fixture : 'ready'
+
+  function handleInitiateScan() {
+    onInitiateScan?.({
+      promptCategories: 3,
+      prompts: 20,
+      competitors: 0,
+      aiPlatforms: 5,
+    })
+    resetToLive()
+  }
+
+  if (viewState === 'data-loading-failed') {
+    return (
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
+        <AiSearchFailedState onInitiateScan={handleInitiateScan} />
+      </div>
+    )
+  }
+
+  if (viewState === 'setup-failed') {
+    return <AiSearchActionsEmptyView />
+  }
 
   return (
     <div className="flex-1 min-w-0 min-h-0 flex flex-col bg-gray-50">
-      <div className="flex-1 overflow-y-auto min-h-0 p-5 pb-8 flex flex-col gap-4" style={{ scrollbarGutter: 'stable' }}>
-
-        <div className="flex items-start justify-between gap-4 flex-wrap">
+      <div className="bg-white border-b border-gray-200 shrink-0">
+        <div className="px-6 py-5 flex items-start justify-between gap-4 flex-wrap">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-md bg-primary-50 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
               <LayoutDashboard size={20} className="text-primary-600" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5">
-                <h1 className="text-[18px] font-semibold text-gray-900 m-0">Overview</h1>
+                <h1 className="text-[18px] font-bold text-gray-900 m-0">Overview</h1>
                 <SectionInfoTip
                   id="ai-search-overview-info"
                   content="Your overall AI search visibility across engines, competitors, sources, and prompts."
                 />
               </div>
-              <p className="text-[14px] font-normal text-gray-500 m-0 mt-0.5">
-                See your overall AI search visibility across tracked engines and prompts.
+              <p className="text-[13px] text-gray-500 m-0 mt-0.5">
+                See your overall AI search visibility across tracked answer engines.
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             <PeriodFilter value={period} onChange={setPeriod} />
-            <span className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md border border-gray-200 bg-gray-50 text-[14px] font-medium text-gray-400">
+            <span className="inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border border-gray-200 bg-gray-50 text-[14px] font-medium text-gray-400">
               <Clock size={14} />
               Updates in 19h 7m
             </span>
@@ -276,6 +395,9 @@ export default function AiSearchOverviewDashboard({
             </HLButton>
           </div>
         </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto min-h-0 px-5 pt-5 pb-5 flex flex-col gap-4" style={{ scrollbarGutter: 'stable' }}>
 
         <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 shrink-0">
           {OVERVIEW_KPIS.map(kpi => (
@@ -303,7 +425,7 @@ export default function AiSearchOverviewDashboard({
                   content="Highest-impact open actions grouped by type."
                 />
               </div>
-              <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">
+              <p className={MUTED}>
                 Start with the recommendations most likely to improve visibility, citations, and share of voice.
               </p>
             </div>
@@ -313,18 +435,18 @@ export default function AiSearchOverviewDashboard({
             {IMPROVE_NEXT.map(item => {
               const Icon = item.Icon
               return (
-                <div key={item.title} className="border border-gray-200 rounded-md bg-white p-4 flex gap-3">
-                  <div className="w-9 h-9 rounded-md bg-primary-50 flex items-center justify-center shrink-0">
+                <div key={item.title} className="border border-gray-200 rounded-lg bg-white p-4 flex gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-primary-50 flex items-center justify-center shrink-0">
                     <Icon size={16} className="text-primary-600" />
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className="text-[14px] font-semibold text-gray-900 m-0">{item.title}</p>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-gray-200 bg-gray-50 text-[13px] font-medium text-gray-600">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full border text-[13px] font-medium ${COUNT_TAG[item.tone]}`}>
                         {item.countLabel}
                       </span>
                     </div>
-                    <p className="text-[14px] font-normal text-gray-500 m-0 mt-1">{item.description}</p>
+                    <p className={MUTED}>{item.description}</p>
                   </div>
                 </div>
               )
@@ -338,7 +460,7 @@ export default function AiSearchOverviewDashboard({
         />
 
         <div className="grid gap-4 items-stretch shrink-0" style={{ gridTemplateColumns: 'minmax(0, 65fr) minmax(0, 35fr)' }}>
-          <div className={`${CARD} p-4 min-w-0 flex flex-col`}>
+          <div className={`${CARD} p-5 min-w-0 flex flex-col`}>
             <div className="flex items-start justify-between gap-3 mb-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -348,7 +470,7 @@ export default function AiSearchOverviewDashboard({
                     content="Track how your brand’s visibility, mentions, or citations change over time versus competitors."
                   />
                 </div>
-                <p className="text-[14px] text-gray-500 m-0 mt-1">Daily AI search visibility score · {period}</p>
+                <p className={MUTED}>Daily AI search visibility score · {period}</p>
               </div>
               <HLTabs
                 type="segment"
@@ -368,7 +490,7 @@ export default function AiSearchOverviewDashboard({
               {trendLines.map(line => (
                 <div key={line.label} className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full inline-block shrink-0" style={{ background: line.color }} />
-                  <span className="text-[14px] text-gray-500">{line.label}</span>
+                  <span className="text-[12px] text-gray-500">{line.label}</span>
                 </div>
               ))}
             </div>
@@ -394,7 +516,7 @@ export default function AiSearchOverviewDashboard({
           description="Compare performance platform by platform, then review how AI answers describe your business—not just whether your business appears."
         />
 
-        <div className={`${CARD} overflow-clip`}>
+        <div className={`${CARD} overflow-hidden`}>
           <div className="p-5 pb-3">
             <div className="flex items-center gap-1.5">
               <h3 className="text-[14px] font-semibold text-gray-900 m-0">Visibility by AI platform</h3>
@@ -403,13 +525,13 @@ export default function AiSearchOverviewDashboard({
                 content="See how your brand performs across different AI search engines."
               />
             </div>
-            <p className="text-[14px] text-gray-500 m-0 mt-1">Per-platform visibility, presence, citation rate, and positioning context</p>
+            <p className={MUTED}>Per-platform visibility, presence, citation rate, and positioning context</p>
           </div>
           <div className="px-5 pb-5">
-            <div className="overflow-x-auto bg-white">
+            <div className={TABLE_WRAP}>
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="bg-gray-50 border-b border-gray-200">
                     <th className={TH}>AI platform</th>
                     <th className={TH}>Visibility</th>
                     <th className={TH}>Presence</th>
@@ -420,19 +542,19 @@ export default function AiSearchOverviewDashboard({
                 </thead>
                 <tbody>
                   {PLATFORM_ROWS.map(row => (
-                    <tr key={row.label} className="border-b border-gray-100 last:border-0">
-                      <td className="px-4 py-2.5">
+                    <tr key={row.label} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                      <td className={TD}>
                         <div className="flex items-center gap-2 min-w-0">
-                          <EngineLogo name={row.logo} size={16} className="w-8 h-8 rounded-md" />
+                          <EngineLogo name={row.logo} size={16} className="w-8 h-8 rounded-lg" />
                           <div className="min-w-0">
                             <p className="text-[14px] font-medium text-gray-900 m-0">{row.label}</p>
                             <p className="text-[12px] text-gray-500 m-0">{PLATFORM_META}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5"><ScoreBar value={row.vis} /></td>
+                      <td className={TD}><ScoreBar value={row.vis} /></td>
                       <td className={`${TD} tabular-nums`}>{row.presence}</td>
-                      <td className="px-4 py-2.5">
+                      <td className={TD}>
                         <p className="text-[14px] font-semibold text-gray-900 m-0 tabular-nums">{row.avgPos}</p>
                         <p className="text-[12px] text-gray-500 m-0">{row.urlsAnswer}</p>
                       </td>
@@ -454,7 +576,7 @@ export default function AiSearchOverviewDashboard({
           footer="AI answers show mixed momentum. Stronger source coverage and clearer category proof can improve how 9hf9h is framed."
         />
 
-        <div className={`${CARD} overflow-clip`}>
+        <div className={`${CARD} overflow-hidden`}>
           <div className="p-5 pb-3 flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5">
@@ -464,15 +586,15 @@ export default function AiSearchOverviewDashboard({
                   content="Domains AI engines cite most often when answering your tracked prompts."
                 />
               </div>
-              <p className="text-[14px] text-gray-500 m-0 mt-1">Sources currently shaping the answers your customers see</p>
+              <p className={MUTED}>Sources currently shaping the answers your customers see</p>
             </div>
             <TextLink onClick={onViewSources}>View sources</TextLink>
           </div>
           <div className="px-5 pb-5">
-            <div className="overflow-x-auto bg-white">
+            <div className={TABLE_WRAP}>
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="bg-gray-50 border-b border-gray-200">
                     <th className={TH}>Source</th>
                     <th className={TH}>Prompt coverage</th>
                     <th className={TH}>AI answers</th>
@@ -481,8 +603,8 @@ export default function AiSearchOverviewDashboard({
                 </thead>
                 <tbody>
                   {TOP_SOURCES.map(row => (
-                    <tr key={row.source} className="border-b border-gray-100 last:border-0">
-                      <td className="px-4 py-2.5 text-[14px] font-medium text-gray-900">{row.source}</td>
+                    <tr key={row.source} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                      <td className={`${TD} font-medium text-gray-900`}>{row.source}</td>
                       <td className={`${TD} tabular-nums`}>{row.coverage}</td>
                       <td className={`${TD} tabular-nums`}>{row.answers}</td>
                       <td className={`${TD} tabular-nums`}>{row.trust}</td>
@@ -499,7 +621,7 @@ export default function AiSearchOverviewDashboard({
           description="Finish at the prompt level to identify the questions worth protecting, expanding, or using as a model for weaker prompt categories."
         />
 
-        <div className={`${CARD} overflow-clip`}>
+        <div className={`${CARD} overflow-hidden`}>
           <div className="p-5 pb-3 flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-1.5">
@@ -509,15 +631,15 @@ export default function AiSearchOverviewDashboard({
                   content="Prompts where your brand currently earns the most visibility and mentions."
                 />
               </div>
-              <p className="text-[14px] text-gray-500 m-0 mt-1">Highest-visibility prompts in the current date range</p>
+              <p className={MUTED}>Highest-visibility prompts in the current date range</p>
             </div>
             <TextLink onClick={onViewPrompts}>View all prompts</TextLink>
           </div>
           <div className="px-5 pb-5">
-            <div className="overflow-x-auto bg-white">
+            <div className={TABLE_WRAP}>
               <table className="w-full border-collapse text-left">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="bg-gray-50 border-b border-gray-200">
                     <th className={TH}>Prompt</th>
                     <th className={TH}>Prompt category</th>
                     <th className={TH}>Platform coverage</th>
@@ -529,20 +651,28 @@ export default function AiSearchOverviewDashboard({
                 </thead>
                 <tbody>
                   {TOP_PROMPTS.map(row => (
-                    <tr key={row.rank} className="border-b border-gray-100 last:border-0">
-                      <td className="px-4 py-2.5">
+                    <tr key={row.rank} className="border-b border-gray-100 last:border-0 hover:bg-gray-50">
+                      <td className={TD}>
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="w-6 h-6 rounded-full shrink-0 inline-flex items-center justify-center text-[12px] font-semibold bg-purple-50 text-purple-700">
+                          <span className="w-6 h-6 rounded-full shrink-0 inline-flex items-center justify-center text-[12px] font-semibold bg-gray-100 text-gray-600">
                             {row.rank}
                           </span>
-                          <span className="text-[14px] font-medium text-gray-900">{row.prompt}</span>
+                          <button
+                            type="button"
+                            onClick={onViewPrompts}
+                            className="text-[14px] font-medium text-primary-600 hover:text-primary-700 hover:underline text-left bg-transparent border-0 p-0 cursor-pointer"
+                          >
+                            {row.prompt}
+                          </button>
                         </div>
                       </td>
-                      <td className="px-4 py-2.5">
-                        <span className="text-[13px] font-medium text-primary-600">{row.category}</span>
+                      <td className={TD}>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full border border-primary-200 bg-primary-50 text-[13px] font-medium text-primary-700">
+                          {row.category}
+                        </span>
                       </td>
                       <td className={`${TD} tabular-nums`}>{row.coverage}</td>
-                      <td className="px-4 py-2.5 text-[14px] font-medium text-gray-900 tabular-nums">{row.visibility}</td>
+                      <td className={`${TD} font-medium text-gray-900 tabular-nums`}>{row.visibility}</td>
                       <td className={`${TD} tabular-nums`}>{row.citRate}</td>
                       <td className={`${TD} tabular-nums`}>{row.mentionShare}</td>
                       <td className={`${TD} tabular-nums`}>{row.mentions}</td>
